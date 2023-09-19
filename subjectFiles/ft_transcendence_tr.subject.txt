@@ -1,0 +1,108 @@
+/*
+	---> ft_transcendence v12.1 <---
+	---> Bilmediğinizi düşündüğünüz şeyleri zaten bildiğinizi fark edeceksiniz <---
+	Özet: Artık C ve C++ kullanmak yok!
+		Bu proje daha önce yapmadığınız şeyleri yapmakla ilgilidir.
+		Kendinize bilgisayar bilimindeki yolculuğunuzun başlangıcını hatırlatın.
+		Çok zor dönemlerden geçtin, artık parlama zamanı!
+
+	---> 𝐈. Preamble / Önsözü, amacı ve kapsamı <---
+		⡟⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⢻⡟⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⢻
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⣤⣿⠀⠀⠀⢸⡇⠀⠀⠀⣭⣭⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⠀⠀⠀⢸⡇⠀⠀⠀⠿⠶⠶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⠀⢀⣀⣀⣀⣰⣆⡀⠀⢀⡀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣷⢸⡟⠛⢻⣿⣿⡿⣤⢸⡇⣿⣟⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡏⠉⠉⠉⢸⣧⣤⣼⣿⣿⡇⠹⢿⡇⣿⣧⣭⣽⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀ ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡴⠄⠀⠀⠀⠀⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢸
+		⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸
+		⣧⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣼⣧⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣼
+
+	---> 𝐈𝐈. Mandatory Part / Zorunlı Kısım  <---
+		Bu proje, büyük Pong yarışması için bir web sitesi oluşturmakla ilgilidir!
+
+	---> 𝐈𝐈. ⓵ Overview / Genel Bakış  <---
+		Web siteniz sayesinde kullanıcılar başkalarıyla Pong oynayacak. Güzel bir kullanıcı arayüzü, sohbet ve gerçek zamanlı çok oyunculu çevrimiçi oyunlar sunacaksınız!
+			
+			Çalışmanız aşağıdaki kurallara uygun olmalıdır:
+				• Web sitenizin backend(işlem tarafı) NestJS'de yazılmalıdır.
+				• Frontend(görsel taraf), seçtiğiniz bir TypeScript çerçevesiyle yazılmalıdır.
+				• Bu bağlamda dilediğiniz kütüphaneyi kullanmakta özgürsünüz.
+					Ancak projenizde kullanılan her kitaplığın veya çerçevenin en son kararlı sürümünü kullanmanız gerekir.
+				• PostgreSQL veritabanı kullanmanız gerekir.
+					İşte bu, başka veritabanı yok.
+				• Web siteniz tek sayfalık bir uygulama olmalıdır.
+					Kullanıcı tarayıcının Geri ve İleri düğmelerini kullanabilmelidir.
+					İçerik bağlantısı: https://en.wikipedia.org/wiki/Single-page_application
+				• Web siteniz, Google Chrome'un en son kararlı ve güncel sürümüyle ve seçeceğiniz ek bir web tarayıcısıyla uyumlu olmalıdır.
+				• Kullanıcı web sitesinde gezinirken hiçbir işlenmemiş hatayla ve hiçbir uyarıyla karşılaşmamalıdır.
+				• Her şeyin tek bir çağrıyla başlatılması gerekiyor: 'docker-compose up --build'
+
+		🚨 Clusterlardaki bilgisayarlarınız Linux altında çalıştığında güvenlik açısından Docker'ı rootless modda kullanacaksınız.
+		🚨 Bu 2 yan tarafla birlikte gelir:
+			🚨 1) Docker runtime dosyalarınız /goinfre veya /sgoinfre konumunda bulunmalıdır.
+			🚨 2) Containerda non-root(kök olmayan) UID'ler kullanılıyorsa, host(ana bilgisayar) ile container arasında "bind-mount volumes" olarak adlandırılan birimleri kullanamazsınız.
+		🚨 Projeye, durumunuza ve bağlama bağlı olarak birkaç geri dönüş mevcuttur:
+			🚨 Bir VM'de Docker, değişikliklerinizden sonra konteynerinizi yeniden oluşturun, benzersiz UID olarak root ile kendi docker görüntünüzü oluşturun.
+
+	---> 𝐈𝐈. ⓶ Security Concerns / Güvenlik Endişeleri  <---
+		Tamamen işlevsel bir web sitesi oluşturmak için, çözmeniz gereken birkaç güvenlik sorunu şunlardır:
+			• Veritabanınızda saklanan tüm şifrelerin hashlenmesi gerekir.
+			• Web sitenizin SQL injections(enjeksiyonlarına) karşı korunması gerekir.
+			• Formlar ve herhangi bir kullanıcı girişi için bir tür sunucu tarafı doğrulaması uygulamanız gerekir.
+
+		🚨 Lütfen güçlü bir şifre karma algoritması kullandığınızdan emin olun.
+	
+		🚨 Açık güvenlik nedenleriyle, tüm kimlik bilgileri, API anahtarları, env değişkenleri vb. yerel olarak bir .env dosyasına kaydedilmeli ve git tarafından göz ardı edilmelidir.
+		🚨 Herkese açık olarak saklanan kimlik bilgileri sizi doğrudan projenin başarısızlığına yönlendirecektir.
+
+	---> 𝐈𝐈. ⓷ User Account / Kullanıcı Hesabı  <---
+		• Kullanıcı 42 intranetin OAuth sistemini kullanarak giriş yapmalıdır.
+		• Kullanıcı, web sitesinde görüntülenecek benzersiz bir ad seçebilmelidir.
+		• Kullanıcı bir avatar yükleyebilmelidir. Kullanıcı bir avatar yüklemezse varsayılan bir avatar ayarlanmalıdır.
+		• Kullanıcı iki faktörlü kimlik doğrulamayı etkinleştirebilmelidir.
+			Örneğin, Google Authenticator veya telefonlarına kısa mesaj gönderilmelidir.
+		• Kullanıcı diğer kullanıcıları arkadaş olarak ekleyebilmeli ve mevcut durumlarını (çevrimiçi, çevrimdışı, oyunda vb.) görebilmelidir.
+		• İstatistiklerin (örneğin: wins(galibiyet) ve losses(mağlubiyetler), ladder(ilerleme) seviyesi, achievements(başarılar) vb.) kullanıcı profilinde görüntülenmesi gerekir.
+		• Her kullanıcının 1v1 oyunları, ilerleme ve diğer yararlı şeyleri içeren bir Maç Geçmişi olmalıdır.
+			Oturum açan herkesin buna ulaşabilmelidir.
+
+	---> 𝐈𝐈. ⓸ Chat / Yazılı Sohbet  <---
+		Ayrıca kullanıcılarınız için bir yazılı sohbet oluşturmanız gerekir:
+			• Kullanıcı, herkese açık, özel veya şifreyle korunan kanallar (sohbet odaları) oluşturabilmelidir.
+			• Kullanıcı diğer kullanıcılara doğrudan mesaj gönderebilmelidir.
+			• Kullanıcı diğer kullanıcıları engelleyebilmelidir.
+				Bu şekilde engelledikleri hesaptan artık mesaj görmezler.
+			• Yeni bir kanal oluşturan kullanıcı, kanaldan ayrılana kadar otomatik olarak kanal sahibi olarak belirlenir.
+				◦ Kanal sahibi, kanala erişim için gerekli şifreyi belirleyebilir, değiştirebilir ve kaldırabilir.
+				◦ Kanal sahibi bir kanal yöneticisidir.
+					Diğer kullanıcıları yönetici olarak ayarlayabilirler.
+				◦ Bir kanalda yönetici olan bir kullanıcı diğer kullanıcıları kanaldan atabilir, yasaklayabilir veya sınırlı bir süre boyunca susturabilir, ancak kanal sahiplerini atamaz.
+			• Kullanıcı, sohbet arayüzü aracılığıyla diğer kullanıcıları Pong oyunu oynamaya davet edebilmelidir.
+			• Kullanıcı, sohbet arayüzü aracılığıyla diğer oyuncuların profillerine erişebilmelidir.
+
+	---> 𝐈𝐈. ⓹ Game / Oyun  <---
+		Bu web sitesinin asıl amacı diğer oyunculara karşı Pong oynamaktır.
+			• Bu nedenle, kullanıcılar doğrudan web sitesinde başka bir oyuncuya karşı canlı bir Pong oyunu oynayabilmelidir.
+			• Bir eşleştirme sistemi olmalı: Kullanıcı, başka biriyle otomatik olarak eşleştirilene kadar bir kuyruğa katılabilir.
+			• Bir tuval oyunu olabilir veya 3 boyutlu olarak oluşturulmuş bir oyun olabilir, çirkin de olabilir ama her durumda orijinal Pong'a (1972) sadık olmalıdır.
+			• Bazı özelleştirme seçenekleri (örneğin, güçlendirmeler veya farklı haritalar) sunmalısınız.
+				Ancak kullanıcı isterse oyunun herhangi bir ekstra özellik içermeyen varsayılan sürümünü seçebilmelidir.
+			• Oyunun duyarlı olması gerekiyor!
+				Oyuncunun eylemlerini hızlı ve doğru bir şekilde yansıtan bir oyun olmalıdır.
+
+		💡 Beklenmedik bağlantı kesilmesi veya gecikme gibi ağ sorunlarını düşünün.
+			Mümkün olan en iyi kullanıcı deneyimini sunmalısınız.
+
+	---> 𝐈𝐈𝐈. Submission and peer-evaluation / Sunum ve akran değerlendirmesi  <---
+		Git deponuzdaki ödevinizi her zamanki gibi teslim edin.
+			Savunma sırasında yalnızca deponuzdaki çalışma değerlendirilecektir.
+			Doğru olduklarından emin olmak için dosyalarınızın adlarını iki kez kontrol etmekten çekinmeyin.
+
+*/
