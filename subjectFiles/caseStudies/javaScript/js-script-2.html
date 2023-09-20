@@ -1,0 +1,36 @@
+<!-- LINK: https://www.youtube.com/watch?v=H_RT1XRqi8I -->
+<!DOCTYPE html>
+<html>
+	<head> <!-- 'head' kisminda; 'Belgeyle' ilgili yani bu 'html' dosyasi ile ilgili bildilerin girildigi kisimdir. -->
+		<meta charset=UTF-8>
+	</head>
+	<body style="background-color: rgb(0, 0, 0); color: orange;"> <!-- 'body' kisminda; Tarayicinin goruntulenen 'html' dosyasinin ana icerigini tanimlar. -->
+		<script> // Burada JavaScript isliyor bundan dolayi JavaScript'in yorum satirini kullanabiliriz. ayni C/C++'deki gibi.
+			var a, b; // Variable tanimliyoruz. Bu 'variable' her tur olabilir.
+			a = 10;
+			b = 20;
+			num = a + b;
+			a = "gorkem";
+			b = "sever";
+			str = a + b;
+			document.write("Hello from Java Script! naber <br> <br>"); // Burada artik JS kodlarimizi yazmaya baslayabiliriz.
+			// <br> // Bu JS icerisinde HTML kodu yazamayiz, yazmak istedigimizde document.write() seklinde yazmamiz gerekiyor.
+			// </br>
+			document.write("Number: " + num, "<br>"); // '+' ya da ',' fark etmiyor.
+			document.write("String: ", str + "<br>");
+			console.log("Hello console terminal!"); // Buradaki console.log(""); terminal'e cikti yazmasini sagliyor.
+			function sumNumbers(a, b) // Function tanimliyoruz. Ozel olarak direkt function seklinde tanimlaniyor.
+			{
+				var sum;
+				sum = a + b;
+				return (sum);
+			}
+			document.write("Number's sum: ", sumNumbers(5, 10));
+		</script>
+		<br> <!-- Buradaki <br> enter islevi goruyor. -->
+		<br> <!-- Buradaki <br> enter islevi goruyor. -->
+		Hello World!
+		<p id="paragraph">aBi buTona tiKladGinda buraSi deGisecek</p>
+		<button onclick="document.getElementById('paragraph').innerHTML='naber';"> eheheh </button>
+	</body>
+</html>
