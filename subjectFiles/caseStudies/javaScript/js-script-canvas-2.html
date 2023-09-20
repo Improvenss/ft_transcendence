@@ -10,18 +10,26 @@
 			Canvas is not working!
 		</canvas>
 		<script>
+			function clear(e)
+			{
+				cizim.beginPath();
+				cizim.fillStyle = '#000000';
+				cizim.fillRect(0, 0, tuval.width, tuval.height);
+				cizim.closePath();
+			}
 			function mouseClick(e)
 			{
 				cizim.beginPath();
 				cizim.arc(e.x, e.y, 50, 0, Math.PI * 2);
-				cizim.strokeStyle = '#ffffff';
 				cizim.closePath();
-				cizim.stroke();
-				// cizim.fill();
+				// cizim.strokeStyle = '#ffffff';
+				// cizim.stroke();
+				cizim.fillStyle = '#0000ff';
+				cizim.fill();
 			}
 			var tuval = document.getElementById("tuval");
-			// tuval.addEventListener("click", mouseClick);
 			tuval.addEventListener("mousemove", mouseClick);
+			tuval.addEventListener("click", clear);
 
 			var cizim = tuval.getContext("2d");
 			cizim.beginPath();
