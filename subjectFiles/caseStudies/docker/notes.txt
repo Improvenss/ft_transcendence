@@ -1,0 +1,31 @@
+How can i start sample postgresql
+{
+	LINK: https://hub.docker.com/_/postgres
+	LINK: https://www.sqlshack.com/getting-started-with-postgresql-on-docker/
+	LINK: https://www.dbvis.com/thetable/how-to-set-up-postgres-using-docker/
+
+	If you want to use inside 'debian';
+	docker pull postgres:latest
+	docker volume create postgres_data
+	docker run -it --name postgres_container -d -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres
+	LINK: https://stackoverflow.com/questions/37694987/connecting-to-postgresql-in-a-docker-container-from-outside
+	How can i connect this container?
+	docker exec -it postgres_container /bin/bash
+	psql -h public-ip-server -p 5432 -U postgres
+
+	If you want to use inside 'alpine';
+	docker pull postgres:alpine:latest
+	docker volume create postgres_data
+	docker run -it --name postgres_container_alpine -d -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres:alpine
+	How can i connect this container?
+	docker exec -it postgres_container_alpine /bin/bash
+	psql -h public-ip-server -p 5432 -U postgres
+}
+
+How can i connect postgresql database with 'pgadmin4'?
+{
+	LINK: https://hub.docker.com/r/dpage/pgadmin4/
+	LINK: https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+	docker pull dpage/pgadmin4:latest
+
+}

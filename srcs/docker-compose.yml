@@ -1,0 +1,59 @@
+version: '3.8'
+
+###############################################################################
+#                             NETWORKS                                        #
+#/////////////////////////////////////////////////////////////////////////////#
+
+networks:
+  transcendence_network:
+    driver: bridge
+
+###############################################################################
+#                             VOLUMES                                         #
+#/////////////////////////////////////////////////////////////////////////////#
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/postgres
+  # Buraya da sonraki datalarin konumlari eklenebilinir.
+
+###############################################################################
+#                             SERVICES                                        #
+#/////////////////////////////////////////////////////////////////////////////#
+services:
+  # _____nest-js____ #
+  nest-js: # For 'Web Server'.
+    container_name: nest-js # PDF asks us to create it with this name.
+    build: ./requirements/nest-js/ # Container's 'Dockerfile' path location for run this file.
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./requirements/nest-js:/app
+    networks:
+      - transcendence_network
+    restart: always
+    ports:
+      - 3000:3000 # Local port / Exported port. nestjs's default port(3000).
+    # depends_on:
+    # progress: plain
+  # ________________ #
+  # ___PostgreSQL___ #
+  postgres:
+    image: postgres:16.0-alpine3.18
+    # container_name: postgres
+    build: /requirements/postgres
+    env_file: .env
+    volumes:
+      - ./requirements/nest-js:/app
+    networks:
+      - transcendence_network
+    restart: always
+    ports:
+      - 5432:5432 # Local port / Exported port. nestjs's default port(3000).
+    # depends_on:
+    # progress: plain
+  # ________________ #
