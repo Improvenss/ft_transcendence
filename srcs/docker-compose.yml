@@ -25,30 +25,50 @@ volumes:
 #                             SERVICES                                        #
 #/////////////////////////////////////////////////////////////////////////////#
 services:
-  # _____nest-js____ #
-  nest-js: # For 'Web Server'.
-    container_name: nest-js # PDF asks us to create it with this name.
-    build: ./requirements/nest-js/ # Container's 'Dockerfile' path location for run this file.
+  # # _____nest-js____ #
+  # nest-js: # For 'Web Server'.
+  #   container_name: nest-js # PDF asks us to create it with this name.
+  #   build: ./requirements/nest-js/ # Container's 'Dockerfile' path location for run this file.
+  #   env_file: .env
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./requirements/nest-js:/app
+  #   networks:
+  #     - transcendence_network
+  #   restart: always
+  #   ports:
+  #     - 3000:3000 # Local port / Exported port. nestjs's default port(3000).
+  #   # depends_on:
+  #   # progress: plain
+  # # ________________ #
+  # ___PostgreSQL___ #
+  postgres:
+    image: postgres:alpine
+    # container_name: postgres
+    # build:
+      # context: ./requirements/postgres
+      # dockerfile: ./Dockerfile
     env_file: .env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./requirements/nest-js:/app
+      - ./requirements/postgres:/app
     networks:
       - transcendence_network
     restart: always
     ports:
-      - 3000:3000 # Local port / Exported port. nestjs's default port(3000).
+      - 5432:5432 # Local port / Exported port. nestjs's default port(3000).
     # depends_on:
     # progress: plain
   # ________________ #
-  # ___PostgreSQL___ #
-  postgres:
-    image: postgres:16.0-alpine3.18
-    # container_name: postgres
-    build: /requirements/postgres
+  # ____pgadmin4____ #
+  pgadmin4:
+    image: dpage/pgadmin4:latest
+    # container_name: pgadmin4
+    # build:
+      # context: ./requirements/pgadmin4
+      # dockerfile: ./Dockerfile
     env_file: .env
     volumes:
-      - ./requirements/nest-js:/app
+      - ./requirements/pgadmin4:/app
     networks:
       - transcendence_network
     restart: always

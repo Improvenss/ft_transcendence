@@ -43,18 +43,18 @@ endif
 # all:
 # 	@$(MAKE) build up -j $(NUMPROC) --no-print-directory
 
-all: build up clean_dangling_images
+all: up clean_dangling_images
 
-build:
-	@echo "$(GREEN)BUILDING CONTAINER IMAGES 'build'$(X)"
-	@mkdir -p /home/$(USER)/data/postgres
-	@docker-compose -f srcs/docker-compose.yml build --parallel
-	@echo $(OS) Builded with $(NUMPROC) cores!
+# build:
+# 	@echo "$(GREEN)BUILDING CONTAINER IMAGES 'build'$(X)"
+# 	@mkdir -p /home/$(USER)/data/postgres
+# 	@docker-compose -f srcs/docker-compose.yml build
+# 	@echo $(OS) Builded with $(NUMPROC) cores!
 
 up: update_hosts
 	@printf "%-57b %b" "$(GREEN)RUNNING CONTAINERS 'up'$(END)\n"
 	@mkdir -p /home/$(USER)/data/postgres
-	@docker-compose -f srcs/docker-compose.yml up -d
+	@docker-compose -f srcs/docker-compose.yml up --build -d
 	@echo $(OS) Runned with $(NUMPROC) cores!
 
 start:
@@ -181,7 +181,7 @@ firstrun:
 	@echo "$(B_GREEN)FirstRun: Installing: 'certutil' for trusted certificate.$(END)"
 	@apt install -y libnss3-tools
 
-.PHONY: all build up start stop down clean fclean cleansh clean_dangling_images re info container_info update_hosts setup_ssh firstrun
+.PHONY: all up start stop down clean fclean cleansh clean_dangling_images re info container_info update_hosts setup_ssh firstrun
 
 # How can i transfer file with 'sftp' protocol local to virtual machine?
 # $> sftp gsever@localhost
