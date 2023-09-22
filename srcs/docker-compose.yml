@@ -1,0 +1,111 @@
+# LINK: https://docs.docker.com/compose/compose-file/compose-versioning/
+version: '3.8'
+
+###############################################################################
+#                             NETWORKS                                        #
+#/////////////////////////////////////////////////////////////////////////////#
+
+networks:
+  transcendence_network:
+    driver: bridge
+
+###############################################################################
+#                             VOLUMES                                         #
+#/////////////////////////////////////////////////////////////////////////////#
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/postgres
+  pgadmin4_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/pgadmin4
+  backend_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/backend
+  frontend_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/frontend
+
+###############################################################################
+#                             SERVICES                                        #
+#/////////////////////////////////////////////////////////////////////////////#
+services:
+  # ___PostgreSQL___ # OK
+  postgres:
+    image: postgres:16.0-alpine3.18
+    env_file:
+      - ./envFiles/postgres.env
+      # - ./requirements/postgres/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - transcendence_network
+    restart: unless-stopped # Durdurulmadigi surece.
+    ports:
+      - 5432:5432 # Local port / Exported port. postgres's default port(5432).
+    # depends_on:
+    # progress: plain
+  # ________________ #
+  # ____pgadmin4____ # OK
+  pgadmin4:
+    image: dpage/pgadmin4:7.4
+    env_file:
+      - ./envFiles/pgadmin4.env
+    volumes:
+      - ./requirements/pgadmin4:/app
+    networks:
+      - transcendence_network
+    restart: unless-stopped
+    ports:
+      - 80:80 # Local port / Exported port.
+      # - 5432:5432 # Local port / Exported port.
+    depends_on:
+      - postgres
+    # progress: plain
+  # ________________ #
+  # _____backend____ #
+  backend: # Backend's container.
+    container_name: backend
+    build: ./requirements/backend/ # Container's 'Dockerfile' path location for run this file.
+    env_file:
+      - ./envFiles/backend.env
+    volumes:
+      - ./requirements/backend:/app
+    networks:
+      - transcendence_network
+    restart: unless-stopped
+    ports:
+      - 3000:3000 # Local port / Exported port. nestjs's default port(3000).
+    depends_on:
+      - postgres
+    # progress: plain
+  # ________________ #
+  # ____frontend____ #
+  frontend: # Frontend's container.
+    container_name: frontend
+    build: ./requirements/frontend/ # Container's 'Dockerfile' path location for run this file.
+    env_file:
+      - ./envFiles/frontend.env
+    volumes:
+      - ./requirements/frontend:/app
+    networks:
+      - transcendence_network
+    restart: unless-stopped
+    ports:
+      - 8080:8080 # Local port / Exported port. nestjs's default port(3000).
+    # depends_on:
+    # progress: plain
+  # ________________ #

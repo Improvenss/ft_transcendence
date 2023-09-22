@@ -1,0 +1,49 @@
+<!-- LINK: https://www.youtube.com/watch?v=H_RT1XRqi8I -->
+<!-- LINK: https://www.html5canvastutorials.com/tutorials/html5-canvas-line-color/ -->
+<!DOCTYPE html>
+<html>
+	<head> <!-- 'head' kisminda; 'Belgeyle' ilgili yani bu 'html' dosyasi ile ilgili bildilerin girildigi kisimdir. -->
+		<meta charset=UTF-8>
+	</head>
+	<body style="background-color: rgb(0, 0, 0); color: orange;"> <!-- 'body' kisminda; Tarayicinin goruntulenen 'html' dosyasinin ana icerigini tanimlar. -->
+		<canvas id="tuval", width="800", height="800", style="border:1px solid;">
+			Canvas is not working!
+		</canvas>
+		<script>
+			var tuval = document.getElementById("tuval");
+			var cizim = tuval.getContext("2d");
+			var	horizontal, vertical, x, y, dx, dy;
+			horizontal = tuval.width; // Yatay
+			vertical = tuval.height; // Dikey
+			x = horizontal/2;
+			y = vertical/2;
+			dx = 6;
+			dy = 4;
+			function ballJump()
+			{
+				var ballR = 20;
+				clear();
+				cizim.beginPath();
+				cizim.arc(x, y, ballR, 0, Math.PI * 2);
+				cizim.closePath();
+				cizim.fillStyle = "#ff0000";
+				cizim.fill();
+				if (x >= horizontal - ballR || x <= 0 + ballR)
+					dx = dx * -1;
+				if (y >= vertical - ballR || y <= 0 + ballR)
+					dy = dy * -1;
+				x += dx;
+				y += dy;
+			}
+			function clear()
+			{
+				cizim.beginPath();
+				cizim.fillStyle = '#000000';
+				cizim.fillRect(0, 0, tuval.width, tuval.height);
+				cizim.closePath();
+				cizim.fill();
+			}
+			setInterval(ballJump, 15);
+		</script>
+	</body>
+</html>

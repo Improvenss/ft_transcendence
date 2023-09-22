@@ -1,0 +1,44 @@
+<!-- LINK: https://www.youtube.com/watch?v=H_RT1XRqi8I -->
+<!-- LINK: https://www.html5canvastutorials.com/tutorials/html5-canvas-line-color/ -->
+<!DOCTYPE html>
+<html>
+	<head> <!-- 'head' kisminda; 'Belgeyle' ilgili yani bu 'html' dosyasi ile ilgili bildilerin girildigi kisimdir. -->
+		<meta charset=UTF-8>
+	</head>
+	<body style="background-color: rgb(0, 0, 0); color: orange;"> <!-- 'body' kisminda; Tarayicinin goruntulenen 'html' dosyasinin ana icerigini tanimlar. -->
+		<canvas id="tuval", width="800", height="800", style="border:1px solid;">
+			Canvas is not working!
+		</canvas>
+		<script>
+			function mouseClick(e)
+			{
+				cizim.beginPath();
+				cizim.arc(e.x, e.y, 50, 0, Math.PI * 2);
+				cizim.strokeStyle = '#ffffff';
+				cizim.closePath();
+				cizim.stroke();
+				// cizim.fill();
+			}
+			var tuval = document.getElementById("tuval");
+			// tuval.addEventListener("click", mouseClick);
+			tuval.addEventListener("mousemove", mouseClick);
+
+			var cizim = tuval.getContext("2d");
+			cizim.beginPath();
+			cizim.moveTo(0, 0);
+			cizim.lineTo(200, 200);
+			cizim.lineTo(250, 200);
+			cizim.lineWidth = 3;
+			cizim.moveTo(300, 0);
+			cizim.lineTo(250, 100);
+			cizim.arc(100, 100, 50, Math.PI, Math.PI * 2);
+			cizim.arc(300, 200, 50, Math.PI * 2, Math.PI);
+			cizim.font = "20px Ariel";
+			cizim.fillStyle = "yellow";
+			cizim.fillText("ft_transcendence project", 50, 250);
+			cizim.fillRect(350, 250, 50, 50);
+			cizim.strokeStyle = "#ff0000";
+			cizim.stroke();
+		</script>
+	</body>
+</html>

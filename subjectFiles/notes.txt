@@ -1,0 +1,15 @@
+LINKS
+{
+	404, 422 or 500 etc. Error codes means.
+	https://www.rfc-editor.org/rfc/rfc7231#section-6.5
+}
+What is?
+{
+	'<br>': The Line Break element. The <br> HTML element produces a line break in text (carriage-return).
+	'<br>': Satir sonu demek. Satirin bittigini belirtir. Yeni satira gecilir yani. (enter).
+}
+
+Advice
+{
+	You can install 'Live Preview' and 'Live Server' extension in vscode.
+}
