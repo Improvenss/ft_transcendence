@@ -45,15 +45,10 @@ endif
 
 all: up clean_dangling_images
 
-# build:
-# 	@echo "$(GREEN)BUILDING CONTAINER IMAGES 'build'$(X)"
-# 	@mkdir -p /home/$(USER)/data/postgres
-# 	@docker-compose -f srcs/docker-compose.yml build
-# 	@echo $(OS) Builded with $(NUMPROC) cores!
-
+# If this -d is not added you stayin inside these containers.
 up: update_hosts
-	@printf "%-57b %b" "$(GREEN)RUNNING CONTAINERS 'up'$(END)\n"
-	@mkdir -p /home/$(USER)/data/postgres
+	@printf "%-57b %b" "$(GREEN)RUNNING CONTAINERS 'up --build'$(END)\n"
+	@mkdir -p ./data
 	@docker-compose -f srcs/docker-compose.yml up --build -d
 	@echo $(OS) Runned with $(NUMPROC) cores!
 
@@ -82,7 +77,7 @@ clean:
 fclean: clean
 	@docker volume rm $$(docker volume ls -q) 2>/dev/null
 	@docker system prune -fa 2>/dev/null
-	@sudo rm -rf /home/$(USER)/data 2>/dev/null
+	@sudo rm -rf ./data 2>/dev/null
 	@echo "Cleaned with $(NUMPROC) cores!"
 	@echo "$(RED)ALL THINGS CLEANED$(RESET)"
 

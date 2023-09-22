@@ -18,7 +18,25 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/${USER}/data/postgres
+      device: ./../data/postgres # srcs/requirements/postgres folder.
+  pgadmin4_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/pgadmin4 # srcs/requirements/pgadmin4 folder.
+  backend_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/backend # srcs/requirements/backend folder.
+  frontend_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./../data/frontend # srcs/requirements/frontend folder.
   # Buraya da sonraki datalarin konumlari eklenebilinir.
 
 ###############################################################################
@@ -41,39 +59,35 @@ services:
   #   # depends_on:
   #   # progress: plain
   # # ________________ #
-  # ___PostgreSQL___ #
+  # ___PostgreSQL___ # OK
   postgres:
-    image: postgres:alpine
-    # container_name: postgres
-    # build:
-      # context: ./requirements/postgres
-      # dockerfile: ./Dockerfile
-    env_file: .env
+    image: postgres:16.0-alpine3.18
+    env_file:
+      - ./envFiles/postgres.env
+      # - ./requirements/postgres/.env
     volumes:
       - ./requirements/postgres:/app
     networks:
       - transcendence_network
     restart: always
     ports:
-      - 5432:5432 # Local port / Exported port. nestjs's default port(3000).
+      - 5432:5432 # Local port / Exported port. postgres's default port(5432).
     # depends_on:
     # progress: plain
   # ________________ #
   # ____pgadmin4____ #
   pgadmin4:
-    image: dpage/pgadmin4:latest
-    # container_name: pgadmin4
-    # build:
-      # context: ./requirements/pgadmin4
-      # dockerfile: ./Dockerfile
-    env_file: .env
+    image: dpage/pgadmin4:7.4
+    env_file:
+      - ./envFiles/pgadmin4.env
     volumes:
       - ./requirements/pgadmin4:/app
     networks:
       - transcendence_network
     restart: always
     ports:
-      - 5432:5432 # Local port / Exported port. nestjs's default port(3000).
+      - 80:80 # Local port / Exported port.
+      # - 5432:5432 # Local port / Exported port.
     # depends_on:
     # progress: plain
   # ________________ #
