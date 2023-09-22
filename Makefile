@@ -47,8 +47,11 @@ all: up clean_dangling_images
 
 # If this -d is not added you stayin inside these containers.
 up: update_hosts
-	@printf "%-57b %b" "$(GREEN)RUNNING CONTAINERS 'up --build'$(END)\n"
-	@mkdir -p ./data
+	@printf "%-57b %b" "$(GREEN)CONFIGURING CONTAINERS 'up --build'$(END)\n"
+	@mkdir -p ./data/postgres 2>/dev/null
+	@mkdir -p ./data/pgadmin4 2>/dev/null
+	@mkdir -p ./data/backend 2>/dev/null
+	@mkdir -p ./data/frontend 2>/dev/null
 	@docker-compose -f srcs/docker-compose.yml up --build -d
 	@echo $(OS) Runned with $(NUMPROC) cores!
 
@@ -57,7 +60,6 @@ start:
 
 stop:
 	@docker stop $$(docker ps -qa) 2>/dev/null | pv -f -L 5 -s $$(docker ps -qa | wc -l) > /dev/null
-
 
 down:
 	@printf "%-57b %b" "$(GREEN)CLOSING CONTAINERS 'down'$(X)\n"
