@@ -56,10 +56,10 @@ up: update_hosts
 	@echo $(OS) Runned with $(NUMPROC) cores!
 
 start:
-	@docker start $$(docker ps -qa) 2>/dev/null | pv -f -L 5 -s $$(docker ps -qa | wc -l) > /dev/null
+	@docker start $$(docker ps -qa) 2>/dev/null
 
 stop:
-	@docker stop $$(docker ps -qa) 2>/dev/null | pv -f -L 5 -s $$(docker ps -qa | wc -l) > /dev/null
+	@docker stop $$(docker ps -qa) 2>/dev/null
 
 down:
 	@printf "%-57b %b" "$(GREEN)CLOSING CONTAINERS 'down'$(X)\n"
@@ -128,7 +128,7 @@ update_hosts:
 		echo "$(YELLOW)Host Already Exist: /etc/hosts: $(B_YELLOW)'127.0.0.1 $(USER).42.fr'$(END)";\
 	else\
 		sudo sed -i '2i127.0.0.1\t$(USER).42.fr' /etc/hosts;\
-		echo "$(B_GREEN)Adding 'gsever.42.fr' host to /etc/hosts inside.$(END)";\
+		echo "$(B_GREEN)Adding '$(USER).42.fr' host to /etc/hosts inside.$(END)";\
 	fi
 # @sed -i '2s/^/127.0.0.0\tgsever.42.fr\n/' /etc/hosts
 

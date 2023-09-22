@@ -61,7 +61,7 @@ services:
   # ________________ #
   # ____pgadmin4____ # OK
   pgadmin4:
-    image: dpage/pgadmin4:7.4
+    image: dpage/pgadmin4:7.7
     env_file:
       - ./envFiles/pgadmin4.env
     volumes:
