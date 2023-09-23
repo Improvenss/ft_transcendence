@@ -19,25 +19,25 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./../data/postgres
+      device: ./data/postgres
   pgadmin4_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./../data/pgadmin4
+      device: ./data/pgadmin4
   backend_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./../data/backend
+      device: ./data/backend
   frontend_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./../data/frontend
+      device: ./data/frontend
 
 ###############################################################################
 #                             SERVICES                                        #
@@ -47,8 +47,8 @@ services:
   postgres:
     image: postgres:16.0-alpine3.18
     env_file:
-      - ./envFiles/postgres.env
-      # - ./requirements/postgres/.env
+      - ./srcs/envFiles/postgres.env
+      # - ./srcs/requirements/postgres/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -63,9 +63,9 @@ services:
   pgadmin4:
     image: dpage/pgadmin4:7.7
     env_file:
-      - ./envFiles/pgadmin4.env
+      - ./srcs/envFiles/pgadmin4.env
     volumes:
-      - ./requirements/pgadmin4:/app
+      - ./srcs/requirements/pgadmin4:/app
     networks:
       - transcendence_network
     restart: unless-stopped
@@ -79,11 +79,11 @@ services:
   # _____backend____ #
   backend: # Backend's container.
     container_name: backend
-    build: ./requirements/backend/ # Container's 'Dockerfile' path location for run this file.
+    build: ./srcs/requirements/backend/ # Container's 'Dockerfile' path location for run this file.
     env_file:
-      - ./envFiles/backend.env
+      - ./srcs/envFiles/backend.env
     volumes:
-      - ./requirements/backend:/app
+      - ./srcs/requirements/backend:/app
     networks:
       - transcendence_network
     restart: unless-stopped
@@ -96,11 +96,11 @@ services:
   # ____frontend____ #
   frontend: # Frontend's container.
     container_name: frontend
-    build: ./requirements/frontend/ # Container's 'Dockerfile' path location for run this file.
+    build: ./srcs/requirements/frontend/ # Container's 'Dockerfile' path location for run this file.
     env_file:
-      - ./envFiles/frontend.env
+      - ./srcs/envFiles/frontend.env
     volumes:
-      - ./requirements/frontend:/app
+      - ./srcs/requirements/frontend:/app
     networks:
       - transcendence_network
     restart: unless-stopped

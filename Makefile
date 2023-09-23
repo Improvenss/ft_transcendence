@@ -52,7 +52,7 @@ up: update_hosts
 	@mkdir -p ./data/pgadmin4 2>/dev/null
 	@mkdir -p ./data/backend 2>/dev/null
 	@mkdir -p ./data/frontend 2>/dev/null
-	@docker-compose -f srcs/docker-compose.yml up --build -d
+	@docker-compose -f ./docker-compose.yml up --build -d
 	@echo $(OS) Runned with $(NUMPROC) cores!
 
 start:
@@ -63,11 +63,11 @@ stop:
 
 down:
 	@printf "%-57b %b" "$(GREEN)CLOSING CONTAINERS 'down'$(X)\n"
-	@docker-compose -f srcs/docker-compose.yml down
+	@docker-compose -f ./docker-compose.yml down
 	@echo $(OS) Closed with $(NUMPROC) cores!
 
 clean:
-	@docker-compose -f srcs/docker-compose.yml down
+	@docker-compose -f ./docker-compose.yml down
 	@echo "$(RED)STOPPED AND CLEANED JUST CONTAINERS$(RESET)"
 
 # There is have 2 way run a command with shell argument.
@@ -79,7 +79,7 @@ clean:
 fclean: clean
 	@docker volume rm $$(docker volume ls -q) 2>/dev/null
 	@docker system prune -fa 2>/dev/null
-	@sudo rm -rf ./data 2>/dev/null
+# @sudo rm -rf ./data 2>/dev/null
 	@echo "Cleaned with $(NUMPROC) cores!"
 	@echo "$(RED)ALL THINGS CLEANED$(RESET)"
 
@@ -111,10 +111,10 @@ info:
 	@docker volume ls
 
 compose_containers:
-	@docker-compose -f ./srcs/docker-compose.yml ps -a
+	@docker-compose -f ./docker-compose.yml ps -a
 
 compose_images:
-	@docker-compose -f ./srcs/docker-compose.yml images
+	@docker-compose -f ./docker-compose.yml images
 
 # update_ssl:
 # 	@cp /home/$(USER)/data/wordpress/gsever.crt /etc/ssl/certs/
