@@ -18,7 +18,7 @@ FROM node:20.7.0-alpine3.18
 
 RUN apk update && apk upgrade
 
-WORKDIR /app/react-app
+WORKDIR /app/react-app/
 
 # RUN chmod -R 777 .
 # RUN sudo chown -R $(whoami) ~/.docker
@@ -32,7 +32,7 @@ RUN ["npm", "install", "--global", "react-cli", "react"]
 # RUN ["npm", "install", "--global", "react-scripts"]
 
 # Installing other packages.
-RUN ["npm", "install"]
+# RUN ["npm", "install"]
 
 # Starting all this NestJS 'backend' project code.
 # RUN ["npm", "run", "start:dev"]
