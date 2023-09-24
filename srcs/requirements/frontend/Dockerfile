@@ -18,10 +18,13 @@ FROM node:20.7.0-alpine3.18
 
 RUN apk update && apk upgrade
 
-WORKDIR /app/react-app/
+WORKDIR /app/react-app
 
 # RUN chmod -R 777 .
 # RUN sudo chown -R $(whoami) ~/.docker
+
+# COPY ./react-app/ .
+# COPY react-app/package*.json .
 
 EXPOSE 80
 
@@ -38,4 +41,4 @@ RUN ["npm", "install", "--global", "react-cli", "react"]
 # RUN ["npm", "run", "start:dev"]
 
 # `-c` mean; After all this are giving like argument.
-ENTRYPOINT ["/bin/sh", "-c", "npm start"]
+ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm run start"]
