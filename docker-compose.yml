@@ -26,6 +26,12 @@ volumes:
       type: none
       o: bind
       device: ./data/pgadmin4
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis
   backend_data:
     driver: local
     driver_opts:
@@ -70,10 +76,26 @@ services:
       - transcendence_network
     restart: unless-stopped
     ports:
-      - 80:80 # Local port / Exported port.
-      # - 5432:5432 # Local port / Exported port.
+      - 9000:80 # Local port / Exported port.
+      # - 9000:9000 # Local port / Exported port.
     depends_on:
       - postgres
+    # progress: plain
+  # ________________ #
+  # ___redis_cache__ #
+  redis:
+    image: redis:7.2.1-alpine3.18
+    env_file:
+      - ./srcs/envFiles/redis.env
+    volumes:
+      - ./srcs/requirements/redis:/app
+    networks:
+      - transcendence_network
+    restart: unless-stopped
+    ports:
+      - 6379:6379 # Local port / Exported port.
+    # depends_on:
+      # - postgres
     # progress: plain
   # ________________ #
   # _____backend____ #
@@ -105,7 +127,7 @@ services:
       - transcendence_network
     restart: unless-stopped
     ports:
-      - 8080:8080 # Local port / Exported port. nestjs's default port(3000).
+      - 80:80 # Local port / Exported port. nestjs's default port(3000).
     # depends_on:
     # progress: plain
   # ________________ #
