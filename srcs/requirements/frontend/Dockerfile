@@ -29,11 +29,13 @@ EXPOSE 80
 # RUN ["npx", "create-react-app", "react-app", "--template", "typescript"]
 RUN ["npm", "install", "--global", "react-cli", "react"]
 
+# RUN ["npm", "install", "--global", "react-scripts"]
+
 # Installing other packages.
-# RUN ["npm", "install"]
+RUN ["npm", "install"]
 
 # Starting all this NestJS 'backend' project code.
 # RUN ["npm", "run", "start:dev"]
 
 # `-c` mean; After all this are giving like argument.
-ENTRYPOINT ["/bin/sh", "-c", "npm run start"]
+ENTRYPOINT ["/bin/sh", "-c", "npm start"]
