@@ -23,11 +23,16 @@ WORKDIR /app/react-app
 # RUN chmod -R 777 .
 # RUN sudo chown -R $(whoami) ~/.docker
 
+# COPY ./react-app/ .
+# COPY react-app/package*.json .
+
 EXPOSE 80
 
 # We are installing React package for global.
 # RUN ["npx", "create-react-app", "react-app", "--template", "typescript"]
 RUN ["npm", "install", "--global", "react-cli", "react"]
+
+# RUN ["npm", "install", "--global", "react-scripts"]
 
 # Installing other packages.
 # RUN ["npm", "install"]
@@ -36,4 +41,4 @@ RUN ["npm", "install", "--global", "react-cli", "react"]
 # RUN ["npm", "run", "start:dev"]
 
 # `-c` mean; After all this are giving like argument.
-ENTRYPOINT ["/bin/sh", "-c", "npm run start"]
+ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm run start"]
