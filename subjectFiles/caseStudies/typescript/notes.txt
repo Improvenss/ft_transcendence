@@ -1,0 +1,23 @@
+How can i intall typescript?
+{
+	$> npm install --global typescript
+	This command installing typescript compiler.
+	$> tsc main.ts
+	This compiler converting you ts code to js code.
+	$> node main.js
+	After you can run js code...
+
+	$> npm install --global ts-node
+	This command installing node's typescript compiler/runner.
+	If you want to run your ts code;
+	$> ts-node main.ts
+	$> Hello World!
+	You can see this output directly.
+	or
+	$> tsc --watch
+	You can see automaticly compiler/runner.
+}
+
+How can i create react app?
+{
+}

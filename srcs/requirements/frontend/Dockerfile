@@ -42,3 +42,9 @@ RUN ["npm", "install", "--global", "react-cli", "react"]
 
 # `-c` mean; After all this are giving like argument.
 ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm run start"]
+
+# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install --global @nestjs/cli^C
+# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# nest new hello-friend^C
+# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install npx^C
+# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install --global react-li react^C
+# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npx create-react-app asdf-app --template typescript^C
