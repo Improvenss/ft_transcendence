@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!-- ASK PHILL
+
+  /$$$$$$   /$$$$$$  /$$   /$$       /$$$$$$$  /$$   /$$ /$$$$$$ /$$       /$$      
+ /$$__  $$ /$$__  $$| $$  /$$/      | $$__  $$| $$  | $$|_  $$_/| $$      | $$      
+| $$  \ $$| $$  \__/| $$ /$$/       | $$  \ $$| $$  | $$  | $$  | $$      | $$      
+| $$$$$$$$|  $$$$$$ | $$$$$/        | $$$$$$$/| $$$$$$$$  | $$  | $$      | $$      
+| $$__  $$ \____  $$| $$  $$        | $$____/ | $$__  $$  | $$  | $$      | $$      
+| $$  | $$ /$$  \ $$| $$\  $$       | $$      | $$  | $$  | $$  | $$      | $$      
+| $$  | $$|  $$$$$$/| $$ \  $$      | $$      | $$  | $$ /$$$$$$| $$$$$$$$| $$$$$$$$
+|__/  |__/ \______/ |__/  \__/      |__/      |__/  |__/|______/|________/|________/
+
+Made by: https://askphill.com                                                                                    
+Designed by: Martin Silvestre
+Year: 2019
+Apply: jobs@askphill.com
+
+/ASKPHILL --><html lang="en" class="is-launching is-animating">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="">
+    <link rel="canonical" href="https://jorik.askphill.com/password"><link rel="shortcut icon" href="favicons/files-favicon_360_32x32.png" type="image/png"><title>jorik-real</title>
+    <meta name="description" content="JORIK is a fashion label rooted in the current street culture. A lifestyle as much as it is a brand, JORIK takes inspiration from daily life, popular style icons and a man&rsquo;s ultimate muse; his wife. Resulting in an exclusive quality streetwear collection with an attitude.">
+
+
+<div class="password">
+  <div class="password__timer">
+    <div class="password__value password__value--day"></div>
+    <div class="password__key password__key--day">d</div>
+    <div class="password__value password__value--hour"></div>
+    <div class="password__key password__key--hour">h</div>
+    <div class="password__value password__value--minute"></div>
+    <div class="password__key password__key--minute">m</div>
+    <div class="password__value password__value--second"></div>
+    <div class="password__key password__key--second">s</div>
+  </div>
+
+  <script>
+    const pad = number => `0${number}`.slice(-2)
+    const launch = new Date('2019-03-07T17:00:00.000Z')
+    const updateTimer = () => {
+      const now = new Date()
+      const diff = (launch.getTime() - now.getTime()) / 1000
+
+      document.querySelector('.password__value--day')
+        .textContent = Math.floor(diff / (60 * 60 * 24))
+      document.querySelector('.password__value--hour')
+        .textContent = pad(Math.floor(diff % (60 * 60 * 24) / (60 * 60)))
+      document.querySelector('.password__value--minute')
+        .textContent = pad(Math.floor(diff % (60 * 60) / 60))
+      document.querySelector('.password__value--second')
+        .textContent = pad(Math.floor(diff % 60))
+    }
+
+    updateTimer()
+    setInterval(updateTimer, 1000)
+  </script>
+
+  <form method="post" action="/password" id="login_form" accept-charset="UTF-8" class="storefront-password-form"><input type="hidden" name="form_type" value="storefront_password"><input type="hidden" name="utf8" value="&#10003;">
+    <div class="password__field">
+      <input class="password__input" type="password" name="password" placeholder="password">
+      <input class="password__button" type="submit" value="&rarr;" disabled>
+    </div>
+    <script>
+      const field = document.querySelector('.password__field')
+      const input = document.querySelector('.password__input')
+      const button = document.querySelector('.password__button')
+      input.addEventListener(
+        'focus',
+        () => field.classList.add('password__field--focused'),
+      )
+      input.addEventListener(
+        'blur',
+        () => field.classList.remove('password__field--focused'),
+      )
+      input.addEventListener('input', () => {
+        if (input.value == '') {
+          button.disabled = true
+        } else {
+          button.disabled = false
+        }
+      })
+    </script>
+  </form>
+</div>
+
+
+</div></body>
+</html>
