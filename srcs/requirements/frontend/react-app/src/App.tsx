@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from './logo.svg';
+// imoprt backgroung from "./images/backgroung.svg";
 import './App.css';
 
 function App() {
@@ -8,7 +9,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Edit <code>src/App.tsx</code> and save to reload. naber
         </p>
         <a
           className="App-link"

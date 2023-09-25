@@ -1,0 +1,49 @@
+.page { color: rgb(236, 233, 228); }
+
+.page__content ul { list-style-image: initial; }
+
+.password { background-image: initial; background-color: rgb(0, 0, 0); color: rgb(242, 240, 237); }
+
+.password__field { border-bottom-color: rgb(80, 87, 91); }
+
+.password__field--focused { border-bottom-color: rgb(40, 44, 47); }
+
+.password__input { color: rgb(242, 240, 237); }
+
+.password__input::placeholder { color: rgb(154, 145, 129); }
+
+.password__button { color: rgb(242, 240, 237); }
+
+.password__button:disabled { color: rgb(154, 145, 129); }
+
+.password { height: 100vh; background: rgb(0, 0, 0); color: rgb(255, 255, 255); }
+  
+  .password__timer { display: flex; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: "VCR OSD Mono", monospace; }
+  
+  .password__value { font-size: 12vw; margin-left: 4vw; }
+  
+  @media (min-width: 1024px) {
+    .password__value { font-size: 8vw; margin-left: 2vw; }
+  }
+  
+  .password__key { font-size: 6vw; }
+  
+  @media (min-width: 1024px) {
+    .password__key { font-size: 4vw; }
+  }
+  
+  .password__field { position: absolute; bottom: 25vw; left: 25vw; display: flex; width: 50vw; border-bottom: 1px solid gray; padding: 1.5625vw 0px; font-size: 4vw; }
+  
+  .password__field--focused { border-bottom-color: rgb(255, 255, 255); }
+  
+  @media (min-width: 1024px) {
+    .password__field { bottom: 12.5vw; left: 50%; transform: translateX(-50%); width: 20vw; padding: 1.5625vw 0px; font-size: 1.2vw; }
+  }
+  
+  .password__input { flex: 1 1 0%; color: rgb(255, 255, 255); }
+  
+  .password__input::placeholder { color: gray; }
+  
+  .password__button { flex: 0 1 0%; color: rgb(255, 255, 255); }
+  
+  .password__button:disabled { color: gray; }
