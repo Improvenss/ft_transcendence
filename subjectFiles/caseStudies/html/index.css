@@ -1,0 +1,29 @@
+/* Burasi html'in 'body' kismi icin kullaniliyor. */
+body{
+	background-color: black;
+	text-align: center;
+	color: aquamarine;
+}
+/* LINK: https://htmlcolorcodes.com/tutorials/css-link-color/#:~:text=As%20far%20as%20CSS%20color,example%20below%20we%20use%20red. */
+a{
+	color: crimson;
+}
+/* Linkin normal hali */
+a:link {
+	color: #FF0000; /* Kırmızı */
+}
+
+/* Ziyaret edilmiş link */
+a:visited {
+	color: #00FF00; /* Yeşil */
+}
+
+/* Fare üzerindeyken */
+a:hover {
+	color: #FF00FF; /* Mor */
+}
+
+/* Seçiliyken */
+a:active {
+	color: #0000FF; /* Mavi */
+}
