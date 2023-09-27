@@ -9,8 +9,13 @@ body{
 	text-align: center;
 	color: aquamarine;
 }
+/* Burayi asagidaki gibi yaparsak mouse'nin sol click'iyle secme olayini kaldirmis oluyoruz. */
+* {
+	/* -webkit-user-select: none; */
+	/* user-select: none; */
+}
 /* LINK: https://htmlcolorcodes.com/tutorials/css-link-color/#:~:text=As%20far%20as%20CSS%20color,example%20below%20we%20use%20red. */
-a{
+a {
 	color: crimson;
 }
 /* Linkin normal hali */
@@ -18,7 +23,7 @@ a:link {
 	color: #FF0000; /* Kırmızı */
 }
 
-/* Ziyaret edilmiş link */
+/* Ziyaret edilmis link */
 a:visited {
 	color: #00FF00; /* Yeşil */
 }
@@ -28,7 +33,92 @@ a:hover {
 	color: #FF00FF; /* Mor */
 }
 
-/* Seçiliyken */
+/* Seciliyken */
 a:active {
 	color: #0000FF; /* Mavi */
 }
+
+p {
+	font-size: large;
+}
+
+/* Tablonun en dis tarafindaki cizgidir. */
+table {
+	border: 1px solid crimson;
+	border-color: pink;
+}
+
+/* Tablonun icerisindeki kutularin etrafini cizer. */
+td {
+	border: 1px solid crimson;
+	padding: 15px;
+	text-align: center;
+}
+
+/* Mouse'mizi bu kutucugun uzerine getirdigimizde calisan yer. */
+td:hover {
+	background-color: darkorange;
+}
+/* Tablonun n'inci olan satirini yani n=n+1 gibi bir sey */
+tr:nth-child(even) {
+	background-color: teal;
+}
+
+/* Column(kolon)'lar icin. */
+col {
+	background-color: tomato;
+}
+
+/* ****************** LIST ************************* */
+/* Unordered List diye geciyor. Listeler • ile basliyor. */
+ul {
+	/* color: red; */
+	/* text-align: left; */
+	/* list-style-type: disc; */
+	/* list-style-type: circle; */
+	/* list-style-type: square; */
+	/* list-style-type: none; */
+}
+
+/* Ordered List diye geciyor. Listeler 1. baslayip 2. 3. diye devam ediyor. */
+ol {
+	/* text-align: left; */
+}
+
+/* List Item diye geciyor. */
+li {
+	color: red;
+	text-align: left;
+}
+
+/* Description List diye geciyor. Listenin kendisi. */
+dl {
+	text-align: left;
+}
+
+/* Description Term(name) olarak geciyor. Listenin basligi. */
+dt {
+	color: lightslategray;
+}
+
+/* Describes the therm's Description. Yani listenin basliginin icerisindeki argumanlar. */
+dd {
+	color: lightsalmon;
+}
+/* ************************************************* */
+/* ************* BLOCK & INLINE ******************** */
+/* Burasi Class olarak adlandirdigimiz kisim icin gecerli oluyor. */
+.city {
+	color: lightseagreen;
+	background-color: darkslategrey;
+}
+
+.town {
+	color: lightcoral;
+	background-color: darkslateblue;
+}
+
+.town p {
+	color: black;
+}
+/* ************************************************* */

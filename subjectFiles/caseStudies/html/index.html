@@ -3,6 +3,7 @@
 <head> <!-- 'meta' bilgileri tuttugu yer, yani 'html' dosyasi ile akalali seyler burada tanimlanir.-->
 	<title>Sekmede Gozuken Yer</title> <!-- Sekmede yazan yeri belirtiyor.-->
 	<link rel="stylesheet" type="text/css" href="./index.css"> <!-- index.css dosyamizi bu html dosyasina ekledik.-->
+	<link rel="icon" type="image/x-icon" href="https://media.tenor.com/uUNcnHwYJQEAAAAi/running-pikachu-transparent-snivee.gif">
 	<style>
 		button {color: black;}
 	</style>
@@ -83,5 +84,59 @@
 		<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Lula_kebab_2.jpg/440px-Lula_kebab_2.jpg">
 	</picture>
 
+	<!-- Burasi JS kodu olarak 'sag klik' basmayi engelleyen kod. -->
+	<script>
+		document.addEventListener('contextmenu', function(e) {
+			e.preventDefault();
+		});
+	</script>
+
+	<!-- Burada olusturdugumuz table'nin ne gibi ozellikler alabilecegini test ediyoruz. -->
+	<table>
+		<colgroup>
+			<col span="2">
+			<tr><td>1</td><td>2</td><td>3</td></tr>
+		</colgroup>
+		<tr><td>4</td><td>5</td><td>6</td></tr>
+		<tr><td>7</td><td>8</td><td>9</td></tr>
+	</table>
+
+	<!-- Buradakiler List icin. -->
+	<ul>
+		<li>su</li>
+		<li>cay</li>
+		<li>ekmek</li>
+		<ul>
+			<li>su</li>
+			<li>cay</li>
+			<li>ekmek</li>
+		</ul>
+	</ul>
+	<ol>
+		<li>su</li>
+		<li>cay</li>
+		<li>ekmek</li>
+	</ol>
+	<dl>
+		<dt>Icecekler:</dt>
+		<dd>su</dd>
+		<dd>kahve</dd>
+	</dl>
+
+	<!-- Burasi artik Division ve Span alani. -->
+	<p>Div'in disarisinda yazilan bir paragraf.</p>
+	<!-- Block & Inline olarak 2'ye ayrilir; block -> <div>, inline -> <span>. Olarak kullanilir. -->
+	<div class="city">
+		<p>Div'in 'city' icerisine dahil edilen bir paragraf.</p>
+	</div>
+	<div class="town">
+		<p>Div'in 'town' icerisine dahil edilen bir paragraf.</p>
+	</div>
+
+
+	<p id="demo"></p>
+	<script>
+		document.getElementById("demo").innerHTML = Date();
+	</script>
 </body>
 </html>
