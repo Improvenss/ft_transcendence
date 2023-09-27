@@ -1,6 +1,11 @@
 /* Burasi html'in 'body' kismi icin kullaniliyor. */
 body{
-	background-color: black;
+	background-color: midnightblue;
+	background-image: url("https://cdn.wallpapersafari.com/33/79/BDMvLS.gif");
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	/* background-size: cover; */
+	/* background-size: 30% 50%; */
 	text-align: center;
 	color: aquamarine;
 }
