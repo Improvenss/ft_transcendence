@@ -22,8 +22,7 @@
 // }
 
 // export default Login;
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, FocusEvent } from 'react';
 import './Countdown.css'; // Stil dosyasını import ediyoruz
 
 function Login() {
@@ -53,15 +52,15 @@ function Login() {
         return () => clearInterval(interval); // Bileşen temizlendiğinde interval'i durdur
     }, []);
 
-    const handleFocus = () => {
+    const handleFocus = (event: FocusEvent<HTMLInputElement>) => {
         setIsFocused(true);
     }
 
-    const handleBlur = () => {
+    const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
         setIsFocused(false);
     }
 
-    const handleChange = (event) => {
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value);
     }
 
@@ -78,13 +77,13 @@ function Login() {
                 <div className='password__key password__key--second'>s</div>
             </div>
 
-            <form method="post" action="/password" id="login_form" accept-charset="UTF-8" class="storefront-password-form">
+            <form method="post" action="/password" id="login_form" acceptCharset="UTF-8" className="storefront-password-form">
                 <input type="hidden" name="form_type" value="storefront_password" />
                 <input type="hidden" name="utf8" value="✓" />
 
                 <div className={`password__field ${isFocused ? 'password__field--focused' : ''}`}>
                     <input
-                        class='password__input'
+                        className='password__input'
                         type='password'
                         name='password'
                         placeholder='password'
@@ -92,7 +91,7 @@ function Login() {
                         onBlur={handleBlur}
                         onChange={handleChange}
                     />
-                    <input class='password__button' type='submit' value='→' disabled={password === ''} />
+                    <input className='password__button' type='submit' value='→' disabled={password === ''} />
                 </div>
             </form>
         </div>
