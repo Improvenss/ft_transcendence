@@ -144,5 +144,34 @@
 	<script>
 		document.getElementById("idAsdf").innerHTML = "Calis calis ama para, para yokkk.";
 	</script>
+
+	<!-- iframe kullaniyoruz yani  -->
+	<iframe src="index2.html" name="iframeName" title="Second Screen Bruh"></iframe>
+	<p><a href="https://media.tenor.com/FfuiDnqY3G0AAAAC/wide-putin.gif" target="iframeName">Bas bu linke ye baba fingoyu.</a></p>
+	<p><a href="https://giphy.com/embed/1xooqBnD094st6HELH" target="iframeName">Hadi buna tikla hadi acidim.</a></p>
+
+	<!-- JavaScript in HTML -->
+	<button type="submit" id="demo" onclick="this.innerText = Date.now()">
+		Tarihi milisaniye olarak goruntulemek icin butona tikla ustam.
+	</button>
+	<br>
+
+	<button type="button" id="demo2" onclick="this.innerText = Date()">
+		Tarihi nasil alacagiz?
+	</button>
+	<br>
+
+	<button type="submit" id="idClock" onclick="updateTime()">
+		Saati güncellemek için butona tıkla ustam.
+	</button>
+	<script>
+	function updateTime() {
+		var d = new Date();
+		var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+		document.getElementById('idClock').innerText = time;
+	}
+	</script>
+
+
 </body>
 </html>
