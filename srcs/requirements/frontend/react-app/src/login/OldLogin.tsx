@@ -1,31 +1,7 @@
-// import React, { useState, useEffect } from 'react';
-// import './Countdown.css'; // Stil dosyasını import ediyoruz
-
-// function Login() {
-// 	const [time, setTime] = useState('');
-
-// 	useEffect(() => {
-// 		const interval = setInterval(() => {
-// 			let d = new Date();
-// 			let currentTime = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-// 			setTime(currentTime);
-// 		}, 1000); // Her 1 saniyede bir güncelle
-
-// 		return () => clearInterval(interval); // Bileşen temizlendiğinde interval'i durdur
-// 	}, []);
-
-// 	return(
-// 		<div className='centered'>
-// 			<p className='large-text'>{time}</p>
-// 		</div>
-// 	);
-// }
-
-// export default Login;
 import React, { useState, useEffect, ChangeEvent, FocusEvent } from 'react';
 import './Countdown.css'; // Stil dosyasını import ediyoruz
 
-function Login() {
+function OldLogin() {
     const [time, setTime] = useState({
         days: 0,
         hours: 0,
@@ -98,4 +74,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default OldLogin;
