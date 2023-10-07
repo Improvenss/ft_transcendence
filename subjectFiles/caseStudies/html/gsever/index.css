@@ -1,7 +1,8 @@
 /* Burasi html'in 'body' kismi icin kullaniliyor. */
 body{
 	background-color: midnightblue;
-	background-image: url("https://cdn.wallpapersafari.com/33/79/BDMvLS.gif");
+	/* background-image: url("https://cdn.wallpapersafari.com/33/79/BDMvLS.gif"); */
+	/* background-clip: url("https://www.youtube.com/watch?v=lJ83ILGA8yI&t=1s"); */
 	background-repeat: no-repeat;
 	/* background-repeat: repeat-y; */
 	background-attachment: fixed;
@@ -258,3 +259,23 @@ button.outset {
 	border-radius: 10px;
 }
 /* ************************************************* */
+.background-video {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	z-index: -1;
+}
+
+@media (min-aspect-ratio: 16/9) {
+	.background-video {
+		width: 100%;
+		height: auto;
+	}
+}
+
+@media (max-aspect-ratio: 16/9) {
+	.background-video {
+		width: auto;
+		height: 100%;
+	}
+}
