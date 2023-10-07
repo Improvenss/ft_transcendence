@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+	</head>
+	<body>
+		<!-------------------------------------------------------------------->
+		<h2>-HTML Input Types-</h2>
+
+		<form action="/action_page.php">
+			<label for="fname">First Name:</label><br>
+			<input type="text" id="fname" name="fname" placeholder="Ahmet" required maxlength="5" autofocus ><br>
+			<label for="lname">Last Name:</label><br>
+			<input type="text" id="lname" name="lname" placeholder="Karaca" required maxlength="10"><br>
+			<label for="pwd">Password:</label><br>
+			<input type="password" id="pwd" name="pwd" placeholder="Enter your password" required maxlength="15"><br>
+			<label for="email">Email:</label><br>
+			<input type="email" id="email" name="email" placeholder="ahmet_karaca@outlook.com.tr"  required maxlength="20" size="30"><br>
+			<label for="phone">Enter your phone number:</label><br>
+			<input type="tel" id="phone" name="phone" placeholder="555-333-66-44" pattern="[1-9]{3}-[1-9]{3}-[1-9]{2}-[1-9]{2}" required><br>
+			<label for="homepage">Enter your github url:</label><br>
+			<input type="url" id="homepage" name="homepage" placeholder="github.com/Ecole42-akaraca" size="30"><br>
+			<label for="school">Enter your school name:</label><br>
+			<input type="text" id="school" name="school" value="42Kocaeli" disabled><br>
+			<label for="country_code">Country code (only 2 or 3 word):</label><br>
+			<input type="text" id="country_code" name="country_code" pattern="[A-Za-z]{2,3}" title="Country Code" placeholder="TR / USA"><br>
+			<label for="points">Points (+-5):</label><br>
+			<input type="number" id="points" name="points" step="5"><br>
+		<hr>
+			<input type="radio" id="html" name="fav_language" value="HTML">
+			<label for="html">HTML</label><br>
+			<input type="radio" id="css" name="fav_language" value="CSS">
+			<label for="css">CSS</label><br>
+			<input type="radio" id="javascript" name="fav_language" value="JavaScript">
+			<label for="javascript">JavaScript</label><br>
+		<hr>
+			<input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">
+			<label for="vehicle1">I have a Bike.</label><br>
+			<input type="checkbox" id="vehicle2" name="vehicle2" value="Car">
+			<label for="vehicle2">I have a Car.</label><br>
+			<input type="checkbox" id="vehicle3" name="vehicle3" value="Boat">
+			<label for="vehicle3">I have a Boat.</label><br>
+		<hr>
+			<label for="favcolor">Select your favorite color:</label>
+			<input type="color" id="favcolor" name="favcolor"><br>
+		<hr>
+			<label for="birthday">Birthday:</label>
+			<input type="date" id="birthday" name="birthday">
+		<hr>
+			<label for="datemin">Enter a date after 2000-01-01:</label>
+			<input type="date" id="datemin" name="datemin" min="2000-01-02"><br>
+			<label for="datemax">Enter a date before 1980-01-01:</label>
+			<input type="date" id="datemax" name="datemax" max="1979-12-31"><br>
+		<hr>
+			<label for="birthdaytime">Birthday (date and time):</label>
+			<input type="datetime-local" id="birthdaytime" name="birthdaytime"><br>
+		<hr>
+			<label for="birthdaymonth">Birthday (month and year):</label>
+			<input type="month" id="birthdaymonth" name="birthdaymonth"><br>
+		<hr>
+			<label for="appt">Select a time:</label>
+			<input type="time" id="appt" name="appt">
+		<hr>
+			<label for="week">Select a week:</label>
+			<input type="week" id="week" name="week">
+		<hr>
+			<label for="myFile">Select a file:</label>
+			<input type="file" id="myFile" name="myFile"><br>
+		<hr>
+			<label for="myFiles">Select multiple file:</label>
+			<input type="file" id="myFiles" name="myFiles" multiple>
+		<hr>
+			<label for="quantity">Quantity (between 1 and 10):</label>
+			<input type="number" id="quantity" name="quantity" min="1" max="10"><br>
+		<hr>
+			<label for="vol">Range Field (between -50 and 100):</label>
+			<input type="range" id="vol" name="vol" min="-50" max="100">
+			<div id="vol-range-value"></div>
+			<script>
+			  const volRange = document.getElementById("vol");
+			  const volRangeValue = document.getElementById("vol-range-value");
+		  
+			  volRange.addEventListener("change", function() {
+				volRangeValue.innerHTML = volRange.value;
+			  });
+			</script>
+		<hr>
+			<label for="gsearch">Search Google:</label>
+			<input type="search" id="gsearch" name="gsearch">
+		<hr>
+			<input type="submit" value="Send">
+			<input type="submit" value="Send as Admin" formaction="/action_page_two.php">
+			<input type="reset" value="Reset">
+			&nbsp; <!-- tab atmak için -->
+			&#160; <!-- tab atmak için -->
+			<input type="image" src="button.gif" alt="button" width="48" height="48" title="Send">
+		</form>
+		<hr>
+		<!-------------------------------------------------------------------->
+<!--	Attribute	Description
+		checked		Specifies that an input field should be pre-selected when the page loads (for type="checkbox" or type="radio")
+		disabled	Specifies that an input field should be disabled
+		max			Specifies the maximum value for an input field
+		maxlength	Specifies the maximum number of character for an input field
+		min			Specifies the minimum value for an input field
+		pattern		Specifies a regular expression to check the input value against
+		readonly	Specifies that an input field is read only (cannot be changed)
+		required	Specifies that an input field is required (must be filled out)
+		size		Specifies the width (in characters) of an input field
+		step		Specifies the legal number intervals for an input field
+		value		Specifies the default value for an input field
+-->
+		<br>
+	</body>
+</html>
+
+<!--https://www.w3schools.com/html/html_form_input_types.asp-->
+<!--Input Type Hidden-->

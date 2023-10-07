@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			table, th, td{
+				border: 1px solid white; /*tablonun sınırlarının rengini belirler*/
+				text-align: center; /*Tablo metinlerinin hizasını belirler*/
+				border-radius: 10px; /*Hücrelere radius atar*/
+				border-collapse: collapse;
+			}
+			table{
+				width: 100%; /*Tablonun tarayıcı penceresi ile orantısını belirler*/
+			}
+			th:nth-child(even), td:nth-child(even) {
+				background-color: pink;
+			}
+			th:nth-child(odd), td:nth-child(odd) {
+				background-color: red;
+			}
+		</style>
+	</head>
+	<body>
+		<table>
+			<tr>
+				<th>Harf</th>
+				<th>İsim</th>
+				<th>Şehir</th>
+				<th>Bitki</th>
+				<th>Hayvan</th>
+				<th>Eşya</th>
+			</tr>
+			<tr>
+				<th>A</th>
+				<td>Ahmet</td>
+				<td>Ankara</td>
+				<td>Armut</td>
+				<td>At</td>
+				<td>Ayna</td>
+			</tr>
+			<tr>
+				<th>B</th>
+				<td>Buket</td>
+				<td>Bursa</td>
+				<td>Buket</td>
+				<td>Balık</td>
+				<td>Bardak</td>
+			</tr>
+			<tr>
+				<th>C / Ç</th>
+				<td>Can</td>
+				<td>Çanakkale</td>
+				<td>Çam</td>
+				<td>Ceylan</td>
+				<td>Cam</td>
+			</tr>
+			<tr>
+				<th>...</th>
+				<td>...</td>
+				<td>...</td>
+				<td>...</td>
+				<td>...</td>
+				<td>...</td>
+			</tr>
+		</table>
+	</body>
+</html>

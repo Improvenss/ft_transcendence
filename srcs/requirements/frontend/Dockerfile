@@ -34,6 +34,8 @@ RUN ["npm", "install", "--global", "react-cli", "react"]
 
 # RUN ["npm", "install", "--global", "react-scripts"]
 
+RUN ["npm", "install", "--global", "react-router-dom"]
+
 # Installing other packages.
 # RUN ["npm", "install"]
 

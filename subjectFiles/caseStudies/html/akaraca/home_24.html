@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			#div1 {
+				background-image: url("42_without42_Login.png");
+				background-repeat: no-repeat;
+				background-size: contain;
+				width: auto;
+				height: 100px;
+				border: 1px solid red;
+			}
+		</style>
+		<script>
+			function allowDrop(event){
+				event.preventDefault();
+			}
+			function drag(event){
+				event.dataTransfer.setData("text", event.target.id);
+			}
+			function drop(event){
+				event.preventDefault();
+				var data = event.dataTransfer.getData("text");
+				event.target.appendChild(document.getElementById(data));
+			}
+		</script>
+	</head>
+	<body>
+		<p>42 resmini dikdörtgenin içine sürükleyin:</p>
+
+		<!--<img id="img1" src="42_without42_Login.png" height="50%" width="50%" ondrop="drop(event)" ondragover="allowDrop(event)">-->
+		<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<br>
+		<img id="drag1" src="42_transparent.png" draggable="true" ondragstart="drag(event)" height="20%" width="20%">
+		<hr>
+	</body>
+</html>
