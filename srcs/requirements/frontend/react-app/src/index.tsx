@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
   <BrowserRouter>
-    {/* <OldLogin/> */}
+    <OldLogin/>
     <ForwardedPage/>
   </BrowserRouter>
   </React.StrictMode>

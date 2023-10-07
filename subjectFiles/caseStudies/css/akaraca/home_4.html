@@ -1,0 +1,60 @@
+<!--CSS Border Style-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			body {
+				background-color: grey;
+			}
+
+			p.dotted { border-style: dotted; }
+			p.dashed { border-style: dashed; }
+			p.solid { border-style: solid; }
+			p.double { border-style: double; }
+			p.groove { border-style: groove; }
+			p.ridge { border-style: ridge; }
+			p.inset { border-style: inset; }
+			p.outset { border-style: outset; }
+			p.none { border-style: none; }
+			p.hidden { border-style: hidden; }
+			p.mix { border-style: dotted dashed solid double; } /*Border can have from one to four styles.*/
+			p { border-width: medium; } /* (in px, pt, cm, em) or (thin, medium, thick) */
+
+			p.fourType {
+				border-style: dashed;
+				border-width: 2px 4px 6px 8px; /* and border can have from one to four values. */
+			}
+			p.fourColor {
+				border-style: dashed;
+				border-color: red yellow green blue;  /* red top, yellow right, green bottom and blue left */
+			}
+			p.borderSide { border-left: 6px solid red; }
+			p.borderRadius {
+				border: 2px solid midnightblue;
+				border-radius: 10px;
+				padding: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<h2> The border-style Property</h2>
+
+		<p class="dotted">A dotted border.</p>
+		<p class="dashed">A dashed border.</p>
+		<p class="solid">A solid border.</p>
+		<p class="double">A double border.</p>
+		<p class="groove">A groove border.</p>
+		<p class="ridge">A ride border.</p>
+		<p class="inset">A inset border.</p>
+		<p class="outset">A outset border.</p>
+		<p class="none">No border.</p>
+		<p class="hidden">A hidden border.</p>
+		<p class="mix">A mixed border.</p>
+		<hr>
+		<p class="fourType">Border can have from one to four values.</p>
+		<p class="fourColor">Border can have from one to four colors.</p>
+		<p class="borderSide">Border can have only Left/Right/Top/Bottom side.</p>
+		<p class="borderRadius">Border can have border radius.</p>
+			
+	</body>
+</html>

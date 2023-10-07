@@ -1,0 +1,46 @@
+<!-- Three Ways to Insert CSS
+		-External/Harici CSS
+		-Internal/Dahili CSS
+		-Inline/Sırada CSS
+
+!!! Farklı stil sayfalarında aynı seçici (öğe) için bazı özellikler tanımlanmışsa, son okunan stil sayfasındaki değer kullanılacaktır.
+Inline > External & Internal
+En son kullanıma göre, External ve Internal birbirine üstünlük sağlar.
+-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- External/Harici CSS -->
+		<link rel="stylesheet" href="mystyle.css">
+		<!--------------------------------------------------------->
+		<!-- Internal/Dahili CSS -->
+		<style>
+			body { /*Harici CSS ayarında background-color atanmış olmasına rağmen Dahili CSS baskın gelmektedir.*/
+				background-color: linen;
+				background-image: url("gradient_bg.png");
+				background-repeat: repeat-x;
+			}
+			p {
+				color: blue;
+				margin-left: 40px;
+				background: rgba(0, 128, 0, 0.3); /* Green background with 30% opacity */
+			}
+			#firstDiv{
+				width: 100vh;
+				height: 100vh;
+				background-image: url("img_tree.png");
+				background-repeat: no-repeat;
+				background-position: right top;
+			}
+		</style>
+		<!--------------------------------------------------------->
+	</head>
+	<body>
+		<h1>External CSS</h1>
+		<p>Internal CSS</p>
+		<!-- Inline/Sırada CSS -->
+		<h2 style="color:red; text-align:center;">Inline CSS</h2>
+		<!--------------------------------------------------------->
+		<div id="firstDiv"></div>
+	</body>
+</html>
