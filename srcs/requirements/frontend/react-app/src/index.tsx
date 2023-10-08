@@ -5,6 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import OldLogin from './login/OldLogin';
 import ForwardedPage from './login/ForwardedPage';
+import Countdown from './login/Countdown';
 // npm install react-router-dom
 
 const root = ReactDOM.createRoot(
@@ -12,10 +13,12 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-  <BrowserRouter>
+    {/* <OldLogin/> */}
+    <Countdown/>
+  {/* <BrowserRouter>
     <OldLogin/>
     <ForwardedPage/>
-  </BrowserRouter>
+  </BrowserRouter> */}
   </React.StrictMode>
 );
 
@@ -32,9 +35,9 @@ root.render(
  */
 
 /**
- * BrowserRouter, Route ve Link React Router DOM kütüphanesinin bileşenleridir ve tek sayfa uygulamalarında (Single Page Applications - SPA) sayfalar arasında gezinme işlemlerini yönetmek için kullanılırlar1234.
- * BrowserRouter: HTML5 History API üzerine kurulmuştur1. Sayfa yönlendirmelerini tutan ana bileşendir1. Route yapısı kullanılacak tüm bileşenler / sayfalar BrowserRouter arasında olmak zorundadır1.
- * Route: Bir sayfayı uygulamaya eklemek için kullanılır1. Sayfa adresi (url) ve o sayfada çalıştırılacak bileşeni (component) değer olarak alır1.
- * Link: Bir sayfaya link vermek için kullanılan bileşendir1. Sayfa adresini alır. Kullanımı HTML A Etiketi gibidir. Fakat A etiketinde olduğu gibi sayfa yenilenmesi olmaz1.
+ * BrowserRouter, Route ve Link React Router DOM kütüphanesinin bileşenleridir ve tek sayfa uygulamalarında (Single Page Applications - SPA) sayfalar arasında gezinme işlemlerini yönetmek için kullanılırlar.
+ * BrowserRouter: HTML5 History API üzerine kurulmuştur. Sayfa yönlendirmelerini tutan ana bileşendir. Route yapısı kullanılacak tüm bileşenler / sayfalar BrowserRouter arasında olmak zorundadır.
+ * Route: Bir sayfayı uygulamaya eklemek için kullanılır. Sayfa adresi (url) ve o sayfada çalıştırılacak bileşeni (component) değer olarak alır.
+ * Link: Bir sayfaya link vermek için kullanılan bileşendir. Sayfa adresini alır. Kullanımı HTML A Etiketi gibidir. Fakat A etiketinde olduğu gibi sayfa yenilenmesi olmaz.
  * Bu bileşenler, uygulamanızın farklı sayfalar arasında geçiş yapabilmesini sağlar.
  */

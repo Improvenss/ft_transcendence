@@ -26,6 +26,7 @@ function OldLogin() {
         }, 1000); // Her 1 saniyede bir güncelle
 
         return () => clearInterval(interval); // Bileşen temizlendiğinde interval'i durdur
+        // return (Date.now());
     }, []);
 
     const handleFocus = (event: FocusEvent<HTMLInputElement>) => {

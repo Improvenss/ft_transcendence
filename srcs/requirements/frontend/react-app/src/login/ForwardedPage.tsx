@@ -1,6 +1,6 @@
 import React from 'react';
 import { Router, Route, Link, Routes } from 'react-router-dom';
-import Sample from './Sample';
+import Sample from './Countdown';
 
 function ForwardedPage()
 {
