@@ -14,6 +14,8 @@ How can i install NodeJS and npm?
 	Changing back to node@latest;
 		$> brew unlink node@10
 		$> brew link node
+	Install npm;
+		$> brew install npm
 
 	OR
 
