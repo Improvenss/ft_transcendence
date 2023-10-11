@@ -35,6 +35,7 @@ function	getSumNumbersRest( a: number, b:number, ...asdf: number[] )
 { // Rest parametreli func().
 	return (a * b * asdf.reduce((x, y) => (x * y), 1));
 }
+// Type Alias
 type	Asdf = ( a: number, b: number ) => number;
 let	functionAsdf: Asdf = ( a, b ) => (a * b);
 
