@@ -45,6 +45,14 @@ How can i intall typescript?
 	You can see automaticly compiler/runner.
 }
 
+How can i create tsconfig.json file?
+{
+	If you want to create globally this tsconfig.json file;
+		$> npx tsc --init
+	And this automatically adding your app's root location.
+
+}
+
 How can i create react app?
 {
 }
