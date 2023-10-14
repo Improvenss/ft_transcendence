@@ -129,8 +129,26 @@ abstract class	Animal
 	// Bu 'abstract' class'larin icerisinde implement olmuyor.
 	//  Sen sadece sanal halini olusturuyorsun. Tanimlamalari,
 	//  kalitilan sinifta olusturuluyor.
-	public abstract	makeSound(): string;
-}
+	public abstract	makeSound(): void;
+};
+class	Cat
+{
+	private	_name: string;
+
+	public	constructor( _name: string )
+	{
+		this._name = _name
+	};
+
+	public	makeSound(): void
+	{
+		console.log("MIYAV MIYAV NIBBA"); // :D
+	};
+	public	getName(): string 
+	{
+		return (this._name);
+	};
+};
 
 let	myCarType = new CarType("Audi");
 // let	myCarType = new CarType(); // Boyle kullanamiyoruz cunku bizde 'constructor' kullanmamizi istiyor.
@@ -139,6 +157,8 @@ let	myCarProperties = new CarProperties("Nissan");
 let	myCarReadonly = new CarReadonly("Lexus");
 let	myRectangle = new Rectangle(20, 10, "white");
 let	mySquare = new Square(5);
+let	myCat = new Cat("Peripella");
+// let	myAnimal = new Animal(); // This Class can't create, because it's a abstract class.
 
 myCarType.name = "Audi";
 console.clear();
@@ -156,6 +176,8 @@ console.log(mySquare.getArea()); // 500 -> Bu Rectangle'nin function'unu cagiriy
 // NOTE: 2 function'da ayni isimde olsaydi ne yakindaki function'u kullanacakti.
 console.log(mySquare.getSquareArea()); // 25 -> Bu kendi fuction'unu cagiriyor.
 console.log(mySquare.getColor()); // red
+console.log(myCat.getName()); // Peripella
+myCat.makeSound(); // MIYAV MIYAV NIBBA
 
 /**
  * NOTES:
