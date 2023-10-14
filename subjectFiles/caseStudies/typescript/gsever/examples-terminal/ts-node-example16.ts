@@ -1,0 +1,1 @@
+// Burada 'Keyof' kullanimini gorecegiz.
