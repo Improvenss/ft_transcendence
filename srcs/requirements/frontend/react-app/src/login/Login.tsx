@@ -1,7 +1,10 @@
 import React from "react";
+import { Routes, Route } from 'react-router-dom';
 
 function onloadFunction() {
-	alert("Page successfully loaded.");
+	return (
+		alert("Page successfully loaded.");
+	);
 }
 
 export default onloadFunction;

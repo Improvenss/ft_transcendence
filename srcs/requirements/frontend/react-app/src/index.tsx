@@ -1,24 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import reportWebVitals from './reportWebVitals';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import OldLogin from './login/OldLogin';
-import ForwardedPage from './login/ForwardedPage';
-import Countdown from './login/Countdown';
+import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import etmemiz gerekiyor, cunku tarayici rotasi olara geciyor.
+import App from './App.tsx';
 // npm install react-router-dom
 
+/**
+ * Burasi ana function olarak geciyor.
+ * Biz SPA(Single Page Application) yazabilmemiz icin;
+ *  'react-router-dom'u kurmamiz gerekiyor. Sonra;
+ *  <BrowserRouter>
+ *   Arasina yazmamiz gerekiyor her seyi.
+ *  </BrowserRouter>
+ */
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    {/* <OldLogin/> */}
-    <Countdown/>
-  {/* <BrowserRouter>
-    <OldLogin/>
-    <ForwardedPage/>
-  </BrowserRouter> */}
+    <BrowserRouter>
+    <App/>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
