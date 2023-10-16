@@ -31,10 +31,10 @@ EXPOSE 80
 # We are installing React package for global.
 # RUN ["npx", "create-react-app", "react-app", "--template", "typescript"]
 RUN ["npm", "install", "--global", "react-cli", "react"]
-
 # RUN ["npm", "install", "--global", "react-scripts"]
-
 RUN ["npm", "install", "--global", "react-router-dom"]
+# Bu da 'react-devtools'un web browser'deki eklentisini kullanabilmek icin.
+RUN ["npm", "install", "--global", "react-devtools"]
 
 # Installing other packages.
 # RUN ["npm", "install"]

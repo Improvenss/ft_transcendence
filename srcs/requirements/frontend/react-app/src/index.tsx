@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import etmemiz gerekiyor, cunku tarayici rotasi olara geciyor.
 import App from './App.tsx';
+import Countdown from './login/Countdown';
 // npm install react-router-dom
 
 /**
@@ -19,7 +20,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-    <App/>
+      <App/>
     </BrowserRouter>
   </React.StrictMode>
 );
