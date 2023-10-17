@@ -1,29 +1,62 @@
-import React from "react";
-import { Routes, Route, Link } from 'react-router-dom';
-import Countdown from "./login/Countdown";
-import OldLogin from "./login/OldLogin";
+// import React, { useEffect } from "react";
+// import { Routes, Route, Link } from 'react-router-dom';
+// import Countdown from "./login/Countdown";
+// import './App.css';
 
-function	App()
-{
-	return (
-		<div>
-			asdfasdf
-			<nav>
-				<ul>
-					<li>
-						<Link to="/">Anasayfa</Link>
-					</li>
-					<li>
-						<Link to="/login">Login</Link>
-					</li>
-				</ul>
-			</nav>
-			<Routes>
-				<Route path="/" element={<Countdown/>} />
-				<Route path="/login" element={<OldLogin/>} />
-			</Routes>
-		</div>
-	);
+
+// function	useEffect()
+// {
+// 	// const	loadingScreen = document.getElementsByClassName('loading-screen');
+
+// 	window.addEventListener('load', () => {
+// 		const	loadingScreen = document.getElementsById('loading-screen')
+
+// 		if (loadingScreen)
+// 			loadingScreen.
+// 	});
+// }
+
+// function	App()
+// {
+// 	return (
+// 		<div id="loading-screen">
+// 			<nav>
+// 				<ul>
+// 					<li><Link to="/">Anasayfa</Link></li>
+// 					<li><Link to="/login">Login</Link></li>
+// 				</ul>
+// 			</nav>
+// 			<Routes>
+// 				<Route path="/" element={<Countdown/>} />
+// 				{/* <Route path="/login" element={</>} /> */}
+// 			</Routes>
+// 		</div>
+// 	);
+// };
+
+// export default	App;
+
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Main from './main/Main.tsx';
+
+const App = () => {
+useEffect(() => {
+	// Sayfa yüklendiğinde yükleme ekranını kaldır
+	window.addEventListener('load', () => {
+	const loadingScreen = document.getElementById('loading-screen');
+	if (loadingScreen)
+		loadingScreen.style.display = 'none';
+	});
+}, []);
+
+return (
+	<Router>
+	<div id="loading-screen">Sayfa şu anda yükleniyor. Lütfen bekleyiniz.</div>
+		<Route path="/login" component={Main} />
+		<Redirect to="/login" />
+	</Router>
+);
 };
 
-export default	App;
+export default App;
