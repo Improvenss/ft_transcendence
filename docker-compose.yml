@@ -132,7 +132,7 @@ services:
       - transcendence_network
     restart: unless-stopped
     ports:
-      - 80:80 # Local port / Exported port. nestjs's default port(3000).
+      - 8080:80 # Local port / Exported port. nestjs's default port(3000).
     # depends_on:
     # progress: plain
   # ________________ #
