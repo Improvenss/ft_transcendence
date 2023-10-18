@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Hello</title>
+	</head>
+	<body>
+		<!------------------------------------------>
+		<button onclick="document.getElementById('timer').innerHTML = Date()">Get Time</button>
+		<p id="timer"></p>
+		<!------------------------------------------>
+		<p id="text">Text</p>
+		<p ><img id="image" style="background-color: red;" alt="frog"></p>
+		<button onclick="textDec()">Text Button</button>
+		<script>
+			document.getElementById("text").innerHTML = "Hello JavaScript!";
+			function textDec() {
+				document.getElementById("text").style.fontSize = "25px";
+				document.getElementById("text").style.color = "pink";
+				document.getElementById("text").style.backgroundColor = "black";
+				document.getElementById("image").src = "frog.png";
+			}
+		</script>
+	</body>
+</html>

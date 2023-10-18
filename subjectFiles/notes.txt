@@ -2,6 +2,8 @@ LINKS
 {
 	404, 422 or 500 etc. Error codes means.
 	https://www.rfc-editor.org/rfc/rfc7231#section-6.5
+	How can i install 'react-router-dom' -> 'single application page'?
+	https://www.codingninjas.com/studio/library/create-a-single-page-application-with-reactjs-in-cherrypy
 }
 What is?
 {

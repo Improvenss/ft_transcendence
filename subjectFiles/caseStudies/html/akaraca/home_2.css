@@ -1,0 +1,29 @@
+body {
+	background-color: hsla(0, 0%, 46%, 0.727);
+	/* font-size: x-large; */
+	font-size: x-large;
+}
+h1 {
+	color: red;
+	font-size: 300%;
+	font-family: verdana;
+}
+p {
+	border: 2px solid rgb(227, 12, 12);
+	padding: 30px;
+}
+p1 {
+	border: 2px solid hsla(122, 100%, 50%, 0.727);
+	margin: 50px;
+	padding: 10px;
+}
+a {
+	padding: 10px;
+	font-size: 50%;
+}
+
+li {
+	border: 2px solid hsla(122, 100%, 50%, 0.727);
+	color: red;
+	font-weight: bold;
+}

@@ -1,0 +1,10 @@
+How can i connect 'css' in 'html'?
+{
+	LINK: https://www.w3schools.com/html/html_css.asp
+
+}
+
+What is HTML commands?
+{
+	LINK: http://www.edu4java.com/_img/web-en/bodyStructureHeader.png
+}

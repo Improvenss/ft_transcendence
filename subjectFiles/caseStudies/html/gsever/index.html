@@ -1,0 +1,199 @@
+<!DOCTYPE html> <!-- HTML5 oldugunu temsil ediyor.-->
+<html lang="en-US"> <!-- Bu 'lang' niteligi tarayicilar icin dili belirtir. Ilk olan 'sayfanin dilini', ikinci olan 'ulkeyi' belirtir.-->
+<head> <!-- 'meta' bilgileri tuttugu yer, yani 'html' dosyasi ile akalali seyler burada tanimlanir.-->
+	<title>Sekmede Gozuken Yer</title> <!-- Sekmede yazan yeri belirtiyor.-->
+	<link rel="stylesheet" type="text/css" href="./index.css"> <!-- index.css dosyamizi bu html dosyasina ekledik.-->
+	<link rel="icon" type="image/x-icon" href="https://media.tenor.com/uUNcnHwYJQEAAAAi/running-pikachu-transparent-snivee.gif">
+	<style>
+		button {color: black;}
+	</style>
+</head>
+<!-- <body style="background-color:midnightblue"> Burasi govde kismi; Kodlarin tanimlamalari buraya oluyor. -->
+<body onload="onloadPage()"> <!-- Burasi govde kismi; Kodlarin tanimlamalari buraya oluyor.-->
+	'normal' olarak tanimlanir.
+	<h style="font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif">
+		Boyle bir sey yok 'normal' yazinin devami diyebiliriz.</h>
+	<h1>'baslik' olarak tanimlanir.</h1> <!-- 'header' demek.-->
+	<h1 style="font-size: 50px;">'baslik' 'style' olarak tanimlanir.</h1> <!-- 'header' demek.-->
+	<h2 style="background-color:brown;">'baslik' olarak tanimlanir.</h2>
+	<h3 style="color:magenta;">'baslik' olarak tanimlanir.</h3>
+	<h4 style="text-align:left;">'baslik' olarak tanimlanir.</h4>
+	<h5>'baslik' olarak tanimlanir.</h5>
+	<h6>'baslik' olarak tanimlanir.</h6>
+	<header>Baslik ornegi.</header>
+	<pre> s     naber e       			ehehehe   sadfasdf       wdfsdf    a  
+					  sdfsfsdf sdf sdf sf				  <dfn>bak egik yazdi	sdfsif</dfn>
+	</pre>
+
+	<p>Paragraf olarak tanimlanir.</p> <!-- 'paragraph' demek.-->
+	<p style="color:blueviolet;">'style' niteligi ozel paragraf olarak tanimlanir.</p>
+	<p title="Su an 'tooltip'e yazilan mesaji okuyorsun eheh">
+		'title' niteligi fareyi uzerine getirdiginde ipucu belirtir.
+	</p>
+
+	<a>Buna link deniyor, su an bunda link yok.</a>
+	<br> <!-- Buna satir sonu deniyor, boylelikle alt satira gecmis oluyoruz.-->
+
+	<!-- Buradaki text-decoration: none; linklerin altindaki _________ yi kaldirir. -->
+	<a href="https://github.com/Improvenss" style="text-decoration: none;">Buna link deniyor, Github linkimi koydum.</a>
+	<br>
+
+	<img src="./image-1.png" alt="arabam ehehe" width="200"> <!-- 'image' boyle eklenir.-->
+
+	<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"> <!-- Fotografli 'link' boyle eklenir.-->
+		<img src="https://img.pikbest.com/png-images/20190917/black-mouse-click-effect-gif-element-dynamic-image_2515118.png!sw800"
+			alt="ehehe" width="200" height="200">
+	</a>
+
+	<!-- Buraya internet sitelerinden kopyaladigimiz linkleri direkt olarak ekleyebiliyoruz. -->
+	<iframe src="https://giphy.com/embed/12BQY6Nj4ZDAFG" width="240" height="176" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+
+	<p><a href="mailto:asdf@hotmail.com">asdf@hotmail.com'a mail atmak icin tikla</a></p>
+
+	<button onclick="document.location='index2.html'">index2.html burasi tikla bak sayfa yenilenecek mi?</button>
+	<br>
+
+	<div id="world_map_class">
+		<img src="https://pngimg.com/d/world_map_PNG5.png"
+			alt="You are found the Turkey!"
+			style="border:5px solid brown; width:1000px; height: 500px;"
+			usemap="#worldmap">
+		<map name="worldmap">
+			<area shape="circle" coords="550,150, 30"
+				href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Lula_kebab_2.jpg/440px-Lula_kebab_2.jpg"
+				onclick="eatKebab()">
+		</map>
+	</div>
+
+	<img src="workplace.jpg" alt="Workplace" usemap="#workmap" width="400" height="379">
+	<map name="workmap">
+		<area shape="circle" coords="337,300,44" href="asdf" onclick="caffeFound()">
+	</map>
+
+	<script>
+		function eatKebab() { alert("You can eat 'kebab' now."); }
+	</script>
+	<script>
+		function caffeFound() {alert("You found the 'coffee'!"); }
+	</script>
+
+	<!-- Burasi goruntulerin genislik/uzunluk'larina gore sectigimiz fotolarin degismesini sagliyor. -->
+	<picture>
+		<source media="(min-width: 1200px)" srcset="image-1.png">
+		<source media="(min-width: 900px)" srcset="workplace.jpg">
+		<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Lula_kebab_2.jpg/440px-Lula_kebab_2.jpg">
+	</picture>
+
+	<!-- Burasi JS kodu olarak 'sag klik' basmayi engelleyen kod. -->
+	<script>
+		document.addEventListener('contextmenu', function(e) {
+			e.preventDefault();
+		});
+	</script>
+
+	<!-- Burada olusturdugumuz table'nin ne gibi ozellikler alabilecegini test ediyoruz. -->
+	<table>
+		<colgroup>
+			<col span="2">
+			<tr><td>1</td><td>2</td><td>3</td></tr>
+		</colgroup>
+		<tr><td>4</td><td>5</td><td>6</td></tr>
+		<tr><td>7</td><td>8</td><td>9</td></tr>
+	</table>
+
+	<!-- Buradakiler List icin. -->
+	<ul>
+		<li>su</li>
+		<li>cay</li>
+		<li>ekmek</li>
+		<ul>
+			<li>su</li>
+			<li>cay</li>
+			<li>ekmek</li>
+		</ul>
+	</ul>
+	<ol>
+		<li>su</li>
+		<li>cay</li>
+		<li>ekmek</li>
+	</ol>
+	<dl>
+		<dt>Icecekler:</dt>
+		<dd>su</dd>
+		<dd>kahve</dd>
+	</dl>
+
+	<!-- Burasi artik Division ve Span alani. -->
+	<p>Div'in disarisinda yazilan bir paragraf.</p>
+	<!-- Block & Inline olarak 2'ye ayrilir; block -> <div>, inline -> <span>. Olarak kullanilir. -->
+	<div class="city">
+		<p>Div'in 'city' icerisine dahil edilen bir paragraf.</p>
+	</div>
+	<div class="town">
+		<p>Div'in 'town' icerisine dahil edilen bir paragraf.</p>
+	</div>
+
+	<p id="demo"></p>
+	<script>
+		document.getElementById("demo").innerHTML = Date();
+	</script>
+
+	<button id="idAsdf">Click Me hehe</button>
+	<button>asdf</button>
+	<h1 id="idAsdf">Surprise</h1>
+	<script>
+		document.getElementById("idAsdf").innerHTML = "Calis calis ama para, para yokkk.";
+	</script>
+
+	<!-- iframe kullaniyoruz yani  -->
+	<iframe src="index2.html" name="iframeName" title="Second Screen Bruh"></iframe>
+	<p><a href="https://media.tenor.com/FfuiDnqY3G0AAAAC/wide-putin.gif" target="iframeName">Bas bu linke ye baba fingoyu.</a></p>
+	<p><a href="https://giphy.com/embed/1xooqBnD094st6HELH" target="iframeName">Hadi buna tikla hadi acidim.</a></p>
+
+	<!-- JavaScript in HTML -->
+	<button type="submit" id="demo" onclick="this.innerText = Date.now()">
+		Tarihi milisaniye olarak goruntulemek icin butona tikla ustam.
+	</button>
+	<br>
+
+	<button type="button" id="demo2" onclick="this.innerText = Date()">
+		Tarihi nasil alacagiz?
+	</button>
+	<br>
+
+	<button type="submit" id="idClock" onclick="updateTime()">
+		Saati güncellemek için butona tıkla ustam.
+	</button>
+	<br>
+	<script>
+	function updateTime() {
+		var d = new Date();
+		var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+		document.getElementById('idClock').innerText = time;
+	}
+	</script>
+
+	<button type="button" class="outset" onclick="this.innerText = Date.now()">
+		Bu stil button kullanabiliriz.
+	</button>
+	<br>
+	<br>
+	<br>
+	<br>
+	<!-- <a class="nb47" herf="updateTime()">Nasil button ama?</a> -->
+	<a class="bn47" href="/">Button47</a>
+	<br>
+	<a class="bn5" href="/">Button5</a>
+
+	<!-- <iframe width="400" height="400" src="https://youtu.be/embed/tgbNymZ7vqY"></iframe> -->
+	<!-- <iframe src="https://www.youtube.com/embed/lJ83ILGA8yI?si=UqjFYRKMxNOEDu_M?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
+	<!-- <iframe width="420" height="345" src="https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1&mute=1"> </iframe> -->
+	<iframe width="100%" height="100%" src="https://www.youtube.com/embed/lJ83ILGA8yI?autoplay=1&mute=0&controls=1&start=150" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+	<script>
+		function onloadPage(){
+			alert("Page Loaded Have Fun!");
+		}
+	</script>
+</body>
+</html>

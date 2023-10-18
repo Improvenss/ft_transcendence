@@ -1,0 +1,281 @@
+/* Burasi html'in 'body' kismi icin kullaniliyor. */
+body{
+	background-color: midnightblue;
+	/* background-image: url("https://cdn.wallpapersafari.com/33/79/BDMvLS.gif"); */
+	/* background-clip: url("https://www.youtube.com/watch?v=lJ83ILGA8yI&t=1s"); */
+	background-repeat: no-repeat;
+	/* background-repeat: repeat-y; */
+	background-attachment: fixed;
+	/* background-size: cover; */
+	/* background-size: 30% 50%; */
+	text-align: center;
+	color: aquamarine;
+}
+/* Burayi asagidaki gibi yaparsak mouse'nin sol click'iyle secme
+ olayini kaldirmis oluyoruz. */
+* {
+	/* -webkit-user-select: none; */
+	/* user-select: none; */
+}
+/* LINK: https://htmlcolorcodes.com/tutorials/css-link-color/#:~:text=As%20far%20as%20CSS%20color,example%20below%20we%20use%20red. */
+a {
+	color: crimson;
+}
+/* Linkin normal hali */
+a:link {
+	color: #FF0000; /* Kırmızı */
+}
+
+/* Ziyaret edilmis link */
+a:visited {
+	color: #00FF00; /* Yeşil */
+}
+
+/* Fare üzerindeyken */
+a:hover {
+	color: #FF00FF; /* Mor */
+}
+
+/* Seciliyken */
+a:active {
+	color: #0000FF; /* Mavi */
+}
+
+p {
+	font-size: large;
+}
+
+/* Tablonun en dis tarafindaki cizgidir. */
+table {
+	border: 1px solid crimson;
+	border-color: pink;
+}
+
+/* Tablonun icerisindeki kutularin etrafini cizer. */
+td {
+	border: 1px solid crimson;
+	padding: 15px;
+	text-align: center;
+}
+
+/* Mouse'mizi bu kutucugun uzerine getirdigimizde calisan yer. */
+td:hover {
+	background-color: darkorange;
+}
+/* Tablonun n'inci olan satirini yani n=n+1 gibi bir sey */
+tr:nth-child(even) {
+	background-color: teal;
+}
+
+/* Column(kolon)'lar icin. */
+col {
+	background-color: tomato;
+}
+
+/* ****************** LIST ************************* */
+/* Unordered List diye geciyor. Listeler • ile basliyor. */
+ul {
+	/* color: red; */
+	/* text-align: left; */
+	/* list-style-type: disc; */
+	/* list-style-type: circle; */
+	/* list-style-type: square; */
+	/* list-style-type: none; */
+}
+
+/* Ordered List diye geciyor. Listeler 1. baslayip 2. 3. diye devam ediyor. */
+ol {
+	/* text-align: left; */
+}
+
+/* List Item diye geciyor. */
+li {
+	color: red;
+	text-align: left;
+}
+
+/* Description List diye geciyor. Listenin kendisi. */
+dl {
+	text-align: left;
+}
+
+/* Description Term(name) olarak geciyor. Listenin basligi. */
+dt {
+	color: lightslategray;
+}
+
+/* Describes the therm's Description. Yani listenin
+ basliginin icerisindeki argumanlar. */
+dd {
+	color: lightsalmon;
+}
+/* ************************************************* */
+/* ************* BLOCK & INLINE ******************** */
+/* Burasi Class olarak adlandirdigimiz kisim icin gecerli oluyor. */
+.city {
+	color: lightseagreen;
+	background-color: darkslategrey;
+}
+
+.town {
+	color: lightcoral;
+	background-color: darkslateblue;
+}
+
+.town p {
+	color: black;
+}
+/* ************************************************* */
+/* *********** ID ********************************** */
+#idAsdf {
+	background-color: lightblue;
+	color: tomato;
+	padding: 20px;
+	border-style: double;
+}
+/* ************************************************* */
+/* ********* IFRAME ******************************** */
+iframe {
+	width: 800px;
+	height: 800px;
+	border: 4px solid tomato;
+	/* border-color:coral; */
+}
+/* ************************************************* */
+
+/* https://cssbuttons.app/ */
+button.outset {
+	outline-style: outset;
+	outline-color: red;
+}
+
+.bn47 {
+	position: relative;
+	padding: 1rem 2rem 0.5rem 2.5rem;
+	color: #000000;
+	border: 3px solid #776e62;
+	-webkit-transition: padding 0.3s ease-in-out;
+	transition: padding 0.3s ease-in-out;
+}
+
+.bn47:before {
+	content: "";
+	position: absolute;
+	top: 0.5rem;
+	left: 0.5rem;
+	z-index: -1;
+	height: 100%;
+	width: 100%;
+	background-color: #ffffff;
+	border-right: 3px solid #ffffff;
+	border-bottom: 3px solid #ffffff;
+	-webkit-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+}
+
+.bn47:hover {
+	padding: 0.75rem 2.25rem;
+}
+
+.bn47:hover:before {
+	top: 0;
+	left: 0;
+}
+
+/* ------------- */
+.bn5 {
+	padding: 0.6em 2em;
+	border: none;
+	outline: none;
+	color: rgb(255, 255, 255);
+	background: #111;
+	cursor: pointer;
+	position: relative;
+	z-index: 0;
+	border-radius: 10px;
+}
+
+.bn5:before {
+	content: "";
+	background: linear-gradient(
+	45deg,
+	#ff0000,
+	#ff7300,
+	#fffb00,
+	#48ff00,
+	#00ffd5,
+	#002bff,
+	#7a00ff,
+	#ff00c8,
+	#ff0000
+	);
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	background-size: 400%;
+	z-index: -1;
+	filter: blur(5px);
+	width: calc(100% + 4px);
+	height: calc(100% + 4px);
+	animation: glowingbn5 20s linear infinite;
+	opacity: 0;
+	transition: opacity 0.3s ease-in-out;
+	border-radius: 10px;
+}
+
+@keyframes glowingbn5 {
+	0% {
+	background-position: 0 0;
+	}
+	50% {
+	background-position: 400% 0;
+	}
+	100% {
+	background-position: 0 0;
+	}
+}
+
+.bn5:active {
+	color: #000;
+}
+
+.bn5:active:after {
+	background: transparent;
+}
+
+.bn5:hover:before {
+	opacity: 1;
+}
+
+.bn5:after {
+	z-index: -1;
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: #191919;
+	left: 0;
+	top: 0;
+	border-radius: 10px;
+}
+/* ************************************************* */
+.background-video {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	z-index: -1;
+}
+
+@media (min-aspect-ratio: 16/9) {
+	.background-video {
+		width: 100%;
+		height: auto;
+	}
+}
+
+@media (max-aspect-ratio: 16/9) {
+	.background-video {
+		width: auto;
+		height: 100%;
+	}
+}

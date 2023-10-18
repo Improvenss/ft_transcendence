@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			table, th, td{
+				border: 1px solid white; /*tablonun sınırlarının rengini belirler*/
+				text-align: center; /*Tablo metinlerinin hizasını belirler*/
+				border-collapse: collapse; /*Tek sınırlı olması için ekliyoruz*/
+				border-radius: 10px; /*Hücrelere radius atar*/
+			}
+			table{
+				width: 100%; /*Tablonun tarayıcı penceresi ile orantısını belirler*/
+			}
+			th, td {
+				background-color: pink; /*Hücre içlerinin rengini belirler*/
+				border-style: dashed; /*Hücre ayrım çizgilerinin stilini değiştirir*/
+				border-color: black; /*Hücre ayrım çizgilerinin rengini değiştirir*/
+			}
+			a:link, a:visited {
+			background-color: #463896;
+			color: rgb(255, 255, 255);
+			padding: 15px 25px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			border-radius: 20px;
+			}
+
+			a:hover, a:active { /*Mause'yi link'in üzerine getirince renk değiştirmesini sağlar*/
+			background-color: red;
+			}
+		</style>
+	</head>
+	<body>
+		<table>
+			<tr> <!--table row-->
+				<th>İsim</th> <!--table head-->
+				<th>Yaş</th>
+				<th>Şehir</th>
+				<th>resim</th>
+				<th>link</th>
+			</tr>
+			<tr>
+				<td>Jack</td> <!-- table data -->
+				<td>23</td>
+				<td>Amerika</td>
+				<td>
+					<img title="resim_1" src="patron.jpg" alt="penguen" style="width: 42px; height: 42px;">
+				</td>
+				<td>
+					<a title="linke basma_1" href="https://www.w3schools.com/" target="_blank">link</a>
+				</td>
+			</tr>
+			<tr>
+				<td>Emanuel</td>
+				<td>43</td>
+				<td>Macaristan</td>
+				<td>
+					<img title="resim_2" src="frog.png" alt="kurbağa" width="42px" height="42px">
+				</td>
+				<td>
+					<a title="linke basma_2" href="https://www.w3schools.com/" target="_blank">link</a>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

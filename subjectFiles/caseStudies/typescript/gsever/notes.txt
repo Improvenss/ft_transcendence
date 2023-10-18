@@ -1,0 +1,58 @@
+How can i install NodeJS and npm?
+{
+	LINK: https://developer.ibm.com/tutorials/learn-nodejs-installing-node-nvm-and-vscode/
+		$> brew install node
+	This installing latest version of node.
+		$> brew upgrade node
+	If there is have any update...
+		$> brew link node
+	We are linking node's selected version for running.
+	If you want to use other versions you must be use this commands;
+	We have two node verison; node@latest and node@10 version.
+		$> brew unlink node
+		$> brew link --force --overwrite node@10
+	Changing back to node@latest;
+		$> brew unlink node@10
+		$> brew link node
+	Install npm;
+		$> brew install npm
+
+	OR
+
+	You can create a container, you can do what ever you want inside this container.
+		$> docker run -it --name my-ft_transcendence -v <your_project_file_pwd_location/:/app debian:latest
+		$> apt update && apt upgrade && apt install -y make git nodejs npm ...
+	I'm using this container for self tests for html-css-js-ts-node-npm etc...
+}
+
+How can i intall typescript?
+{
+		$> npm install --global typescript
+	This command installing typescript compiler.
+		$> tsc main.ts
+	This compiler converting you ts code to js code.
+		$> node main.js
+	After you can run js code...
+
+		$> npm install --global ts-node
+	This command installing node's typescript compiler/runner.
+	If you want to run your ts code;
+		$> ts-node main.ts
+		$> Hello World!
+	You can see this output directly.
+	or
+		$> tsc --watch
+	You can see automaticly compiler/runner.
+}
+
+How can i create tsconfig.json file?
+{
+	If you want to create globally this tsconfig.json file;
+		$> npx tsc --init
+	And this automatically adding your app's root location.
+
+}
+
+How can i create react app?
+{
+}

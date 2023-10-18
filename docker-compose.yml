@@ -58,6 +58,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
+      # - bridge
       - transcendence_network
     restart: unless-stopped # Durdurulmadigi surece.
     ports:
@@ -73,6 +74,7 @@ services:
     volumes:
       - ./srcs/requirements/pgadmin4:/app
     networks:
+      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
@@ -90,6 +92,7 @@ services:
     volumes:
       - ./srcs/requirements/redis:/app
     networks:
+      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
@@ -107,6 +110,7 @@ services:
     volumes:
       - ./srcs/requirements/backend:/app
     networks:
+      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
@@ -124,6 +128,7 @@ services:
     volumes:
       - ./srcs/requirements/frontend:/app
     networks:
+      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:

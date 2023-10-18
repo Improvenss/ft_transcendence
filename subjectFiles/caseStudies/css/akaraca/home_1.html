@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			
+			body { /*body içerisinde yer alan tüm yapıyı etkilemektedir.*/
+				background-color: blanchedalmond;
+				font-size: 5px; /*Bu kısımdaki fontun başlıklar haricinde etkileşimde bulunmamasının nedeni, genel 'p' için bir font değeri atanmasından dolayıdır.*/
+			}
+
+			h1 { /*Burada tek bir elementin özelleştirip, html içerisinde bulunan tüm 'h1'leri değiştirdiği anlamına geliyor.*/
+				color: red;
+				text-align: center;
+			}
+
+			#testID { /*id'si atanmış bir h1'in üzerinde değişiklik yapılabilinir.*/
+				color: pink;
+			}
+
+			p { /*tüm 'p'lerin ayarları değiştirilmektedir.*/
+				font-family: verdana;
+				font-size: 20px;
+			}
+
+			.testClass { /*Class olarak atanmış bir 'p'nin üzerinde değişiklik yapılanabilir.*/
+				color: red;
+			}
+			
+			h1.testClass { /*Class olarak atanmış olan birden fazla, farklı yapı varsa, bu yapılar arasında ayrım yapılarak özel değişiklikler yapılabilinir.*/
+				color:purple;
+			}
+
+			.testClass_two {
+				font-family: Impact;
+			}
+
+			* { /*Tüm html öğelerini seçen bir yapıdır, lakin spesifik olarak değiştirilen ayarlara baskın gelmemektedir.*/
+				color: blue;
+			}
+
+			h1, p { /*Birden fazla elementi seçip değiştirebilirsin.*/
+				background-image: url("../Html/frog.png");
+			}
+		</style>
+	</head>
+	<body>
+		<h1>My first CSS Example.</h1>
+		<h1 id="testID">ID atanmış h1.</h1>
+		<p>Bu bir paragraftır.</p>
+		<p class="testClass">Class atanmış bir paragraftır.</p>
+		<h1 class="testClass">Class atanmış bir başlıktır.</h2>
+		<h2 class="testClass testClass_two">iki class'a sahip olan bir başlıktır.</h2>
+	</body>
+</html>
+<!-- All CSS Simple Selectors
+Selector			Example			Example description
+#id					#firstname		Selects the element with id="firstname"
+.class				.intro			Selects all elements with class="intro"
+element.class		p.intro			Selects only <p> elements with class="intro"
+*					*				Selects all elements
+element				p				Selects all <p> elements
+element,element,..	div, p			Selects all <div> elements and all <p> elements
+-->
