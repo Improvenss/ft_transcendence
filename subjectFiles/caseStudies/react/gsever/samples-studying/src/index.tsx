@@ -21,6 +21,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import './index.css'
 import ES6 from "./ES6/ES6";
 import Array from "./ES6/ES6Array";
 
@@ -29,6 +30,10 @@ import Array from "./ES6/ES6Array";
 const container = document.getElementById("root") as HTMLElement; // Burada <div>'imizin root ismindeki elementini aliyoruz.
 const root = ReactDOM.createRoot(container); // Burada DOM icin tekrardan elementimizi olusturuyoruz.
 // root.render(myFirstElement); // Burada artik render ediyoruz.
-root.render(<App/>);
+root.render(
+	<React.StrictMode>
+		<App/>
+	</React.StrictMode>
+);
 // root.render(<ES6/>);
 // root.render(<Array/>);
