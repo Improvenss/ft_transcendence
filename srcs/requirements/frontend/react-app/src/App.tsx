@@ -31,6 +31,7 @@ function	App()
 			<Routes>
 				<Route path="/" element={<Countdown/>} />
 				<Route path="/address" element={<Address/>} />
+				{/* <Route path="*" element={<NotLoaded/>} /> */}
 				{/* <Route path="/login" element={</>} /> */}
 			</Routes>
 		</div>
