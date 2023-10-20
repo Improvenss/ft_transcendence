@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Link } from 'react-router-dom';
-import Countdown from "./login/Countdown";
 import './App.css';
+import HomePage from "./main/HomePage"; // '/' root dizini.
+import Countdown from "./login/Countdown";
 import Address from "./client/Address";
-import HomePage from "./main/HomePage";
+import Loading from "./login/Loading";
 
 // function	useEffect()
 // {
@@ -17,19 +18,33 @@ import HomePage from "./main/HomePage";
 // 	});
 // }
 
+
+
 function	App()
 {
+	const	[loading, setLoading] = useState(true);
+
+	useEffect(() =>
+	{
+		setTimeout(() => setLoading(false), 1000)
+	}, []);
+
+	if (loading)
+	{
+		// return (loading ? <Loading/> : <App/>);
+		return (<Loading/>);
+	}
+
 	return (
-		<div id="app">
-			<nav>
+		<div id="id-app">
+			<header>
 				<ul>
 					<li><Link to="/">Anasayfa</Link></li>
 					<li><Link to="/login">Login</Link></li>
 					<li><Link to="/address">Address</Link></li>
 				</ul>
-			</nav>
+			</header>
 			<Routes>
-				{/* <Route path="/" element={<Countdown/>} /> */}
 				<Route path="/" element={<HomePage/>} />
 				<Route path="/address" element={<Address/>} />
 				{/* <Route path="/login" element={</>} /> */}

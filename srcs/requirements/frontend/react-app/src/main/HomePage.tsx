@@ -1,18 +1,12 @@
 import React from "react";
-import { Link, Router } from "react-router-dom";
+import { Link, Router, Route } from "react-router-dom";
+import Countdown from "../login/Countdown";
 
 function	HomePage()
 {
 	return (
-		<div className="main-page">
-			<nav>
-				<ul>
-					<li><Link to="/">Anasayfa</Link></li>
-					<li><Link to="/login">Login</Link></li>
-					<li><Link to="/address">Address</Link></li>
-				</ul>
-			</nav>
-			{/* <Router */}
+		<div className="c-home-page">
+			<div>{Countdown()}</div>
 		</div>
 	);
 };
