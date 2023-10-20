@@ -3,7 +3,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Countdown from "./login/Countdown";
 import './App.css';
 import Address from "./client/Address";
-
+import HomePage from "./main/HomePage";
 
 // function	useEffect()
 // {
@@ -20,7 +20,7 @@ import Address from "./client/Address";
 function	App()
 {
 	return (
-		<div id="loading-screen">
+		<div id="app">
 			<nav>
 				<ul>
 					<li><Link to="/">Anasayfa</Link></li>
@@ -29,10 +29,11 @@ function	App()
 				</ul>
 			</nav>
 			<Routes>
-				<Route path="/" element={<Countdown/>} />
+				{/* <Route path="/" element={<Countdown/>} /> */}
+				<Route path="/" element={<HomePage/>} />
 				<Route path="/address" element={<Address/>} />
-				{/* <Route path="*" element={<NotLoaded/>} /> */}
 				{/* <Route path="/login" element={</>} /> */}
+				{/* <Route path="*" element={<NotLoaded/>} /> */}
 			</Routes>
 		</div>
 	);
