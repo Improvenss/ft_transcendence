@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Link } from 'react-router-dom';
-import { Helmet } from "react-helmet"; // Bu React JSX'in icerisinde <link> calistirabilmek icin.
+// import { Helmet } from "react-helmet"; // Bu React JSX'in icerisinde <link> calistirabilmek icin.
 import './App.css';
 import HomePage from "./main/HomePage"; // '/' root dizini.
 import Address from "./client/Address";
@@ -29,8 +29,8 @@ function	App()
 
 	return (
 		<div id="id-app">
-			<Helmet>
-			</Helmet>
+			{/* <Helmet>
+			</Helmet> */}
 			<header>
 				<ul>
 					<li><Link to="/">Anasayfa</Link></li>

@@ -3,12 +3,16 @@
 #id-countdown {
 	font-family: 'Big Shoulders Stencil Text', sans-serif;
 	color:cornsilk;
-	/* font-size: 50px; */
 	font-size: 8vw; /* Canli bir sekilde genisligi degistirirken font'un boyutunu guncelliyor. */
 	text-align: center;
 	top: 50%;
 	left: 50%;
 }
+/* 
+@font-face {
+	font-family: 'Big Shoulders Stencil Text', sans-serif';
+	src: url();
+} */
 
 /* LINK: https://fonts.google.com/specimen/Big+Shoulders+Stencil+Text?preview.text=1234567ABCDEabcde&vfonly=true&subset=latin&noto.script=Latn */
 /* vietnamese */
