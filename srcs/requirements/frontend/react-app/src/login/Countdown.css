@@ -1,11 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Text:wght@900&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Text:wght@900&display=swap'); */
 
 #id-countdown {
 	font-family: 'Big Shoulders Stencil Text', sans-serif;
 	color:cornsilk;
-	font-size: 50px;
+	/* font-size: 50px; */
+	font-size: 8vw; /* Canli bir sekilde genisligi degistirirken font'un boyutunu guncelliyor. */
 	text-align: center;
+	top: 50%;
+	left: 50%;
 }
+
 /* LINK: https://fonts.google.com/specimen/Big+Shoulders+Stencil+Text?preview.text=1234567ABCDEabcde&vfonly=true&subset=latin&noto.script=Latn */
 /* vietnamese */
 /* @font-face {
