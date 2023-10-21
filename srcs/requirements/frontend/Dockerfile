@@ -33,8 +33,13 @@ EXPOSE 80
 RUN ["npm", "install", "--global", "react-cli", "react"]
 # RUN ["npm", "install", "--global", "react-scripts"]
 RUN ["npm", "install", "--global", "react-router-dom"]
+RUN ["npm", "install", "--save-dev", "@types/react-router-dom"]
 # Bu da 'react-devtools'un web browser'deki eklentisini kullanabilmek icin.
 RUN ["npm", "install", "--global", "react-devtools"]
+
+# Bu cok sacma bir sekilde eklenmiyor saka gibi...
+# RUN ["npm", "install", "--global", "react-meta-tags"]
+# RUN ["npm", "install", "--save-dev", "@types/react-meta-tags"]
 
 # Installing other packages.
 # RUN ["npm", "install"]
