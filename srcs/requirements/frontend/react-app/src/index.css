@@ -1,0 +1,17 @@
+/* LINK: https://fonts.google.com/specimen/Big+Shoulders+Stencil+Display?preview.text=1234567ABCDEabcde&vfonly=true&subset=latin&noto.script=Latn&query=big+shoulders */
+/* @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@600&display=swap'); */
+
+* {
+	background-color: black;
+	color: cornsilk;
+	font-family: 'Big Shoulders Stencil Display', sans-serif;
+}
+
+body {
+	background-color: black;
+	color: cornsilk;
+}
+
+#id-body {
+	background-color: red;
+}

@@ -1,7 +1,5 @@
 // Burada 'Class'lari ogrenecegiz.
 
-import { publicDecrypt } from "crypto";
-
 // Members: Types
 class	CarType
 {

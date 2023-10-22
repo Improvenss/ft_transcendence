@@ -15,3 +15,9 @@ Advice
 {
 	You can install 'Live Preview' and 'Live Server' extension in vscode.
 }
+
+How can you update node?
+{
+	$> npm install -g n
+	$> sudo n latest
+}

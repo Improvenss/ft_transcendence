@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import etmemiz gerekiyor, cunku tarayici rotasi olara geciyor.
-import App from './App.tsx';
-import Countdown from './login/Countdown';
+import './index.css';
+import App from './App';
 // npm install react-router-dom
 
 /**

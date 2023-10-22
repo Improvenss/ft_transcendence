@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+	<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body style="background-color: black; color: white;">
+	<div id="myDiv"></div>
+	<script type="text/babel">
+		function	Asdf()
+		{
+			return	(<h2>hello my ruski friend</h2>);
+		}
+
+		const	container = document.getElementById("myDiv");
+		const	root = ReactDOM.createRoot(container);
+
+		root.render(<Asdf/>);
+	</script>
+</body>
+</html>
+<!-- Boyle de HTML dosyasinin icerisinde React projesi yazabiliyoruz ama yazma sen. -->

@@ -1,0 +1,10 @@
+How can i create this typescript react app?
+{
+	LINK: https://create-react-app.dev/docs/adding-typescript/
+	$> npx create-react-app <your_project_folder_name> --templeate typescript
+}
+
+How can i update 'React'?
+{
+	$> npm install -g react@latest react-dom@latest
+}
