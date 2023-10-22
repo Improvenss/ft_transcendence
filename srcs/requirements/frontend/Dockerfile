@@ -30,15 +30,19 @@ EXPOSE 80
 
 # We are installing React package for global.
 # RUN ["npx", "create-react-app", "react-app", "--template", "typescript"]
-RUN ["npm", "install", "--global", "react-cli", "react"]
-# RUN ["npm", "install", "--global", "react-scripts"]
-RUN ["npm", "install", "--global", "react-router-dom"]
-RUN ["npm", "install", "--save-dev", "@types/react-router-dom"]
+# npm i react@latest react-dom@latest
+
+# RUN ["npm", "install", "--global", "react@latest", "react-router-dom", "react-dom@latest"]
+
+# RUN ["npm", "install", "react@latest"]
+# RUN ["npm", "install", "react-dom@latest"]
+
+# RUN ["npm", "install", "--save-dev", "@types/react-router-dom"]
 # Bu da 'react-devtools'un web browser'deki eklentisini kullanabilmek icin.
-RUN ["npm", "install", "--global", "react-devtools"]
+# RUN ["npm", "install", "--global", "react-devtools"]
 
 # Bu cok sacma bir sekilde eklenmiyor saka gibi...
-# RUN ["npm", "install", "--global", "react-meta-tags"]
+# RUN ["npm", "install", "react-meta-tags"]
 # RUN ["npm", "install", "--save-dev", "@types/react-meta-tags"]
 
 # Installing other packages.
@@ -54,4 +58,4 @@ ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm run start"]
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# nest new hello-friend^C
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install npx^C
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install --global react-li react^C
-# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npx create-react-app asdf-app --template typescript^C
+# root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npx create-react-app asdf-app --template typescript

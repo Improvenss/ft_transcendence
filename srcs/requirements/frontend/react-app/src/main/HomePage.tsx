@@ -7,6 +7,7 @@ function	HomePage()
 	return (
 		<div className="c-home-page">
 			<div>{Countdown()}</div>
+			<div>Pong game PLAY page.</div>
 		</div>
 	);
 };
