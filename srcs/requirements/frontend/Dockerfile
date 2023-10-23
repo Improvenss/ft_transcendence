@@ -18,6 +18,19 @@ FROM node:20.7.0-alpine3.18
 
 RUN apk update && apk upgrade
 
+# RUN apk update && apk upgrade && apk add --update --no-cache \
+# 	openssl \
+# 	&& rm -f /var/cache/apk/*
+
+# RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+# 	-out /etc/ssl/certs/ft_transcendence.crt \
+# 	-keyout /etc/ssl/certs/ft_transcendence.key \
+# 	-subj "/C=TR/ST=Kocaeli/L=Istanbul/O=Ecole42/OU=gsever/CN=gsever"
+
+# RUN cp /etc/ssl/certs/ft_transcendence.crt /var/www/html/
+
+
+
 WORKDIR /app/react-app
 
 # RUN chmod -R 777 .
@@ -52,7 +65,7 @@ EXPOSE 80
 # RUN ["npm", "run", "start:dev"]
 
 # `-c` mean; After all this are giving like argument.
-ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm run start"]
+ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && HTTPS=true npm start"]
 
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install --global @nestjs/cli^C
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# nest new hello-friend^C
