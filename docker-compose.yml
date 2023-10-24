@@ -14,6 +14,7 @@ networks:
 #/////////////////////////////////////////////////////////////////////////////#
 
 volumes:
+  # node_modules:
   postgres_data:
     driver: local
     driver_opts:
@@ -109,6 +110,7 @@ services:
       - ./srcs/envFiles/backend.env
     volumes:
       - ./srcs/requirements/backend:/app
+      # - node_modules:/app/nest-js/node_modules
     networks:
       # - bridge
       - transcendence_network
@@ -127,12 +129,14 @@ services:
       - ./srcs/envFiles/frontend.env
     volumes:
       - ./srcs/requirements/frontend:/app
+      # - node_modules:/app/react-app/node_modules
     networks:
       # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
       - 8080:80 # Local port / Exported port. nestjs's default port(3000).
-    # depends_on:
+    depends_on:
+      - backend
     # progress: plain
   # ________________ #
