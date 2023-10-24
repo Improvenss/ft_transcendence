@@ -10,23 +10,47 @@
 # How can i add existing project?
 # LINK: https://react.dev/learn/add-react-to-an-existing-project
 
+# How can i see all 'trusted certificates' from alpine?
+# $> openssl crl2pkcs7 -nocrl -certfile /etc/ssl/certs/ca-certificates.crt | openssl pkcs7 -print_certs -noout
+# How can you check your certificate is trusted?
+# $> openssl crl2pkcs7 -nocrl -certfile /etc/ssl/certs/ca-certificates.crt | openssl pkcs7 -print_certs -noout | grep pong
+
+# How can i see all 'trusted certificates' from macos?
+# $> openssl crl2pkcs7 -nocrl -certfile /etc/ssl/cert.pem | openssl pkcs7 -print_certs -noout
+
+
+# Add the certificate to the macos trust store?
+# security verify-cert -c ./certificate.crt > /dev/null 2>&1
+# if [ $? != 0 ]; then
+#     echo "Adding certificate to trust store ..."
+#     security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ./certificate.crt
+# fi
+
 FROM node:20.7.0-alpine3.18
 
-# RUN apk update && \
-# 	apk add --no-cache \
-# 	&& rm -rf /var/cache/apk/*
+RUN apk update && apk upgrade && apk add --update --no-cache \
+	ca-certificates \
+	openssl \
+	&& rm -f /var/cache/apk/*
 
-RUN apk update && apk upgrade
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+	-out /etc/ssl/certs/ft_transcendence.crt \
+	-keyout /etc/ssl/certs/ft_transcendence.key \
+	-subj "/C=TR/ST=Kocaeli/L=Istanbul/O=Ecole42/OU=pong/CN=pong"
+
+RUN cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/
+RUN chmod 644 /usr/local/share/ca-certificates/ft_transcendence.crt
+RUN update-ca-certificates
 
 WORKDIR /app/react-app
 
-# RUN chmod -R 777 .
-# RUN sudo chown -R $(whoami) ~/.docker
-
-# COPY ./react-app/ .
-# COPY react-app/package*.json .
-
 EXPOSE 80
+
+ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive\
+&& npm start"]
+
+
+
 
 # We are installing React package for global.
 # RUN ["npx", "create-react-app", "react-app", "--template", "typescript"]
@@ -52,7 +76,8 @@ EXPOSE 80
 # RUN ["npm", "run", "start:dev"]
 
 # `-c` mean; After all this are giving like argument.
-ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm run start"]
+
+
 
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# npm install --global @nestjs/cli^C
 # root@gsever-debian:/home/gsever/Desktop/ft_transcendence# nest new hello-friend^C

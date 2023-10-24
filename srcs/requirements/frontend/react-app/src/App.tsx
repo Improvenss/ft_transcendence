@@ -10,7 +10,7 @@ import Client from "./client/Client";
 function App() {
 const [loading, setLoading] = useState(true);
 const navigate = useNavigate();
-const	client = new Client();
+// const	client = new Client();
 
 const handleLoad = (e: Event) => {
 	setLoading(false);
@@ -27,8 +27,8 @@ if (loading) {
 	return (<Loading />);
 }
 
-if (!client.isAuthenticate())
-	navigate('/login');
+// if (!client.isAuthenticate())
+// 	navigate('/login');
 
 return (
 	<div id="id-app">
