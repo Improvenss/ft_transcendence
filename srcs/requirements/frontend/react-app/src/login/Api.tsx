@@ -8,15 +8,6 @@ export default function	Api()
 	// let [clientData, setClientData] = useState<string | null>(null);
 	const	navigate = useNavigate();
 
-	// useEffect(() =>
-	// {
-	// 	// Yonlendirildikten sonra code ile geri gelen bilgiyi;
-	// 	const	urlParams = new URLSearchParams(window.location.search);
-	// 	const	code = urlParams.get('code');
-	// 	console.log(code);
-	// 	navigate('/');
-	// }, []);
-
 	// Yonlendirildikten sonra code ile geri gelen bilgiyi;
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	code = urlParams.get('code');

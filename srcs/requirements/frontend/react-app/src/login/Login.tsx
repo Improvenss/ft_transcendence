@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import styles from './Login.module.css'
 import Countdown from "./Countdown";
 import Client from "../client/Client";
 
@@ -43,14 +44,14 @@ function Login()
 {
 	const redirectToLogin = async () =>
 	{
-		window.location.href = process.env.REACT_APP_REDIR_URL as string;
+		// window.location.href = process.env.REACT_APP_REDIR_URL as string;
+		console.log(process.env.REACT_APP_REDIR_URL);
 	};
 
 	return (
 		<div>
 			<div>{Countdown()}</div>
-			<button onClick={redirectToLogin}>Login 42</button>
-			
+			<button className={styles.button} onClick={redirectToLogin}>Login 42</button>
 		</div>
 	);
 }
