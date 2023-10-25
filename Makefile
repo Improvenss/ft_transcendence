@@ -81,6 +81,8 @@ fclean: clean
 	@docker volume rm $$(docker volume ls -q) 2>/dev/null
 	@docker system prune -fa 2>/dev/null
 # @sudo rm -rf ./data 2>/dev/null
+	@rm -rf /srcs/requirements/frontend/react-app/node_modules
+	@rm -rf /srcs/requirements/backend/nest-js/node_modules
 	@echo "Cleaned with $(NUMPROC) cores!"
 	@echo "$(RED)ALL THINGS CLEANED$(RESET)"
 
@@ -125,11 +127,11 @@ compose_images:
 # @certutil -A -n "gsever" -t "TCu,Cu,Tu" -i "/home/gsever/data/wordpress/gsever.crt" -d sql:$(HOME)/.mozilla/firefox/*default
 
 update_hosts:
-	@if grep -q "127.0.0.1	$(USER).42.fr" /etc/hosts; then\
-		echo "$(YELLOW)Host Already Exist: /etc/hosts: $(B_YELLOW)'127.0.0.1 $(USER).42.fr'$(END)";\
+	@if grep -q "127.0.0.1	yuandre.com" /etc/hosts; then\
+		echo "$(YELLOW)Host Already Exist: /etc/hosts: $(B_YELLOW)'127.0.0.1 yuandre.com'$(END)";\
 	else\
-		sudo sed -i '2i127.0.0.1\t$(USER).42.fr' /etc/hosts;\
-		echo "$(B_GREEN)Adding '$(USER).42.fr' host to /etc/hosts inside.$(END)";\
+		sudo sed -i '2i127.0.0.1\tyuandre.com' /etc/hosts;\
+		echo "$(B_GREEN)Adding 'yuandre.com' host to /etc/hosts inside.$(END)";\
 	fi
 # @sed -i '2s/^/127.0.0.0\tgsever.42.fr\n/' /etc/hosts
 
