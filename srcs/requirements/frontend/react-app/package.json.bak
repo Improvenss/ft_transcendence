@@ -13,7 +13,7 @@
     "typescript": "^4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "HTTPS=true $SSL_CRT_FILE $SSL_KEY_FILE react-scripts start",
     "build": "GENERATE_SOURCEMAP=false HTTPS=true $SSL_CRT_FILE $SSL_KEY_FILE react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
