@@ -21,30 +21,30 @@ volumes:
       type: none
       o: bind
       device: ./data/postgres
-  pgadmin4_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/pgadmin4
-  redis_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/redis
-  backend_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/backend
-  frontend_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/frontend
+  # pgadmin4_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./data/pgadmin4
+  # redis_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./data/redis
+  # backend_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./data/backend
+  # frontend_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./data/frontend
 
 ###############################################################################
 #                             SERVICES                                        #
@@ -88,8 +88,8 @@ services:
   # ___redis_cache__ #
   redis:
     image: redis:7.2.1-alpine3.18
-    env_file:
-      - ./srcs/envFiles/redis.env
+    # env_file:
+    #   - ./srcs/envFiles/redis.env
     volumes:
       - ./srcs/requirements/redis:/app
     networks:
@@ -106,8 +106,8 @@ services:
   backend: # Backend's container.
     container_name: backend
     build: ./srcs/requirements/backend/ # Container's 'Dockerfile' path location for run this file.
-    env_file:
-      - ./srcs/envFiles/backend.env
+    # env_file:
+    #   - ./srcs/envFiles/backend.env
     volumes:
       - ./srcs/requirements/backend:/app
       # - node_modules:/app/nest-js/node_modules
@@ -125,8 +125,8 @@ services:
   frontend: # Frontend's container.
     container_name: frontend
     build: ./srcs/requirements/frontend/ # Container's 'Dockerfile' path location for run this file.
-    env_file:
-      - ./srcs/envFiles/frontend.env
+    # env_file:
+    #   - ./srcs/envFiles/frontend.env
     volumes:
       - ./srcs/requirements/frontend:/app
       # - node_modules:/app/react-app/node_modules

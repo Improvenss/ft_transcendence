@@ -5,7 +5,7 @@ import HomePage from "./main/HomePage";
 import Address from "./client/Address";
 import Loading from "./login/Loading";
 import Login from "./login/Login";
-import Client from "./client/Client";
+import Api from "./login/Api";
 
 function App() {
 const [loading, setLoading] = useState(true);
@@ -45,6 +45,7 @@ return (
 		<Route path="/login" element={<Login />} />
 		<Route path="/address" element={<Address />} />
 		<Route path="/loading" element={<Loading />} />
+		<Route path="/api" element={<Api />} />
 	</Routes>
 	</div>
 );
