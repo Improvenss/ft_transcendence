@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { createProxyMiddleware } from "http-proxy-middleware";
 import './App.css';
 import HomePage from "./main/HomePage";
 import Address from "./client/Address";
