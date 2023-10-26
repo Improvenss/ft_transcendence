@@ -20,7 +20,7 @@ export default function	Api()
 		form.append('code', code as string);
 		form.append('redirect_uri', process.env.INTRA_REDIRECT_URI as string);
 		const	responseToken = await fetch(process.env.REACT_APP_TOKEN_URL as string, {
-			method: "POST",
+			method: 'POST',
 			body: form
 		})
 		const data = await responseToken.json();

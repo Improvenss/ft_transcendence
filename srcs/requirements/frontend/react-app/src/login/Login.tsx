@@ -44,7 +44,8 @@ function Login()
 {
 	const redirectToLogin = async () =>
 	{
-		// window.location.href = process.env.REACT_APP_REDIR_URL as string;
+		window.location.href = process.env.REACT_APP_REDIR_URL as string;
+		// window.open(process.env.REACT_APP_REDIR_URL as string, "_blank");
 		console.log(process.env.REACT_APP_REDIR_URL);
 	};
 

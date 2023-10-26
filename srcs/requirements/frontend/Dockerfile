@@ -44,7 +44,7 @@ RUN update-ca-certificates
 
 WORKDIR /app/react-app
 
-EXPOSE 80
+EXPOSE 443
 
 ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive\
 && npm start"]
