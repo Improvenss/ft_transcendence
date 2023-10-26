@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { createProxyMiddleware } from "http-proxy-middleware";
 import './App.css';
 import HomePage from "./main/HomePage";
 import Address from "./client/Address";
 import Loading from "./login/Loading";
 import Login from "./login/Login";
 import Api from "./login/Api";
+
+
 
 function App() {
 const [loading, setLoading] = useState(true);

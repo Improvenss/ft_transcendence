@@ -20,14 +20,17 @@ export default function	Api()
 		form.append('code', code as string);
 		form.append('redirect_uri', process.env.INTRA_REDIRECT_URI as string);
 		const	responseToken = await fetch(process.env.REACT_APP_TOKEN_URL as string, {
+			headers: {
+				'Access-Control-Allow-Origin': '*'
+			},
 			method: 'POST',
 			body: form
 		})
 		const data = await responseToken.json();
 		console.log(responseToken);
 	};
-	sendAccessToken();
 	console.log(code);
+	sendAccessToken();
 	useEffect(() => {
 		navigate('/');
 	}, [])
