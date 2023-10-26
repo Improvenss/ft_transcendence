@@ -1,36 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+async function sendCode( uriCode: string ) {
+
+		// const	responseCode = await fetch("http://10.12.14.8:3000/", {
+		// 	method: 'POST',
+		// 	headers: {
+		// 		'Content-Type':'application/json'
+		// 	 },
+		// 	body: JSON.stringify({
+		// 		code: code,
+		// 	})
+		// })
+		const response = await fetch("https://localhost:3000/api", {
+			method: 'POST',
+			headers: {
+				'Content-Type':'application/json'
+			 },
+			//mode: 'no-cors',
+			body: JSON.stringify({
+				code: uriCode as string
+			})
+		})
+		if (response.ok)
+		{
+			const data = await response.json();
+			console.log("Server response:", data);
+			console.log("OK");
+		}
+		else
+			console.log("NOK");
+		console.log("Backend'ten gelen code infosu:", response);
+}
 
 export default function	Api()
 {
-	// let	[clientData, setClientData] = useState(null);
-	// let [clientData, setClientData] = useState<string | null>(null);
 	const	navigate = useNavigate();
 
-	// Yonlendirildikten sonra code ile geri gelen bilgiyi;
+	// 42'nin Authorize butonuna tikladiktan sonra gelen kod.
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	code = urlParams.get('code');
 
-	async function sendAccessToken() {
-		const	form = new FormData();
-		form.append('grant_type', 'authorization_code');
-		form.append('client_id', process.env.REACT_APP_UID as string);
-		form.append('client_secret', process.env.REACT_APP_SECRET as string);
-		form.append('code', code as string);
-		form.append('redirect_uri', process.env.INTRA_REDIRECT_URI as string);
-		const	responseToken = await fetch(process.env.REACT_APP_TOKEN_URL as string, {
-			method: 'POST',
-			body: form
-		})
-		const data = await responseToken.json();
-		console.log(responseToken);
-	};
-	sendAccessToken();
-	console.log(code);
+	sendCode(code as string);
+
 	useEffect(() => {
 		navigate('/');
-	}, [])
+	}, [navigate]);
 
 	return (
 		<div>

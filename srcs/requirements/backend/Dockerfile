@@ -4,18 +4,26 @@
 
 FROM node:20.7.0-alpine3.18
 
-# RUN apk update && \
-# 	apk add --no-cache \
-# 	&& rm -rf /var/cache/apk/*
+RUN apk update && apk upgrade && apk add --update --no-cache \
+	ca-certificates \
+	openssl \
+	&& rm -f /var/cache/apk/*
 
-RUN apk update && apk upgrade
+RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+	-out /etc/ssl/certs/ft_transcendence-backend.crt \
+	-keyout /etc/ssl/certs/ft_transcendence-backend.key \
+	-subj "/C=TR/ST=Kocaeli/L=Istanbul/O=Ecole42/OU=pongBackend/CN=pongBackend"
+
+RUN cp /etc/ssl/certs/ft_transcendence-backend.crt /usr/local/share/ca-certificates/
+RUN chmod 644 /usr/local/share/ca-certificates/ft_transcendence-backend.crt
+RUN update-ca-certificates
 
 WORKDIR /app/nest-js
 
 EXPOSE 3000
 
 # We are installing NestJS package for global.
-RUN ["npm", "install", "--global", "@nestjs/cli"]
+# RUN ["npm", "install", "--global", "@nestjs/cli"]
 
 # Installing other packages.
 # RUN ["npm", "install"]
