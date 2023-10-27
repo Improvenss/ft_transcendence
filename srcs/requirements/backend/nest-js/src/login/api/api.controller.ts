@@ -25,8 +25,16 @@ export class ApiController {
 		if (response.ok)
 		{
 			const	data = await response.json();
-			// const	responseAccessToken = await fetch()
-			return {message: "BACKEND OK", other: data.access_token};
+			const	responseAccessToken = await fetch(process.env.API_ME_URL, {
+				method: 'GET',
+				headers: {
+					"Authorization": "Bearer " + data.access_token
+				}
+			});
+			console.log("Data access_token:", data.access_token as string);
+			const	dataClient = await responseAccessToken.json();
+			console.log("Data client: ", dataClient.login);
+			return {message: "BACKEND OK", access_token: data.access_token, dataClient: dataClient};
 		}
 		else
 			return {message: "BACKEND NOK"};
