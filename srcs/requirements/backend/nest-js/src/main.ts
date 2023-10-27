@@ -11,6 +11,12 @@ async function bootstrap() {
 		cert: fs.readFileSync(process.env.SSL_CRT_FILE as string),
 	};
 	const	app = await NestFactory.create(AppModule, {httpsOptions}); // Bu ana 'app'imiz.
+	app.use(
+		cors({
+		origin: 'https://localhost', // İzin verilen kök alan
+		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // İzin verilen HTTP yöntemleri
+		})
+	);
 
 	const	configSwagger = new DocumentBuilder() // Bu ve altindakiler 'swagger' icin;
 		.setTitle('ft_transcendence') // Config olusturduk.
@@ -19,12 +25,7 @@ async function bootstrap() {
 		.build()
 	const	documentSwagger = SwaggerModule.createDocument(app, configSwagger);
 	SwaggerModule.setup('swagger', app, documentSwagger);
-	app.use(
-		cors({
-			origin: 'https://192.168.1.36/', // İzin verilen kök alan
-			methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // İzin verilen HTTP yöntemleri
-		})
-	);
+
 	app.listen(process.env.PORT);
 }
 
