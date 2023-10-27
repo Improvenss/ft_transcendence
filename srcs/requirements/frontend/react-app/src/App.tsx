@@ -12,7 +12,6 @@ import Api from "./login/Api";
 function App() {
 const [loading, setLoading] = useState(true);
 const navigate = useNavigate();
-// const	client = new Client();
 
 const handleLoad = (e: Event) => {
 	setLoading(false);

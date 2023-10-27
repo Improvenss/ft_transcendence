@@ -15,7 +15,7 @@ export default function	Api()
 			headers: {
 				'Content-Type':'application/json'
 			 },
-			//mode: 'no-cors',
+			// mode: 'no-cors',
 			body: JSON.stringify({
 				code: uriCode as string
 			})
@@ -23,7 +23,7 @@ export default function	Api()
 		if (response.ok)
 		{
 			const data = await response.json();
-      		console.log("Server response:", data);
+			console.log("Server response:", data);
 			console.log("OK");
 		}
 		else
@@ -37,7 +37,6 @@ export default function	Api()
 
 	return (
 		<div>
-			<p>You are authorized!</p>
 		</div>
 	);
 };

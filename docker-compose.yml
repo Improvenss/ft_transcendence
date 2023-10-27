@@ -50,58 +50,58 @@ volumes:
 #                             SERVICES                                        #
 #/////////////////////////////////////////////////////////////////////////////#
 services:
-  # ___PostgreSQL___ # OK
-  postgres:
-    image: postgres:16.0-alpine3.18
-    env_file:
-      - ./srcs/envFiles/postgres.env
-      # - ./srcs/requirements/postgres/.env
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      # - bridge
-      - transcendence_network
-    restart: unless-stopped # Durdurulmadigi surece.
-    ports:
-      - 5432:5432 # Local port / Exported port. postgres's default port(5432).
-    # depends_on:
-    # progress: plain
-  # ________________ #
-  # ____pgadmin4____ # OK
-  pgadmin4:
-    image: dpage/pgadmin4:7.7
-    env_file:
-      - ./srcs/envFiles/pgadmin4.env
-    volumes:
-      - ./srcs/requirements/pgadmin4:/app
-    networks:
-      # - bridge
-      - transcendence_network
-    restart: unless-stopped
-    ports:
-      - 9000:80 # Local port / Exported port.
-      # - 9000:9000 # Local port / Exported port.
-    depends_on:
-      - postgres
-    # progress: plain
-  # ________________ #
-  # ___redis_cache__ #
-  redis:
-    image: redis:7.2.1-alpine3.18
-    # env_file:
-    #   - ./srcs/envFiles/redis.env
-    volumes:
-      - ./srcs/requirements/redis:/app
-    networks:
-      # - bridge
-      - transcendence_network
-    restart: unless-stopped
-    ports:
-      - 6379:6379 # Local port / Exported port.
-    depends_on:
-      - postgres
-    # progress: plain
-  # ________________ #
+  # # ___PostgreSQL___ # OK
+  # postgres:
+  #   image: postgres:16.0-alpine3.18
+  #   env_file:
+  #     - ./srcs/envFiles/postgres.env
+  #     # - ./srcs/requirements/postgres/.env
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     # - bridge
+  #     - transcendence_network
+  #   restart: unless-stopped # Durdurulmadigi surece.
+  #   ports:
+  #     - 5432:5432 # Local port / Exported port. postgres's default port(5432).
+  #   # depends_on:
+  #   # progress: plain
+  # # ________________ #
+  # # ____pgadmin4____ # OK
+  # pgadmin4:
+  #   image: dpage/pgadmin4:7.7
+  #   env_file:
+  #     - ./srcs/envFiles/pgadmin4.env
+  #   volumes:
+  #     - ./srcs/requirements/pgadmin4:/app
+  #   networks:
+  #     # - bridge
+  #     - transcendence_network
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9000:80 # Local port / Exported port.
+  #     # - 9000:9000 # Local port / Exported port.
+  #   depends_on:
+  #     - postgres
+  #   # progress: plain
+  # # ________________ #
+  # # ___redis_cache__ #
+  # redis:
+  #   image: redis:7.2.1-alpine3.18
+  #   # env_file:
+  #   #   - ./srcs/envFiles/redis.env
+  #   volumes:
+  #     - ./srcs/requirements/redis:/app
+  #   networks:
+  #     # - bridge
+  #     - transcendence_network
+  #   restart: unless-stopped
+  #   ports:
+  #     - 6379:6379 # Local port / Exported port.
+  #   depends_on:
+  #     - postgres
+  #   # progress: plain
+  # # ________________ #
   # _____backend____ #
   backend: # Backend's container.
     container_name: backend
@@ -117,8 +117,8 @@ services:
     restart: unless-stopped
     ports:
       - 3000:3000 # Local port / Exported port. nestjs's default port(3000).
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     # progress: plain
   # ________________ #
   # ____frontend____ #

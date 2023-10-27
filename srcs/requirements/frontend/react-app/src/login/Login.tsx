@@ -1,7 +1,54 @@
 import React, { useState, useEffect } from "react";
 import styles from './Login.module.css'
 import Countdown from "./Countdown";
-import Client from "../client/Client";
+
+async function	redirectToLogin(setClicked: (value: boolean) => void) {
+	const	response = await fetch("https://localhost:3000/login", {
+		method: 'POST',
+		headers: {
+			'Content-Type':'application/json'
+			// 'Content-Type':'text/plain'
+		},
+		// body: "LOGIN",
+		body: JSON.stringify({
+			requestLogin: 'LOGIN'
+		})
+	})
+	if (response.ok)
+	{
+		const	data = await response.json();
+		console.log(data);
+		setClicked(true); // Bu da butonun tekrar tiklanabilir olmasini sagliyor.
+		window.location.href = data.requestLogin;
+	}
+	else
+	{
+		alert("LOGIN: API: Connection error!");
+		setClicked(false); // Bu da butonun tekrar tiklanabilir olmasini sagliyor.
+	}
+}
+
+function Login()
+{
+	const [clicked, setClicked] = useState(false);
+
+	useEffect(() => {
+		if (clicked === true)
+			redirectToLogin(setClicked);
+	}, [clicked]);
+
+	return (
+		<div>
+			<div>{Countdown()}</div>
+			<button className={styles.button} onClick={() => setClicked(true)} disabled={clicked}>Login 42</button>
+		</div>
+	);
+}
+
+export default Login;
+
+
+
 
 /**
  * 
@@ -40,36 +87,3 @@ import Client from "../client/Client";
 	gsever@k2m14s08 ~ % curl -H "Authorization: Bearer b39fb34f2e7a5611323e8294a466498010988110d3cc8125a541b046a272f368" https://api.intra.42.fr/v2/me
  * @returns 
  */
-function Login()
-{
-	const redirectToLogin = async () =>
-	{
-		window.location.href = process.env.REACT_APP_REDIR_URL as string;
-		// window.open(process.env.REACT_APP_REDIR_URL as string, "_blank");
-		console.log(process.env.REACT_APP_REDIR_URL);
-	};
-
-	return (
-		<div>
-			<div>{Countdown()}</div>
-			<button className={styles.button} onClick={redirectToLogin}>Login 42</button>
-		</div>
-	);
-}
-
-export default Login;
-
-
-		// const client = new Client();
-		// const	form = new FormData();
-		// form.append('grant_type', 'authorization_code');
-		// form.append('client_id', process.env.REACT_APP_UID as string);
-		// form.append('client_secret', process.env.REACT_APP_SECRET as string);
-		// form.append('code', intra.code);
-		// form.append('redirect_uri', process.env.INTRA_REDIRECT_URI as string);
-
-			// const response = await fetch(process.env.REACT_APP_REDIR_URL as string)
-				// .catch(error => console.error(error));
-			// const data = await response.json();
-			// setClientData(data);
-		// client.Authenticate(true);

@@ -23,7 +23,7 @@ WORKDIR /app/nest-js
 EXPOSE 3000
 
 # We are installing NestJS package for global.
-# RUN ["npm", "install", "--global", "@nestjs/cli"]
+RUN ["npm", "install", "--global", "@nestjs/cli"]
 
 # Installing other packages.
 # RUN ["npm", "install"]

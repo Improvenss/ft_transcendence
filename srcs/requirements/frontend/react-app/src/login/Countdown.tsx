@@ -9,7 +9,7 @@ function Countdown() {
 		const interval = setInterval(() =>
 		{
 			setTime(Date.now());
-		}, 10);
+		}, 1000);
 
 		return () => clearInterval(interval);
 	}, []);
