@@ -1,5 +1,4 @@
-# # FROM postgres:alpine:lastest
-# FROM postgres:16.0-alpine
+# FROM postgres:16.0-alpine3.18
 
 # LABEL author="gsever and akaraca"
 # LABEL description="Postgres Image for ft_transcendence"

@@ -31,9 +31,7 @@ export class ApiController {
 					"Authorization": "Bearer " + data.access_token
 				}
 			});
-			console.log("Data access_token:", data.access_token as string);
 			const	dataClient = await responseAccessToken.json();
-			console.log("Data client: ", dataClient.login);
 			return {message: "BACKEND OK", access_token: data.access_token, dataClient: dataClient};
 		}
 		else
