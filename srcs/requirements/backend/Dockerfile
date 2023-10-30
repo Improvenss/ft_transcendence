@@ -3,19 +3,27 @@
 # LINK: https://docs.nestjs.com/
 
 FROM node:20.7.0-alpine3.18
+# FROM node:20.7.0-alpine
 
 RUN apk update && apk upgrade && apk add --update --no-cache \
 	ca-certificates \
-	openssl \
 	&& rm -f /var/cache/apk/*
 
-RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
-	-out /etc/ssl/certs/ft_transcendence-backend.crt \
-	-keyout /etc/ssl/certs/ft_transcendence-backend.key \
-	-subj "/C=TR/ST=Kocaeli/L=Istanbul/O=Ecole42/OU=pongBackend/CN=pongBackend"
+# openssl \
+# RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
+# 	-out /etc/ssl/certs/ft_transcendence-backend.crt \
+# 	-keyout /etc/ssl/certs/ft_transcendence-backend.key \
+# 	-subj "/C=TR/ST=Kocaeli/L=Istanbul/O=Ecole42/OU=pongBackend/CN=pongBackend"
 
-RUN cp /etc/ssl/certs/ft_transcendence-backend.crt /usr/local/share/ca-certificates/
-RUN chmod 644 /usr/local/share/ca-certificates/ft_transcendence-backend.crt
+RUN mkdir -p /etc/ssl/certs
+
+# COPY ../../certs/ft_transcendence.crt /etc/ssl/certs/
+
+COPY ft_transcendence.crt /etc/ssl/certs/
+COPY ft_transcendence.key /etc/ssl/certs/
+
+RUN cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/
+RUN chmod 644 /usr/local/share/ca-certificates/ft_transcendence.crt
 RUN update-ca-certificates
 
 WORKDIR /app/nest-js

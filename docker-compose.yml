@@ -1,5 +1,5 @@
 # LINK: https://docs.docker.com/compose/compose-file/compose-versioning/
-version: '3.8'
+version: '3.9'
 
 ###############################################################################
 #                             NETWORKS                                        #
@@ -7,6 +7,7 @@ version: '3.8'
 
 networks:
   transcendence_network:
+    name: t_network
     driver: bridge
 
 ###############################################################################
@@ -14,19 +15,18 @@ networks:
 #/////////////////////////////////////////////////////////////////////////////#
 
 volumes:
-  # node_modules:
   postgres_data:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ./data/postgres
-  # pgadmin4_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     o: bind
-  #     device: ./data/pgadmin4
+  pgadmin4_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/pgadmin4
   # redis_data:
   #   driver: local
   #   driver_opts:
@@ -52,39 +52,39 @@ volumes:
 services:
   # ___PostgreSQL___ # OK
   postgres:
+    container_name: postgres
     image: postgres:16.0-alpine3.18
     env_file:
       - ./srcs/requirements/postgres/.env
+    environment:
+      TZ: "Europe/Istanbul"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./srcs/requirements/postgres/create-database.sh:/docker-entrypoint-initdb.d/create-database.sh # PostgreSQL bu 'docker-entypoing-initdb.d' klasorunun icerisindekileri container olusup postgresql calistirildiktan sonra otomatik bir sekilde bu icerisindeki dosyalari calistiriyor.
     networks:
-      # - bridge
       - transcendence_network
     restart: unless-stopped # Durdurulmadigi surece.
     ports:
       - 5432:5432 # Local port / Exported port. postgres's default port(5432).
-    command: ["postgres", "-c", "log_statement=all"] # Bu komut satiri hem 'postgres'i calistirip run-time parametresini 'log_statement=all' olarak belirliyor. Bu da log'larin print edilmesini sagliyor ki development asamasinda isimizi kolaylastiriyor.
-    # depends_on:
-    # progress: plain
   # ________________ #
   # ____pgadmin4____ # OK
   pgadmin4:
+    container_name: pgadmin4
     image: dpage/pgadmin4:7.7
     env_file:
       - ./srcs/requirements/pgadmin4/.env
+    environment:
+      TZ: "Europe/Istanbul"
     volumes:
-      - ./srcs/requirements/pgadmin4:/app
+      - ./srcs/requirements/pgadmin4/servers.json:/pgadmin4/servers.json
+      - pgadmin4_data:/pgadmin4
     networks:
-      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
-      - 9000:80 # Local port / Exported port.
-      # - 9000:9000 # Local port / Exported port.
+      - 5050:80 # Local port / Exported port.
     depends_on:
       - postgres
-    # progress: plain
   # ________________ #
   # # ___redis_cache__ #
   # redis:
@@ -100,8 +100,8 @@ services:
   #   ports:
   #     - 6379:6379 # Local port / Exported port.
   #   depends_on:
-  #     - postgres
-  #   # progress: plain
+  #     - ssl
+  #     - postgres #   # progress: plain
   # # ________________ #
   # _____backend____ #
   backend: # Backend's container.
@@ -111,9 +111,7 @@ services:
     #   - ./srcs/envFiles/backend.env
     volumes:
       - ./srcs/requirements/backend:/app
-      # - node_modules:/app/nest-js/node_modules
     networks:
-      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
@@ -130,15 +128,14 @@ services:
     #   - ./srcs/envFiles/frontend.env
     volumes:
       - ./srcs/requirements/frontend:/app
-      # - node_modules:/app/react-app/node_modules
     networks:
-      # - bridge
       - transcendence_network
     restart: unless-stopped
     ports:
-      # - 80:80 # Local port / Exported port. nestjs's default port(3000).
+      # - 80:80 # Local port / Exported port.
       - 443:443
     depends_on:
+      - postgres
       - backend
     # progress: plain
   # ________________ #
