@@ -12,6 +12,7 @@ class	User {
 export default User;
 
 /**
+ * LINK: https://medium.com/@mohitu531/nestjs-7c0eb5655bde
  * Bu 'Entity' nedir ne icin kullanilir?
  * 
  * Nedir?: Veritabani'nin her bir satirini temsil eder.

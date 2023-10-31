@@ -7,14 +7,22 @@ import { Repository } from 'typeorm';
 class UsersService {
 	constructor(
 		@InjectRepository(User)
-		private	userRepo: Repository<User>,
+		private	userRepo: Repository<User>
 	) {}
 
 	// DB'de yeni bir 'user' olusturuyoruz.
-	async	createUser( user: Partial<User>): Promise<User> {
+	async	createUser( user: Partial<User> ): Promise<User> {
 		const	newUser = this.userRepo.create(user);
 		return (this.userRepo.save(newUser));
+		
 	}
+
+	// async	createUserFromDataClient( dataClient: any ): Promise<User> {
+	// 	const user: Partial<User> = {
+	// 		id: dataClient.id,
+	// 	};
+	// 	return (this.createUser(user));
+	// }
 
 	// Burada DB'deki user id'sine sahip olan 'user'i siliyoruz.
 	async	deleteUser( id: number ): Promise<void> {
@@ -38,6 +46,7 @@ class UsersService {
 export default UsersService;
 
 /**
+ * LINK: https://medium.com/@mohitu531/nestjs-7c0eb5655bde
  * Bu 'Service'(Hizmet) nedir ne icin kullanilir?
  * 
  * Nedir?: Veri ile ilgiyi isler, veritabani ile baglantilidir.

@@ -90,7 +90,8 @@ services:
   # ____pgadmin4____ # OK
   pgadmin4:
     container_name: pgadmin4
-    image: dpage/pgadmin4:7.7
+    # image: dpage/pgadmin4:7.8
+    image: dpage/pgadmin4:latest
     env_file:
       - ./srcs/requirements/pgadmin4/.env
     environment:
@@ -98,12 +99,13 @@ services:
     volumes:
       - ssl_certs:/etc/ssl/certs
       - ./srcs/requirements/pgadmin4/servers.json:/pgadmin4/servers.json
+      - ./srcs/requirements/pgadmin4/entrypoint.sh:/entrypoint.sh
       - pgadmin4_data:/pgadmin4
     networks:
       - transcendence_network
     restart: unless-stopped
     ports:
-      - 5050:80 # Local port / Exported port.
+      - 5050:443 # Local port / Exported port.
     depends_on:
       - ssl_container
       - postgres

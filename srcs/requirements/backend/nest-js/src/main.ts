@@ -10,7 +10,8 @@ async function bootstrap() {
 		key: fs.readFileSync(process.env.SSL_KEY_FILE as string),
 		cert: fs.readFileSync(process.env.SSL_CRT_FILE as string),
 	};
-	const	app = await NestFactory.create(AppModule, {httpsOptions}); // Bu ana 'app'imiz.
+	const	app = await NestFactory.create(AppModule, {httpsOptions, cors: true}); // Bu ana 'app'imiz.
+	app.enableCors();
 	app.use(
 		cors({
 		origin: 'https://localhost', // İzin verilen kök alan

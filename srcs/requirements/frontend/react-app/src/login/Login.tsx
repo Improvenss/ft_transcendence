@@ -6,7 +6,11 @@ async function	redirectToLogin(setClicked: (value: boolean) => void) {
 	const	response = await fetch("https://localhost:3000/login", {
 		method: 'POST',
 		headers: {
-			'Content-Type':'application/json'
+			'Content-Type':'application/json',
+			'Access-Control-Allow-Origin': "https://localhost:3000",
+			"Access-Control-Allow-Methods": "POST",
+			"Access-Control-Allow-Headers": "Content-Type",
+			'Access-Control-Allow-Credentials': 'true',
 			// 'Content-Type':'text/plain'
 		},
 		// body: "LOGIN",
