@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { LoginModule } from './login/login.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users/users.controller';
-import { UsersService } from './users/users.service';
+// import UserService from './users/users.service';
 import { UsersModule } from './users/users.module';
 import 'dotenv/config'; // <- this line is the important
 
@@ -24,7 +24,7 @@ import 'dotenv/config'; // <- this line is the important
 		UsersModule,
 	],
 	controllers: [AppController, UsersController],
-	providers: [AppService, UsersService],
+	providers: [AppService],
 })
 export class AppModule {}
 

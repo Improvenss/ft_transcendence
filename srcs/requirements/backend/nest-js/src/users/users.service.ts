@@ -4,7 +4,7 @@ import User from './users.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-class UserService {
+class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private	userRepo: Repository<User>,
@@ -35,7 +35,16 @@ class UserService {
 
 };
 
-export default UserService;
+export default UsersService;
+
+/**
+ * Bu 'Service'(Hizmet) nedir ne icin kullanilir?
+ * 
+ * Nedir?: Veri ile ilgiyi isler, veritabani ile baglantilidir.
+ * 
+ * Bu Service dosyasi genellikle 'veritabani' ve 'HTTP' istekleri
+ *  gibi islevler icin kullanilir.
+ */
 
 /**
  * NOTES:

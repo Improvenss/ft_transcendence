@@ -15,6 +15,13 @@ networks:
 #/////////////////////////////////////////////////////////////////////////////#
 
 volumes:
+  ssl_certs:
+    name: ssl_certs
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: ./data
   postgres_data:
     driver: local
     driver_opts:
@@ -50,6 +57,16 @@ volumes:
 #                             SERVICES                                        #
 #/////////////////////////////////////////////////////////////////////////////#
 services:
+  # __CERTIFICATE___ # OK
+  ssl_container:
+    container_name: ssl
+    build: ./srcs/requirements/ssl
+    volumes:
+      - ssl_certs:/etc/ssl/certs
+    networks:
+      - transcendence_network
+    restart: "no"
+  # ________________ #
   # ___PostgreSQL___ # OK
   postgres:
     container_name: postgres
@@ -59,6 +76,7 @@ services:
     environment:
       TZ: "Europe/Istanbul"
     volumes:
+      - ssl_certs:/etc/ssl/certs
       - postgres_data:/var/lib/postgresql/data
       - ./srcs/requirements/postgres/create-database.sh:/docker-entrypoint-initdb.d/create-database.sh # PostgreSQL bu 'docker-entypoing-initdb.d' klasorunun icerisindekileri container olusup postgresql calistirildiktan sonra otomatik bir sekilde bu icerisindeki dosyalari calistiriyor.
     networks:
@@ -66,6 +84,8 @@ services:
     restart: unless-stopped # Durdurulmadigi surece.
     ports:
       - 5432:5432 # Local port / Exported port. postgres's default port(5432).
+    depends_on:
+      - ssl_container
   # ________________ #
   # ____pgadmin4____ # OK
   pgadmin4:
@@ -76,6 +96,7 @@ services:
     environment:
       TZ: "Europe/Istanbul"
     volumes:
+      - ssl_certs:/etc/ssl/certs
       - ./srcs/requirements/pgadmin4/servers.json:/pgadmin4/servers.json
       - pgadmin4_data:/pgadmin4
     networks:
@@ -84,6 +105,7 @@ services:
     ports:
       - 5050:80 # Local port / Exported port.
     depends_on:
+      - ssl_container
       - postgres
   # ________________ #
   # # ___redis_cache__ #
@@ -92,6 +114,7 @@ services:
   #   # env_file:
   #   #   - ./srcs/envFiles/redis.env
   #   volumes:
+  #     - ssl_certs:/etc/ssl/certs
   #     - ./srcs/requirements/redis:/app
   #   networks:
   #     # - bridge
@@ -100,7 +123,7 @@ services:
   #   ports:
   #     - 6379:6379 # Local port / Exported port.
   #   depends_on:
-  #     - ssl
+  #     - ssl_container
   #     - postgres #   # progress: plain
   # # ________________ #
   # _____backend____ #
@@ -110,6 +133,7 @@ services:
     # env_file:
     #   - ./srcs/envFiles/backend.env
     volumes:
+      - ssl_certs:/etc/ssl/certs
       - ./srcs/requirements/backend:/app
     networks:
       - transcendence_network
@@ -117,6 +141,7 @@ services:
     ports:
       - 3000:3000 # Local port / Exported port. nestjs's default port(3000).
     depends_on:
+      - ssl_container
       - postgres
     # progress: plain
   # ________________ #
@@ -127,6 +152,7 @@ services:
     # env_file:
     #   - ./srcs/envFiles/frontend.env
     volumes:
+      - ssl_certs:/etc/ssl/certs
       - ./srcs/requirements/frontend:/app
     networks:
       - transcendence_network
@@ -135,7 +161,7 @@ services:
       # - 80:80 # Local port / Exported port.
       - 443:443
     depends_on:
-      - postgres
+      - ssl_container
       - backend
     # progress: plain
   # ________________ #
