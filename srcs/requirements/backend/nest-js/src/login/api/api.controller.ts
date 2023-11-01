@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-// import UsersService from 'src/users/users.service';
+import UsersService from 'src/users/users.service';
 
 @Controller('api')
 export class ApiController {
+	constructor(private readonly usersService: UsersService) {}
+
 	@Get()
 	getApi() {
 		return ("Here 'application programming interface' page.");
@@ -33,7 +35,9 @@ export class ApiController {
 				}
 			});
 			const	dataClient = await responseAccessToken.json();
+			// const	user = await this.usersService.createUser(dataClient.);
 			return {message: "BACKEND OK", access_token: data.access_token, dataClient: dataClient};
+			// return {message: "BACKEND OK", access_token: data.access_token, user: user};
 		}
 		else
 			return {message: "BACKEND NOK"};

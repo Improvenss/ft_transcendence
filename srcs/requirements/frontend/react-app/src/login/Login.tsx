@@ -22,7 +22,7 @@ async function	redirectToLogin(setClicked: (value: boolean) => void) {
 	{
 		const	data = await response.json();
 		console.log(data);
-		setClicked(true); // Bu da butonun tekrar tiklanabilir olmasini sagliyor.
+		setClicked(true);
 		window.location.href = data.requestLogin;
 	}
 	else
