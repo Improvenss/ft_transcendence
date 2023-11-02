@@ -164,6 +164,7 @@ services:
       - 443:443
     depends_on:
       - ssl_container
+      - postgres
       - backend
     # progress: plain
   # ________________ #

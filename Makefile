@@ -80,9 +80,9 @@ clean:
 
 fclean: clean
 	@docker system prune -fa 2>/dev/null
-# @sudo rm -rf ./data 2>/dev/null
-	@rm -rf /srcs/requirements/frontend/react-app/node_modules
-	@rm -rf /srcs/requirements/backend/nest-js/node_modules
+	@rm -rf ./srcs/requirements/frontend/react-app/node_modules
+	@rm -rf ./srcs/requirements/backend/nest-js/node_modules
+	@rm -rf ./data 2>/dev/null
 	@echo "Cleaned with $(NUMPROC) cores!"
 	@echo "$(RED)ALL THINGS CLEANED$(RESET)"
 
