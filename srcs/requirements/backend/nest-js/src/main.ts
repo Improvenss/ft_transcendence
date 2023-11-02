@@ -4,6 +4,20 @@ import * as fs from 'fs';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+/**
+ * TODO: API 1. adimi test edilecek. React'tan da yonlendimeyi duzelt.
+ * DONTFORGET: Func()'larin altindaki yorum satirlarini(NOTLARI) buraya ekle.
+ * TODO: API 2. ve 3. eklenecek.
+ * TODO: Ya Veritabanina yazma islemi 3. adimda gerceklesecek
+ *  ona ozel api.service.ts dosyasinda api'den gelen user bilgisini
+ *  veritabanina kaydedecek function yapilacak.
+ * TODO: Ya da users CRUD yapisina yonlendirilecek.
+ *  Buradan yazma islemi gerceklesecek.
+ * TODO: Entity'leri api ve users olacak sekilde ayarla, hangisi mantikliysa.
+ * 
+ * TODO: Cookies eklenecek, buna gore login sayfasina yonlendirme yapilacak.
+ * TODO: JWT yapisini daha detayli ogren.
+ */
 async function bootstrap() {
 	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.
 	const	httpsOptions = {
@@ -43,6 +57,7 @@ bootstrap();
  * npm install --save-dev @nestjs/typeorm -> Veritabani ile baglanti kurabilmemizi saglayan ORM(Object Relational Mapping).
  * npm install --save-dev pg -> PostgreSQL ile bagtanti kurabilmek icin.
  * 
- * 
- * 
+ * nest generate resource api
+ * 	? What transport layer do you use? REST API
+ * 	? Would you like to generate CRUD entry points? Yes
  */
