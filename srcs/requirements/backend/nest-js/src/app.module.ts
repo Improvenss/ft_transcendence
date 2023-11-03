@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config'; // Bunu ekledigimizde 'dotenv/config'i kullanmiyoruz. Ama ConfigModule.forRoot()'u eklemek zorunda kaliyoruz.
 import { TypeOrmModule } from '@nestjs/typeorm'; // Veritabani ile iletisim kurabilmek icin kullandigimiz ORM kutuphanesi.
 import { ApiModule } from './api/api.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { ApiModule } from './api/api.module';
 			synchronize: true,
 		}),
 		ApiModule,
+		UsersModule,
 		// TypeOrmModule.forRoot({
 		// 	type: 'postgres',
 		// 	port: parseInt("5432"),

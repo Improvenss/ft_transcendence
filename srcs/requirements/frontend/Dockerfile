@@ -54,9 +54,9 @@ WORKDIR /app/react-app
 
 EXPOSE 443
 
-ENTRYPOINT ["/bin/sh", "-c", "cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/"]
-ENTRYPOINT ["/bin/sh", "-c", "chmod 777 /usr/local/share/ca-certificates/ft_transcendence.crt"]
-ENTRYPOINT ["/bin/sh", "-c", "update-ca-certificates"]
+# ENTRYPOINT ["/bin/sh", "-c", "cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/"]
+# ENTRYPOINT ["/bin/sh", "-c", "chmod 777 /usr/local/share/ca-certificates/ft_transcendence.crt"]
+# ENTRYPOINT ["/bin/sh", "-c", "update-ca-certificates"]
 
 ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive\
 && npm start"]

@@ -23,12 +23,12 @@ WORKDIR /app/nest-js
 
 EXPOSE 3000
 
-ENTRYPOINT ["/bin/sh", "-c", "cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/"]
-ENTRYPOINT ["/bin/sh", "-c", "chmod 777 /usr/local/share/ca-certificates/ft_transcendence.crt"]
-ENTRYPOINT ["/bin/sh", "-c", "update-ca-certificates"]
+# ENTRYPOINT ["/bin/sh", "-c", "cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/"]
+# ENTRYPOINT ["/bin/sh", "-c", "chmod 777 /usr/local/share/ca-certificates/ft_transcendence.crt"]
+# ENTRYPOINT ["/bin/sh", "-c", "update-ca-certificates"]
 
 # We are installing NestJS package for global.
-ENTRYPOINT ["npm", "install", "--global", "@nestjs/cli"]
+RUN ["npm", "install", "--global", "@nestjs/cli"]
 
 # Installing other packages.
 # RUN ["npm", "install"]

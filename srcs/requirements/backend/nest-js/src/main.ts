@@ -61,4 +61,6 @@ bootstrap();
  * nest generate resource api
  * 	? What transport layer do you use? REST API
  * 	? Would you like to generate CRUD entry points? Yes
+ * 
+ * npm install --save-dev typeorm -> Entity'de falan TypeORM CRUD yapisini kullanabilmek icin.
  */

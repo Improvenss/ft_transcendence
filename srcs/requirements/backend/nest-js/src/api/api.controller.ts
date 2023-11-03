@@ -123,6 +123,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			return {message: "BACKEND NOK"};
 		const	dataClient = await responseAccessToken.json();
 
+		// dataClient -> DB'ye kaydedilecek.
 		// const	user = await this.usersService.createUser(dataClient.);
 		return {message: "BACKEND OK", access_token: dataToken.access_token, dataClient: dataClient};
 		// return {message: "BACKEND OK", access_token: data.access_token, user: user};
