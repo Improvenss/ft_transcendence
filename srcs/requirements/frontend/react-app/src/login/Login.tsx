@@ -3,7 +3,7 @@ import styles from './Login.module.css'
 import Countdown from "./Countdown";
 
 async function	redirectToLogin(setClicked: (value: boolean) => void) {
-	const	response = await fetch("https://localhost:3000/login", {
+	const	response = await fetch("https://localhost:3000/api/login", {
 		method: 'POST',
 		headers: {
 			'Content-Type':'application/json',

@@ -5,13 +5,14 @@ import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 /**
- * TODO: API 1. adimi test edilecek. React'tan da yonlendimeyi duzelt.
+ * TODO OK: API 1. adimi test edilecek. React'tan da yonlendimeyi duzelt.
  * DONTFORGET: Func()'larin altindaki yorum satirlarini(NOTLARI) buraya ekle.
+ * 
  * TODO: API 2. ve 3. eklenecek.
- * TODO: Ya Veritabanina yazma islemi 3. adimda gerceklesecek
+ * TODO degil: Ya Veritabanina yazma islemi 3. adimda gerceklesecek
  *  ona ozel api.service.ts dosyasinda api'den gelen user bilgisini
  *  veritabanina kaydedecek function yapilacak.
- * TODO: Ya da users CRUD yapisina yonlendirilecek.
+ * TODO bunu yap: Ya da users CRUD yapisina yonlendirilecek.
  *  Buradan yazma islemi gerceklesecek.
  * TODO: Entity'leri api ve users olacak sekilde ayarla, hangisi mantikliysa.
  * 

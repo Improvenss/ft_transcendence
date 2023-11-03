@@ -92,15 +92,41 @@ export class ApiController {
 	@Post('login')
 	async	loginStatus(@Body() status: {requestLogin: string}) {
 		const	URL = `https://api.intra.42.fr/oauth/authorize?client_id=\
-			${process.env.API_UID}&redirect_uri=\
-			${process.env.API_REDIR_URI}&response_type=code`;
+${process.env.API_UID}&redirect_uri=\
+${process.env.API_REDIR_URI}&response_type=code`;
 		if (status.requestLogin === "LOGIN") // Basarili bir sekilde giris yapabilir.
 			return ({message: "Login Successfully!", requestLogin: URL});
 		else // Buradaki requestLogin kismini login ya da 404 sayfasi yapabilirsin.
 			return ({message: "Connection Failed!", requestLogin: process.env.API_LOGIN_URL});
 	}
 
-	// Buraya kalan 2 adim da eklenecek.
+	/**
+	 * 2/3 & 3/3 adimlar burada gerceklesiyor.
+	 * 
+	 * Buradaki islemler bittigi anda 42 API'den user'in butun
+	 *  bilgileri alinmis olacak.
+	 * 
+	 * @param status 
+	 * @returns 
+	 */
+	@Post('token')
+	async	loginToken(@Body() status: {code: string}) {
+		// Burada 2/3 access_token'i aliyoruz
+		const	response = await this.apiService.fetchToken(status);
+		if (!response.ok)
+			return {message: "BACKEND NOK"};
+		const	dataToken = await response.json();
+
+		// Burada 3/3 user(dataClient) verisini aliyoruz.
+		const	responseAccessToken = await this.apiService.fetchAccessToken(dataToken);
+		if (!responseAccessToken.ok)
+			return {message: "BACKEND NOK"};
+		const	dataClient = await responseAccessToken.json();
+
+		// const	user = await this.usersService.createUser(dataClient.);
+		return {message: "BACKEND OK", access_token: dataToken.access_token, dataClient: dataClient};
+		// return {message: "BACKEND OK", access_token: data.access_token, user: user};
+	}
 	// Sonra da 'users' olusturulacak. 'nest generate resource users' diye.
 
 	@Get()
