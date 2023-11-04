@@ -13,6 +13,10 @@ export class User {
 
 	@Column()
 	last_name: string
+
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
 }
 
 /**

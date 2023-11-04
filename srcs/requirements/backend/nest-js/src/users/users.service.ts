@@ -1,27 +1,63 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
-	create(createUserDto: CreateUserDto) {
-		return 'This action adds a new user';
+	constructor(
+		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
+		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
+		private readonly	entityManager: EntityManager
+		) {}
+
+	/**
+	 * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
+	 * 
+	 * @param createUserDto 
+	 */
+	async	create(createUserDto: CreateUserDto) {
+		const	newUser = new User(createUserDto);
+		await this.entityManager.save(newUser);
+		return (`New user created: id[${newUser.id}]`);
 	}
 
-	findAll() {
-		return `This action returns all users`;
+	/**
+	 * DB'deki butun Users kayitlarini aliyor.
+	 */
+	async	findAll() {
+		return (await this.usersRepository.find());
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} user`;
+	/**
+	 * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
+	 * @param id 
+	 * @returns User.
+	 */
+	async	findOne(id: number) {
+		return (await this.usersRepository.findOneBy({id}));
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto) {
-		return `This action updates a #${id} user`;
+	/**
+	 * DB'de var olan User verisini guncelliyoruz.
+	 * @param id Guncellenecek olan User id'si.
+	 * @param updateUserDto Guncellemek istedigmiz parametre.
+	 * @returns Guncellenen User.
+	 */
+	async	update(id: number, updateUserDto: UpdateUserDto) {
+		const	tmpUser = await this.findOne(id);
+		console.log("asdfasdfasdf");
+		console.log(tmpUser);
+		tmpUser.login = updateUserDto.login;
+		tmpUser.first_name = updateUserDto.first_name;
+		// Buraya baska seyleri degistirmek istiyorsak onlari da tek tek eklememiz gerekiyor.
+		return (await this.entityManager.save(tmpUser));
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} user`;
+	async	remove(id: number) {
+		return (this.usersRepository.delete(id));
 	}
 }
 
