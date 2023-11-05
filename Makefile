@@ -130,7 +130,7 @@ update_hosts:
 	@if grep -q "127.0.0.1	yuandre.com" /etc/hosts; then\
 		echo "$(YELLOW)Host Already Exist: /etc/hosts: $(B_YELLOW)'127.0.0.1 yuandre.com'$(END)";\
 	else\
-		sudo sed -i '2i127.0.0.1\tyuandre.com' /etc/hosts;\
+		sudo sed -i '' '2i127.0.0.1\tyuandre.com' /etc/hosts;\
 		echo "$(B_GREEN)Adding 'yuandre.com' host to /etc/hosts inside.$(END)";\
 	fi
 # @sed -i '2s/^/127.0.0.0\tgsever.42.fr\n/' /etc/hosts

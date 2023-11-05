@@ -114,19 +114,21 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		// Burada 2/3 access_token'i aliyoruz
 		const	response = await this.apiService.fetchToken(status);
 		if (!response.ok)
-			return {message: "BACKEND NOK"};
+			return {message: "BACKEND response NOK"};
 		const	dataToken = await response.json();
 
 		// Burada 3/3 user(dataClient) verisini aliyoruz.
 		const	responseAccessToken = await this.apiService.fetchAccessToken(dataToken);
 		if (!responseAccessToken.ok)
-			return {message: "BACKEND NOK"};
-		const	dataClient = await responseAccessToken.json();
+			return {message: "BACKEND responseAccessToken NOK"};
+		const	dataClient = await responseAccessToken.json(); // User data (json file).
 
-		// dataClient -> DB'ye kaydedilecek.
 		// const	user = await this.usersService.createUser(dataClient.);
-		return {message: "BACKEND OK", access_token: dataToken.access_token, dataClient: dataClient};
-		// return {message: "BACKEND OK", access_token: data.access_token, user: user};
+		const	responseData = await this.apiService.fetchUserData(dataClient);
+		const	userData = await responseData.json();
+		// return (responseData.ok ? "Data save ok" : "save error");
+		// return ({message: "User data successfully saved database."});
+		return {message: "BACKEND OK", access_token: dataToken.access_token, dataClient: dataClient, userData: userData};
 	}
 	// Sonra da 'users' olusturulacak. 'nest generate resource users' diye.
 

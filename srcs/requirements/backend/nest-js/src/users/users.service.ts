@@ -52,6 +52,7 @@ export class UsersService {
 		console.log(tmpUser);
 		tmpUser.login = updateUserDto.login;
 		tmpUser.first_name = updateUserDto.first_name;
+		tmpUser.last_name = updateUserDto.last_name;
 		// Buraya baska seyleri degistirmek istiyorsak onlari da tek tek eklememiz gerekiyor.
 		return (await this.entityManager.save(tmpUser));
 	}

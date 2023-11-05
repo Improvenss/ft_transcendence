@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class ApiService {
+	// constructor(createUserDto: CreateUserDto) {}
+
 	create(createApiDto: CreateApiDto) {
 		return 'This action adds a new api';
 	}
@@ -36,7 +39,7 @@ export class ApiService {
 		const response = await fetch(process.env.API_TOKEN_URL, {
 			method: "POST",
 			headers: {
-				"Content-Type":"application/json"
+				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
 				grant_type: "authorization_code",
@@ -66,5 +69,24 @@ export class ApiService {
 			}
 		});
 		return (responseAccessToken);
+	}
+
+	async	fetchUserData(dataClient: any) {
+		const asdf: CreateUserDto = {
+			login: dataClient.login,
+			first_name: dataClient.first_name,
+			last_name: dataClient.last_name,
+		};
+		const	responseData = await fetch(process.env.POSTGRES_TABLE_USER, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(asdf)
+			// body: JSON.stringify({
+				
+			// })
+		});
+		return (responseData);
 	}
 }
