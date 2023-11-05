@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, H
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { isEqual } from 'lodash';
+// import { isEqual } from 'lodash';
 
 @Controller('users')
 export class UsersController {
@@ -15,7 +15,7 @@ export class UsersController {
 	 */
 	@Post()
 	async	create(@Body() createUserDto: CreateUserDto) {
-		const	newUser = this.usersService.create(createUserDto);
+		const	newUser = await this.usersService.create(createUserDto);
 		if (!newUser)
 			throw (new HttpException("@Post(): create(): User could not be created!",
 				HttpStatus.INTERNAL_SERVER_ERROR));

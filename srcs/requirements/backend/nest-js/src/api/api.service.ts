@@ -2,10 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ApiService {
-	// constructor(createUserDto: CreateUserDto) {}
+	constructor(
+		private readonly	usersService: UsersService
+		) {}
 
 	create(createApiDto: CreateApiDto) {
 		return 'This action adds a new api';
@@ -72,21 +75,12 @@ export class ApiService {
 	}
 
 	async	fetchUserData(dataClient: any) {
-		const asdf: CreateUserDto = {
+		const	createUserDto: CreateUserDto = {
 			login: dataClient.login,
 			first_name: dataClient.first_name,
 			last_name: dataClient.last_name,
-		};
-		const	responseData = await fetch(process.env.POSTGRES_TABLE_USER, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(asdf)
-			// body: JSON.stringify({
-				
-			// })
-		});
-		return (responseData);
+		}
+		const	responseSave = await this.usersService.create(createUserDto);
+		return (responseSave);
 	}
 }

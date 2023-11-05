@@ -5,9 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 
 @Module({
-	imports: [TypeOrmModule.forFeature([User])], // Burasi da User CRUD'unu kullanabilmemizi sagliyor.
+	imports: [
+		TypeOrmModule.forFeature([User]),
+	], // Burasi da User CRUD'unu kullanabilmemizi sagliyor.
 	controllers: [UsersController],
 	providers: [UsersService],
+	exports: [UsersService] // api.service.ts dosyasinin icerisinde kullandigimiz icin bunu export ediyoruz. Sonra da api.module.ts dosyasinda da import edecegiz.
 })
 export class UsersModule {}
 

@@ -28,12 +28,12 @@ volumes:
       type: none
       o: bind
       device: ./data/postgres
-  pgadmin4_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/pgadmin4
+  # pgadmin4_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./data/pgadmin4
   # redis_data:
   #   driver: local
   #   driver_opts:
@@ -100,7 +100,7 @@ services:
       - ssl_certs:/etc/ssl/certs
       - ./srcs/requirements/pgadmin4/servers.json:/pgadmin4/servers.json
       - ./srcs/requirements/pgadmin4/entrypoint.sh:/entrypoint.sh
-      - pgadmin4_data:/pgadmin4
+      # - pgadmin4_data:/pgadmin4
     networks:
       - transcendence_network
     restart: unless-stopped
