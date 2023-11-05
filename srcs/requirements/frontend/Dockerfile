@@ -43,16 +43,20 @@ RUN apk update && apk upgrade && apk add --update --no-cache \
 # 	-keyout /etc/ssl/certs/ft_transcendence.key \
 # 	-subj "/C=TR/ST=Kocaeli/L=Istanbul/O=Ecole42/OU=pong/CN=pong"
 
-COPY ft_transcendence.crt /etc/ssl/certs/
-COPY ft_transcendence.key /etc/ssl/certs/
+# COPY ft_transcendence.crt /etc/ssl/certs/
+# COPY ft_transcendence.key /etc/ssl/certs/
 
-RUN cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/
-RUN chmod 644 /usr/local/share/ca-certificates/ft_transcendence.crt
-RUN update-ca-certificates
+# RUN cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/
+# RUN chmod 644 /usr/local/share/ca-certificates/ft_transcendence.crt
+# RUN update-ca-certificates
 
 WORKDIR /app/react-app
 
 EXPOSE 443
+
+# ENTRYPOINT ["/bin/sh", "-c", "cp /etc/ssl/certs/ft_transcendence.crt /usr/local/share/ca-certificates/"]
+# ENTRYPOINT ["/bin/sh", "-c", "chmod 777 /usr/local/share/ca-certificates/ft_transcendence.crt"]
+# ENTRYPOINT ["/bin/sh", "-c", "update-ca-certificates"]
 
 ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive\
 && npm start"]

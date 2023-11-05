@@ -10,7 +10,7 @@ export default function	Api()
 	const	uriCode = urlParams.get('code');
 
 	async function sendCode() {
-		const response = await fetch("https://localhost:3000/api", {
+		const response = await fetch("https://localhost:3000/api/token", {
 			method: 'POST',
 			headers: {
 				'Content-Type':'application/json'

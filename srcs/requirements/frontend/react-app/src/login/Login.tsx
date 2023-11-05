@@ -3,10 +3,14 @@ import styles from './Login.module.css'
 import Countdown from "./Countdown";
 
 async function	redirectToLogin(setClicked: (value: boolean) => void) {
-	const	response = await fetch("https://localhost:3000/login", {
+	const	response = await fetch("https://localhost:3000/api/login", {
 		method: 'POST',
 		headers: {
-			'Content-Type':'application/json'
+			'Content-Type':'application/json',
+			'Access-Control-Allow-Origin': "https://localhost:3000",
+			"Access-Control-Allow-Methods": "POST",
+			"Access-Control-Allow-Headers": "Content-Type",
+			'Access-Control-Allow-Credentials': 'true',
 			// 'Content-Type':'text/plain'
 		},
 		// body: "LOGIN",
@@ -18,7 +22,7 @@ async function	redirectToLogin(setClicked: (value: boolean) => void) {
 	{
 		const	data = await response.json();
 		console.log(data);
-		setClicked(true); // Bu da butonun tekrar tiklanabilir olmasini sagliyor.
+		setClicked(true);
 		window.location.href = data.requestLogin;
 	}
 	else
@@ -46,6 +50,10 @@ function Login()
 }
 
 export default Login;
+
+
+
+
 
 
 

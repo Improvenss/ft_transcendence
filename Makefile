@@ -69,6 +69,7 @@ down:
 
 clean:
 	@docker-compose -f ./docker-compose.yml down
+	@docker volume rm $$(docker volume ls -q) 2>/dev/null
 	@echo "$(RED)STOPPED AND CLEANED JUST CONTAINERS$(RESET)"
 
 # There is have 2 way run a command with shell argument.
@@ -78,11 +79,10 @@ clean:
 # 	docker container rm $(shell docker ps -aq) -f
 
 fclean: clean
-	@docker volume rm $$(docker volume ls -q) 2>/dev/null
 	@docker system prune -fa 2>/dev/null
-# @sudo rm -rf ./data 2>/dev/null
-	@rm -rf /srcs/requirements/frontend/react-app/node_modules
-	@rm -rf /srcs/requirements/backend/nest-js/node_modules
+	@rm -rf ./srcs/requirements/frontend/react-app/node_modules
+	@rm -rf ./srcs/requirements/backend/nest-js/node_modules
+	@rm -rf ./data 2>/dev/null
 	@echo "Cleaned with $(NUMPROC) cores!"
 	@echo "$(RED)ALL THINGS CLEANED$(RESET)"
 
@@ -130,7 +130,7 @@ update_hosts:
 	@if grep -q "127.0.0.1	yuandre.com" /etc/hosts; then\
 		echo "$(YELLOW)Host Already Exist: /etc/hosts: $(B_YELLOW)'127.0.0.1 yuandre.com'$(END)";\
 	else\
-		sudo sed -i '2i127.0.0.1\tyuandre.com' /etc/hosts;\
+		sudo sed -i '' '2i127.0.0.1\tyuandre.com' /etc/hosts;\
 		echo "$(B_GREEN)Adding 'yuandre.com' host to /etc/hosts inside.$(END)";\
 	fi
 # @sed -i '2s/^/127.0.0.0\tgsever.42.fr\n/' /etc/hosts
@@ -159,12 +159,18 @@ setup_ssh: ## It aims to make the necessary settings to provide SSH (Secure Shel
 	sudo ufw enable
 	sudo ufw allow ssh
 	sudo ufw allow 4242
-	sudo ufw allow 3306
-	sudo ufw allow 80
+	sudo ufw allow 5050
+	sudo ufw allow 3000
+	sudo ufw allow 9000
 	sudo ufw allow 443
 	sudo ufw allow OpenSSH
 	sudo ufw enable
 	@echo "...then add port(4242) for Virtual Machine"
+	@echo 'set VM networks; host machine ip: 127.0.0.1,  host b. point: 4242, guest b.point: 4242 \n\
+			set VM networks; host machine ip: 127.0.0.1,  host b. point: 5050, guest b.point: 5050 \n\
+			set VM networks; host machine ip: 127.0.0.1,  host b. point: 443, guest b.point: 443 \n\
+			set VM networks; host machine ip: 127.0.0.1,  host b. point: 3000, guest b.point: 3000 \n\
+			set VM networks; host machine ip: 127.0.0.1,  host b. point: 9000, guest b.point: 9000 \n\'
 	@echo "Now you can connect to your VM in this way from your own terminal: 'ssh user_name@localhost -p 4242' or ssh root@localhost -p 4242"
 	@echo "if you can't connect, check the 'known_hosts' file example: 'rm -rf /home/gsever/.ssh/known_hosts'"
 
