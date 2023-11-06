@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config'; // Bunu ekledigimizde 'dotenv/con
 import { TypeOrmModule } from '@nestjs/typeorm'; // Veritabani ile iletisim kurabilmek icin kullandigimiz ORM kutuphanesi.
 import { ApiModule } from './api/api.module';
 import { UsersModule } from './users/users.module';
+import { ChatGateway } from './chat/chat.gateway'; // nest g gateway chat kodunu calistirdiktan sonra geldi.
 
 @Module({
 	imports: [
@@ -34,6 +35,6 @@ import { UsersModule } from './users/users.module';
 		// }),
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, ChatGateway], // Buraya da nest g gateway chat kodunu calistirinca geldi.
 })
 export class AppModule {}
