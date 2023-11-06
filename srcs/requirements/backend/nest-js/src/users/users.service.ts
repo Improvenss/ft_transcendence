@@ -53,13 +53,28 @@ export class UsersService {
 		tmpUser.login = updateUserDto.login;
 		tmpUser.first_name = updateUserDto.first_name;
 		tmpUser.last_name = updateUserDto.last_name;
+		tmpUser.image = updateUserDto.image
 		// Buraya baska seyleri degistirmek istiyorsak onlari da tek tek eklememiz gerekiyor.
 		return (await this.entityManager.save(tmpUser));
 	}
 
+	/**
+	 * Deleting all User tables.
+	 * @returns 
+	 */
+	async	removeAll() {
+		return (this.usersRepository.delete({}));
+	}
+
+	/**
+	 * Sadece verilen id'ye sahip olan User tablosunu siliyor.
+	 * @param id User id.
+	 * @returns 
+	 */
 	async	remove(id: number) {
 		return (this.usersRepository.delete(id));
 	}
+
 }
 
 

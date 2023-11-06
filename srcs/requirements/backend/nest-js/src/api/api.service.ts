@@ -75,11 +75,7 @@ export class ApiService {
 	}
 
 	async	fetchUserData(dataClient: any) {
-		const	createUserDto: CreateUserDto = {
-			login: dataClient.login,
-			first_name: dataClient.first_name,
-			last_name: dataClient.last_name,
-		}
+		const createUserDto: CreateUserDto = Object.assign({}, dataClient);
 		const	responseSave = await this.usersService.create(createUserDto);
 		return (responseSave);
 	}

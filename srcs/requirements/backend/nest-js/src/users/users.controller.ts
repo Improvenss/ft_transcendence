@@ -65,6 +65,11 @@ export class UsersController {
 		return ({message: "User updated successfully."});
 	}
 
+	@Delete()
+	async	removeAll() {
+		return this.usersService.removeAll();
+	}
+
 	/**
 	 * Disaridan 'string' olarak aldigimiz 'id' parametremizi
 	 *  Number() ile 'number' tipine ceviriyoruz.

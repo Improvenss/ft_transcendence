@@ -1,4 +1,21 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+
+// @Entity()
+// export class Image {
+// 	@PrimaryGeneratedColumn()
+// 	id: number
+
+// 	@Column()
+// 	link: string
+
+// 	@Column()
+// 	versions: {
+// 		large: string;
+// 		medium: string;
+// 		micro: string;
+// 		small: string;
+// 	}
+// }
 
 @Entity()
 export class User {
@@ -13,6 +30,21 @@ export class User {
 
 	@Column()
 	last_name: string
+
+	// @OneToOne(() => Image)
+	// @JoinColumn()
+	@Column({type: "text", nullable: true})
+	// image: string
+	image: {
+		link: string,
+		versions: {
+			large: string;
+			medium: string;
+			micro: string;
+			small: string;
+		}
+	}
+	// image: Image;
 
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);

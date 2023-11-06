@@ -7,6 +7,7 @@ export class AppService {
 		return ('Hello World! from backend/nest-js/src/app.service.ts.');
 	}
 
+	// NOT BURADAN SONRAKI FUNCTIONLAR KULLANILMAMAKTADIR. TEST AMACIYLA YAZILMISTIR!!!
 	private	fileName = "asdf.txt";
 
 	createFile(): void {
