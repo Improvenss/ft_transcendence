@@ -31,6 +31,7 @@
     ]
   },
   "devDependencies": {
+    "socket.io-client": "^4.7.2",
     "web-vitals": "^3.5.0"
   }
 }
