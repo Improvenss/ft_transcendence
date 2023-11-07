@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, H
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-// import { isEqual } from 'lodash';
 
 @Controller('users')
 export class UsersController {
@@ -53,15 +52,39 @@ export class UsersController {
 	 */
 	@Patch(':id')
 	async	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-		const	tmpUser = await this.usersService.update(+id, updateUserDto);
+		const	tmpDb: UpdateUserDto = {}; // DB'deki guncellenmis degerler atanacak.
+		const	tmpUser = await this.usersService.update(+id, updateUserDto); // DB'deki eskisi yenisiyle guncelliyoruz, yeni halini donduruyoruz.
+
 		if (!tmpUser)
 			throw (new HttpException("@Patch(':id'): update(): id: User does not exist!",
 				HttpStatus.INTERNAL_SERVER_ERROR));
-		// if (updateUserDto !== tmpUser)
-		// if (!isEqual(updateUserDto, tmpUser)) // Buradaki function 'lodash' kutuphanesi icerisindeki objenin tipini ve icerisindeki degerlerini de esit mi diye kontrol ediyor.
-		// if (JSON.stringify(UpdateUserDto) !== JSON.stringify(tmpUser))
-			// throw (new HttpException("@Patch(':id'): update(): id: User's in DB but User does not update!",
-				// HttpStatus.INTERNAL_SERVER_ERROR));
+		// Bizim guncellemek icin attigimiz istekteki parametreleri DB'deki ile karsilastiriyoruz.
+		// Eger ikisinde de varsa; tmpDb'ye atiyoruz.
+		// Degismis mi degismemis mi DB'deki veriyi aliyoruz.
+		// DB'deki veriyle, bizim istedigimizi karsilastiracagiz.
+		// Degerler ayniysa basarili bir sekilde 'update' tamamlanmis oluyor.
+		for (const key in updateUserDto) {
+			if (updateUserDto.hasOwnProperty(key) && tmpUser.hasOwnProperty(key)) {
+				tmpDb[key] = tmpUser[key];
+			}
+		}
+		console.log("-------------------");
+		console.log("tmpDb -> :", tmpDb);
+		// Burada JSON dosyasinin icerisindeki verileri parse'ledik.
+		const updateUserObj = JSON.parse(JSON.stringify(updateUserDto));
+		// const tmpUserObj = JSON.parse(JSON.stringify(tmpUser));
+		const tmpDbObj = JSON.parse(JSON.stringify(tmpDb));
+		// console.log(updateUserDto);
+		// console.log(tmpUser);
+		console.log("-------------------");
+		console.log("updateUserObj -> :", updateUserObj);
+		console.log("+++++++++++");
+		console.log("tmpDbObj -> :", tmpDbObj);
+		console.log("-------------------");
+		// Burada da duzgunce alinmis JSON dosyasi uzerinden esitlik kontrolu yapiyoruz.
+		if (JSON.stringify(updateUserObj) !== JSON.stringify(tmpDbObj))
+			throw (new HttpException("@Patch(':id'): update(): id: User's in DB but User does not update!",
+				HttpStatus.INTERNAL_SERVER_ERROR));
 		return ({message: "User updated successfully."});
 	}
 

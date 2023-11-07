@@ -63,6 +63,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 
 		const	responseData = await this.apiService.fetchUserData(dataClient);
 		// return ({message: "User data successfully saved database."});
+		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", access_token: dataToken.access_token,
 			dataClient: dataClient, responseData: responseData};
 	}

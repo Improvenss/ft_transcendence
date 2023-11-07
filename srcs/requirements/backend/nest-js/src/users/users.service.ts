@@ -42,19 +42,15 @@ export class UsersService {
 
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.
+	 * Object.assign(); function'unda updateUserDto json bilgilerini
+	 *  tmpUser'e atiyoruz.
 	 * @param id Guncellenecek olan User id'si.
 	 * @param updateUserDto Guncellemek istedigmiz parametre.
 	 * @returns Guncellenen User.
 	 */
 	async	update(id: number, updateUserDto: UpdateUserDto) {
 		const	tmpUser = await this.findOne(id);
-		console.log("asdfasdfasdf");
-		console.log(tmpUser);
-		tmpUser.login = updateUserDto.login;
-		tmpUser.first_name = updateUserDto.first_name;
-		tmpUser.last_name = updateUserDto.last_name;
-		tmpUser.image = updateUserDto.image
-		// Buraya baska seyleri degistirmek istiyorsak onlari da tek tek eklememiz gerekiyor.
+		Object.assign(tmpUser, updateUserDto);
 		return (await this.entityManager.save(tmpUser));
 	}
 
