@@ -68,12 +68,12 @@ export class UsersController {
 				tmpDb[key] = tmpUser[key];
 			}
 		}
-		console.log("-------------------");
-		console.log("tmpDb -> :", tmpDb);
 		// Burada JSON dosyasinin icerisindeki verileri parse'ledik.
 		const updateUserObj = JSON.parse(JSON.stringify(updateUserDto));
 		// const tmpUserObj = JSON.parse(JSON.stringify(tmpUser));
 		const tmpDbObj = JSON.parse(JSON.stringify(tmpDb));
+		console.log("-------------------");
+		console.log("tmpDb -> :", tmpDb);
 		// console.log(updateUserDto);
 		// console.log(tmpUser);
 		console.log("-------------------");
