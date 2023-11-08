@@ -12,8 +12,45 @@ function App() {
 	const navigate = useNavigate();
 	const [isLoading, setLoading] = useState(true);
 	const [isAuth, setAuth] = useState(() => {
-		const user = Cookies.get("user");
-		return !!user;
+		const userCookie = Cookies.get("user");
+
+		async function sendCookie() {
+			const response = await fetch("https://localhost:3000/api/cookie", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					cookie: userCookie as string,
+				})
+			})
+
+			if (response.ok){
+				const data = await response.json();
+				console.log(data);
+				console.log("BACKEND CONNECTION OK");
+				if (data.message === 'COOKIE OK')
+				{
+					return (true);
+				}
+				return (false);
+			}
+			else{
+				console.log("BACKEND CONNECTION NOK");
+				console.log("COOKIE NOK");
+				return (false);
+			}
+		}
+
+		const cookieResponse = sendCookie();
+		cookieResponse.then(data => {
+		  if (data) {
+			setAuth(true);
+		  } else {
+			setAuth(false);
+		  }
+		});
+		return (!!cookieResponse);
 	});
 
 	useEffect(() => {

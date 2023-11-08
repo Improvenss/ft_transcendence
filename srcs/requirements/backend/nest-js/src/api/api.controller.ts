@@ -4,6 +4,9 @@ import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
 import * as fs from 'fs';
 import { stringify } from 'querystring';
+import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+
 
 @Controller('api')
 export class ApiController {
@@ -61,13 +64,41 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		console.log(`Dosya şu konuma kaydedildi: ${filepath}`);
 		fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
 
-		const	responseData = await this.apiService.fetchUserData(dataClient);
+		const createUserDto: CreateUserDto = {
+			login: dataClient.login,
+			email: dataClient.email,
+			first_name: dataClient.first_name,
+			last_name: dataClient.last_name,
+			image: dataClient.image
+		  };
+
+		const	responseData = await this.apiService.fetchUserData(createUserDto);
+		const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
+		const cookie = jwt.sign(createUserDto, 'your_secret_key', { expiresIn: '1h' });
+
 		// return ({message: "User data successfully saved database."});
 		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", access_token: dataToken.access_token,
-			dataClient: dataClient, responseData: responseData};
+			responseData: responseData, cookie: cookie};
 	}
 	// Sonra da 'users' olusturulacak. 'nest generate resource users' diye.
+
+	@Post('cookie')
+	async userCookie(@Body() status: {cookie: string}){
+		const jwt = require('jsonwebtoken');
+
+		// JWT'yi doğrulayın
+		try {
+		  const decoded = jwt.verify(status.cookie, 'your_secret_key');
+		  console.log(decoded);
+		  return ({message: "COOKIE OK"});
+		} catch(err) {
+		  console.error(err);
+		}
+		//if (status.cookie)
+		//	return ({message: "COOKIE OK"});
+		return ({message: "COOKIE NOK"});
+	}
 
 	@Get()
 	findAll() {

@@ -44,8 +44,8 @@ export default function	Api({isAuth, setAuth}: ApiProps)
 				// localStorage ve sessionStorage'un aksine, Cookies'in bir son kullanma tarihi vardır ve bu tarih geçtikten sonra otomatik olarak silinir. Bu, belirli bir süre boyunca veri tutmak istediğiniz durumlar için faydalı olabilir.
 
 
-				console.log(data);
-				Cookies.set("user", "abc");
+				//console.log(data.cookie);
+				Cookies.set("user", data.cookie);
 				setAuth(true);
 				const browserCookie = document.cookie; //tarayıcıdaki cookiler çekilebiliniyor.
 				console.log(browserCookie);
