@@ -29,4 +29,4 @@ $> docker-compose up --build
 
 [`https://localhost:3000/`](https://localhost:3000/) for NestJS backend.
 
-[`http://localhost:9000/`](http://localhost:9000/) for pgAdmin4 PostgreSQL's administration.
+[`https://localhost:5050/`](https://localhost:5050/) for pgAdmin4 PostgreSQL's administration.

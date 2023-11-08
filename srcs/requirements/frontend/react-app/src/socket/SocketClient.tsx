@@ -13,7 +13,7 @@ function	SocketClient() {
 	}
 
 	useEffect(() => {
-		const	newSocket = io("https://localhost:9090");
+		const	newSocket = io(process.env.SOCKET_HOST as string);
 		setSocket(newSocket);
 	}, [setSocket]);
 

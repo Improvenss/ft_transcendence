@@ -16,7 +16,7 @@ export default function	Api({isAuth, setAuth}: ApiProps)
 	const	uriCode = urlParams.get('code');
 
 	async function sendCode() {
-		const response = await fetch("https://localhost:3000/api/token", {
+		const response = await fetch(process.env.REACT_APP_API_TOKEN as string, {
 			method: 'POST',
 			headers: {
 				'Content-Type':'application/json'
