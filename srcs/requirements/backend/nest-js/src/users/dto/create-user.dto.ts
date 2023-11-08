@@ -1,5 +1,3 @@
-// import { Image } from "../entities/user.entity";
-
 class Image {
 	link: string;
 	versions: {
@@ -14,5 +12,6 @@ export class CreateUserDto {
 	login: string;
 	first_name: string;
 	last_name: string;
+	email: string;
 	image: Image;
 }

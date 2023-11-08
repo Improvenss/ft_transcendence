@@ -10,7 +10,6 @@ import Cookies from 'js-cookie';
 
 function App() {
 	const navigate = useNavigate();
-	// const [isLoading, setLoading] = useState(true);
 	const [isLoading, setLoading] = useState(true);
 	const [isAuth, setAuth] = useState(() => {
 		const user = Cookies.get("user");
@@ -21,17 +20,19 @@ function App() {
 		const handleLoad = () => {
 			setLoading(false);
 		};
+		const timer = setTimeout(handleLoad, 1000);
 		
 		window.addEventListener('load', handleLoad);
 		
 		return () => {
 			window.removeEventListener('load', handleLoad);
-		};
+			clearTimeout(timer);
+		  };
 	}, []);
 		
-	// if (isLoading) {
-	// 	return (<LoadingPage />);
-	// }
+	 if (isLoading) {
+	 	return (<LoadingPage />);
+	 }
 
 	function logOut() {
 		setAuth(false);
@@ -50,7 +51,7 @@ function App() {
 		</header>
 		<Routes>
 			<Route path='/' element={<HomePage isAuth={isAuth} />} />
-			<Route path='/login' element={<LoginPage isAuth={isAuth} setAuth={setAuth}/>} />
+			<Route path='/login' element={<LoginPage isAuth={isAuth} />} />
 			<Route path='/api' element={<Api isAuth={isAuth} setAuth={setAuth} />} />
 			<Route path='*' element={<NoMatchPage />} />
 		</Routes>

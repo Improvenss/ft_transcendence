@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, JsonContains, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -33,12 +33,16 @@ export class UsersService {
 
 	/**
 	 * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
-	 * @param id 
+	 * @param id
+	 * @param login
 	 * @returns User.
 	 */
-	async	findOne(id: number) {
-		return (await this.usersRepository.findOneBy({id}));
+	async findOne(id?: number, login?: string) {
+		if (!id && !login)
+			throw new Error('Must be enter ID or login.');
+		return (await this.usersRepository.findOne({where: {id: id, login: login}}));
 	}
+	
 
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.

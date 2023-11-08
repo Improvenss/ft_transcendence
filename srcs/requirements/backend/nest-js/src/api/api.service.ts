@@ -75,7 +75,15 @@ export class ApiService {
 	}
 
 	async	fetchUserData(dataClient: any) {
+		// JWT ile token oluştur.
+		const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
 		const createUserDto: CreateUserDto = Object.assign({}, dataClient);
+		const token = jwt.sign(createUserDto, 'your_secret_key', { expiresIn: '1h' });
+		console.log(createUserDto);
+		// console.log(token);
+		const	tmpDb = await this.usersService.findOne(undefined, dataClient.login);
+		if (tmpDb)
+			return ("User already exist in DB.");
 		const	responseSave = await this.usersService.create(createUserDto);
 		return (responseSave);
 	}

@@ -22,12 +22,12 @@ volumes:
     #   type: none
     #   o: bind
     #   device: ./data
-  postgres_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/postgres
+  # postgres_data:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./data/postgres
   # pgadmin4_data:
   #   driver: local
   #   driver_opts:
@@ -77,7 +77,7 @@ services:
       TZ: "Europe/Istanbul"
     volumes:
       - ssl_certs:/etc/ssl/certs
-      - postgres_data:/var/lib/postgresql/data
+      # - postgres_data:/var/lib/postgresql/data
       - ./srcs/requirements/postgres/create-database.sh:/docker-entrypoint-initdb.d/create-database.sh # PostgreSQL bu 'docker-entypoing-initdb.d' klasorunun icerisindekileri container olusup postgresql calistirildiktan sonra otomatik bir sekilde bu icerisindeki dosyalari calistiriyor.
     networks:
       - transcendence_network

@@ -31,16 +31,31 @@ export class UsersController {
 	}
 
 	/**
-	 * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
+	 * Verilen id'nin ya da login'in karsilik
+	 *  geldigi 'User' verisini donduruyoruz.
 	 * @param id Istenilen 'user'in 'id'si.
+	 * @param login Istenilen 'user'in login'i.
 	 * @returns 'user'.
 	 */
-	@Get(':id')
-	async	findOne(@Param('id') id: string) {
-		// const	tmpUser = this.usersService.findOne(Number(id));
-		const	tmpUser = await this.usersService.findOne(+id);
+	// @Get(':id/:login?')
+	@Get(':id(\\d+)')
+	async findOneId(@Param('id') id: string) {
+		const tmpUser = await this.usersService.findOne(+id, undefined);
 		if (!tmpUser)
-			throw (new NotFoundException("@Get(':id'): findOne(): id: User does not exist!"));
+			throw (new NotFoundException("@Get(':id'): findOneId(): User does not exist!"));
+		return (tmpUser);
+	}
+
+	/**
+	 * Verilen login'in karsilik geldigi 'User' verisini donduruyoruz.
+	 * @param login Istenilen 'user'in login'i.
+	 * @returns 'user'.
+	 */
+	@Get(':login')
+	async findOneLogin(@Param('login') login: string) {
+		const tmpUser = await this.usersService.findOne(undefined, login);
+		if (!tmpUser)
+			throw (new NotFoundException("@Get(':login'): findOne(): User does not exist!"));
 		return (tmpUser);
 	}
 

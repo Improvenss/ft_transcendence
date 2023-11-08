@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 /**
  * TODO: Cookies eklenecek, buna gore login sayfasina yonlendirme yapilacak.
  * TODO: JWT yapisini daha detayli ogren.
+ * TODO: createUserDto'nin verilerini kisalt...
  * TODO: 42Login butonuna tiklandiginda veriler zaten varsa tekrardan
  *  kayit yapmayi engelle. Buna da 42'deki userData'sindaki 'id',
  *  login ve e-mail, bunlar unique degerler. Bunlarin hepsine gore
@@ -62,4 +63,6 @@ bootstrap();
  * 
  * npm install --save-dev @nestjs/websockets @nestjs/platform-socket.io -> WebSocket'leri icin gerekli kutuphaneleri kurduk.
  * nest generate gateway chat -> Socket ile mesajlasabilmek icin 'gateway' yapisini ekledik.
+ * 
+ * npm install jsonwebtoken -> JWT token icin.
  */
