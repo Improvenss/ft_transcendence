@@ -7,7 +7,7 @@ import LoadingPage from "./login/LoadingPage";
 import NoMatchPage from "./main/NoMatchPage";
 import LoginPage from "./login/LoginPage";
 import Cookies from 'js-cookie';
-import ChatPage from "./socket/ChatPage";
+import ChatPage from "./chat/ChatPage";
 
 function App() {
 	const navigate = useNavigate();
@@ -16,7 +16,6 @@ function App() {
 		const userCookie = Cookies.get("user");
 
 		async function sendCookie() {
-			console.log("kakam gledi", process.env.REACT_APP_API_COOKIE as string);
 			const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
 				method: 'POST',
 				headers: {
