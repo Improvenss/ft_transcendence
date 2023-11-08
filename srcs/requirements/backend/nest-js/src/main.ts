@@ -26,7 +26,7 @@ async function bootstrap() {
 	app.enableCors();
 	app.use(
 		cors({
-		origin: "https://localhost", // İzin verilen kök alan
+		origin: process.env.API_HOST as string, // İzin verilen kök alan
 		methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // İzin verilen HTTP yöntemleri
 		})
 	);

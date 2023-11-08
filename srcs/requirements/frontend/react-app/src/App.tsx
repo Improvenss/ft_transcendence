@@ -15,7 +15,8 @@ function App() {
 		const userCookie = Cookies.get("user");
 
 		async function sendCookie() {
-			const response = await fetch("https://localhost:3000/api/cookie", {
+			console.log("kakam gledi", process.env.REACT_APP_API_COOKIE as string);
+			const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

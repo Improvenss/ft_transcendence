@@ -4,11 +4,11 @@ import './LoginPage.css';
 import Countdown from "./Countdown";
 
 async function	redirectToLogin(setClicked: (value: boolean) => void, navigate: any) {
-	const	response = await fetch("https://localhost:3000/api/login", {
+	const	response = await fetch(process.env.REACT_APP_API_LOGIN as string, {
 		method: 'POST',
 		headers: {
 			'Content-Type':'application/json',
-			'Access-Control-Allow-Origin': "https://localhost:3000",
+			'Access-Control-Allow-Origin': process.env.REACT_APP_HOST as string,
 			"Access-Control-Allow-Methods": "POST",
 			"Access-Control-Allow-Headers": "Content-Type",
 			'Access-Control-Allow-Credentials': 'true',
