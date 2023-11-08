@@ -1,15 +1,24 @@
 import React from "react";
-import { Link, Router, Route } from "react-router-dom";
-import Countdown from "../login/Countdown";
+import { Navigate } from "react-router-dom";
+import './HomePage.css';
 
-function	HomePage()
-{
+interface HomePageProps {
+	isAuth: boolean;
+}
+
+function HomePage({isAuth}: HomePageProps){
+
+	if (!isAuth)
+	{
+		return (
+			<Navigate to='/login' replace />
+		);
+	}
+
 	return (
-		<div className="c-home-page">
-			<div>{Countdown()}</div>
-			<div>Pong game PLAY page.</div>
+		<div id="home-page">
+			<h1>HomePage</h1>
 		</div>
-	);
-};
-
-export default	HomePage;
+	)
+}
+export default HomePage;

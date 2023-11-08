@@ -5,19 +5,15 @@ import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 /**
- * TODO OK: API 1. adimi test edilecek. React'tan da yonlendimeyi duzelt.
- * DONTFORGET: Func()'larin altindaki yorum satirlarini(NOTLARI) buraya ekle.
- * 
- * TODO: API 2. ve 3. eklenecek.
- * TODO degil: Ya Veritabanina yazma islemi 3. adimda gerceklesecek
- *  ona ozel api.service.ts dosyasinda api'den gelen user bilgisini
- *  veritabanina kaydedecek function yapilacak.
- * TODO bunu yap: Ya da users CRUD yapisina yonlendirilecek.
- *  Buradan yazma islemi gerceklesecek.
- * TODO: Entity'leri api ve users olacak sekilde ayarla, hangisi mantikliysa.
- * 
  * TODO: Cookies eklenecek, buna gore login sayfasina yonlendirme yapilacak.
  * TODO: JWT yapisini daha detayli ogren.
+ * TODO: 42Login butonuna tiklandiginda veriler zaten varsa tekrardan
+ *  kayit yapmayi engelle. Buna da 42'deki userData'sindaki 'id',
+ *  login ve e-mail, bunlar unique degerler. Bunlarin hepsine gore
+ *  kontrol et. Bunlar yoksa ekle, varsa ekleme. Cookie kontrolu yap,
+ *  ona gore olustur. 
+ * TODO: WS: Soket baglantisiyla ornek bir mesajlasma yap. Bunu 'backend'
+ *  de yapacaksin sadece .emit() ile frontend'de baglanti kurulacak.
  */
 async function bootstrap() {
 	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.

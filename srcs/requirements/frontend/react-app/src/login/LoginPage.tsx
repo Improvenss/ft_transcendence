@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import styles from './Login.module.css'
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, Navigate, Route, Link } from "react-router-dom";
+import './LoginPage.css';
 import Countdown from "./Countdown";
 
-async function	redirectToLogin(setClicked: (value: boolean) => void) {
+async function	redirectToLogin(setClicked: (value: boolean) => void, setAuth: (value: boolean) => void, navigate: any) {
 	const	response = await fetch("https://localhost:3000/api/login", {
 		method: 'POST',
 		headers: {
@@ -24,6 +25,23 @@ async function	redirectToLogin(setClicked: (value: boolean) => void) {
 		console.log(data);
 		setClicked(true);
 		window.location.href = data.requestLogin;
+		//const popup = await window.open(data.requestLogin, '_blank', 'width=600,height=400');
+		//if (popup)
+		//{
+		//	const redirectUrl = popup.location.href;
+		//	popup.addEventListener('load', () => {
+		//		const newUrl = popup.location.href;
+			
+		//		const apiUrlMatch = newUrl.match(/api\?(.*)/);
+		//		if (apiUrlMatch) {
+		//			const capturedApiUrl = apiUrlMatch[0];
+		//			navigate('/' + capturedApiUrl);
+		//		  }
+		//		if (redirectUrl !== newUrl) {
+		//			popup.close();
+		//		}
+		//	  });
+		//}
 	}
 	else
 	{
@@ -32,24 +50,39 @@ async function	redirectToLogin(setClicked: (value: boolean) => void) {
 	}
 }
 
-function Login()
-{
+interface LoginPageProps {
+	isAuth: boolean;
+	setAuth: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function LoginPage({isAuth, setAuth}: LoginPageProps){
+	const navigate = useNavigate();
+
+	if (isAuth)
+	{
+		return (
+			<Navigate to='/' replace />
+		);
+	}
+
 	const [clicked, setClicked] = useState(false);
 
 	useEffect(() => {
 		if (clicked === true)
-			redirectToLogin(setClicked);
+			redirectToLogin(setClicked, setAuth, navigate);
 	}, [clicked]);
 
 	return (
-		<div>
-			<div>{Countdown()}</div>
-			<button className={styles.button} onClick={() => setClicked(true)} disabled={clicked}>Login 42</button>
+		<div id="login-page">
+			{Countdown()}
+			<button onClick={() => setClicked(true)} disabled={clicked}>
+				<span>42 Login</span>
+			</button>
 		</div>
-	);
+	)
 }
 
-export default Login;
+export default LoginPage;
 
 
 
