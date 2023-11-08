@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ApiService } from './api.service';
 import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
+import * as fs from 'fs';
+import { stringify } from 'querystring';
 
 @Controller('api')
 export class ApiController {
@@ -53,9 +55,15 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			return {message: "BACKEND responseAccessToken NOK"};
 		const	dataClient = await responseAccessToken.json(); // User data (json file).
 
-		// const	user = await this.usersService.createUser(dataClient.);
+		const path = require('path');
+		const filename = "me_data.json";
+		const filepath = path.join(process.cwd(), filename);
+		console.log(`Dosya şu konuma kaydedildi: ${filepath}`);
+		fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
+
 		const	responseData = await this.apiService.fetchUserData(dataClient);
 		// return ({message: "User data successfully saved database."});
+		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", access_token: dataToken.access_token,
 			dataClient: dataClient, responseData: responseData};
 	}
@@ -77,7 +85,6 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 	}
 
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.apiService.remove(+id);
+	remove(@Param('id') id: string) { return this.apiService.remove(+id);
 	}
 }

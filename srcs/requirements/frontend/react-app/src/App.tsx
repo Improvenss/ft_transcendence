@@ -7,6 +7,7 @@ import Loading from "./login/Loading";
 import Login from "./login/Login";
 import Api from "./login/Api";
 import Add from "./add/Add";
+import SocketClient from "./socket/SocketClient";
 
 
 function App() {
@@ -36,6 +37,7 @@ return (
 		<li><Link to="/address">Address</Link></li>
 		<li><Link to="/loading">Loading Screen</Link></li>
 		<li><Link to="/add">Add Database</Link></li>
+		<li><Link to="/socket">Socket Messaging</Link></li>
 		</ul>
 	</header>
 	<Routes>
@@ -45,6 +47,7 @@ return (
 		<Route path="/loading" element={<Loading />} />
 		<Route path="/api" element={<Api />} />
 		<Route path="/add" element={<Add />} />
+		<Route path="/socket" element={<SocketClient />} />
 	</Routes>
 	</div>
 );

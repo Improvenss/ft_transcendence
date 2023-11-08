@@ -63,4 +63,7 @@ bootstrap();
  * 	? Would you like to generate CRUD entry points? Yes
  * 
  * npm install --save-dev typeorm -> Entity'de falan TypeORM CRUD yapisini kullanabilmek icin.
+ * 
+ * npm install --save-dev @nestjs/websockets @nestjs/platform-socket.io -> WebSocket'leri icin gerekli kutuphaneleri kurduk.
+ * nest generate gateway chat -> Socket ile mesajlasabilmek icin 'gateway' yapisini ekledik.
  */
