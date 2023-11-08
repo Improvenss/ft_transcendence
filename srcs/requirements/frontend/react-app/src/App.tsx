@@ -7,6 +7,7 @@ import LoadingPage from "./login/LoadingPage";
 import NoMatchPage from "./main/NoMatchPage";
 import LoginPage from "./login/LoginPage";
 import Cookies from 'js-cookie';
+import ChatPage from "./socket/ChatPage";
 
 function App() {
 	const navigate = useNavigate();
@@ -89,6 +90,7 @@ function App() {
 		</header>
 		<Routes>
 			<Route path='/' element={<HomePage isAuth={isAuth} />} />
+			<Route path='/chat' element={<ChatPage isAuth={isAuth} />} />
 			<Route path='/login' element={<LoginPage isAuth={isAuth} />} />
 			<Route path='/api' element={<Api isAuth={isAuth} setAuth={setAuth} />} />
 			<Route path='*' element={<NoMatchPage />} />
