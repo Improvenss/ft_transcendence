@@ -31,6 +31,9 @@ export class User {
 	@Column()
 	last_name: string
 
+	@Column({type: "text", nullable: true})
+	email: string
+
 	// @OneToOne(() => Image)
 	// @JoinColumn()
 	@Column({type: "text", nullable: true})

@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, Navigate, Route, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import './LoginPage.css';
 import Countdown from "./Countdown";
 
-async function	redirectToLogin(setClicked: (value: boolean) => void, setAuth: (value: boolean) => void, navigate: any) {
+async function	redirectToLogin(setClicked: (value: boolean) => void, navigate: any) {
 	const	response = await fetch("https://localhost:3000/api/login", {
 		method: 'POST',
 		headers: {
@@ -52,10 +52,9 @@ async function	redirectToLogin(setClicked: (value: boolean) => void, setAuth: (v
 
 interface LoginPageProps {
 	isAuth: boolean;
-	setAuth: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function LoginPage({isAuth, setAuth}: LoginPageProps){
+function LoginPage({isAuth}: LoginPageProps){
 	const navigate = useNavigate();
 
 	if (isAuth)
@@ -69,7 +68,7 @@ function LoginPage({isAuth, setAuth}: LoginPageProps){
 
 	useEffect(() => {
 		if (clicked === true)
-			redirectToLogin(setClicked, setAuth, navigate);
+			redirectToLogin(setClicked, navigate);
 	}, [clicked]);
 
 	return (

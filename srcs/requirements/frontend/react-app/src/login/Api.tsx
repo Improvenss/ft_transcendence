@@ -39,9 +39,12 @@ export default function	Api({isAuth, setAuth}: ApiProps)
 				// kullanıcı kayıt olduğunda cookie bilgisi backend'den response edilecektir.
 				//const cookieValue = CookieGenerate();
 
+				// localStorage: eriler, tarayıcı kapatılsa bile kalıcı olarak saklanır. Yani tarayıcı kapatılıp tekrar açıldığında bile veriler hala mevcut olacaktır.
+				// sessionStorage: Tarayıcı penceresi veya sekmesi açık olduğu sürece veriler saklanır. Tarayıcı penceresi kapatıldığında veya sekme kapatıldığında veriler silinir.
+				// localStorage ve sessionStorage'un aksine, Cookies'in bir son kullanma tarihi vardır ve bu tarih geçtikten sonra otomatik olarak silinir. Bu, belirli bir süre boyunca veri tutmak istediğiniz durumlar için faydalı olabilir.
+
+
 				console.log(data);
-				const cookie = data.cookieValue;
-				//Cookies('usercookie', 'AAAAA', { httpOnly: true, secure: true });
 				Cookies.set("user", "abc");
 				setAuth(true);
 				const browserCookie = document.cookie; //tarayıcıdaki cookiler çekilebiliniyor.
