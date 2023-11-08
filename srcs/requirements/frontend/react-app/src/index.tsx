@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import etmemiz gerekiyor, cunku tarayici rotasi olara geciyor.
 import './index.css';
 import App from './App';
+import { CookiesProvider } from 'react-cookie';
 // npm install react-router-dom
 
 /**
@@ -18,11 +19,21 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App/>
-    </BrowserRouter>
+    <CookiesProvider>
+      <BrowserRouter>
+        <App/>
+      </BrowserRouter>
+    </CookiesProvider>
   </React.StrictMode>
 );
+
+/**
+ * Kurulan paketler sirasiyla;
+ * 
+ * npm install --save-dev react-cookie -> Cookie kullanimi icin kullandigimiz kutuphane.
+ * npm install --save-dev @types/js-cookie
+ * npm install js-cookie -> Cookie.set() fonksiyonu icin.
+ */
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

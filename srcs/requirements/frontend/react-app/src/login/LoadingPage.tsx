@@ -1,7 +1,7 @@
 import React from 'react';
-import './Loading.css'
+import './LoadingPage.css'
 
-function	Loading()
+function	LoadingPage()
 {
 	return(
 		<div id="loader-container">
@@ -28,4 +28,4 @@ function	Loading()
 	);
 };
 
-export default	Loading;
+export default	LoadingPage;
