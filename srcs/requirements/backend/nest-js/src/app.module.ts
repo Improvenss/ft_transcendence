@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'; // Veritabani ile iletisim kura
 import { ApiModule } from './api/api.module';
 import { UsersModule } from './users/users.module';
 import { ChatGateway } from './chat/chat.gateway'; // nest g gateway chat kodunu calistirdiktan sonra geldi.
+import { ChatModule } from './chat/chat.module';
 
 @Module({
 	imports: [
@@ -23,6 +24,7 @@ import { ChatGateway } from './chat/chat.gateway'; // nest g gateway chat kodunu
 		}),
 		ApiModule,
 		UsersModule,
+		ChatModule,
 		// TypeOrmModule.forRoot({
 		// 	type: 'postgres',
 		// 	port: parseInt("5432"),
