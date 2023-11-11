@@ -1,52 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
-import './LoginPage.css';
+import { Navigate } from "react-router-dom";
 import Countdown from "./Countdown";
+import './LoginPage.css';
 
-async function	redirectToLogin(setClicked: (value: boolean) => void, navigate: any) {
+async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (value: string) => void) {
+	console.log("II: ---API Login Connection---");
 	const	response = await fetch(process.env.REACT_APP_API_LOGIN as string, {
 		method: 'POST',
 		headers: {
 			'Content-Type':'application/json',
-			'Access-Control-Allow-Origin': process.env.REACT_APP_HOST as string,
-			"Access-Control-Allow-Methods": "POST",
-			"Access-Control-Allow-Headers": "Content-Type",
-			'Access-Control-Allow-Credentials': 'true',
-			// 'Content-Type':'text/plain'
 		},
-		// body: "LOGIN",
 		body: JSON.stringify({
 			requestLogin: 'LOGIN'
 		})
 	})
 	if (response.ok)
 	{
+		console.log("II: ---API Login Connection '✅'---");
 		const	data = await response.json();
-		console.log(data);
 		setClicked(true);
-		window.location.href = data.requestLogin;
-		//const popup = await window.open(data.requestLogin, '_blank', 'width=600,height=400');
-		//if (popup)
-		//{
-		//	const redirectUrl = popup.location.href;
-		//	popup.addEventListener('load', () => {
-		//		const newUrl = popup.location.href;
-			
-		//		const apiUrlMatch = newUrl.match(/api\?(.*)/);
-		//		if (apiUrlMatch) {
-		//			const capturedApiUrl = apiUrlMatch[0];
-		//			navigate('/' + capturedApiUrl);
-		//		  }
-		//		if (redirectUrl !== newUrl) {
-		//			popup.close();
-		//		}
-		//	  });
-		//}
+		// window.location.href = data.requestLogin;
+		const popup = window.open(data.requestLogin, "intraPopup", "width=500,height=300");
+		window.addEventListener('message', event => {	
+			if (event.origin === process.env.REACT_APP_IP) {
+				const data = event.data;
+				if (data.message === 'popupRedirect'){
+					setPath('/api?code=' + data.additionalData);
+				}
+			}
+		});
 	}
 	else
 	{
-		alert("LOGIN: API: Connection error!");
-		setClicked(false); // Bu da butonun tekrar tiklanabilir olmasini sagliyor.
+		console.log("II: ---API Login Connection '❌'---");
+		setClicked(false); // Bu da butonun tekrar tiklanabilir olmamasini sagliyor.
 	}
 }
 
@@ -55,8 +42,6 @@ interface LoginPageProps {
 }
 
 function LoginPage({isAuth}: LoginPageProps){
-	const navigate = useNavigate();
-
 	if (isAuth)
 	{
 		return (
@@ -65,10 +50,11 @@ function LoginPage({isAuth}: LoginPageProps){
 	}
 
 	const [clicked, setClicked] = useState(false);
+	const [path, setPath] = useState('/login');
 
 	useEffect(() => {
 		if (clicked === true)
-			redirectToLogin(setClicked, navigate);
+			redirectToLogin(setClicked, setPath);
 	}, [clicked]);
 
 	return (
@@ -77,17 +63,12 @@ function LoginPage({isAuth}: LoginPageProps){
 			<button onClick={() => setClicked(true)} disabled={clicked}>
 				<span>42 Login</span>
 			</button>
+			<Navigate to={path} replace />
 		</div>
 	)
 }
 
 export default LoginPage;
-
-
-
-
-
-
 
 
 /**

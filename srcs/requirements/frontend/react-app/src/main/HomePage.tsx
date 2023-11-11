@@ -7,7 +7,6 @@ interface HomePageProps {
 }
 
 function HomePage({isAuth}: HomePageProps){
-
 	if (!isAuth)
 	{
 		return (
