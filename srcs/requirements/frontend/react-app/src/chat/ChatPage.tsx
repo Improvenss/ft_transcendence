@@ -14,11 +14,7 @@ interface ChatPageProps {
 
 function ChatPage ({isAuth}: ChatPageProps){
 	if (!isAuth)
-	{
-		return (
-			<Navigate to='/login' replace />
-		);
-	}
+		return (<Navigate to='/login' replace />);
 
 	const	[socket, setSocket] = useState<Socket>();
 	const	[messages, setMessages] = useState<string[]>([]);
@@ -59,3 +55,38 @@ function ChatPage ({isAuth}: ChatPageProps){
 	)
 }
 export default ChatPage;
+
+/**
+ * import React, { useEffect, useState } from "react";
+import io from 'socket.io-client';
+
+function ChatPage() {
+  const [socket, setSocket] = useState(null);
+  const [channel, setChannel] = useState('general');
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const newSocket = io.connect(process.env.REACT_APP_SOCKET_HOST);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      newSocket.emit('joinRoom', channel);
+    });
+
+    newSocket.on('messageToClient', (message) => {
+      setMessages((messages) => [...messages, message]);
+    });
+
+    return () => {
+      newSocket.emit('leaveRoom', channel);
+    };
+  }, [channel]);
+
+  const sendMessage = (message) => {
+    socket.emit('chatToRoom', { room: channel, message });
+  };
+
+  // ... diğer kodlar ...
+}
+
+ */

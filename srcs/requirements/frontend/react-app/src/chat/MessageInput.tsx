@@ -30,6 +30,7 @@ function	MessageInput({send}: {send: (val: string) => void}) {
 			send(trimmedValue);
 			setValue("");
 		}
+		inputRef.current?.focus(); // Cursor tekrardan input'a focus olmasi gerek.
 	}
 
 	return (

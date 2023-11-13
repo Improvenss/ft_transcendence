@@ -1,5 +1,8 @@
 import { MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'http';
+// import { Socket } from 'dgram';
+// import { Server } from 'http';
+import { Server, Socket } from 'socket.io';
+
 // import * as fs from 'fs';
 import { UsersService } from 'src/users/users.service';
 
@@ -19,9 +22,9 @@ export class ChatGateway implements OnGatewayConnection {
 		// console.log(`İstemci bağlandı - ID: ${client.id}, Giriş: ${loginName}`);
 		console.log(client);
 		console.log("client.id: ", client.id);
-		console.log(client.handshake.address);
-		// client.handshake.time
-		// client.handshake.query
+		console.log("client handshake addr: ", client.handshake.address);
+		console.log("client handshake time: ", client.handshake.time);
+		console.log("client handshake query: ", client.handshake.query);
 	}
 	
 	@WebSocketServer()
@@ -49,6 +52,22 @@ export class ChatGateway implements OnGatewayConnection {
 		this.server.emit('messageToClient', data);
 	}
 
+	@SubscribeMessage('joinRoom')
+	handleJoinRoom(client: Socket, room: string) {
+		client.join(room);
+		client.emit('joinedRoom', room);
+	}
+
+	@SubscribeMessage('leaveRoom')
+	handleLeaveRoom(client: Socket, room: string) {
+		client.leave(room);
+		client.emit('leftRoom', room);
+	}
+
+	@SubscribeMessage('chatToRoom')
+	handleChatToRoom(client: Socket, { room, message }: { room: string; message: string }) {
+		this.server.to(room).emit('chatToClient', message);
+	}
 }
 
 

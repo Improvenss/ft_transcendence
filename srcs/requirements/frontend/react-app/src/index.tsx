@@ -18,6 +18,8 @@ import { CookiesProvider } from 'react-cookie';
  * TODO: Kullanici adlarini koy.
  * TODO: User list yap.
  * TODO: Channel list yap.
+ * TODO: Channel olustururken; ChatPage.tsx'te olacak ama function
+ *  implementation'larini(definition) ayri bir 'Channel.tsx' dosyasinda yaz.
  * TODO: Sol & Sag mesajlari genisligini sinirla.
  * TODO: Mesajlari 'await' ile synchronize hale getir.
  * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.

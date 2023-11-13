@@ -38,6 +38,9 @@ RUN apk update && apk upgrade && apk add --update --no-cache \
 	&& rm -f /var/cache/apk/*
 	# openssl \
 
+# ENV TZ=Europe/Istanbul
+# RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
 # 	-out /etc/ssl/certs/ft_transcendence.crt \
 # 	-keyout /etc/ssl/certs/ft_transcendence.key \
