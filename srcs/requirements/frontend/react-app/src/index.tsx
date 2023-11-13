@@ -15,11 +15,12 @@ import { CookiesProvider } from 'react-cookie';
  *  </BrowserRouter>
  * 
  * TODO: 2 tane msg gondermeyi engelle.
- * TODO: Input bossa engellendi(enter) ama send(button) engellenmedi onu ekle.
  * TODO: Kullanici adlarini koy.
  * TODO: User list yap.
  * TODO: Channel list yap.
  * TODO: Sol & Sag mesajlari genisligini sinirla.
+ * TODO: Mesajlari 'await' ile synchronize hale getir.
+ * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.
  * TODO: Kaka yaptiktan sonra dislerini fircalamayi unutma. :D
  */
 const root = ReactDOM.createRoot(

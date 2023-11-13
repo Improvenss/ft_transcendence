@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import io, { Socket } from 'socket.io-client';
-import './ChatPage.css';
 import MessageInput from "./MessageInput";
 import './ChatPage.css';
+import Message from "./Message";
 
 interface ChatPageProps {
 	isAuth: boolean;
@@ -19,7 +19,7 @@ function ChatPage ({isAuth}: ChatPageProps){
 
 	const	[socket, setSocket] = useState<Socket>();
 	const	[messages, setMessages] = useState<string[]>([]);
-	const	messagesEndRef = useRef<HTMLDivElement>(null);
+	// const	[messages, setMessages] = useState<{login: string, message: string}[]>([]);
 
 	const	send = (value: string) => {
 		socket?.emit("createMessage", value);
@@ -36,29 +36,22 @@ function ChatPage ({isAuth}: ChatPageProps){
 		});
 	}, [setSocket]);
 
+	// const	messageListener = (message: {login: string, message: string}) => {
 	const	messageListener = (message: string) => {
 		setMessages(prevMessages => [...prevMessages, message]);
 	}
 
 	useEffect(() => {
+		console.log("hay anneni");
 		socket?.on("messageToClient", messageListener);
 		return () => {
 			socket?.off("messageToClient", messageListener);
 		}
 	}, [messageListener]);
 
-	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages]);
-
 	return (
 		<div id="chat-page">
-			<div>
-				{messages.map((message, index) => (
-					<p key={index}>{index}: {message}</p>
-				))}
-				<div ref={messagesEndRef} />
-			</div>
+			<Message messages={messages}/>
 			<MessageInput send={send} />
 		</div>
 	)

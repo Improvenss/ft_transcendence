@@ -1,16 +1,22 @@
-// import React from "react";
+import React, { useEffect, useRef } from "react";
 
-// function	Message({messages}: {messages: string[]}) {
-// 	console.log("ekrana koyarken--->>>:" + messages.at);
-// 	return (
-// 		<div>
-// 			{
-// 				messages.map((message, index) => (
-// 					<div key={index}>{index}: {messages}</div>
-// 				))
-// 			}
-// 		</div>
-// 	);
-// }
+function	Message({messages}: {messages: string[]}) {
+	const	messagesEndRef = useRef<HTMLDivElement>(null);
+	console.log("ekrana koyarken--->>>:" + messages);
 
-// export default	Message;
+	useEffect(() => {
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
+
+	return (
+		<div>
+			{messages.map((message, index) => (
+				// <p key={index}>{message.login}: {message.message}</p>
+				<p key={index}>{index}: {message}</p>
+			))}
+			<div ref={messagesEndRef} />
+		</div>
+	);
+}
+
+export default	Message;
