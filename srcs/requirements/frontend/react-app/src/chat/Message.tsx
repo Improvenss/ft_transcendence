@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from "react";
 
 function	Message({messages}: {messages: string[]}) {
 	const	messagesEndRef = useRef<HTMLDivElement>(null);
-	console.log("ekrana koyarken--->>>:" + messages);
 
+	// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);

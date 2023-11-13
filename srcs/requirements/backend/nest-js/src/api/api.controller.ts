@@ -61,7 +61,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		const path = require('path');
 		const filename = "me_data.json";
 		const filepath = path.join(process.cwd(), filename);
-		console.log(`Dosya şu konuma kaydedildi: ${filepath}`);
+		console.log(`File saved this location: ${filepath}`);
 		fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
 
 		const createUserDto: CreateUserDto = {
