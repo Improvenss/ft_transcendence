@@ -1,0 +1,5 @@
+/* Message.css */
+#chat-page input {
+	width: calc(100% - 60px);
+	margin-right: 10px;
+}
