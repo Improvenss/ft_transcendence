@@ -1,11 +1,9 @@
-/* ChatPage.tsx */
 import React, { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import io, { Socket } from 'socket.io-client';
 import './ChatPage.css';
 import MessageInput from "./MessageInput";
 import './ChatPage.css';
-import './Message.css';
 
 interface ChatPageProps {
 	isAuth: boolean;
@@ -57,7 +55,7 @@ function ChatPage ({isAuth}: ChatPageProps){
 		<div id="chat-page">
 			<div>
 				{messages.map((message, index) => (
-					<div key={index}>{index}: {message}</div>
+					<p key={index}>{index}: {message}</p>
 				))}
 				<div ref={messagesEndRef} />
 			</div>
@@ -66,5 +64,3 @@ function ChatPage ({isAuth}: ChatPageProps){
 	)
 }
 export default ChatPage;
-
-

@@ -18,7 +18,6 @@ export class ChatGateway implements OnGatewayConnection {
 
 	@SubscribeMessage("createMessage")
 	handleCreateMessage(@MessageBody() data: any) {
-		// console.log("Create Message");
 		this.server.emit('messageToClient', data);
 	}
 }
