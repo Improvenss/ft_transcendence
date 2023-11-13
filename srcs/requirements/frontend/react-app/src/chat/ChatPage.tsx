@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+/* ChatPage.tsx */
+import React, { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import io, { Socket } from 'socket.io-client';
-import Message from "./Message";
+import './ChatPage.css';
 import MessageInput from "./MessageInput";
+import './ChatPage.css';
+import './Message.css';
 
 interface ChatPageProps {
 	isAuth: boolean;
@@ -18,33 +21,50 @@ function ChatPage ({isAuth}: ChatPageProps){
 
 	const	[socket, setSocket] = useState<Socket>();
 	const	[messages, setMessages] = useState<string[]>([]);
-		console.log(process.env.REACT_APP_SOCKET_HOST, "asdfasdf");
+	const	messagesEndRef = useRef<HTMLDivElement>(null);
 
 	const	send = (value: string) => {
-		socket?.emit("message", value);
+		socket?.emit("createMessage", value);
 	}
 
 	useEffect(() => {
-		const	newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
+		const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
 		setSocket(newSocket);
+		newSocket.on('connect', () => {
+			console.log('Client connected to Server. ✅');
+		});
+		newSocket.on('disconnect', () => {
+			console.log('Client connection lost. 💔');
+		});
 	}, [setSocket]);
 
 	const	messageListener = (message: string) => {
-		setMessages([...messages, message]);
+		setMessages(prevMessages => [...prevMessages, message]);
 	}
 
 	useEffect(() => {
-		socket?.on("message", messageListener);
+		socket?.on("messageToClient", messageListener);
 		return () => {
-			socket?.off("message", messageListener);
+			socket?.off("messageToClient", messageListener);
 		}
 	}, [messageListener]);
 
+	useEffect(() => {
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
+
 	return (
 		<div id="chat-page">
+			<div>
+				{messages.map((message, index) => (
+					<div key={index}>{index}: {message}</div>
+				))}
+				<div ref={messagesEndRef} />
+			</div>
 			<MessageInput send={send} />
-			<Message messages={messages} />
 		</div>
 	)
 }
 export default ChatPage;
+
+

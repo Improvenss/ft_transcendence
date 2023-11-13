@@ -1,0 +1,25 @@
+/* ChatPage.css */
+#chat-page {
+	display: flex;
+	flex-direction: column;
+	height: 66vh;
+	width: 66vw;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+#chat-page > div:first-child {
+	overflow: auto;
+	flex-grow: 1;
+	padding: 1em;
+}
+
+#chat-page > div:last-child {
+	padding: 1em;
+	border-top: 1px solid #ccc;
+}

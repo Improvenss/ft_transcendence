@@ -87,13 +87,18 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 	async userCookie(@Body() status: {cookie: string}){
 		const jwt = require('jsonwebtoken');
 
+		if (!status.cookie) {
+			console.error("Cookie not provided");
+			return { message: "COOKIE NOK" };
+		}
+
 		// JWT'yi doğrulayın
 		try {
-		  const decoded = jwt.verify(status.cookie, 'your_secret_key');
-		//   console.log(decoded);
-		  return ({message: "COOKIE OK"});
+			const decoded = jwt.verify(status.cookie, 'your_secret_key');
+			// console.log("cookie:", decoded);
+			return ({message: "COOKIE OK"});
 		} catch(err) {
-		//   console.error(err);
+			// console.error("cookie err:", err);
 		}
 		//if (status.cookie)
 		//	return ({message: "COOKIE OK"});

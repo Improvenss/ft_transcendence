@@ -5,7 +5,7 @@ function	Message({messages}: {messages: string[]}) {
 		<div>
 			{
 				messages.map((message, index) => (
-					<div key={index}>{index}</div>
+					<div key={index}>{index}: {message}</div>
 				))
 			}
 		</div>

@@ -12,18 +12,15 @@ export default function	Api({setAuth}: ApiProps)
 	const	uriCode = urlParams.get('code');
 
 	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
-		console.log(urlParams);
 		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
-		window.close();
 	}
-
 	async function sendCode() {
 		console.log("III: ---API Token Connection---");
 		const response = await fetch(process.env.REACT_APP_API_TOKEN as string, {
 			method: 'POST',
 			headers: {
 				'Content-Type':'application/json'
-			 },
+			},
 			body: JSON.stringify({
 				code: uriCode as string
 			})
@@ -47,8 +44,11 @@ export default function	Api({setAuth}: ApiProps)
 			console.log("III: ---API Token Connection '❌'---");
 	}
 	useEffect(() => {
+	if (!window.opener)
 		sendCode();
-	  }, []);
+	else
+		window.close();
+	}, []);
 
 	return (
 		<Navigate to='/' replace/>

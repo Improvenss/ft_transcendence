@@ -14,6 +14,7 @@ async function checkAuth(setAuth: React.Dispatch<React.SetStateAction<boolean>>)
 	const userCookie = Cookies.get("user");
 	const userLStore = localStorage.getItem("user");
 	//console.log(userLStore);
+	console.log(process.env.REACT_APP_API_COOKIE);
 	const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
 		method: "POST",
 		headers: {
@@ -33,9 +34,9 @@ async function checkAuth(setAuth: React.Dispatch<React.SetStateAction<boolean>>)
 		} else {
 			console.log("I: ---Cookie Response '❌'---");
 		}
-		} else {
+	} else {
 		console.log("I: ---Cookie Backend Connection '❌'---");
-		}
+	}
 }
 
 function App() {
@@ -74,13 +75,13 @@ function App() {
 			<header>
 			<ul>
 				{ isAuth && <Link to="/" style={{ padding: 5 }}> Home </Link> }
-				{/*{ isAuth && <Link to="/chat" style={{ padding: 5 }}> Chat </Link> }*/}
+				{ isAuth && <Link to="/chat" style={{ padding: 5 }}> Chat </Link> }
 				{ isAuth && <span onClick={logOut} style={{ padding: 5, cursor: 'pointer' }}> Logout </span> }
 			</ul>
 		</header>
 		<Routes>
 			<Route path='/' element={<HomePage isAuth={isAuth} />} />
-			{/*<Route path='/chat' element={<ChatPage isAuth={isAuth} />} />*/}
+			<Route path='/chat' element={<ChatPage isAuth={isAuth} />} />
 			<Route path='/login' element={<LoginPage isAuth={isAuth} />} />
 			<Route path='/api' element={<Api setAuth={setAuth} />} />
 			<Route path='*' element={<NoMatchPage />} />

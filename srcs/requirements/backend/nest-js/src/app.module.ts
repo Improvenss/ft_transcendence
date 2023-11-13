@@ -25,16 +25,6 @@ import { ChatModule } from './chat/chat.module';
 		ApiModule,
 		UsersModule,
 		ChatModule,
-		// TypeOrmModule.forRoot({
-		// 	type: 'postgres',
-		// 	port: parseInt("5432"),
-		// 	host: "postgres",
-		// 	username: "transcendence",
-		// 	password: "pass123",
-		// 	database: "postgres",
-		// 	entities: [__dirname + '/**/*.entity{.ts,.js}'],
-		// 	synchronize: true,
-		// }),
 	],
 	controllers: [AppController],
 	providers: [AppService, ChatGateway], // Buraya da nest g gateway chat kodunu calistirinca geldi.

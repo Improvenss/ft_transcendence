@@ -20,7 +20,6 @@ async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (v
 		const	data = await response.json();
 		setClicked(true);
 		// window.location.href = data.requestLogin;
-		const popup = window.open(data.requestLogin, "intraPopup", "width=500,height=300");
 		window.addEventListener('message', event => {	
 			if (event.origin === process.env.REACT_APP_IP) {
 				const data = event.data;
@@ -29,6 +28,7 @@ async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (v
 				}
 			}
 		});
+		window.open(data.requestLogin, "intraPopup", "width=500,height=300");
 	}
 	else
 	{
