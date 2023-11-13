@@ -1,3 +1,50 @@
+// import React from "react";
+// import Message from "./Message";
+// import MessageInput from "./MessageInput";
+// import { Navigate } from "react-router-dom";
+// import io from 'socket.io-client';
+
+// interface ChatPageProps {
+// 	isAuth: boolean;
+// }
+
+// function ChatPage ({isAuth}: ChatPageProps){
+// 	if (!isAuth)
+// 	{
+// 		return (
+// 			<Navigate to='/login' replace />
+// 		);
+// 	}
+
+// 	const socket = io('https://10.12.14.8:3000/chat');
+
+// 	socket.on('connect', () => {
+// 		console.log('connected');
+// 	});
+
+// 	socket.on('messageToClient', (msg) => {
+// 		console.log('Message received: ', msg);
+// 	});
+
+
+// 	return (
+// 		<div>
+// 			kaka
+// 			{/* <MessageInput />
+// 			<Message /> */}
+// 		</div>
+// 	);
+// };
+
+// export default ChatPage;
+
+
+
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import io, { Socket } from 'socket.io-client';
@@ -18,15 +65,22 @@ function ChatPage ({isAuth}: ChatPageProps){
 
 	const	[socket, setSocket] = useState<Socket>();
 	const	[messages, setMessages] = useState<string[]>([]);
-		console.log(process.env.REACT_APP_SOCKET_HOST, "asdfasdf");
+
 
 	const	send = (value: string) => {
-		socket?.emit("message", value);
+		socket?.emit("createMessage", value);
+		console.log("kac kere girdik abi");
 	}
 
 	useEffect(() => {
-		const	newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
+		const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
 		setSocket(newSocket);
+		newSocket.on('connect', () => {
+			console.log('Client connected to Server. ✅');
+		});
+		newSocket.on('disconnect', () => {
+			console.log('Client connection lost. 💔');
+		});
 	}, [setSocket]);
 
 	const	messageListener = (message: string) => {
@@ -34,9 +88,9 @@ function ChatPage ({isAuth}: ChatPageProps){
 	}
 
 	useEffect(() => {
-		socket?.on("message", messageListener);
+		socket?.on("messageToClient", messageListener);
 		return () => {
-			socket?.off("message", messageListener);
+			socket?.off("messageToClient", messageListener);
 		}
 	}, [messageListener]);
 
