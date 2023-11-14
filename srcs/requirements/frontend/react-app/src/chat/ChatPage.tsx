@@ -7,6 +7,7 @@ import io, { Socket } from 'socket.io-client';
 import MessageInput from "./MessageInput";
 import './ChatPage.css';
 import Message from "./Message";
+import { useSocket } from '../main/SocketHook';
 
 interface ChatPageProps {
 	isAuth: boolean;
@@ -16,24 +17,25 @@ function ChatPage ({isAuth}: ChatPageProps){
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
 
-	const	[socket, setSocket] = useState<Socket>();
+	const	socket = useSocket();
 	const	[messages, setMessages] = useState<string[]>([]);
 	// const	[messages, setMessages] = useState<{login: string, message: string}[]>([]);
+	console.log("ChatPage: ", socket);
 
 	const	send = (value: string) => {
 		socket?.emit("createMessage", value);
 	}
 
 	useEffect(() => {
-		const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
-		setSocket(newSocket);
-		newSocket.on('connect', () => {
+		// const socket = io(process.env.REACT_APP_SOCKET_HOST as string);
+		// setSocket(socket);
+		socket?.on('connect', () => {
 			console.log('Client connected to Server. ✅');
 		});
-		newSocket.on('disconnect', () => {
+		socket?.on('disconnect', () => {
 			console.log('Client connection lost. 💔');
 		});
-	}, [setSocket]);
+	}, []);
 
 	// const	messageListener = (message: {login: string, message: string}) => {
 	const	messageListener = (message: string) => {
@@ -66,19 +68,19 @@ function ChatPage() {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    const newSocket = io.connect(process.env.REACT_APP_SOCKET_HOST);
-    setSocket(newSocket);
+    const socket = io.connect(process.env.REACT_APP_SOCKET_HOST);
+    setSocket(socket);
 
-    newSocket.on('connect', () => {
-      newSocket.emit('joinRoom', channel);
+    socket.on('connect', () => {
+      socket.emit('joinRoom', channel);
     });
 
-    newSocket.on('messageToClient', (message) => {
+    socket.on('messageToClient', (message) => {
       setMessages((messages) => [...messages, message]);
     });
 
     return () => {
-      newSocket.emit('leaveRoom', channel);
+      socket.emit('leaveRoom', channel);
     };
   }, [channel]);
 

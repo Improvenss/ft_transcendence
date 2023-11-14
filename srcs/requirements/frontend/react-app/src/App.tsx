@@ -8,6 +8,7 @@ import NoMatchPage from "./main/NoMatchPage";
 import LoginPage from "./login/LoginPage";
 import Cookies from 'js-cookie';
 import ChatPage from "./chat/ChatPage";
+import { SocketProvider } from "./main/SocketHook";
 
 async function checkAuth(setAuth: React.Dispatch<React.SetStateAction<boolean>>) {
 	console.log("I: ---Cookie Checking---");
@@ -46,21 +47,21 @@ function App() {
 
 	useEffect(() => {
 		const fetchData = async () => {
-            await checkAuth(setAuth);
+			await checkAuth(setAuth);
 			setLoading(false);
-        };
+		};
 		window.addEventListener('load', fetchData);
 		const timer = setTimeout(fetchData, 1000);
 
 		return () => {
 			window.removeEventListener('load', fetchData);
 			clearTimeout(timer);
-		  };
+		};
 	}, []);
 		
-	 if (isLoading) {
-	 	return (<LoadingPage />);
-	 }
+	if (isLoading) {
+		return (<LoadingPage />);
+	}
 
 	function logOut() {
 		setAuth(false);
@@ -79,13 +80,15 @@ function App() {
 				{ isAuth && <span onClick={logOut} style={{ padding: 5, cursor: 'pointer' }}> Logout </span> }
 			</ul>
 		</header>
-		<Routes>
-			<Route path='/' element={<HomePage isAuth={isAuth} />} />
-			<Route path='/chat' element={<ChatPage isAuth={isAuth} />} />
-			<Route path='/login' element={<LoginPage isAuth={isAuth} />} />
-			<Route path='/api' element={<Api setAuth={setAuth} />} />
-			<Route path='*' element={<NoMatchPage />} />
-		</Routes>
+		<SocketProvider isAuth={isAuth}>
+			<Routes>
+				<Route path='/' element={<HomePage isAuth={isAuth} />} />
+				<Route path='/chat' element={<ChatPage isAuth={isAuth}/>} />
+				<Route path='*' element={<NoMatchPage />} />
+				<Route path='/api' element={<Api setAuth={setAuth} />} />
+				<Route path='/login' element={<LoginPage isAuth={isAuth} />} />
+			</Routes>
+		</SocketProvider>
 		</div>
 	);
 };

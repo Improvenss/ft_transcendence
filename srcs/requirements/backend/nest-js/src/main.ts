@@ -5,16 +5,7 @@ import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 /**
- * TODO: Cookies eklenecek, buna gore login sayfasina yonlendirme yapilacak.
- * TODO: JWT yapisini daha detayli ogren.
- * TODO: createUserDto'nin verilerini kisalt...
- * TODO: 42Login butonuna tiklandiginda veriler zaten varsa tekrardan
- *  kayit yapmayi engelle. Buna da 42'deki userData'sindaki 'id',
- *  login ve e-mail, bunlar unique degerler. Bunlarin hepsine gore
- *  kontrol et. Bunlar yoksa ekle, varsa ekleme. Cookie kontrolu yap,
- *  ona gore olustur. 
- * TODO: WS: Soket baglantisiyla ornek bir mesajlasma yap. Bunu 'backend'
- *  de yapacaksin sadece .emit() ile frontend'de baglanti kurulacak.
+ * TODO: :)
  */
 async function bootstrap() {
 	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.
