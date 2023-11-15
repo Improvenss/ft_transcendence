@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
-import { stringify } from 'querystring';
-import { empty } from 'rxjs';
 
 @Injectable()
 export class ApiService {
@@ -77,25 +74,10 @@ export class ApiService {
 	}
 
 	async	fetchUserData(dataClient: any) {
-		// JWT ile token oluştur.
-		//const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
-		//const createUserDto: CreateUserDto = Object.assign({}, dataClient);
-		//const createUserDto: CreateUserDto = { ...CreateUserDto, ...dataClient };
-		const createUserDto: CreateUserDto = {
-			login: dataClient.login,
-			email: dataClient.email,
-			first_name: dataClient.first_name,
-			last_name: dataClient.last_name,
-			image: dataClient.image
-		  };
-
-		//const token = jwt.sign(createUserDto, 'your_secret_key', { expiresIn: '1h' });
-		//console.log(createUserDto);
-		//console.log(token);
 		const	tmpDb = await this.usersService.findOne(undefined, dataClient.login);
 		if (tmpDb)
 			return ("User already exist in DB.");
-		const	responseSave = await this.usersService.create(createUserDto);
+		const	responseSave = await this.usersService.create(dataClient);
 		return (responseSave);
 	}
 }

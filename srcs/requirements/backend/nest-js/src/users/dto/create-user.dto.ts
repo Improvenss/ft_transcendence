@@ -10,6 +10,7 @@ class Image {
 
 export class CreateUserDto {
 	login: string;
+	socket_id?: string | null;
 	first_name: string;
 	last_name: string;
 	email: string;

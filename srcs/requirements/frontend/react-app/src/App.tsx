@@ -8,16 +8,18 @@ import NoMatchPage from "./main/NoMatchPage";
 import LoginPage from "./login/LoginPage";
 import Cookies from 'js-cookie';
 import ChatPage from "./chat/ChatPage";
-import { SocketProvider } from "./main/SocketHook";
 import { useAuth } from './login/AuthHook';
+import { useSocket } from "./main/SocketHook";
 
 function App() {
-	const { isAuth, setAuth } = useAuth();
+	const	{ isAuth, setAuth } = useAuth();
+	const	socket = useSocket();
 
 	function logOut() {
 		setAuth(false);
 		Cookies.remove('user');
 		localStorage.removeItem('user');
+		socket?.disconnect(); // Socket baglantisini kopariyoruz.
 		return (<Navigate to='/login' replace/>); //geri butonuna basınca mal olmasın diye ekleniyor
 	}
 
@@ -30,7 +32,6 @@ function App() {
 				{ isAuth && <span onClick={logOut} style={{ padding: 5, cursor: 'pointer' }}> Logout </span> }
 			</ul>
 		</header>
-		<SocketProvider>
 			<Routes>
 				<Route path='/' element={<HomePage />} />
 				<Route path='/chat' element={<ChatPage />} />
@@ -38,7 +39,6 @@ function App() {
 				<Route path='/api' element={<Api />} />
 				<Route path='/login' element={<LoginPage />} />
 			</Routes>
-		</SocketProvider>
 		</div>
 	);
 };

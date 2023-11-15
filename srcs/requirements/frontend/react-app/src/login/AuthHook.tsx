@@ -22,7 +22,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		console.log("I: ---Cookie Checking---");
 		const userCookie = Cookies.get("user");
 		const userLStore = localStorage.getItem("user");
-		console.log(process.env.REACT_APP_API_COOKIE);
 		const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
 		  method: "POST",
 		  headers: {
@@ -57,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	if (loading) {
 		return (<LoadingPage />);
 	}
-	console.log(isAuth);
 	return (
 	  <AuthContext.Provider value={{ isAuth, setAuth }}>
 		{children}

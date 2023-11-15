@@ -25,6 +25,9 @@ export class User {
 	@Column()
 	login: string
 
+	@Column({nullable: true})
+	socket_id?: string
+
 	@Column()
 	first_name: string
 

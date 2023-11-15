@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import { CookiesProvider } from 'react-cookie';
 import { AuthProvider } from './login/AuthHook';
+import { SocketProvider } from './main/SocketHook';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -31,15 +32,17 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 root.render(
-	<React.StrictMode>
-		<CookiesProvider>
-			<BrowserRouter>
-				<AuthProvider>
-					<App />
-				</AuthProvider>
-			</BrowserRouter>
-		</CookiesProvider>
-	</React.StrictMode>
+	<AuthProvider>
+		<SocketProvider>
+			<React.StrictMode>
+				<CookiesProvider>
+					<BrowserRouter>
+						<App />
+					</BrowserRouter>
+				</CookiesProvider>
+			</React.StrictMode>
+		</SocketProvider>
+	</AuthProvider>
 );
 
 /**

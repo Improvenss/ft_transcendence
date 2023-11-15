@@ -3,8 +3,6 @@ import { ApiService } from './api.service';
 import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
 import * as fs from 'fs';
-import { stringify } from 'querystring';
-import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 
 
@@ -19,8 +17,6 @@ export class ApiController {
 
 	/**
 	 * React'tan ilk butona tikandigi anda buraya geliyor.
-	 * 
-	 * 
 	 * @param status 
 	 * @returns API ekraninin linki; Authorization ekrani gelecek.
 	 */
@@ -66,11 +62,11 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 
 		const createUserDto: CreateUserDto = {
 			login: dataClient.login,
-			email: dataClient.email,
 			first_name: dataClient.first_name,
 			last_name: dataClient.last_name,
+			email: dataClient.email,
 			image: dataClient.image
-		  };
+		};
 
 		const	responseData = await this.apiService.fetchUserData(createUserDto);
 		const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
@@ -78,10 +74,8 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 
 		// return ({message: "User data successfully saved database."});
 		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
-		return {message: "BACKEND OK", access_token: dataToken.access_token,
-			responseData: responseData, cookie: cookie};
+		return {message: "BACKEND OK", responseData: createUserDto, cookie: cookie};
 	}
-	// Sonra da 'users' olusturulacak. 'nest generate resource users' diye.
 
 	@Post('cookie')
 	async userCookie(@Body() status: {cookie: string}){
@@ -95,13 +89,10 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		// JWT'yi doğrulayın
 		try {
 			const decoded = jwt.verify(status.cookie, 'your_secret_key');
-			// console.log("cookie:", decoded);
 			return ({message: "COOKIE OK"});
 		} catch(err) {
-			// console.error("cookie err:", err);
+			console.error("Cookie err:", err);
 		}
-		//if (status.cookie)
-		//	return ({message: "COOKIE OK"});
 		return ({message: "COOKIE NOK"});
 	}
 

@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { EntityManager, JsonContains, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Socket } from 'dgram';
 
 @Injectable()
 export class UsersService {
@@ -55,6 +56,17 @@ export class UsersService {
 	async	update(id: number, updateUserDto: UpdateUserDto) {
 		const	tmpUser = await this.findOne(id);
 		Object.assign(tmpUser, updateUserDto);
+		return (await this.entityManager.save(tmpUser));
+	}
+
+	/**
+	 * Login asamasindan sonra User datasi DB'ye kayit edildikten sonra,
+	 *  olusturulan Socket.id'sini DB'de guncellemek icin.
+	 * @param login 
+	 */
+	async	updateSocketLogin(login: string, socketData: string) {
+		const	tmpUser = await this.findOne(undefined, login);
+		Object.assign(tmpUser, socketData);
 		return (await this.entityManager.save(tmpUser));
 	}
 

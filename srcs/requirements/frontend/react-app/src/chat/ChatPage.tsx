@@ -25,17 +25,6 @@ function ChatPage (){
 		socket?.emit("createMessage", value);
 	}
 
-	useEffect(() => {
-		// const socket = io(process.env.REACT_APP_SOCKET_HOST as string);
-		// setSocket(socket);
-		socket?.on('connect', () => {
-			console.log('Client connected to Server. ✅');
-		});
-		socket?.on('disconnect', () => {
-			console.log('Client connection lost. 💔');
-		});
-	}, []);
-
 	// const	messageListener = (message: {login: string, message: string}) => {
 	const	messageListener = (message: string) => {
 		setMessages(prevMessages => [...prevMessages, message]);

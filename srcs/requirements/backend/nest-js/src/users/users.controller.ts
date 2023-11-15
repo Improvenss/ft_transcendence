@@ -21,6 +21,22 @@ export class UsersController {
 		return (newUser);
 	}
 
+	@Post('socket')
+	async	createSocket(@Body() status: {cookie: string, socketID: string}) {
+		const jwt = require('jsonwebtoken');
+		try {
+			const decoded = jwt.verify(status.cookie, 'your_secret_key');
+			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login, status.socketID);
+			if (!tmpUser)
+				throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
+					HttpStatus.INTERNAL_SERVER_ERROR));
+			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socket_id}]`});
+		} catch(err) {
+			console.error("Cookie err:", err);
+		}
+		return ({message: "Socket not updated."});
+	}
+
 	/**
 	 * DB'den butun 'User' verilerini donduruyoruz.
 	 * @returns All Users.
@@ -65,11 +81,10 @@ export class UsersController {
 	 * @param updateUserDto 
 	 * @returns 
 	 */
-	@Patch(':id')
+	@Patch(':id(\\d+)')
 	async	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
 		const	tmpDb: UpdateUserDto = {}; // DB'deki guncellenmis degerler atanacak.
 		const	tmpUser = await this.usersService.update(+id, updateUserDto); // DB'deki eskisi yenisiyle guncelliyoruz, yeni halini donduruyoruz.
-
 		if (!tmpUser)
 			throw (new HttpException("@Patch(':id'): update(): id: User does not exist!",
 				HttpStatus.INTERNAL_SERVER_ERROR));
@@ -78,11 +93,9 @@ export class UsersController {
 		// Degismis mi degismemis mi DB'deki veriyi aliyoruz.
 		// DB'deki veriyle, bizim istedigimizi karsilastiracagiz.
 		// Degerler ayniysa basarili bir sekilde 'update' tamamlanmis oluyor.
-		for (const key in updateUserDto) {
-			if (updateUserDto.hasOwnProperty(key) && tmpUser.hasOwnProperty(key)) {
+		for (const key in updateUserDto)
+			if (updateUserDto.hasOwnProperty(key) && tmpUser.hasOwnProperty(key))
 				tmpDb[key] = tmpUser[key];
-			}
-		}
 		// Burada JSON dosyasinin icerisindeki verileri parse'ledik.
 		const updateUserObj = JSON.parse(JSON.stringify(updateUserDto));
 		// const tmpUserObj = JSON.parse(JSON.stringify(tmpUser));
@@ -101,6 +114,16 @@ export class UsersController {
 			throw (new HttpException("@Patch(':id'): update(): id: User's in DB but User does not update!",
 				HttpStatus.INTERNAL_SERVER_ERROR));
 		return ({message: "User updated successfully."});
+	}
+
+	@Patch(':login')
+	async	updateSocketLogin(@Param('login') login: string,
+	@Body() socketData: string) {
+		const	tmpUser = await this.usersService.updateSocketLogin(login, socketData);
+		if (!tmpUser)
+			throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
+				HttpStatus.INTERNAL_SERVER_ERROR));
+		return ({message: "User socket_id updated."});
 	}
 
 	@Delete()
