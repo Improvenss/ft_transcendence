@@ -1,43 +1,42 @@
-/* ChatPage.tsx */
+/**
+ * LINK: https://socket.io/docs/v4/server-socket-instance/
+ */
 import React, { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import io, { Socket } from 'socket.io-client';
-import './ChatPage.css';
 import MessageInput from "./MessageInput";
 import './ChatPage.css';
-import './Message.css';
+import Message from "./Message";
+import { useSocket } from '../main/SocketHook';
+import { useAuth } from '../login/AuthHook';
 
-interface ChatPageProps {
-	isAuth: boolean;
-}
 
-function ChatPage ({isAuth}: ChatPageProps){
+function ChatPage (){
+	const isAuth = useAuth().isAuth;
 	if (!isAuth)
-	{
-		return (
-			<Navigate to='/login' replace />
-		);
-	}
+		return (<Navigate to='/login' replace />);
 
-	const	[socket, setSocket] = useState<Socket>();
+	const	socket = useSocket();
 	const	[messages, setMessages] = useState<string[]>([]);
-	const	messagesEndRef = useRef<HTMLDivElement>(null);
+	// const	[messages, setMessages] = useState<{login: string, message: string}[]>([]);
+	console.log("ChatPage: ", socket);
 
 	const	send = (value: string) => {
 		socket?.emit("createMessage", value);
 	}
 
 	useEffect(() => {
-		const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
-		setSocket(newSocket);
-		newSocket.on('connect', () => {
+		// const socket = io(process.env.REACT_APP_SOCKET_HOST as string);
+		// setSocket(socket);
+		socket?.on('connect', () => {
 			console.log('Client connected to Server. ✅');
 		});
-		newSocket.on('disconnect', () => {
+		socket?.on('disconnect', () => {
 			console.log('Client connection lost. 💔');
 		});
-	}, [setSocket]);
+	}, []);
 
+	// const	messageListener = (message: {login: string, message: string}) => {
 	const	messageListener = (message: string) => {
 		setMessages(prevMessages => [...prevMessages, message]);
 	}
@@ -49,22 +48,46 @@ function ChatPage ({isAuth}: ChatPageProps){
 		}
 	}, [messageListener]);
 
-	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages]);
-
 	return (
 		<div id="chat-page">
-			<div>
-				{messages.map((message, index) => (
-					<div key={index}>{index}: {message}</div>
-				))}
-				<div ref={messagesEndRef} />
-			</div>
+			<Message messages={messages}/>
 			<MessageInput send={send} />
 		</div>
 	)
 }
 export default ChatPage;
 
+/**
+ * import React, { useEffect, useState } from "react";
+import io from 'socket.io-client';
 
+function ChatPage() {
+  const [socket, setSocket] = useState(null);
+  const [channel, setChannel] = useState('general');
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const socket = io.connect(process.env.REACT_APP_SOCKET_HOST);
+    setSocket(socket);
+
+    socket.on('connect', () => {
+      socket.emit('joinRoom', channel);
+    });
+
+    socket.on('messageToClient', (message) => {
+      setMessages((messages) => [...messages, message]);
+    });
+
+    return () => {
+      socket.emit('leaveRoom', channel);
+    };
+  }, [channel]);
+
+  const sendMessage = (message) => {
+    socket.emit('chatToRoom', { room: channel, message });
+  };
+
+  // ... diğer kodlar ...
+}
+
+ */

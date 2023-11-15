@@ -4,27 +4,42 @@ import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import e
 import './index.css';
 import App from './App';
 import { CookiesProvider } from 'react-cookie';
-// npm install react-router-dom
+import { AuthProvider } from './login/AuthHook';
 
 /**
  * Burasi ana function olarak geciyor.
  * Biz SPA(Single Page Application) yazabilmemiz icin;
- *  'react-router-dom'u kurmamiz gerekiyor. Sonra;
+ *  'react-router-dom'u kurmamiz gerekiyor.
+ * $> npm install react-router-dom
+ * Sonra;
  *  <BrowserRouter>
  *   Arasina yazmamiz gerekiyor her seyi.
  *  </BrowserRouter>
+ * 
+ * TODO: 2 tane msg gondermeyi engelle.
+ * TODO: Kullanici adlarini koy.
+ * TODO: User list yap.
+ * TODO: Channel list yap.
+ * TODO: Channel olustururken; ChatPage.tsx'te olacak ama function
+ *  implementation'larini(definition) ayri bir 'Channel.tsx' dosyasinda yaz.
+ * TODO: Sol & Sag mesajlari genisligini sinirla.
+ * TODO: Mesajlari 'await' ile synchronize hale getir.
+ * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.
+ * TODO: Kaka yaptiktan sonra dislerini fircalamayi unutma. :D
  */
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+	document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <CookiesProvider>
-      <BrowserRouter>
-        <App/>
-      </BrowserRouter>
-    </CookiesProvider>
-  </React.StrictMode>
+	<React.StrictMode>
+		<CookiesProvider>
+			<BrowserRouter>
+				<AuthProvider>
+					<App />
+				</AuthProvider>
+			</BrowserRouter>
+		</CookiesProvider>
+	</React.StrictMode>
 );
 
 /**

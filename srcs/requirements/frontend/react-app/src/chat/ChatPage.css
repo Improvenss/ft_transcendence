@@ -1,4 +1,3 @@
-/* ChatPage.css */
 #chat-page {
 	display: flex;
 	flex-direction: column;
@@ -17,6 +16,15 @@
 	overflow: auto;
 	flex-grow: 1;
 	padding: 1em;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+#chat-page > div:first-child > p {
+	background-color: rgb(31, 31, 31);
+	margin: 10px 0;
+	padding: 10px;
+	border-radius: 10px;
 }
 
 #chat-page > div:last-child {

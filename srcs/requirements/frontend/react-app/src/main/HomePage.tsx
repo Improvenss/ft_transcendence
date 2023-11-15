@@ -1,12 +1,10 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import './HomePage.css';
+import { useAuth } from '../login/AuthHook';
 
-interface HomePageProps {
-	isAuth: boolean;
-}
-
-function HomePage({isAuth}: HomePageProps){
+function HomePage(){
+	const isAuth = useAuth().isAuth;
 	if (!isAuth)
 	{
 		return (

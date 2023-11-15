@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Countdown from "./Countdown";
 import './LoginPage.css';
+import { useAuth } from './AuthHook';
 
 async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (value: string) => void) {
 	console.log("II: ---API Login Connection---");
@@ -37,11 +38,8 @@ async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (v
 	}
 }
 
-interface LoginPageProps {
-	isAuth: boolean;
-}
-
-function LoginPage({isAuth}: LoginPageProps){
+function LoginPage(){
+	const isAuth = useAuth().isAuth;
 	if (isAuth)
 	{
 		return (

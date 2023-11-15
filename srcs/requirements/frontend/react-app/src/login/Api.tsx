@@ -1,13 +1,11 @@
 import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import Cookies from 'js-cookie';
+import { useAuth } from './AuthHook';
 
-interface ApiProps {
-	setAuth: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export default function	Api({setAuth}: ApiProps)
+export default function	Api()
 {
+	const	setAuth = useAuth().setAuth;
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	uriCode = urlParams.get('code');
 
