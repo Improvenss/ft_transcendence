@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { useAuth } from '../login/AuthHook';
 
 // SocketContext'i oluştur
 const SocketContext = createContext<Socket | null>(null);
 
 // Provider component'ini oluştur
-export function SocketProvider({ children, isAuth }: { children: React.ReactNode, isAuth: boolean }) {
+export function SocketProvider({ children }: { children: React.ReactNode }) {
 	const [socket, setSocket] = useState<Socket | null>(null);
+	const isAuth = useAuth().isAuth;
   
 	useEffect(() => {
 	  if (isAuth) {

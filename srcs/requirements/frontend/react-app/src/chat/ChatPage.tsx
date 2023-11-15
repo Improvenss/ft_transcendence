@@ -8,12 +8,11 @@ import MessageInput from "./MessageInput";
 import './ChatPage.css';
 import Message from "./Message";
 import { useSocket } from '../main/SocketHook';
+import { useAuth } from '../login/AuthHook';
 
-interface ChatPageProps {
-	isAuth: boolean;
-}
 
-function ChatPage ({isAuth}: ChatPageProps){
+function ChatPage (){
+	const isAuth = useAuth().isAuth;
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
 

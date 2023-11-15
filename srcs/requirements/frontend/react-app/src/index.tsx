@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import e
 import './index.css';
 import App from './App';
 import { CookiesProvider } from 'react-cookie';
+import { AuthProvider } from './login/AuthHook';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -33,7 +34,9 @@ root.render(
 	<React.StrictMode>
 		<CookiesProvider>
 			<BrowserRouter>
+				<AuthProvider>
 					<App />
+				</AuthProvider>
 			</BrowserRouter>
 		</CookiesProvider>
 	</React.StrictMode>

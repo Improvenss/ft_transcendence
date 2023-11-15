@@ -1,73 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+/*App.tsx */
+import React from "react";
+import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
 import HomePage from "./main/HomePage";
 import Api from "./login/Api";
-import LoadingPage from "./login/LoadingPage";
 import NoMatchPage from "./main/NoMatchPage";
 import LoginPage from "./login/LoginPage";
 import Cookies from 'js-cookie';
 import ChatPage from "./chat/ChatPage";
 import { SocketProvider } from "./main/SocketHook";
-
-async function checkAuth(setAuth: React.Dispatch<React.SetStateAction<boolean>>) {
-	console.log("I: ---Cookie Checking---");
-	const userCookie = Cookies.get("user");
-	const userLStore = localStorage.getItem("user");
-	//console.log(userLStore);
-	console.log(process.env.REACT_APP_API_COOKIE);
-	const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-		cookie: userCookie as string
-		})
-	});
-
-	if (response.ok) {
-		console.log("I: ---Cookie Backend Connection '✅'---");
-		const data = await response.json();
-		if (data.message === "COOKIE OK") {
-			console.log("I: ---Cookie Response '✅'---");
-			setAuth(true);
-		} else {
-			console.log("I: ---Cookie Response '❌'---");
-		}
-	} else {
-		console.log("I: ---Cookie Backend Connection '❌'---");
-	}
-}
+import { useAuth } from './login/AuthHook';
 
 function App() {
-	const navigate = useNavigate();
-	const [isLoading, setLoading] = useState(true);
-	const [isAuth, setAuth] = useState(false);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			await checkAuth(setAuth);
-			setLoading(false);
-		};
-		window.addEventListener('load', fetchData);
-		const timer = setTimeout(fetchData, 1000);
-
-		return () => {
-			window.removeEventListener('load', fetchData);
-			clearTimeout(timer);
-		};
-	}, []);
-		
-	if (isLoading) {
-		return (<LoadingPage />);
-	}
+	const { isAuth, setAuth } = useAuth();
 
 	function logOut() {
 		setAuth(false);
 		Cookies.remove('user');
 		localStorage.removeItem('user');
-		//navigate('/login');
 		return (<Navigate to='/login' replace/>); //geri butonuna basınca mal olmasın diye ekleniyor
 	}
 
@@ -80,13 +30,13 @@ function App() {
 				{ isAuth && <span onClick={logOut} style={{ padding: 5, cursor: 'pointer' }}> Logout </span> }
 			</ul>
 		</header>
-		<SocketProvider isAuth={isAuth}>
+		<SocketProvider>
 			<Routes>
-				<Route path='/' element={<HomePage isAuth={isAuth} />} />
-				<Route path='/chat' element={<ChatPage isAuth={isAuth}/>} />
+				<Route path='/' element={<HomePage />} />
+				<Route path='/chat' element={<ChatPage />} />
 				<Route path='*' element={<NoMatchPage />} />
-				<Route path='/api' element={<Api setAuth={setAuth} />} />
-				<Route path='/login' element={<LoginPage isAuth={isAuth} />} />
+				<Route path='/api' element={<Api />} />
+				<Route path='/login' element={<LoginPage />} />
 			</Routes>
 		</SocketProvider>
 		</div>
