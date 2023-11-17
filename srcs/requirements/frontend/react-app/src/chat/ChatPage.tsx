@@ -1,9 +1,8 @@
 /**
  * LINK: https://socket.io/docs/v4/server-socket-instance/
  */
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import io, { Socket } from 'socket.io-client';
 import MessageInput from "./MessageInput";
 import './ChatPage.css';
 import Message from "./Message";
