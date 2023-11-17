@@ -1,11 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import etmemiz gerekiyor, cunku tarayici rotasi olara geciyor.
 import './index.css';
 import App from './App';
-import { CookiesProvider } from 'react-cookie';
-import { AuthProvider } from './login/AuthHook';
-import { SocketProvider } from './main/SocketHook';
+import { BrowserRouter } from 'react-router-dom';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -32,17 +29,11 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 root.render(
-	<AuthProvider>
-		<SocketProvider>
-			<React.StrictMode>
-				<CookiesProvider>
-					<BrowserRouter>
-						<App />
-					</BrowserRouter>
-				</CookiesProvider>
-			</React.StrictMode>
-		</SocketProvider>
-	</AuthProvider>
+	<React.StrictMode>
+		<BrowserRouter>
+			<App />
+		</BrowserRouter>
+	</React.StrictMode>
 );
 
 /**

@@ -21,3 +21,49 @@ How can you update node?
 	$> npm install -g n
 	$> sudo n latest
 }
+
+REACT {
+	Installed {
+		npm install socket.io-client
+		npm install react-router-dom
+	}
+	How can i create react? {
+		npx {
+			npx create-react-app socket-sample --template typescript
+		}
+		Install pnpm.
+			npm install -g pnpm
+		pnpx {
+			pnpx create-react-app socket-pnpx --template typescript
+		}
+	}
+
+	How can i start react? {
+		npm run start
+		or
+		pnpm run start
+	}
+}
+
+NESTJS {
+	Installed {
+		pnpm install --save @nestjs/websockets
+		npm install @nestjs/platform-socket.io
+	}
+	How can i create nestjs? {
+		Install nestjs/cli.
+			npm i -g @nestjs/cli
+		npm {
+			nest new nestjs-sample
+		}
+		pnpm {
+			nest new nestjs-pnpm
+		}
+	}
+
+	How can start nestjs? {
+		pnpm run start
+		or
+		npm run start
+	}
+}

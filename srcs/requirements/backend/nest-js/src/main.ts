@@ -4,9 +4,6 @@ import * as fs from 'fs';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-/**
- * TODO: :)
- */
 async function bootstrap() {
 	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.
 	const	httpsOptions = {
@@ -17,8 +14,8 @@ async function bootstrap() {
 	app.enableCors();
 	app.use(
 		cors({
-		origin: process.env.API_HOST as string, // İzin verilen kök alan
-		methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // İzin verilen HTTP yöntemleri
+			origin: process.env.API_HOST as string, // İzin verilen kök alan
+			methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // İzin verilen HTTP yöntemleri
 		})
 	);
 	const	configSwagger = new DocumentBuilder() // Bu ve altindakiler 'swagger' icin;
@@ -30,18 +27,16 @@ async function bootstrap() {
 	SwaggerModule.setup('swagger', app, documentSwagger);
 
 	await app.listen(process.env.PORT);
-	console.log(`Application is running on: ${await app.getUrl()}`);
-}
-
+	console.log(`Application is running on: ${await app.getUrl()}`);}
 bootstrap();
 
 /**
  * Kurulan paketler sirasiyla;
  * 
- * npm install --save dotenv -> .env'lerimizi alabilmemiz icin.
+ * OK npm install --save dotenv -> .env'lerimizi alabilmemiz icin.
  * npm install --save-dev @types/babel__core -> tsconfig.json dosyasinda istiyordu.
  * npm install --save-dev @types/cors -> cors pakedini kurduk, cors protokolu hatasini onlemek icin.
- * npm install --save-dev @nestjs/swagger -> Swagger ile postman gibi GET POST... Gibi istekleri tiklayarak yapabilmemizi sagliyor.
+ * OK npm install --save-dev @nestjs/swagger -> Swagger ile postman gibi GET POST... Gibi istekleri tiklayarak yapabilmemizi sagliyor.
  * 
  * npm install --save-dev @nestjs/config -> app.module.ts icerisindeki @Module nin icerisinde .env dosyasini kullanabilmek icin.
  * npm install --save-dev @nestjs/typeorm -> Veritabani ile baglanti kurabilmemizi saglayan ORM(Object Relational Mapping).
