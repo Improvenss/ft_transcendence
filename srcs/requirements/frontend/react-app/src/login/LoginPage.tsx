@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import Countdown from "./Countdown";
 import './LoginPage.css';
 import { useAuth } from './AuthHook';
+import LoadingPage from "./LoadingPage";
 
-async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (value: string) => void) {
+interface ILoginProps{
+	setClicked: (value: boolean) => void,
+	navigate: (to: string, options?: { replace: boolean }) => void,
+	//navigate: (to: string, options?: { replace: boolean; state: { userStatus: boolean }; }) => void,
+}
+
+async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 	console.log("II: ---API Login Connection---");
 	const	response = await fetch(process.env.REACT_APP_API_LOGIN as string, {
 		method: 'POST',
@@ -19,27 +26,85 @@ async function	redirectToLogin(setClicked: (value: boolean) => void, setPath: (v
 	{
 		console.log("II: ---API Login Connection '✅'---");
 		const	data = await response.json();
-		setClicked(true);
 		// window.location.href = data.requestLogin;
-		window.addEventListener('message', event => {	
+		const	messageHandler = function(event: MessageEvent<any>) {
 			if (event.origin === process.env.REACT_APP_IP) {
 				const data = event.data;
 				if (data.message === 'popupRedirect'){
-					setPath('/api?code=' + data.additionalData);
+					console.log("API REDIRECT");
+					navigate('/api?code=' + data.additionalData, { replace: true });
+					//navigate('/api?code=' + data.additionalData, { replace: true, state: { userStatus: true } });
+					window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
 				}
 			}
-		});
+		}
+		window.addEventListener('message', messageHandler);
 		window.open(data.requestLogin, "intraPopup", "width=500,height=300");
 	}
-	else
-	{
+	else{
+
 		console.log("II: ---API Login Connection '❌'---");
 		setClicked(false); // Bu da butonun tekrar tiklanabilir olmamasini sagliyor.
 	}
 }
 
+// function LoginPage(){
+// 	//console.log("---------LOGIN-PAGE---------");
+// 	const isAuth = useAuth().isAuth;
+// 	if (isAuth)
+// 	{
+// 		return (
+// 			<Navigate to='/' replace />
+// 		);
+// 	}
+
+// 	const [clicked, setClicked] = useState(false);
+// 	const navigate = useNavigate();
+// 	const [fontsLoaded, setFontsLoaded] = useState(false);
+// 	useEffect(() => {
+// 		Promise.all([
+// 		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
+// 		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
+// 		]).then(() => setFontsLoaded(true));
+// 	  }, []);
+
+// 	useEffect(() => {
+// 		if (clicked === true)
+// 			redirectToLogin({setClicked, navigate});
+// 	}, [clicked])
+
+// 	if (!fontsLoaded)
+// 	  return (<LoadingPage />);
+
+// 	return (
+// 		<div id="login-page">
+// 			<Countdown />
+// 			<button onClick={() => setClicked(true)}  disabled={clicked}>
+// 				<span>42 Login</span>
+// 			</button>
+// 		</div>
+// 	)
+// }
+
 function LoginPage(){
+	//console.log("---------LOGIN-PAGE---------");
 	const isAuth = useAuth().isAuth;
+	const [clicked, setClicked] = useState(false);
+	const navigate = useNavigate();
+	const [fontsLoaded, setFontsLoaded] = useState(false);
+
+	useEffect(() => {
+		Promise.all([
+		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
+		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
+		]).then(() => setFontsLoaded(true));
+	}, []);
+
+	useEffect(() => {
+		if (clicked === true)
+			redirectToLogin({setClicked, navigate});
+	}, [clicked])
+
 	if (isAuth)
 	{
 		return (
@@ -47,21 +112,15 @@ function LoginPage(){
 		);
 	}
 
-	const [clicked, setClicked] = useState(false);
-	const [path, setPath] = useState('/login');
-
-	useEffect(() => {
-		if (clicked === true)
-			redirectToLogin(setClicked, setPath);
-	}, [clicked]);
+	if (!fontsLoaded)
+	  return (<LoadingPage />);
 
 	return (
 		<div id="login-page">
-			{Countdown()}
-			<button onClick={() => setClicked(true)} disabled={clicked}>
+			<Countdown />
+			<button onClick={() => setClicked(true)}  disabled={clicked}>
 				<span>42 Login</span>
 			</button>
-			<Navigate to={path} replace />
 		</div>
 	)
 }

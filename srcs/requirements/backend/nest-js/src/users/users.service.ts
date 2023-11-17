@@ -4,7 +4,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { EntityManager, JsonContains, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Socket } from 'dgram';
 
 @Injectable()
 export class UsersService {

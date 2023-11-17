@@ -1,9 +1,8 @@
 /**
  * LINK: https://socket.io/docs/v4/server-socket-instance/
  */
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import io, { Socket } from 'socket.io-client';
 import MessageInput from "./MessageInput";
 import './ChatPage.css';
 import Message from "./Message";
@@ -12,20 +11,16 @@ import { useAuth } from '../login/AuthHook';
 
 
 function ChatPage (){
+	console.log("---------CHAT-PAGE---------");
 	const isAuth = useAuth().isAuth;
-	if (!isAuth)
-		return (<Navigate to='/login' replace />);
-
 	const	socket = useSocket();
 	const	[messages, setMessages] = useState<string[]>([]);
-	// const	[messages, setMessages] = useState<{login: string, message: string}[]>([]);
 	console.log("ChatPage: ", socket);
 
 	const	send = (value: string) => {
 		socket?.emit("createMessage", value);
 	}
 
-	// const	messageListener = (message: {login: string, message: string}) => {
 	const	messageListener = (message: string) => {
 		setMessages(prevMessages => [...prevMessages, message]);
 	}
@@ -37,6 +32,9 @@ function ChatPage (){
 		}
 	}, [messageListener]);
 
+	if (!isAuth)
+		return (<Navigate to='/login' replace />);
+
 	return (
 		<div id="chat-page">
 			<Message messages={messages}/>
@@ -45,6 +43,7 @@ function ChatPage (){
 	)
 }
 export default ChatPage;
+
 
 /**
  * import React, { useEffect, useState } from "react";

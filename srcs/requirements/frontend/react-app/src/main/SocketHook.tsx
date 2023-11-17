@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useAuth } from '../login/AuthHook';
 import Cookies from 'js-cookie';
-import { time } from 'console';
 
 // SocketContext'i oluştur
 const SocketContext = createContext<Socket | null>(null);
@@ -14,7 +13,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 	const userCookie = Cookies.get("user");
 
 	useEffect(() => {
-
 		if (isAuth) {
 			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
 			setSocket(newSocket);
@@ -33,9 +31,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					})
 				})
 				if (response.ok)
-				{
 					console.log("Socket update:", await response.json());
-				}
 			});
 			newSocket.on('disconnect', () => {
 				console.log('Client connection lost. 💔');

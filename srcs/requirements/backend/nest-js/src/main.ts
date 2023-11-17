@@ -4,9 +4,6 @@ import * as fs from 'fs';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-/**
- * TODO: :)
- */
 async function bootstrap() {
 	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.
 	const	httpsOptions = {
@@ -17,8 +14,8 @@ async function bootstrap() {
 	app.enableCors();
 	app.use(
 		cors({
-		origin: process.env.API_HOST as string, // İzin verilen kök alan
-		methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // İzin verilen HTTP yöntemleri
+			origin: process.env.API_HOST as string, // İzin verilen kök alan
+			methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // İzin verilen HTTP yöntemleri
 		})
 	);
 	const	configSwagger = new DocumentBuilder() // Bu ve altindakiler 'swagger' icin;
@@ -30,31 +27,33 @@ async function bootstrap() {
 	SwaggerModule.setup('swagger', app, documentSwagger);
 
 	await app.listen(process.env.PORT);
-	console.log(`Application is running on: ${await app.getUrl()}`);
-}
-
+	console.log(`Application is running on: ${await app.getUrl()}`);}
 bootstrap();
 
 /**
  * Kurulan paketler sirasiyla;
  * 
- * npm install --save dotenv -> .env'lerimizi alabilmemiz icin.
- * npm install --save-dev @types/babel__core -> tsconfig.json dosyasinda istiyordu.
- * npm install --save-dev @types/cors -> cors pakedini kurduk, cors protokolu hatasini onlemek icin.
- * npm install --save-dev @nestjs/swagger -> Swagger ile postman gibi GET POST... Gibi istekleri tiklayarak yapabilmemizi sagliyor.
+ * @OK npm install --save dotenv -> .env'lerimizi alabilmemiz icin.
+ * npm install --save @types/babel__core -> tsconfig.json dosyasinda istiyordu.
+ * npm install --save @types/cors -> cors pakedini kurduk, cors protokolu hatasini onlemek icin.
+ * @OK npm install --save @nestjs/swagger -> Swagger ile postman gibi GET POST... Gibi istekleri tiklayarak yapabilmemizi sagliyor.
  * 
- * npm install --save-dev @nestjs/config -> app.module.ts icerisindeki @Module nin icerisinde .env dosyasini kullanabilmek icin.
- * npm install --save-dev @nestjs/typeorm -> Veritabani ile baglanti kurabilmemizi saglayan ORM(Object Relational Mapping).
- * npm install --save-dev pg -> PostgreSQL ile bagtanti kurabilmek icin.
+ * @OK npm install --save @nestjs/config -> app.module.ts icerisindeki @Module nin icerisinde .env dosyasini kullanabilmek icin.
+ * @OK npm install --save @nestjs/typeorm -> Veritabani ile baglanti kurabilmemizi saglayan ORM(Object Relational Mapping).
+ * @OK npm install --save pg -> PostgreSQL ile bagtanti kurabilmek icin.
  * 
- * nest generate resource api
+ * @OK /app/nest-js # nest generate resource api
+ * 	? What transport layer do you use? REST API
+ * 	? Would you like to generate CRUD entry points? Yes
+ * 
+ * @OK /app/nest-js # nest generate resource users
  * 	? What transport layer do you use? REST API
  * 	? Would you like to generate CRUD entry points? Yes
  * 
  * npm install --save-dev typeorm -> Entity'de falan TypeORM CRUD yapisini kullanabilmek icin.
  * 
- * npm install --save-dev @nestjs/websockets @nestjs/platform-socket.io -> WebSocket'leri icin gerekli kutuphaneleri kurduk.
+ * @OK npm install --save @nestjs/websockets @nestjs/platform-socket.io -> WebSocket'leri icin gerekli kutuphaneleri kurduk.
  * nest generate gateway chat -> Socket ile mesajlasabilmek icin 'gateway' yapisini ekledik.
  * 
- * npm install jsonwebtoken -> JWT token icin.
+ * @OK npm install jsonwebtoken -> JWT token icin.
  */

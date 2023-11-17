@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom'; // Burada sadece bunu import etmemiz gerekiyor, cunku tarayici rotasi olara geciyor.
 import './index.css';
 import App from './App';
-import { CookiesProvider } from 'react-cookie';
+import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './login/AuthHook';
 import { SocketProvider } from './main/SocketHook';
 
@@ -17,7 +16,6 @@ import { SocketProvider } from './main/SocketHook';
  *   Arasina yazmamiz gerekiyor her seyi.
  *  </BrowserRouter>
  * 
- * TODO: 2 tane msg gondermeyi engelle.
  * TODO: Kullanici adlarini koy.
  * TODO: User list yap.
  * TODO: Channel list yap.
@@ -26,7 +24,6 @@ import { SocketProvider } from './main/SocketHook';
  * TODO: Sol & Sag mesajlari genisligini sinirla.
  * TODO: Mesajlari 'await' ile synchronize hale getir.
  * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.
- * TODO: Kaka yaptiktan sonra dislerini fircalamayi unutma. :D
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -35,11 +32,9 @@ root.render(
 	<AuthProvider>
 		<SocketProvider>
 			<React.StrictMode>
-				<CookiesProvider>
-					<BrowserRouter>
-						<App />
-					</BrowserRouter>
-				</CookiesProvider>
+				<BrowserRouter>
+					<App />
+				</BrowserRouter>
 			</React.StrictMode>
 		</SocketProvider>
 	</AuthProvider>
@@ -48,9 +43,10 @@ root.render(
 /**
  * Kurulan paketler sirasiyla;
  * 
- * npm install --save-dev react-cookie -> Cookie kullanimi icin kullandigimiz kutuphane.
- * npm install --save-dev @types/js-cookie
- * npm install js-cookie -> Cookie.set() fonksiyonu icin.
+ * @OK npm install --save socket.io-client
+ * NOK npm install --save react-cookie -> Cookie kullanimi icin kullandigimiz kutuphane.
+ * @OK npm install --save-dev @types/js-cookie
+ * @OK npm install js-cookie -> Cookie.set() fonksiyonu icin.
  */
 
 // If you want to start measuring performance in your app, pass a function

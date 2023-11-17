@@ -1,57 +1,75 @@
 import React, { useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import { useAuth } from './AuthHook';
 
-export default function	Api()
+function Api()
 {
-	const	setAuth = useAuth().setAuth;
+	console.log("---------API-PAGE---------");
+	const	{isAuth, setAuth} = useAuth();
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	uriCode = urlParams.get('code');
+	const	navigate = useNavigate();
+	
+	useEffect(() => {
+		const sendCode = async () => {
+			console.log("III: ---API Token Connection---");
+			const response = await fetch(process.env.REACT_APP_API_TOKEN as string, {
+				method: 'POST',
+				headers: {
+					'Content-Type':'application/json'
+				},
+				body: JSON.stringify({
+					code: uriCode as string
+				})
+			})
+			if (response.ok)
+			{
+				console.log("III: ---API Token Connection '✅'---");
+				const data = await response.json();
+				if (data.message === 'BACKEND OK')
+				{
+					console.log("III: ---API Token Backend Response '✅'---");
+					localStorage.setItem("user", data.cookie);
+					Cookies.set("user", data.cookie);
+					setAuth(true);
+					navigate("/", {replace: true, state: true});
+				}
+				else{
+					console.log("III: ---API Token Backend Response '❌'---");
+				}
+			}
+			else
+				console.log("III: ---API Token Connection '❌'---");
+		}
+		if (!isAuth) {
+			sendCode();
+		}
+	}, [isAuth]);
+
+	if (isAuth){
+		return (<Navigate to='/' replace />);
+	}
 
 	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
 		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
-	}
-	async function sendCode() {
-		console.log("III: ---API Token Connection---");
-		const response = await fetch(process.env.REACT_APP_API_TOKEN as string, {
-			method: 'POST',
-			headers: {
-				'Content-Type':'application/json'
-			},
-			body: JSON.stringify({
-				code: uriCode as string
-			})
-		})
-		if (response.ok)
-		{
-			console.log("III: ---API Token Connection '✅'---");
-			const data = await response.json();
-			if (data.message === 'BACKEND OK')
-			{
-				console.log("III: ---API Token Backend Response '✅'---");
-				localStorage.setItem("user", data.cookie);
-				Cookies.set("user", data.cookie);
-				setAuth(true);
-			}
-			else{
-				console.log("III: ---API Token Backend Response '❌'---");
-			}
-		}
-		else
-			console.log("III: ---API Token Connection '❌'---");
-	}
-	useEffect(() => {
-	if (!window.opener)
-		sendCode();
-	else
 		window.close();
-	}, []);
+		return (<></>);
+	}
 
 	return (
-		<Navigate to='/' replace/>
+		<>
+			{ !isAuth && <Navigate to='/login' replace/> }
+			{/*{ isAuth ? <Navigate to='/' replace /> : <></>}*/}
+			{/*{ isAuth ? <Navigate to='/' replace state={{ userStatus: true }}/> : <></>}*/}
+		</>
 		);
 };
+
+export default Api;
+
+
+
 
 /*
 	// --------------- Cookie bilgilerini backende gönder  ---------------------------

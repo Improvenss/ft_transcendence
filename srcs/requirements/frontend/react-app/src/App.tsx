@@ -1,25 +1,22 @@
-/*App.tsx */
-import React from "react";
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
-import './App.css';
-import HomePage from "./main/HomePage";
-import Api from "./login/Api";
-import NoMatchPage from "./main/NoMatchPage";
-import LoginPage from "./login/LoginPage";
+import React from 'react';
+import logo from './logo.svg';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import ChatPage from "./chat/ChatPage";
+import './App.css';
+import ChatPage from './chat/ChatPage';
 import { useAuth } from './login/AuthHook';
-import { useSocket } from "./main/SocketHook";
+import HomePage from './main/HomePage';
+import NoMatchPage from './main/NoMatchPage';
+import LoginPage from './login/LoginPage';
+import Api from './login/Api';
 
 function App() {
+	console.log("--->APP PAGE<---");
 	const	{ isAuth, setAuth } = useAuth();
-	const	socket = useSocket();
-
 	function logOut() {
 		setAuth(false);
 		Cookies.remove('user');
 		localStorage.removeItem('user');
-		socket?.disconnect(); // Socket baglantisini kopariyoruz.
 		return (<Navigate to='/login' replace/>); //geri butonuna basınca mal olmasın diye ekleniyor
 	}
 
