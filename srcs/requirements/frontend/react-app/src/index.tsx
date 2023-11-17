@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './login/AuthHook';
+import { SocketProvider } from './main/SocketHook';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -14,7 +16,6 @@ import { BrowserRouter } from 'react-router-dom';
  *   Arasina yazmamiz gerekiyor her seyi.
  *  </BrowserRouter>
  * 
- * TODO: 2 tane msg gondermeyi engelle.
  * TODO: Kullanici adlarini koy.
  * TODO: User list yap.
  * TODO: Channel list yap.
@@ -23,25 +24,29 @@ import { BrowserRouter } from 'react-router-dom';
  * TODO: Sol & Sag mesajlari genisligini sinirla.
  * TODO: Mesajlari 'await' ile synchronize hale getir.
  * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.
- * TODO: Kaka yaptiktan sonra dislerini fircalamayi unutma. :D
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 root.render(
-	<React.StrictMode>
-		<BrowserRouter>
-			<App />
-		</BrowserRouter>
-	</React.StrictMode>
+	<AuthProvider>
+		<SocketProvider>
+			<React.StrictMode>
+				<BrowserRouter>
+					<App />
+				</BrowserRouter>
+			</React.StrictMode>
+		</SocketProvider>
+	</AuthProvider>
 );
 
 /**
  * Kurulan paketler sirasiyla;
  * 
- * npm install --save-dev react-cookie -> Cookie kullanimi icin kullandigimiz kutuphane.
- * npm install --save-dev @types/js-cookie
- * npm install js-cookie -> Cookie.set() fonksiyonu icin.
+ * @OK npm install --save socket.io-client
+ * NOK npm install --save react-cookie -> Cookie kullanimi icin kullandigimiz kutuphane.
+ * @OK npm install --save-dev @types/js-cookie
+ * @OK npm install js-cookie -> Cookie.set() fonksiyonu icin.
  */
 
 // If you want to start measuring performance in your app, pass a function
