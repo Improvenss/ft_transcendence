@@ -1,0 +1,6 @@
+.matrix-rain {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: -1; /* Bu, Matrix yağmur efektini diğer elementlerin altına koyar */
+}  

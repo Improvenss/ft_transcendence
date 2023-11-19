@@ -1,9 +1,8 @@
-
 #user-status {
 	display: flex;
 	flex-direction: column;
-	height: 33vh;
-	width: 33vw;
+	height: 30vh;
+	width: 30vw;
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -14,4 +13,26 @@
 	justify-content: center;
 	align-items: center;
 	font-size: 20px;
+}
+
+#save {
+	background-color: darkred;
+	margin-top: 10%;
+	margin-left: 35%;
+	cursor: pointer;
+}
+
+#save:hover{
+	color: black;
+}
+
+.close-button {
+	cursor: pointer;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+.close-button:hover{
+	color: red;
 }

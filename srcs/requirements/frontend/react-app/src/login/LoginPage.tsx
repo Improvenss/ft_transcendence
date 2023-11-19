@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import Countdown from "./Countdown";
 import './LoginPage.css';
 import { useAuth } from './AuthHook';
 import LoadingPage from "./LoadingPage";
+import MatrixRain from './MatrixRain'
 
 interface ILoginProps{
 	setClicked: (value: boolean) => void,
@@ -27,11 +28,10 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 		console.log("II: ---API Login Connection '✅'---");
 		const	data = await response.json();
 		// window.location.href = data.requestLogin;
-		const	messageHandler = function(event: MessageEvent<any>) {
+		function messageHandler(event: MessageEvent<any>) {
 			if (event.origin === process.env.REACT_APP_IP) {
 				const data = event.data;
 				if (data.message === 'popupRedirect'){
-					console.log("API REDIRECT");
 					navigate('/api?code=' + data.additionalData, { replace: true });
 					//navigate('/api?code=' + data.additionalData, { replace: true, state: { userStatus: true } });
 					window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
@@ -48,63 +48,9 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 	}
 }
 
-// function LoginPage(){
-// 	//console.log("---------LOGIN-PAGE---------");
-// 	const isAuth = useAuth().isAuth;
-// 	if (isAuth)
-// 	{
-// 		return (
-// 			<Navigate to='/' replace />
-// 		);
-// 	}
-
-// 	const [clicked, setClicked] = useState(false);
-// 	const navigate = useNavigate();
-// 	const [fontsLoaded, setFontsLoaded] = useState(false);
-// 	useEffect(() => {
-// 		Promise.all([
-// 		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
-// 		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
-// 		]).then(() => setFontsLoaded(true));
-// 	  }, []);
-
-// 	useEffect(() => {
-// 		if (clicked === true)
-// 			redirectToLogin({setClicked, navigate});
-// 	}, [clicked])
-
-// 	if (!fontsLoaded)
-// 	  return (<LoadingPage />);
-
-// 	return (
-// 		<div id="login-page">
-// 			<Countdown />
-// 			<button onClick={() => setClicked(true)}  disabled={clicked}>
-// 				<span>42 Login</span>
-// 			</button>
-// 		</div>
-// 	)
-// }
-
 function LoginPage(){
 	//console.log("---------LOGIN-PAGE---------");
 	const isAuth = useAuth().isAuth;
-	const [clicked, setClicked] = useState(false);
-	const navigate = useNavigate();
-	const [fontsLoaded, setFontsLoaded] = useState(false);
-
-	useEffect(() => {
-		Promise.all([
-		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
-		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
-		]).then(() => setFontsLoaded(true));
-	}, []);
-
-	useEffect(() => {
-		if (clicked === true)
-			redirectToLogin({setClicked, navigate});
-	}, [clicked])
-
 	if (isAuth)
 	{
 		return (
@@ -112,13 +58,29 @@ function LoginPage(){
 		);
 	}
 
+	const [clicked, setClicked] = useState(false);
+	const navigate = useNavigate();
+	const [fontsLoaded, setFontsLoaded] = useState(false);
+	useEffect(() => {
+		Promise.all([
+		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
+		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
+		]).then(() => setFontsLoaded(true));
+	  }, []);
+
+	useEffect(() => {
+		if (clicked === true)
+			redirectToLogin({setClicked, navigate});
+	}, [clicked])
+
 	if (!fontsLoaded)
 	  return (<LoadingPage />);
 
 	return (
 		<div id="login-page">
 			<Countdown />
-			<button onClick={() => setClicked(true)}  disabled={clicked}>
+			<MatrixRain />
+			<button className='bn5' onClick={() => setClicked(true)}  disabled={clicked}>
 				<span>42 Login</span>
 			</button>
 		</div>
@@ -129,8 +91,8 @@ export default LoginPage;
 
 
 /**
- * 
- * 
+ *
+ *
  * grand_type -> 'authorization_code' olarak kalacak.
  * client_id -> api sayfasindaki UID -> u- ile baslayan.
  * client_secret -> api sayfasindaki SECRET -> s- ile baslayan.
@@ -138,19 +100,19 @@ export default LoginPage;
  * code -> Buradaki yani api sayfasindaki en alltaki link URL.
  * redirect_uri -> api sayfasindaki en alttaki REDIRECT URI kismindaki URI -> https://10.12.14.8:80
  * POST https://api.intra.42.fr/oauth/token -> Bu da "access_token"imizi alabilmek icin kullandigimiz link.
- * 
+ *
  * Sonra bu alttaki JSON dosyasi geliyor.
- * 
- *	{"access_token":"b39fb34f2e7a5611323e8294a466498010988110d3cc8125a541b046a272f368","token_type":"bearer","expires_in":7132,"refresh_token":"ebdd6effe8c24cede3ad7c016522a57c5b8c916795e210809242e01e2365fdcd","scope":"public","created_at":1698230661,"secret_valid_until":1699880781}% 
+ *
+ *	{"access_token":"b39fb34f2e7a5611323e8294a466498010988110d3cc8125a541b046a272f368","token_type":"bearer","expires_in":7132,"refresh_token":"ebdd6effe8c24cede3ad7c016522a57c5b8c916795e210809242e01e2365fdcd","scope":"public","created_at":1698230661,"secret_valid_until":1699880781}%
 
  * Buradan donen access_token ile bizim artik izin verilen kod araciligiyla;
  * 	Benim 42'deki bilgilerimin hepsini almis oluyoruz.
  * Bilgileri JSON formatinda alabilmek icin de;
- * 
+ *
  * curl -H "Authorization: Bearer <yukaridaki_POST_isteginden_donen_access_token>" https://api.intra.42.fr/v2/me
- * 
+ *
  * ------------------------------------------------
- * 
+ *
  * gsever@k2m14s08 ~ % curl -F grant_type='authorization_code' \
 	-F client_id=u-s4t2ud-4ea96d534d4f392fc0e1c0c8a19eaaaee9faebc6e9ad6f6f374e88eb09c49bc5 \
 	-F client_secret=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 \
@@ -163,5 +125,5 @@ export default LoginPage;
 	sonra bu access_token'i kullanarak;
 
 	gsever@k2m14s08 ~ % curl -H "Authorization: Bearer b39fb34f2e7a5611323e8294a466498010988110d3cc8125a541b046a272f368" https://api.intra.42.fr/v2/me
- * @returns 
+ * @returns
  */
