@@ -11,8 +11,18 @@ function Api()
 	const	uriCode = urlParams.get('code');
 	const	navigate = useNavigate();
 	
+	if (isAuth){
+		return (<Navigate to='/' replace />);
+	}
+
+	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
+		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
+		window.close();
+		return (<></>);
+	}
+
 	useEffect(() => {
-		const sendCode = async () => {
+		async function sendCode() {
 			console.log("III: ---API Token Connection---");
 			const response = await fetch(process.env.REACT_APP_API_TOKEN as string, {
 				method: 'POST',
@@ -33,7 +43,9 @@ function Api()
 					localStorage.setItem("user", data.cookie);
 					Cookies.set("user", data.cookie);
 					setAuth(true);
-					navigate("/", {replace: true, state: true});
+					localStorage.setItem("userLoginPage", "true");
+					navigate('/', {replace: true});
+					//navigate("/", {replace: true, state: true});
 				}
 				else{
 					console.log("III: ---API Token Backend Response '❌'---");
@@ -42,20 +54,8 @@ function Api()
 			else
 				console.log("III: ---API Token Connection '❌'---");
 		}
-		if (!isAuth) {
-			sendCode();
-		}
-	}, [isAuth]);
-
-	if (isAuth){
-		return (<Navigate to='/' replace />);
-	}
-
-	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
-		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
-		window.close();
-		return (<></>);
-	}
+		{ !isAuth && sendCode() }
+	}, []);
 
 	return (
 		<>
@@ -67,9 +67,6 @@ function Api()
 };
 
 export default Api;
-
-
-
 
 /*
 	// --------------- Cookie bilgilerini backende gönder  ---------------------------

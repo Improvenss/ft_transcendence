@@ -10,7 +10,7 @@ import { useSocket } from '../main/SocketHook';
 import { useAuth } from '../login/AuthHook';
 
 
-function ChatPage (){
+function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const	socket = useSocket();

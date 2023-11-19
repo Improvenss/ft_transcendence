@@ -3,11 +3,15 @@
 #id-countdown {
 	font-family: 'Big Shoulders Stencil Text', sans-serif;
 	color:cornsilk;
-	font-size: 8vw; /* Canli bir sekilde genisligi degistirirken font'un boyutunu guncelliyor. */
+	font-size: 8vw;
 	text-align: center;
 	top: 50%;
 	left: 50%;
+	text-shadow: 2px 2px red;
+	padding-top: 10%;
 }
+/* font-size: 8vw; Canli bir sekilde genisligi degistirirken font'un boyutunu guncelliyor. */
+
 /* 
 @font-face {
 	font-family: 'Big Shoulders Stencil Text', sans-serif';

@@ -2,16 +2,14 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@600&display=swap'); */
 
 * {
-	background-color: black;
-	color: cornsilk;
 	font-family: 'Big Shoulders Stencil Display', sans-serif;
+	/* background-color: black; */
+	background-color: transparent;
+	color: cornsilk;
+	text-decoration: none;
 }
 
-body {
+/* body  {
 	background-color: black;
 	color: cornsilk;
-}
-
-#id-body {
-	background-color: red;
-}
+} */

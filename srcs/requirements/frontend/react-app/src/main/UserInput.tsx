@@ -1,42 +1,54 @@
 import React, { useState } from 'react';
 import './UserInput.css';
 
-function UserInput() {
-	const [username, setUsername] = useState('');
-	const [selectedFile, setSelectedFile] = useState(null);
+interface IUserProps{
+	setVisible: (value: boolean) => void,
+}
 
-	const handleUsernameChange = (event: any) => {
-		setUsername(event.target.value);
-	};
+function UserInput({setVisible}: IUserProps) {
+  const [username, setUsername] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
 
-	const handleFileChange = (event: any) => {
-		setSelectedFile(event.target.files[0]);
-	};
+  const handleUsernameChange = (event: any) => {
+	setUsername(event.target.value);
+  };
 
-	const handleSubmit = (event: any) => {
-		event.preventDefault();
-		// Burada dosyayı sunucuya yüklemek için bir işlem yapabilirsiniz.
-		console.log('Kullanıcı adı: ', username);
-		console.log('Seçilen dosya: ', selectedFile);
-	};
+  const handleFileChange = (event: any) => {
+	setSelectedFile(event.target.files[0]);
+  };
 
-	return (
+  const handleSubmit = (event: any) => {
+	event.preventDefault();
+	// Burada dosyayı sunucuya yüklemek için bir işlem yapabilirsiniz.
+	console.log('Kullanıcı adı: ', username);
+	console.log('Seçilen dosya: ', selectedFile);
+	localStorage.removeItem('userLoginPage');
+	setVisible(false);
+  };
+  
+  const handleClose = () => {
+	localStorage.removeItem('userLoginPage');
+	setVisible(false);
+  }
+
+  return (
 	<div id="user-status">
 		<form onSubmit={handleSubmit}>
-		<label>
-			Kullanıcı Adı:
-			<input type="text" value={username} onChange={handleUsernameChange} />
-		</label>
-		<label>
-			<br></br>
-			Resim Yükle:
-			<input type="file" onChange={handleFileChange} />
-			<br></br>
-		</label>
-		<input type="submit" value="Gönder" />
+		<div className="close-button" onClick={handleClose} title='Close'>X</div>
+			<label>
+				Nickname:
+				<input type="text" value={username} onChange={handleUsernameChange} />
+				<br />
+			</label>
+			<label>
+				Upload image:
+				<input type="file" onChange={handleFileChange} />
+				<br />
+			</label>
+				<button id='save' type="submit" >Save Settings</button>
 		</form>
 	</div>
-	);
+  );
 }
 
 export default UserInput;
