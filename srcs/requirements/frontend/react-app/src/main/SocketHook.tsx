@@ -9,13 +9,12 @@ const SocketContext = createContext<Socket | null>(null);
 
 // Provider component'ini oluştur
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-	const [socket, setSocket] = useState<Socket | null>(null);
 	const isAuth = useAuth().isAuth;
 	const userCookie = Cookies.get("user");
+	const [socket, setSocket] = useState<Socket | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-
 		if (isAuth) {
 			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
 			setSocket(newSocket);
@@ -47,7 +46,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			};
 		}
 		setLoading(false);
-	}, [isAuth]);
+	}, [isAuth, userCookie]);
 
 	if (loading) {
 		return (<LoadingPage />);

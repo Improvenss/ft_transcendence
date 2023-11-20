@@ -21,16 +21,15 @@ function ChatPage () {
 		socket?.emit("createMessage", value);
 	}
 
-	const	messageListener = (message: string) => {
-		setMessages(prevMessages => [...prevMessages, message]);
-	}
-
 	useEffect(() => {
+		const	messageListener = (message: string) => {
+			setMessages(prevMessages => [...prevMessages, message]);
+		}
 		socket?.on("messageToClient", messageListener);
 		return () => {
 			socket?.off("messageToClient", messageListener);
 		}
-	}, [messageListener]);
+	}, [socket]);
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
