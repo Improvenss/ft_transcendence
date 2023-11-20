@@ -7,17 +7,10 @@ import UserInput from "./UserInput";
 function HomePage(){
 	console.log("---------HOME-PAGE---------");
 	const isAuth = useAuth().isAuth;
-
-	if (!isAuth)
-	{
-		return (
-			<Navigate to='/login' replace />
-		);
-	}
-
 	const [isVisible, setVisible] = useState(true);
 	const navigationType = useNavigationType();
 	const status = localStorage.getItem('userLoginPage');
+
 
 	useEffect(() => {
 		window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
@@ -34,6 +27,14 @@ function HomePage(){
 			if (navigationType === 'POP') // Geri düğmesine tıklandı.
 				localStorage.removeItem('userLoginPage');
 	}, [navigationType]);
+
+
+	if (!isAuth)
+	{
+		return (
+			<Navigate to='/login' replace />
+		);
+	}
 
 	return (
 		<div id="home-page">
