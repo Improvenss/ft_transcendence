@@ -10,16 +10,6 @@ function Api()
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	uriCode = urlParams.get('code');
 	const	navigate = useNavigate();
-	
-	if (isAuth){
-		return (<Navigate to='/' replace />);
-	}
-
-	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
-		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
-		window.close();
-		return (<></>);
-	}
 
 	useEffect(() => {
 		async function sendCode() {
@@ -54,8 +44,21 @@ function Api()
 			else
 				console.log("III: ---API Token Connection '❌'---");
 		}
-		{ !isAuth && sendCode() }
-	}, []);
+		// { !isAuth && sendCode() }
+		if (!isAuth)
+			sendCode();
+	}, [isAuth, setAuth, uriCode, navigate]);
+	// }, []);
+	
+	if (isAuth){
+		return (<Navigate to='/' replace />);
+	}
+
+	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
+		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
+		window.close();
+		return (<></>);
+	}
 
 	return (
 		<>
