@@ -41,8 +41,11 @@ function	MessageInput({send}: {send: (val: string) => void}) {
 				onKeyDown={handleKeyDown}
 				placeholder="Type your message... "
 				value={value}
-				maxLength={maxCharLimit}></input>
-			<button onClick={handleClick}>SEND</button>
+				maxLength={maxCharLimit}>
+			</input>
+			<button
+				onClick={handleClick}>SEND
+			</button>
 		</div>
 	)
 }

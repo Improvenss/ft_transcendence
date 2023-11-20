@@ -26,7 +26,7 @@ export class UsersController {
 		const jwt = require('jsonwebtoken');
 		try {
 			const decoded = jwt.verify(status.cookie, 'your_secret_key');
-			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login, status.socketID);
+			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login as string, status.socketID);
 			if (!tmpUser)
 				throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
 					HttpStatus.INTERNAL_SERVER_ERROR));

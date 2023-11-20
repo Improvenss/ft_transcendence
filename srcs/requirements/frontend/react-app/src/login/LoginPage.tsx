@@ -28,7 +28,7 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 		console.log("II: ---API Login Connection '✅'---");
 		const	data = await response.json();
 		// window.location.href = data.requestLogin;
-		function messageHandler(event: MessageEvent<any>) {
+		const	messageHandler = function(event: MessageEvent<any>) {
 			if (event.origin === process.env.REACT_APP_IP) {
 				const data = event.data;
 				if (data.message === 'popupRedirect'){
@@ -51,27 +51,28 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 function LoginPage(){
 	//console.log("---------LOGIN-PAGE---------");
 	const isAuth = useAuth().isAuth;
+	const [clicked, setClicked] = useState(false);
+	const navigate = useNavigate();
+	const [fontsLoaded, setFontsLoaded] = useState(false);
+
+	useEffect(() => {
+		Promise.all([
+		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
+		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
+		]).then(() => setFontsLoaded(true));
+	}, []);
+
+	useEffect(() => {
+		if (clicked === true)
+			redirectToLogin({setClicked, navigate});
+	}, [clicked, navigate])
+
 	if (isAuth)
 	{
 		return (
 			<Navigate to='/' replace />
 		);
 	}
-
-	const [clicked, setClicked] = useState(false);
-	const navigate = useNavigate();
-	const [fontsLoaded, setFontsLoaded] = useState(false);
-	useEffect(() => {
-		Promise.all([
-		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
-		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
-		]).then(() => setFontsLoaded(true));
-	  }, []);
-
-	useEffect(() => {
-		if (clicked === true)
-			redirectToLogin({setClicked, navigate});
-	}, [clicked])
 
 	if (!fontsLoaded)
 	  return (<LoadingPage />);
@@ -88,7 +89,6 @@ function LoginPage(){
 }
 
 export default LoginPage;
-
 
 /**
  *

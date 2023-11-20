@@ -1,4 +1,9 @@
 #chat-page input {
-	width: calc(100% - 60px);
-	margin-right: 10px;
+	width: calc(100% - 80px);
+	margin-right: 23px;
+	font-size: 20px;
+}
+
+#chat-page button {
+	font-size: 20px;
 }

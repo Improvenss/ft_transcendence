@@ -15,7 +15,7 @@ set -e
 # [GRANT ALL PRIVILEGES ON DATABASE <database_name> TO <database_username>]; Database'nin butun yetkilerini bu kullaniciya veriyor. Yani Database uzerinde tam yetkiye sahip oluyor ornek: root yetkisi gibi ama Database'nin.
 # [EOSQL]; ile de komutlarin sonuna geldigimizi bitiriyoruz. << EOF'nin sonlanmasi icin EOF ile bitmesi gerekiyor ya.
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-	CREATE DATABASE $POSTGRES_DB;
+	CREATE DATABASE IF NOT EXISTS $POSTGRES_DB;
 	CREATE USER $POSTGRES_USER WITH ENCRYPTED PASSWORD '$POSTGRES_PASSWORD';
 	GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB TO $POSTGRES_USER;
 EOSQL
