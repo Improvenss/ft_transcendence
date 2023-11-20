@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			console.log("I: ---Cookie Backend Connection '❌'---");
 		}
 		setLoading(false);
-		};
+	};
 
 		const fetchData = async () => {
 			await checkAuth();
@@ -57,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	if (loading) {
 		return (<LoadingPage />);
 	}
+
 	return (
 		<AuthContext.Provider value={{ isAuth, setAuth }}>
 		{children}
