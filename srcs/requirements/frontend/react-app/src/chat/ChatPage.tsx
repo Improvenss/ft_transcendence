@@ -8,6 +8,7 @@ import './ChatPage.css';
 import Message from "./Message";
 import { useSocket } from '../main/SocketHook';
 import { useAuth } from '../login/AuthHook';
+import Channels from "./Channels";
 
 
 function ChatPage () {
@@ -36,6 +37,7 @@ function ChatPage () {
 
 	return (
 		<div id="chat-page">
+			{/* <Channels /> */}
 			<Message messages={messages}/>
 			<MessageInput send={send} />
 		</div>

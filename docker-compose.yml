@@ -58,17 +58,7 @@ networks:
 #/////////////////////////////////////////////////////////////////////////////#
 
 services:
-  # __CERTIFICATE___ # OK
-  #ssl_container:
-  #  container_name: ssl
-  #  build: ./srcs/requirements/ssl
-  #  volumes:
-  #    - ssl_certs:/etc/ssl/certs
-  #  networks:
-  #    - transcendence_network
-  #  restart: "no"
-  # ________________ #
-  # ___PostgreSQL___ # OK
+  # ___PostgreSQL___ #
   postgres:
     container_name: postgres
     image: postgres:16.0-alpine3.18
@@ -89,7 +79,7 @@ services:
     #depends_on:
       #- ssl_container
   # ________________ #
-  # ____pgadmin4____ # OK
+  # ____pgadmin4____ #
   pgadmin4:
     container_name: pgadmin4
     # image: dpage/pgadmin4:7.8
@@ -107,6 +97,8 @@ services:
     networks:
       - transcendence_network
     restart: unless-stopped
+    expose:
+      - 5050
     ports:
       - "5050:443" # Local port / Exported port.
     depends_on:
@@ -144,6 +136,8 @@ services:
     networks:
       - transcendence_network
     restart: unless-stopped
+    expose:
+      - 3000
     ports:
       - "3000:3000" # Local port / Exported port. nestjs's default port(3000).
     depends_on:
@@ -164,9 +158,11 @@ services:
     networks:
       - transcendence_network
     restart: unless-stopped
+    expose:
+      - 3001
     ports:
       # - 80:80 # Local port / Exported port.
-      - 443:443
+      - 3001:3001
     depends_on:
       #- ssl_container
       - postgres
@@ -174,7 +170,22 @@ services:
     # progress: plain
   # ________________ #
   # _____nginx______ #
-  # nginx:
-  #   container_name: nginx
-
+  nginx:
+    container_name: nginx
+    # image: nginx:latest
+    build: ./srcs/requirements/nginx
+    env_file:
+      - ./srcs/requirements/nginx/.env
+    volumes:
+      - ./srcs/requirements/nginx/default:/etc/nginx/sites-available/default
+      - ./srcs/requirements/ssl:/etc/ssl/certs
+    networks:
+      - transcendence_network
+    restart: unless-stopped
+    expose:
+      - 443
+    ports:
+      - 443:443
+    depends_on:
+      - frontend
   # ________________ #
