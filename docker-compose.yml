@@ -85,7 +85,7 @@ services:
       - transcendence_network
     restart: unless-stopped # Durdurulmadigi surece.
     ports:
-      - "127.0.0.1:5432:5432" # Local port / Exported port. postgres's default port(5432).
+      - "5432:5432" # Local port / Exported port. postgres's default port(5432).
     #depends_on:
       #- ssl_container
   # ________________ #
@@ -108,7 +108,7 @@ services:
       - transcendence_network
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5050:443" # Local port / Exported port.
+      - "5050:443" # Local port / Exported port.
     depends_on:
       #- ssl_container
       - postgres
@@ -145,7 +145,7 @@ services:
       - transcendence_network
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000" # Local port / Exported port. nestjs's default port(3000).
+      - "3000:3000" # Local port / Exported port. nestjs's default port(3000).
     depends_on:
       #- ssl_container
       - postgres
