@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			console.log("I: ---Cookie Checking---");
 			const userCookie = Cookies.get("user");
 			// const userLStore = localStorage.getItem("user");
+			// 'https://localhost/backend/api/cookie' veya /backend/api/cookie
 			const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
 				method: "POST",
 				headers: {

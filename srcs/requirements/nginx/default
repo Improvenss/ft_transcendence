@@ -1,36 +1,24 @@
 server {
     listen 443 ssl;
-    server_name 10.12.14.8;
+    server_name 10.12.15.8;
 
 	ssl_certificate  /etc/ssl/certs/ft_transcendence.crt;
 	ssl_certificate_key /etc/ssl/certs/ft_transcendence.key;
 	ssl_protocols  TLSv1.2 TLSv1.3;
 
     location / {
-        proxy_pass https://frontend:3001;
+		proxy_pass https://frontend:3001/;
+		proxy_http_version 1.1;
+	}
+
+    location /backend/ {
+        proxy_pass https://backend:3000/;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
     }
 
-    location /backend {
-        proxy_pass https://backend:3000;
+    location /pgadmin4/ {
+        proxy_pass https://pgadmin4:5050/;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    location /pgadmin {
-        proxy_pass https://pgadmin4:5050;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
     }
 }
 

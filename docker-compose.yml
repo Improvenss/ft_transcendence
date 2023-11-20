@@ -97,8 +97,8 @@ services:
     networks:
       - transcendence_network
     restart: unless-stopped
-    expose:
-      - 5050
+    #expose:
+    #  - 5050
     ports:
       - "5050:443" # Local port / Exported port.
     depends_on:

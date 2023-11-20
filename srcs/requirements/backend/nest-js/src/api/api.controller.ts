@@ -80,7 +80,6 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 	@Post('cookie')
 	async userCookie(@Body() status: {cookie: string}){
 		const jwt = require('jsonwebtoken');
-
 		if (!status.cookie) {
 			console.error("Cookie not provided");
 			return { message: "COOKIE NOK" };
