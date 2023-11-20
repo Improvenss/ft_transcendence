@@ -4,24 +4,24 @@ You must be install; `docker.io`, `docker-compose`, `make`.
 
 MacOS
 ```bash
-$> brew install -y docker.io docker-compose make
+brew install -y docker.io docker-compose make
 ```
 Linux
 ```bash
-$> sudo apt install -y docker.io docker-compose make
+sudo apt install -y docker.io docker-compose make
 ```
 Windows
 ```bash
-$> Use Linux, it's better.
+Use Linux, it is better.
 ```
 
 ## Running the app
 ```bash
-$> make
+make
 ```
 or
 ```bash
-$> docker-compose up --build
+docker-compose up --build
 ```
 
 ## Information
