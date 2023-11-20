@@ -29,39 +29,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					"Content-Type": "application/json"
 				},
 				body: JSON.stringify({
-				cookie: userCookie as string
-			})
-		});
+					cookie: userCookie as string
+				})
+			});
 
-		if (response.ok) {
-			console.log("I: ---Cookie Backend Connection '✅'---");
-			const data = await response.json();
-			if (data.message === "COOKIE OK") {
-				console.log("I: ---Cookie Response '✅'---");
-				setAuth(true);
+			setLoading(false);
+			if (response.ok) {
+				console.log("I: ---Cookie Backend Connection '✅'---");
+				const data = await response.json();
+				if (data.message === "COOKIE OK") {
+					console.log("I: ---Cookie Response '✅'---");
+					setAuth(true);
+				} else {
+					console.log("I: ---Cookie Response '❌'---");
+				}
 			} else {
-				console.log("I: ---Cookie Response '❌'---");
+				console.log("I: ---Cookie Backend Connection '❌'---");
 			}
-		} else {
-			console.log("I: ---Cookie Backend Connection '❌'---");
-		}
-		setLoading(false);
-	};
-
-		const fetchData = async () => {
-			await checkAuth();
 		};
-		fetchData();
+		checkAuth();
 	}, []);
 
-	if (loading) {
-		return (<LoadingPage />);
-	}
-
 	return (
+		<>
+		{loading ? <LoadingPage /> : (
 		<AuthContext.Provider value={{ isAuth, setAuth }}>
 		{children}
 		</AuthContext.Provider>
+		)}
+		</>
 	);
 }
 
