@@ -142,10 +142,10 @@ services:
     networks:
       - transcendence_network
     restart: unless-stopped
-    expose:
+    expose: #sadece docker ağı içine port açılmış olunur.
       - 3001
     ports:
-      # - 80:80 # Local port / Exported port.
+    # - 80:80 # Local port / Exported port.
       - 3001:3001
     depends_on:
       - postgres
@@ -160,13 +160,14 @@ services:
     env_file:
       - ./srcs/requirements/nginx/.env
     volumes:
-      - ./srcs/requirements/nginx/default:/etc/nginx/sites-available/default
+      #- ./srcs/requirements/nginx/default:/etc/nginx/conf.d/default.conf
+      - ./srcs/requirements/nginx/default.conf:/etc/nginx/sites-available/default
       - ./srcs/requirements/ssl:/etc/ssl/certs
     networks:
       - transcendence_network
     restart: unless-stopped
-    expose:
-      - 443
+    #expose:
+    #  - 443
     ports:
       - 443:443
     depends_on:

@@ -17,6 +17,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isAuth, setAuth] = useState(false);
 	const [loading, setLoading] = useState(true);
 
+	//useEffect(() => {
+	//	setAuth(true);
+	//	setLoading(false);
+	//}, []);
+
+	//console.log(isAuth, loading);
+
 	useEffect(() => {
 		const checkAuth = async () => {
 			console.log("I: ---Cookie Checking---");
@@ -33,7 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				})
 			});
 
-			setLoading(false);
 			if (response.ok) {
 				console.log("I: ---Cookie Backend Connection '✅'---");
 				const data = await response.json();
@@ -46,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			} else {
 				console.log("I: ---Cookie Backend Connection '❌'---");
 			}
+			setLoading(false);
 		};
 		checkAuth();
 	}, []);

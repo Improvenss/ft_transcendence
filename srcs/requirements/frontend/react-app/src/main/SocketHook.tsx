@@ -20,7 +20,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			setSocket(newSocket);
 			newSocket.on('connect', async () => {
 				console.log('Client connected to Server. ✅');
-				const response = await fetch(process.env.REACT_APP_HOST + '/users/socket', {
+				const response = await fetch(process.env.REACT_APP_SOCKET as string, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json"

@@ -13,3 +13,16 @@ EXPOSE 443
 RUN mkdir -p /run/nginx
 
 CMD [ "nginx", "-g", "daemon off;" ]
+
+#	<!--ssl_session_timeout 1d;
+#	ssl_session_cache shared:SSL:50m;
+#	ssl_session_tickets off;
+#	ssl_prefer_server_ciphers on;-->
+
+#  <!--location /sw.js {
+#      add_header Cache-Control "no-cache";
+#      proxy_cache_bypass $http_pragma;
+#      proxy_cache_revalidate on;
+#      expires off;
+#      access_log off;
+#  }-->
