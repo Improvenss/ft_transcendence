@@ -1,21 +1,5 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-
-// @Entity()
-// export class Image {
-// 	@PrimaryGeneratedColumn()
-// 	id: number
-
-// 	@Column()
-// 	link: string
-
-// 	@Column()
-// 	versions: {
-// 		large: string;
-// 		medium: string;
-// 		micro: string;
-// 		small: string;
-// 	}
-// }
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Channel, Message } from "src/chat/entities/chat.entity";
 
 @Entity()
 export class User {
@@ -51,6 +35,13 @@ export class User {
 		}
 	}
 	// image: Image;
+
+	@ManyToMany(() => Channel, channel => channel.admin)
+	@JoinTable()
+	channels: Channel[];
+  
+	@OneToMany(() => Message, message => message.user)
+	messages: Message[];
 
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);

@@ -24,6 +24,7 @@ async function bootstrap() {
 		.setVersion('1.0') // bu config'i verecegiz.
 		.build()
 	const	documentSwagger = SwaggerModule.createDocument(app, configSwagger);
+	fs.writeFileSync('swagger.json', JSON.stringify(documentSwagger, null, 2)); // Buradaki swagger'in json dosyasini kaydediyoruz; boylelikle Postman uygulamasindan direkt olarak swagger'in butun http isteklerini Postman'dan atabiliyoruz.
 	SwaggerModule.setup('swagger', app, documentSwagger);
 
 	await app.listen(process.env.PORT);

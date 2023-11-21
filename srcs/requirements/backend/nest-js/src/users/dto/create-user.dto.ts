@@ -15,4 +15,5 @@ export class CreateUserDto {
 	last_name: string;
 	email: string;
 	image: Image;
+	channels: string;
 }
