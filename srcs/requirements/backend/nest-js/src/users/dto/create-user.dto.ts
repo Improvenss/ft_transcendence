@@ -1,3 +1,5 @@
+import { Channel, Message } from "src/chat/entities/chat.entity";
+
 class Image {
 	link: string;
 	versions: {
@@ -15,5 +17,6 @@ export class CreateUserDto {
 	last_name: string;
 	email: string;
 	image: Image;
-	channels: string;
+	channels: Channel[];
+	messages: Message[];
 }

@@ -11,10 +11,11 @@
 // BU YUKARIDAKI chat.gateway.ts dosyasi.
 
 
-import { MessageBody,
+import { ConnectedSocket, MessageBody,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 
 var count: number = 0;
 
@@ -34,14 +35,28 @@ export class ChatGateway {
 	@WebSocketServer()
 	server;
 
+	// @SubscribeMessage('createMessage')
+	// async handleMessage(@MessageBody() message: string) {
+	// 	console.log(`BACKEND: gelen msg[${count++}]:`, message);
+	// 	this.server.emit("messageToClient", message);
+	// }
+
 	@SubscribeMessage('createMessage')
-	async handleMessage(@MessageBody() message: string) {
+	async handleMessage(@MessageBody() { channel, message }: { channel: string, message: string }) {
 		console.log(`BACKEND: gelen msg[${count++}]:`, message);
-		this.server.emit("messageToClient", message);
+		this.server.to(channel).emit("messageToClient", message);
 	}
 
-	// @SubscribeMessage('joinChannel')
-	// async handleJoinChannel(channel: string, client: string)
+	@SubscribeMessage('joinChannel')
+	async handleJoinChannel(@MessageBody() channel: string, @ConnectedSocket() socket: Socket) {
+		socket.join(channel);
+		console.log(`${channel} kanalina katıldı: ${socket.id}`);
+		this.server.to(channel).emit('messageToClient', `Channel(${channel}): ${socket.id} joined!`);
+
+		// socket.on('messageToChannel', (message) => {
+		// 	this.server.to(channel).emit('messageToClient', message);
+		// });
+	}
 }
 
 // import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';

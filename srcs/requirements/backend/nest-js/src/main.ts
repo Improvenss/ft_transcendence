@@ -5,7 +5,6 @@ import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.
 	const	httpsOptions = {
 		key: fs.readFileSync(process.env.SSL_KEY_FILE as string),
 		cert: fs.readFileSync(process.env.SSL_CRT_FILE as string),

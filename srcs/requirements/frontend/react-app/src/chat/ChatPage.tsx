@@ -18,14 +18,29 @@ function ChatPage () {
 	const	[messages, setMessages] = useState<string[]>([]);
 	console.log("ChatPage: ", socket);
 
+	// const	send = (value: string) => {
+	// 	socket?.emit("createMessage", value);
+	// }
+
 	const	send = (value: string) => {
-		socket?.emit("createMessage", value);
+		console.log("send'e geldi createMessage:", value);
+		socket?.emit("createMessage", { channel: 'hehe', message: value });
+	}
+
+	const joinChannel = (channel: string) => {
+		console.log("joinChannel'e geldi:", channel);
+		socket?.emit("joinChannel", channel);
+	}
+
+	const sendMessageToChannel = (channel: string, message: string) => {
+		socket?.emit("messageToChannel", { channel, message });
 	}
 
 	useEffect(() => {
 		const	messageListener = (message: string) => {
 			setMessages(prevMessages => [...prevMessages, message]);
 		}
+
 		socket?.on("messageToClient", messageListener);
 		return () => {
 			socket?.off("messageToClient", messageListener);
@@ -37,9 +52,10 @@ function ChatPage () {
 
 	return (
 		<div id="chat-page">
-			{/* <Channels /> */}
+			<Channels />
 			<Message messages={messages}/>
 			<MessageInput send={send} />
+			<button onClick={() => joinChannel("hehe")}> Tikla "hehe" kanalina katil</button>
 		</div>
 	)
 }
