@@ -5,7 +5,6 @@ import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-	require('dotenv').config(); // Bu .env dosyalasini kullanabilmemizi sagliyor.
 	const	httpsOptions = {
 		key: fs.readFileSync(process.env.SSL_KEY_FILE as string),
 		cert: fs.readFileSync(process.env.SSL_CRT_FILE as string),
@@ -24,6 +23,7 @@ async function bootstrap() {
 		.setVersion('1.0') // bu config'i verecegiz.
 		.build()
 	const	documentSwagger = SwaggerModule.createDocument(app, configSwagger);
+	fs.writeFileSync('swagger.json', JSON.stringify(documentSwagger, null, 2)); // Buradaki swagger'in json dosyasini kaydediyoruz; boylelikle Postman uygulamasindan direkt olarak swagger'in butun http isteklerini Postman'dan atabiliyoruz.
 	SwaggerModule.setup('swagger', app, documentSwagger);
 
 	await app.listen(process.env.PORT);

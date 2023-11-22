@@ -4,6 +4,7 @@ import { CreateApiDto } from './dto/create-api.dto';
 import { UpdateApiDto } from './dto/update-api.dto';
 import * as fs from 'fs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { channel } from 'diagnostics_channel';
 
 
 @Controller('api')
@@ -65,7 +66,9 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			first_name: dataClient.first_name,
 			last_name: dataClient.last_name,
 			email: dataClient.email,
-			image: dataClient.image
+			image: dataClient.image,
+			channels: null,
+			messages: null
 		};
 
 		const	responseData = await this.apiService.fetchUserData(createUserDto);
@@ -80,7 +83,6 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 	@Post('cookie')
 	async userCookie(@Body() status: {cookie: string}){
 		const jwt = require('jsonwebtoken');
-
 		if (!status.cookie) {
 			console.error("Cookie not provided");
 			return { message: "COOKIE NOK" };

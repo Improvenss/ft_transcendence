@@ -39,6 +39,7 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 			}
 		}
 		window.addEventListener('message', messageHandler);
+		console.log(data.requestLogin);
 		window.open(data.requestLogin, "intraPopup", "width=500,height=300");
 	}
 	else{
