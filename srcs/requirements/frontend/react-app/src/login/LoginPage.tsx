@@ -4,7 +4,7 @@ import Countdown from "./Countdown";
 import './LoginPage.css';
 import { useAuth } from './AuthHook';
 import LoadingPage from "./LoadingPage";
-import MatrixRain from './MatrixRain'
+import MatrixRain from './MatrixRain';
 
 interface ILoginProps{
 	setClicked: (value: boolean) => void,
@@ -77,13 +77,12 @@ function LoginPage(){
 
 	if (!fontsLoaded)
 	  return (<LoadingPage />);
-
+	  
 	return (
 		<div id="login-page">
-			<Countdown />
 			<MatrixRain />
-			<button className='bn5' onClick={() => setClicked(true)}  disabled={clicked}>
-				<span>42 Login</span>
+			<button className='bn5' onClick={() => setClicked(true)}  disabled={clicked} >
+				<Countdown />
 			</button>
 		</div>
 	)
