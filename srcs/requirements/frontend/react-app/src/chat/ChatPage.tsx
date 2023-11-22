@@ -22,7 +22,7 @@ function ChatPage () {
 			<Channels />
 			<Message />
 			<MessageInput />
-			{/* <Users /> */}
+			<Users />
 		</div>
 	)
 }

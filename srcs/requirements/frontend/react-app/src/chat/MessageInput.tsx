@@ -7,15 +7,15 @@ function	MessageInput() {
 	const	[value, setValue] = useState("");
 	const	maxCharLimit = 1024;
 	const	inputRef = useRef<HTMLInputElement>(null);
+	const	onChannel = localStorage.getItem("onChannel") || "global";
 
 	// const	send = (value: string) => {
 	// 	socket?.emit("createMessage", value);
 	// }
 
-	const	send = (value: string) => {
-		console.log("send'e geldi createMessage:", value);
-		socket?.emit("createMessage", { channel: 'hehe', message: value });
-		console.log( { channel: 'hehe', message: value });
+	const	send = (channel: string, value: string) => {
+		console.log("send'e geldi createMessage:", { channel: channel, message: value });
+		socket?.emit("createMessage", { channel: channel, message: value });
 	}
 
 	// /chat sayfasi acildigi anda cursor focus'unu direkt input'a yoneltmek icin.
@@ -29,7 +29,7 @@ function	MessageInput() {
 			event.preventDefault();
 			const trimmedValue = value.replace(/^\s+/, "");
 			if (trimmedValue !== "" && trimmedValue.length <= maxCharLimit) {
-				send(trimmedValue);
+				send(onChannel, trimmedValue);
 				setValue("");
 			}
 		}
@@ -39,7 +39,7 @@ function	MessageInput() {
 	const handleClick = () => {
 		const trimmedValue = value.replace(/^\s+/, "");
 		if (trimmedValue !== "" && trimmedValue.length <= maxCharLimit) {
-			send(trimmedValue);
+			send(onChannel, trimmedValue);
 			setValue("");
 		}
 		inputRef.current?.focus(); // Cursor tekrardan input'a focus olmasi gerek.
