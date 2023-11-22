@@ -11,6 +11,9 @@
 // BU YUKARIDAKI chat.gateway.ts dosyasi.
 
 
+/**
+ * LINK: https://dzone.com/articles/build-a-real-time-chat-application-with-nestjs-and-postgresql
+ */
 import { ConnectedSocket, MessageBody,
 	SubscribeMessage,
 	WebSocketGateway,
@@ -41,9 +44,44 @@ export class ChatGateway {
 	// 	this.server.emit("messageToClient", message);
 	// }
 
+	/**
+	 * Buradaki handleConnection function isimleri ozel isimlerdir.
+	 *  Bu soket basarili bir sekilde baglandiginda calisir.
+	 * @param client 
+	 * @param args 
+	 */
+	handleConnection(client: Socket, ...args: any[]) {
+		console.log(`Client connected ✅: socket.id[${client.id}]`);
+		//Do stuffs
+	}
+
+	/**
+	 * Buradaki handleDisconnect function isimleri ozel isimlerdir.
+	 *  Backend'e baglanan socket'in baglantisi kesildiginde calisir.
+	 * @param client Client socket.
+	 */
+	handleDisconnect(client: Socket) {
+		console.log(`Client disconnected 💔: socket.id[${client.id}]`);
+		//Do stuffs
+	}
+
+	/**
+	 * https://<project_ip>:3000/chat'e baglanan socket'in;
+	 *  .emit() fonksiyonu ile 'createMessage' istegi attiginda calistigi yer.
+	 * 
+	 * Postman'dan mesaj gondermek istediginde;
+	 *  Socket.IO ile url kismina 'https://10.12.14.8:3000/chat' yazarak,
+	 *  baglandiktan sonra, 'event name' kismina da 'createMessage' yazarak
+	 *  mesaji gonderdigimizde burasi calisir ama burada ekstradan
+	 *  channel de var.
+	 * ornek;
+	 *  https://10.12.14.8:3000/chat -> createMessage -> compose message: '{Postman}
+	 * @param param0 
+	 */
 	@SubscribeMessage('createMessage')
 	async handleMessage(@MessageBody() { channel, message }: { channel: string, message: string }) {
 		console.log(`BACKEND: gelen msg[${count++}]:`, message);
+		console.log('MessageBody():', {channel, message});
 		this.server.to(channel).emit("messageToClient", message);
 	}
 
@@ -52,47 +90,11 @@ export class ChatGateway {
 		socket.join(channel);
 		console.log(`${channel} kanalina katıldı: ${socket.id}`);
 		this.server.to(channel).emit('messageToClient', `Channel(${channel}): ${socket.id} joined!`);
-
-		// socket.on('messageToChannel', (message) => {
-		// 	this.server.to(channel).emit('messageToClient', message);
-		// });
+		socket.on('messageToChannel', (message) => {
+			this.server.to(channel).emit('messageToClient', message);
+		});
 	}
 }
-
-// import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-// import { Server, Socket } from 'socket.io';
-
-// var count: number = 0;
-// var count2: number = 0;
-
-// @WebSocketGateway({ 
-// 	cors: {
-// 		origin: "*",
-// 	},
-// 	namespace: "/chat",
-// })
-// export class ChatGateway {
-// 	@WebSocketServer()
-// 	server: Server;
-// 	@SubscribeMessage('message')
-// 	handleMessage(@MessageBody() message: string) {
-// 		console.log(`BACKEND: gelen msg[${count++}]:`, message);
-// 		this.server.emit("messageToClient", message);
-// 	}
-// 	@SubscribeMessage('message2')
-// 	handleMessage2(@MessageBody() message: string) {
-// 		console.log(`BACKEND: gelen 2 msg[${count2++}]:`, message);
-// 		this.server.emit("messageToClient", message);
-// 	}
-// }
-
-
-
-
-
-
-
-
 
 // const io = require('socket.io')({
 // 	cors: {
@@ -111,29 +113,3 @@ export class ChatGateway {
 // 		io.emit('messageToClient', data);
 // 	});
 // 	 });
-
-
-
-
-// import { MessageBody,
-// 	SubscribeMessage,
-// 	WebSocketGateway,
-// 	WebSocketServer } from '@nestjs/websockets';
-
-// @WebSocketGateway({ 
-// 	cors: {
-// 		origin: "*",
-// 	},
-// 	namespace: "/chat",
-// })
-// export class ChatGateway {
-// 	@WebSocketServer()
-// 	server;
-
-// 	@SubscribeMessage("message")
-// 	async handleCreateMessage(@MessageBody() data: any) {
-// 		console.log("BURAYA KAC KERE GIRDIN AQ");
-// 		this.server.emit('messageToClient', data);
-// 	}
-
-// }

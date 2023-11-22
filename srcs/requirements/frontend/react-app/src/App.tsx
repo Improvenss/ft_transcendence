@@ -9,6 +9,7 @@ import Cookies from 'js-cookie';
 import ChatPage from "./chat/ChatPage";
 import { useAuth } from './login/AuthHook';
 import { ReactComponent as GithubIcon } from './github.svg';
+import FallingChars from "./login/FallingChars";
 
 function App() {
   console.log("---------APP-PAGE---------");
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <div id="id-app">
+      {isAuth && <FallingChars />}
       <header>
         {isAuth ? (
           <ul id='bar'>

@@ -1,40 +1,25 @@
 import React from 'react';
+import { useSocket } from '../main/SocketHook';
 
-const Channels = () => {
+function Channels() {
+	const	socket = useSocket();
 	const channelList = ['Channel 1', 'Channel 2', 'Channel 3']; // Kanal listesini istediğiniz şekilde doldurabilirsiniz
 
+	const joinChannel = (channel: string) => {
+		console.log("joinChannel'e geldi:", channel);
+		socket?.emit("joinChannel", channel);
+	}
+
 	return (
-		<div style={{ width: '200px', borderRight: '1px solid white' }}> 
+		<div id='channel-page'>
 			<ul>
 				{channelList.map(channel => (
-					<li key={channel}>{channel}</li>
+					<li key={channel} onClick={() => joinChannel(channel)}>{channel}</li>
 				))}
+			{/* <button onClick={() => joinChannel("hehe")}> Tikla "hehe" kanalina katil</button> */}
 			</ul>
 		</div>
 	);
 };
 
 export default Channels;
-
-// import React, { useEffect } from 'react';
-// import { Link, Route, Routes } from 'react-router-dom';
-// import { Channel } from '../'
-
-// const Channels = ({ channels, joinChannel }: { channels: Channel[], joinChannel: (id: string) => void }) => {
-// 	return (
-// 	  <div style={{ width: '200px', borderRight: '1px solid white' }}>
-// 		<ul>
-// 		  {channels.map((channel) => (
-// 			<li key={channel.id}>
-// 			  <Link to={`/channels/${channel.id}`} onClick={() => joinChannel(channel.id)}>
-// 				{channel.name}
-// 			  </Link>
-// 			</li>
-// 		  ))}
-// 		</ul>
-// 	  </div>
-// 	);
-//   };
-  
-
-// export default Channels;

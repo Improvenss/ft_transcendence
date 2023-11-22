@@ -11,25 +11,37 @@
 	border: 1px solid #ccc;
 	border-radius: 10px;
 	overflow: hidden;
-	align-items: stretch; /* Tüm öğeleri dikeyde genişlet */
+	align-items: stretch;
 }
 
-#chat-page > div:first-child {
+#chat-page > #channel-page {
+	border-right: 1px solid white;
 	overflow: auto;
 	flex-grow: 1;
 	padding: 1em;
 	word-wrap: break-word;
 	white-space: pre-wrap;
+	width: 200px;
 }
 
-#chat-page > div:first-child > p {
+#chat-page > #message-page > p {
 	background-color: rgb(31, 31, 31);
 	margin: 10px 0;
 	padding: 10px;
 	border-radius: 10px;
 }
 
-#chat-page > div:last-child {
+#chat-page > #input-page {
 	padding: 1em;
 	border-top: 1px solid #ccc;
+}
+
+#chat-page input {
+	width: calc(100% - 80px);
+	margin-right: 23px;
+	font-size: 20px;
+}
+
+#chat-page button {
+	font-size: 20px;
 }
