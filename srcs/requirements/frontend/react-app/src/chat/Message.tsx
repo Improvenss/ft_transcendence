@@ -7,9 +7,9 @@ function	Message() {
 	const	messagesEndRef = useRef<HTMLDivElement>(null);
 	const	[messages, setMessages] = useState<string[]>([]);
 
-	const sendMessageToChannel = (channel: string, message: string) => {
-		socket?.emit("messageToChannel", { channel, message });
-	}
+	// const sendMessageToChannel = (channel: string, message: string) => {
+	// 	socket?.emit("messageToChannel", { channel, message });
+	// }
 
 	useEffect(() => {
 		const	messageListener = (message: string) => {

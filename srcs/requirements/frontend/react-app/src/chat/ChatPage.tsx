@@ -8,10 +8,14 @@ import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { useAuth } from '../login/AuthHook';
 import Users from "./Users";
+import { useEffect } from "react";
+import { useSocket } from "../main/SocketHook";
 
 function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
 	const isAuth = useAuth().isAuth;
+	const	socket = useSocket();
+	
 	console.log("ChatPage: ", " eskiden buradaydi socket");
 
 	if (!isAuth)

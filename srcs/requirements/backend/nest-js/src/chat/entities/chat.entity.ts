@@ -1,5 +1,3 @@
-// chat.entity.ts
-
 import { Entity,
 	Column,
 	PrimaryGeneratedColumn,
