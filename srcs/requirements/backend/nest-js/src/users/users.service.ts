@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { EntityManager, JsonContains, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class UsersService {
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
 		private readonly	entityManager: EntityManager
-		) {}
+	) {}
 
 	/**
 	 * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
@@ -85,7 +85,6 @@ export class UsersService {
 	async	remove(id: number) {
 		return (this.usersRepository.delete(id));
 	}
-
 }
 
 
@@ -117,8 +116,6 @@ export class UsersService {
  * 
  * 
  * 
-gsever@k2m14s08 ~ % echo 'Gorkem BEY hos geldiniz efendim.'
-Gorkem BEY hos geldiniz efendim.
 gsever@k2m14s08 ~ % docker exec -it postgres /bin/sh
 
 

@@ -12,36 +12,6 @@
         }
       }
     },
-    "/api": {
-      "post": {
-        "operationId": "ApiController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateApiDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      },
-      "get": {
-        "operationId": "ApiController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/login": {
       "post": {
         "operationId": "ApiController_loginStatus",
@@ -70,72 +40,6 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/{id}": {
-      "get": {
-        "operationId": "ApiController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "ApiController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateApiDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ApiController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
             "description": ""
           }
         }
@@ -412,14 +316,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateApiDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateApiDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateUserDto": {
         "type": "object",
         "properties": {}

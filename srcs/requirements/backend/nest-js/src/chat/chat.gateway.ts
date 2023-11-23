@@ -79,14 +79,18 @@ export class ChatGateway {
 	 * @param param0 
 	 */
 	@SubscribeMessage('createMessage')
-	async handleMessage(@MessageBody() { channel, message }: { channel: string, message: string }) {
+	async handleMessage(
+			@MessageBody() 
+			{ channel, message }:
+				{ channel: string, message: string }) {
 		console.log(`BACKEND: gelen msg[${count++}]:`, message);
 		console.log('MessageBody():', {channel, message});
 		this.server.to(channel).emit("messageToClient", message);
 	}
 
 	@SubscribeMessage('joinChannel')
-	async handleJoinChannel(@MessageBody() channel: string, @ConnectedSocket() socket: Socket) {
+	async handleJoinChannel(@MessageBody() channel: string,
+			@ConnectedSocket() socket: Socket) {
 		socket.join(channel);
 		console.log(`${channel} kanalina katıldı: ${socket.id}`);
 		this.server.to(channel).emit('messageToClient', `Channel(${channel}): ${socket.id} joined!`);
