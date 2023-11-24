@@ -16,20 +16,4 @@ export class CreateMessageDto {
 	channelId: number;
 }
 
-export class UpdateMessageDto extends PartialType(CreateMessageDto) {
-	// @IsString()
-	// @IsOptional()
-	// message?: string;
-
-	// @IsDate()
-	// @IsOptional()
-	// sentAt?: Date;
-
-	// @IsNumber()
-	// @IsOptional()
-	// userId?: number;
-
-	// @IsNumber()
-	// @IsOptional()
-	// channelId?: number;
-}
+export class UpdateMessageDto extends PartialType(CreateMessageDto) {}

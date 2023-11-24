@@ -1,5 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsOptional, IsEnum, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsEnum, IsNumber, IsArray, IsNotEmpty } from 'class-validator';
+import { User } from 'src/users/entities/user.entity';
 
 export class CreateChannelDto {
 	@IsString()
@@ -7,38 +8,24 @@ export class CreateChannelDto {
 
 	@IsBoolean()
 	@IsOptional()
-	isActive?: boolean;
+	isActive: boolean;
 
 	@IsArray()
 	@IsOptional()
-	adminId?: number[];
+	users: User[] | null;
 
-	@IsEnum(['public', 'private', 'password'])
+	@IsArray()
+	@IsOptional()
+	@IsNotEmpty() // veya @IsDefined()
+	admin: User[];
+	// adminId: number[];
+
+	@IsEnum(['public', 'private', 'protected'])
 	type: string;
 
 	@IsString()
 	@IsOptional()
-	password?: string;
+	password: string | "none";
 }
 
-export class UpdateChannelDto extends PartialType(CreateChannelDto) {
-	// @IsString()
-	// @IsOptional()
-	// name?: string;
-
-	// @IsBoolean()
-	// @IsOptional()
-	// isActive?: boolean;
-
-	// @IsArray()
-	// @IsOptional()
-	// adminId?: number[];
-
-	// @IsEnum(['public', 'private', 'password'])
-	// @IsOptional()
-	// type?: string;
-
-	// @IsString()
-	// @IsOptional()
-	// password?: string;
-}
+export class UpdateChannelDto extends PartialType(CreateChannelDto) {}

@@ -2,15 +2,32 @@ import { useEffect } from 'react';
 import { useSocket } from '../main/SocketHook';
 import { Socket } from 'socket.io-client';
 
+/**
+ * Buradaki yapi tipi ayni backend'deki 'CreateChannelDto' tipi.
+ */
+interface WebSocketChannelData {
+	channel: string;
+	name: string;
+	type: string;
+	// adminId: number[];
+	isActive: boolean;
+	password: string | "none";
+}
+
 function joinChannel(channel: string, socket: Socket | null) {
 	if (socket === null)
 		throw ("Error: Socket: null");
-	socket?.emit("joinChannel", channel);
+	const sendData: WebSocketChannelData = {
+		channel: channel,
+		name: "Example Name",
+		type: "public",
+		// adminId: [],
+		isActive: true,
+		password: "none",
+		// Buraya cookie'de tuttugumuz login ismini verirsek Channel olusumunda admini User entity'si olarak atayabiliriz.
+	};
+	socket?.emit("joinChannel", sendData);
 	localStorage.setItem("onChannel", channel);
-	// if (channel === "global")
-	// 	localStorage.setItem("isChannelGlobal", "TRUE");
-	// else
-	// 	localStorage.setItem("isChannelGlobal", "FALSE");
 }
 
 function Channels() {

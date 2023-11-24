@@ -22,11 +22,14 @@ export class Channel {
 	messages: Message[];
 
 	@ManyToMany(() => User, user => user.channels)
-	@JoinColumn({ name: 'adminId' })
-	admin: User[];
+	users: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
 
-	@Column()
-	adminId: number;
+	@ManyToMany(() => User, user => user.channels)
+	@JoinColumn({ name: 'adminId' })
+	admin: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
+
+	// @Column("simple-array")
+	// adminId: number[];
 
 	// Buradaki password'u ayir cunku ya public/private bunlar da passwordu var/yok olarak olabilir.
 	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
@@ -34,6 +37,10 @@ export class Channel {
 
 	@Column({ nullable: true })
 	password: string;
+
+	constructor(channel: Partial<Channel>) {
+		Object.assign(this, channel);
+	}
 }
 
 @Entity('message')
@@ -54,5 +61,8 @@ export class Message {
 	@ManyToOne(() => Channel, channel => channel.messages)
 	@JoinColumn({ name: 'channelId' })
 	channel: Channel;
-}
 
+	constructor(message: Partial<Message>) {
+		Object.assign(this, message);
+	}
+}

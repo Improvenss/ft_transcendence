@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class UsersService {
@@ -41,6 +42,12 @@ export class UsersService {
 		if (!id && !login)
 			throw new Error('Must be enter ID or login.');
 		return (await this.usersRepository.findOne({where: {id: id, login: login}}));
+	}
+
+	async findOneSocket(socket: Socket): Promise<User> {
+		if (!socket)
+			throw new Error('Must be enter Socket.');
+		return (await this.usersRepository.findOne({where: {socket_id: socket.id as string}}));
 	}
 	
 
