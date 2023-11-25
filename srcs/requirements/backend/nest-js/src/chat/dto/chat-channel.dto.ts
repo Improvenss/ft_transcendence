@@ -4,6 +4,7 @@ import { User } from 'src/users/entities/user.entity';
 
 export class CreateChannelDto {
 	@IsString()
+	@IsNotEmpty()
 	name: string;
 
 	@IsBoolean()
@@ -12,12 +13,12 @@ export class CreateChannelDto {
 
 	@IsArray()
 	@IsOptional()
-	users: User[] | null;
+	users: User[];
 
 	@IsArray()
 	@IsOptional()
 	@IsNotEmpty() // veya @IsDefined()
-	admin: User[];
+	admins: User[];
 	// adminId: number[];
 
 	@IsEnum(['public', 'private', 'protected'])

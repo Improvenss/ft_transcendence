@@ -6,27 +6,31 @@ import { Entity,
 	JoinColumn,
 	OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity('channel')
 export class Channel {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column({ length: 50, unique: true })
+	@Column({ length: 50, unique: true , nullable: false})
+	@IsNotEmpty()
 	name: string;
 
 	@Column({ default: true })
 	isActive: boolean;
 
-	@OneToMany(() => Message, message => message.channel)
+	@OneToMany(() => Message, message => message.channel, {nullable: true})
+	@JoinColumn()
 	messages: Message[];
 
-	@ManyToMany(() => User, user => user.channels)
+	@ManyToMany(() => User, user => user.channels, {nullable: true})
+	@JoinColumn()
 	users: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
 
-	@ManyToMany(() => User, user => user.channels)
+	@ManyToMany(() => User, user => user.channels, {nullable: true})
 	@JoinColumn({ name: 'adminId' })
-	admin: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
+	admins: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
 
 	// @Column("simple-array")
 	// adminId: number[];

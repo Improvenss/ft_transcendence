@@ -8,9 +8,8 @@ import { Socket } from 'socket.io-client';
 interface WebSocketChannelData {
 	channel: string;
 	name: string;
-	type: string;
-	// adminId: number[];
 	isActive: boolean;
+	type: string;
 	password: string | "none";
 }
 
@@ -20,9 +19,8 @@ function joinChannel(channel: string, socket: Socket | null) {
 	const sendData: WebSocketChannelData = {
 		channel: channel,
 		name: "Example Name",
-		type: "public",
-		// adminId: [],
 		isActive: true,
+		type: "public",
 		password: "none",
 		// Buraya cookie'de tuttugumuz login ismini verirsek Channel olusumunda admini User entity'si olarak atayabiliriz.
 	};

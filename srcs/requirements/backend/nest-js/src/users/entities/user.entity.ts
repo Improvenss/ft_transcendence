@@ -36,7 +36,7 @@ export class User {
 	}
 	// image: Image;
 
-	@ManyToMany(() => Channel, channel => channel.admin)
+	@ManyToMany(() => Channel, channel => channel.admins)
 	@JoinTable()
 	channels: Channel[];
   

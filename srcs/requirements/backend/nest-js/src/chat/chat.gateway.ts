@@ -23,6 +23,7 @@ import { CreateChannelDto } from './dto/chat-channel.dto';
 import { ChatService } from './chat.service';
 import { Body } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/entities/user.entity';
 
 var count: number = 0;
 
@@ -104,30 +105,47 @@ export class ChatGateway {
 	@SubscribeMessage('joinChannel')
 	// async handleJoinChannel(@MessageBody() channel: string,
 	async handleJoinChannel(@Body() data: any,
-			@ConnectedSocket() socket: Socket)
-	{
-		const	responseUser = await this.usersService.findOneSocket(socket);
+			@ConnectedSocket() socket: Socket) {
+		const	responseUser: User = await this.usersService.findOneSocket(socket);
 		const	responseChannel = await this.chatService.findOneChannel(undefined, data.channel);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
 			const	createChannelDto: CreateChannelDto = {
-				name: data.channel,
-				type: data.type,
-				users: [responseUser],
-				admin: [responseUser],
-				isActive: data.isActive,
-				password: data.password,
+				name: data.channel as string,
+				isActive: data.isActive as boolean,
+				// users: [responseUser],
+				users: [],
+				// admins: [responseUser],
+				admins: [],
+				type: data.type as string,
+				password: data.password as string,
 			};
-			const response = await (this.chatService.createChannel(createChannelDto));
-			console.log("RESPONSEEEEEEEEEEE", response); // Basarili bir sekidle Channel olusturuldu mu onu kontrol edebiliriz.
+			const response = await this.chatService.createChannel(createChannelDto);
+			console.log(response, `ADMIN: ${socket.id}`); // Basarili bir sekidle Channel olusturuldu mu onu kontrol edebiliriz.
+			socket.join(data.channel);
+			this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}) created: ${socket.id} you are admin!`);
 		}
-		// if (responseChannel.name === data.channel
-		// 	&& responseChannel.users.find("sadfj") === socket.id)
-		// {
-		socket.join(data.channel);
+		else if (responseChannel !== null
+			&& responseChannel.name === data.channel)
+		{
+			if (!socket.rooms.has(data.channel))
+			{
+				socket.join(data.channel);
+				if (responseUser.socket_id === socket.id) {
+					console.log(`${data.channel} kanalina katıldı: ${socket.id}`);
+					this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}): ${socket.id} joined!`);
+				}
+			}
+			else
+				console.log(`${socket.id} zaten ${data.channel} kanalında! :)`);
+		}
+	}
 
-		// }
+	@SubscribeMessage('leaveChannel')
+	async handleLeaveChannel(@Body() data: any,
+			@ConnectedSocket() Socket: Socket) {
+		
+	}
+	
 		// socket.leave(data.channel); -> Bu; katilmis oldugu Channel'lerden ciktiysa(leave) o zaman yapacagiz.
-		console.log(`${data.channel} kanalina katıldı: ${socket.id}`);
-		this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}): ${socket.id} joined!`); }
 }
