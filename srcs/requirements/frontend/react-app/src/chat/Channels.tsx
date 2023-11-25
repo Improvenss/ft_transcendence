@@ -28,11 +28,24 @@ function joinChannel(channel: string, socket: Socket | null) {
 	localStorage.setItem("onChannel", channel);
 }
 
+function leaveChannel(channel: string, socket: Socket | null) {
+	if (socket === null)
+		throw ("Error: Socket: null");
+	const sendData = {
+		channel: channel,
+		// name: "Example Name",
+		// isActive: true,
+		// type: "public",
+		// password: "none",
+		// Buraya cookie'de tuttugumuz login ismini verirsek Channel olusumunda admini User entity'si olarak atayabiliriz.
+	};
+	socket?.emit("leaveChannel", sendData);
+	localStorage.setItem("onChannel", "none");
+}
+
 function Channels() {
 	const	socket = useSocket();
 	const	channelList = ['hehe', 'Channel 2', 'Channel 3']; // Kanal listesini istediğiniz şekilde doldurabilirsiniz
-
-	console.log("kac kere calisti channels");
 
 	// firstPageLogin
 	useEffect(() => {
@@ -52,7 +65,7 @@ function Channels() {
 					<li key={channel}
 					onClick={
 						() => joinChannel(channel, socket)
-					}>{channel}</li>
+					}>{channel}<button onClick={(e) => { e.stopPropagation(); leaveChannel(channel, socket); }}>Leave</button> </li>
 				))}
 			</ul>
 		</div>

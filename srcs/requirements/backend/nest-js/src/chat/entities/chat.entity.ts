@@ -11,36 +11,36 @@ import { IsNotEmpty } from 'class-validator';
 @Entity('channel')
 export class Channel {
 	@PrimaryGeneratedColumn()
-	id: number;
+	public id: number;
 
 	@Column({ length: 50, unique: true , nullable: false})
 	@IsNotEmpty()
-	name: string;
+	public name: string;
 
 	@Column({ default: true })
-	isActive: boolean;
+	public isActive: boolean;
 
 	@OneToMany(() => Message, message => message.channel, {nullable: true})
 	@JoinColumn()
-	messages: Message[];
+	public messages: Message[];
 
 	@ManyToMany(() => User, user => user.channels, {nullable: true})
 	@JoinColumn()
-	users: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
+	public users: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
 
 	@ManyToMany(() => User, user => user.channels, {nullable: true})
 	@JoinColumn({ name: 'adminId' })
-	admins: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
+	public admins: User[]; // Kanali DB'den silme islemini kanali olusturan ya da admin olan kisi silebilir.
 
 	// @Column("simple-array")
 	// adminId: number[];
 
 	// Buradaki password'u ayir cunku ya public/private bunlar da passwordu var/yok olarak olabilir.
 	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
-	type: string;
+	public type: string;
 
 	@Column({ nullable: true })
-	password: string;
+	public password: string;
 
 	constructor(channel: Partial<Channel>) {
 		Object.assign(this, channel);
@@ -50,21 +50,21 @@ export class Channel {
 @Entity('message')
 export class Message {
 	@PrimaryGeneratedColumn()
-	id: number;
+	public id: number;
 
 	@Column()
-	message: string;
+	public message: string;
 
 	@Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-	sentAt: Date;
+	public sentAt: Date;
 
 	@ManyToOne(() => User, user => user.messages)
 	@JoinColumn({ name: 'userId' })
-	user: User;
+	public user: User;
 
 	@ManyToOne(() => Channel, channel => channel.messages)
 	@JoinColumn({ name: 'channelId' })
-	channel: Channel;
+	public channel: Channel;
 
 	constructor(message: Partial<Message>) {
 		Object.assign(this, message);

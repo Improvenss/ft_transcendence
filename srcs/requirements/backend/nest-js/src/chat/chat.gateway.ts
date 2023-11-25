@@ -86,8 +86,10 @@ export class ChatGateway {
 	 *  channel de var.
 	 * ornek;
 	 *  https://10.12.14.8:3000/chat -> createMessage -> compose message: Postman:
+	 *  Change type 'Text' to 'JSON'.
 	 *  {
-	 * 		
+	 * 		"channel": "global",
+	 * 		"message": "Message from Postman! :)"
 	 *  }
 	 * @param param0 
 	 */
@@ -106,7 +108,9 @@ export class ChatGateway {
 	// async handleJoinChannel(@MessageBody() channel: string,
 	async handleJoinChannel(@Body() data: any,
 			@ConnectedSocket() socket: Socket) {
-		const	responseUser: User = await this.usersService.findOneSocket(socket);
+		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
+		if (responseUser === null)
+			return (new Error("ERROR: User not found for create Channel!"))
 		const	responseChannel = await this.chatService.findOneChannel(undefined, data.channel);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
@@ -143,8 +147,19 @@ export class ChatGateway {
 
 	@SubscribeMessage('leaveChannel')
 	async handleLeaveChannel(@Body() data: any,
-			@ConnectedSocket() Socket: Socket) {
-		
+			@ConnectedSocket() socket: Socket)
+	{
+		// Eger kanalda kimse kalmadiysa isActive false olacak.
+		// users[] kimse kalmamasi lazim cikan cikacak.
+		// admins[] ciksalar bile adminler kalacak.
+		if (socket.rooms.has(data.channel))
+		{
+			this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}): ${socket.id} left the channel!`);
+			socket.leave(data.channel)
+			console.log(`${data.channel} kanalindan cikti: ${socket.id}`);
+		}
+		else
+			console.log(`${socket.id} zaten ${data.channel} kanalinda degil! :D?`);
 	}
 	
 		// socket.leave(data.channel); -> Bu; katilmis oldugu Channel'lerden ciktiysa(leave) o zaman yapacagiz.
