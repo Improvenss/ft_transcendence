@@ -4,6 +4,7 @@ import { Entity,
 	ManyToOne,
 	ManyToMany,
 	JoinColumn,
+	JoinTable,
 	OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { IsNotEmpty } from 'class-validator';
@@ -82,9 +83,6 @@ export class Message {
 
 
 
-function JoinTable(): (target: Channel, propertyKey: "users") => void {
-	throw new Error('Function not implemented.');
-}
 // @Entity('channel')
 // export class Channel {
 // 	@PrimaryGeneratedColumn()

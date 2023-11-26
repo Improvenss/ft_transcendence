@@ -15,7 +15,7 @@ interface WebSocketChannelData {
 
 function joinChannel(channel: string, socket: Socket | null) {
 	if (socket === null)
-		throw ("Error: Socket: null");
+		throw (new Error("Error: Socket: null"));
 	const sendData: WebSocketChannelData = {
 		channel: channel,
 		name: "Example Name",
@@ -30,7 +30,7 @@ function joinChannel(channel: string, socket: Socket | null) {
 
 function leaveChannel(channel: string, socket: Socket | null) {
 	if (socket === null)
-		throw ("Error: Socket: null");
+		throw (new Error("Error: Socket: null"));
 	const sendData = {
 		channel: channel,
 		// name: "Example Name",
@@ -56,7 +56,7 @@ function Channels() {
 			console.log(`Sayfa yenilendi ve '${lastChannel}' channel'inden otomatik olarak 'global' channeline katilindi.`);
 			joinChannel("global", socket);
 		// }
-	}, [])
+	}, [socket])
 
 	return (
 		<div id='channel-page'>
