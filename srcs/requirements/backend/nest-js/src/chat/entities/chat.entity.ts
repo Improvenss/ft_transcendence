@@ -25,12 +25,12 @@ export class Channel {
 	@JoinColumn()
 	public messages: Message[];
 
-	@ManyToMany(() => User, user => user.channels, {nullable: true})
-	@JoinTable()
-	public users: User[];
+	// @ManyToMany(() => User, user => user.channels, {nullable: true})
+	// @JoinTable()
+	// public users: User[];
 
-	@ManyToMany(() => User, user => user.adminChannels)
-	public admins: User[];
+	// @ManyToMany(() => User, user => user.adminChannels)
+	// public admins: User[];
 
 	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
 	public type: string;

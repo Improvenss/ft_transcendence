@@ -107,9 +107,9 @@ export class ChatGateway {
 				name: data.channel as string,
 				isActive: data.isActive as boolean,
 				// users: [responseUser],
-				users: [responseUser],
+				// users: [responseUser],
 				// admins: [responseUser],
-				admins: [responseUser],
+				// admins: [responseUser],
 				type: data.type as string,
 				password: data.password as string,
 			};

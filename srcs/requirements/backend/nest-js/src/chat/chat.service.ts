@@ -81,13 +81,19 @@ export class ChatService {
 
 	async removeChannel(channel: number | string) {
 		try {
-			const tmpChannel = await this.findChannel(channel);
-
+			const tmpChannel: Channel | Channel[] = await this.findChannel(channel, ['messages']);
 			if (!tmpChannel) {
 				throw new NotFoundException(
 					'chat.service.ts: removeChannel(): Channel not found!'
 				);
 			}
+
+			if (Array.isArray(tmpChannel))
+				for (const channelItem of tmpChannel)
+					await this.entityManager.remove(channelItem.messages);
+			else
+				await this.entityManager.remove(tmpChannel.messages);
+
 			if (typeof channel === 'number') {
 				return await this.channelRepository.delete({ id: channel });
 			} else if (typeof channel === 'string') {
@@ -96,12 +102,17 @@ export class ChatService {
 			throw new Error(
 				'chat.service.ts: removeChannel(): Invalid type for channel parameter!'
 			);
-			} catch (error) {
-				throw new Error(
-					`chat.service.ts: removeChannel(): ${error.message || 'Error during deletion!'}`
-			);
+		} catch (error) {
+			throw new Error(
+				`chat.service.ts: removeChannel(): ${error.message || 'Error during deletion!'}`
+		);
 		}
 	}
+
+	async removeAllMessage() {
+		return (await this.messageRepository.delete({}));
+	}
+}
 
 	// async removeChannel(id: number | null = null, name: string | null = null) {
 	// 	if (!id && !name)
@@ -128,7 +139,4 @@ export class ChatService {
 	// 	}
 	// }
 
-	async removeAllMessage() {
-		return (await this.messageRepository.delete({}));
-	}
-}
+

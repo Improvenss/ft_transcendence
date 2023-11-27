@@ -13,8 +13,7 @@ export class User {
 	@Column()
 	public login: string
 
-	@Column({nullable: true})
-	public socket_id?: string
+	@Column({nullable: true}) public socket_id?: string
 
 	@Column()
 	public first_name: string
@@ -36,13 +35,13 @@ export class User {
 		}
 	}
 
-	@ManyToMany(() => Channel, channel => channel.users)
-	@JoinTable()
-	public channels: Channel[];
+	// @ManyToMany(() => Channel, channel => channel.users)
+	// @JoinTable()
+	// public channels: Channel[];
 
-	@ManyToMany(() => Channel, channel => channel.admins)
-	@JoinTable()
-	public adminChannels: Channel[];
+	// @ManyToMany(() => Channel, channel => channel.admins)
+	// @JoinTable()
+	// public adminChannels: Channel[];
 
 	@OneToMany(() => Message, message => message.user)
 	public messages: Message[];
