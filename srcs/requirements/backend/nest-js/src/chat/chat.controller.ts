@@ -19,31 +19,44 @@ export class ChatController {
 	}
 
 	// ---------- Get ------------
-	@Get(':channel')
-	findAllChannel() {
-		return this.chatService.findAllChannel();
+	@Get('@:channel')
+	async findChannel(@Param('channel') channel: string) {
+		console.log(`Channel: ${channel}`);
+		if (channel === 'all')
+		{
+			console.log("Butun Channel'ler alindi.")
+			return this.chatService.findAllChannel();
+		}
+		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
+		if (isId === true)
+		{
+			const tmpUser = await this.chatService.findOneChannel(+channel, undefined);
+			if (!tmpUser)
+				throw (new NotFoundException("@Get('@:channel'): findChannel(): Channel does not exist!"));
+			return (tmpUser);
+		}
+		else
+		{
+			const tmpUser = await this.chatService.findOneChannel(undefined, channel);
+			if (!tmpUser)
+				throw (new NotFoundException("@Get('@:channel'): findChannel(): Channel does not exist!"));
+			return (tmpUser);
+		}
 	}
-
-	@Get(':message')
+// Burada kaldin
+	@Get('messages/all')
 	findAllMessage() {
+		console.log("Butun Message'ler alindi.")
 		return this.chatService.findAllMessage();
 	}
 
 	// oneeeeeeeeeeeeeeee
-	@Get(':channel:id(\\d+)')
+	@Get(':/id(\\d+)')
 	async findOneChannelId(@Param('id') id?: string) {
-		const tmpUser = await this.chatService.findOneChannel(+id, undefined);
-		if (!tmpUser)
-			throw (new NotFoundException("@Get(':channel:id'): findOneChannelId(): Channel does not exist!"));
-		return (tmpUser);
 	}
 
-	@Get(':channel:name')
+	@Get(':name')
 	async findOneChannelName(@Param('name') name: string) {
-		const tmpUser = await this.chatService.findOneChannel(undefined, name);
-		if (!tmpUser)
-			throw (new NotFoundException("@Get(':channel:name'): findOneChannelName(): Channel does not exist!"));
-		return (tmpUser);
 	}
 
 	@Get(':message:id(\\d+)')
@@ -75,8 +88,15 @@ export class ChatController {
 	}
 
 	@Delete(':channel:id(\\d+)')
-	removeChannel(@Param('id') id: string) {
-		return this.chatService.removeAllChannel();
+	async removeChannelId(@Param('id') id: string) {
+		const	tmpChannel = this.chatService.findOneChannel(+id, undefined);
+
+		return (this.chatService.removeChannel(+id));
+	}
+
+	@Delete(':channel:name(\\d+)')
+	async removeChannelName(@Param('name') name: string) {
+		// return this.chatService.removeAllChannel();
 	}
 
 	@Delete(':message:id(\\d+)')

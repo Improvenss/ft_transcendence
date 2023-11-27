@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 
 @Entity()

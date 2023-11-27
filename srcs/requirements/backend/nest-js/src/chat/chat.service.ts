@@ -36,15 +36,19 @@ export class ChatService {
 		return (await this.messageRepository.find());
 	}
 
-	async findOneChannel(id?: number, name?: string) {
-		if (!id && !name || name === undefined)
+	async findOneChannel(id: number | null = null, name: string | null = null) {
+		if (!id && !name)
 			throw (new Error(`chat: service: Must be enter ID or login!`));
-		const response = await this.channelRepository.findOne(
-			{where: {id: id, name: name}}
-		)
-		return (await this.channelRepository.findOne(
-			{where: {id: id, name: name}}
-		));
+		try {
+			if (id !== null)
+				return await this.channelRepository.findOne({where: {id}});
+			else if (name !== null)
+				return await this.channelRepository.findOne({where: { name: name }});
+			else
+				return null;
+		} catch (error) {
+			return (new Error(error + "chat.service.ts: findOneChannel(): Channel not found!"));
+		}
 	}
 
 	async findOneMessage(id: number) {
@@ -60,6 +64,10 @@ export class ChatService {
 
 	async removeAllChannel() {
 		return (await this.channelRepository.delete({}));
+	}
+
+	async removeChannel(id: number) {
+		return (await this.channelRepository.delete({id: id}))
 	}
 
 	async removeAllMessage() {

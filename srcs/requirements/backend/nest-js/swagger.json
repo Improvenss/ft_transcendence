@@ -229,15 +229,6 @@
           }
         }
       },
-      "get": {
-        "operationId": "ChatController_findAllChannel",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
       "delete": {
         "operationId": "ChatController_removeAllChannel",
         "parameters": [],
@@ -267,7 +258,29 @@
             "description": ""
           }
         }
-      },
+      }
+    },
+    "/chat/@{channel}": {
+      "get": {
+        "operationId": "ChatController_findChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/messages/all": {
       "get": {
         "operationId": "ChatController_findAllMessage",
         "parameters": [],
@@ -278,7 +291,7 @@
         }
       }
     },
-    "/chat/{channel}{id}": {
+    "/chat/:/id{0}": {
       "get": {
         "operationId": "ChatController_findOneChannelId",
         "parameters": [
@@ -296,27 +309,9 @@
             "description": ""
           }
         }
-      },
-      "delete": {
-        "operationId": "ChatController_removeChannel",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
       }
     },
-    "/chat/{channel}{name}": {
+    "/chat/{name}": {
       "get": {
         "operationId": "ChatController_findOneChannelName",
         "parameters": [
@@ -406,6 +401,46 @@
       "delete": {
         "operationId": "ChatController_removeAllMessage",
         "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{channel}{id}": {
+      "delete": {
+        "operationId": "ChatController_removeChannelId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{channel}{name}": {
+      "delete": {
+        "operationId": "ChatController_removeChannelName",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""

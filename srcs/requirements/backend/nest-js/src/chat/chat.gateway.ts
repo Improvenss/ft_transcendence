@@ -1,16 +1,3 @@
-// import { Module } from '@nestjs/common';
-// // import { ChatGateway } from './chat.gateway';
-// import { UsersModule } from 'src/users/users.module';
-
-// @Module({
-// 	imports: [UsersModule],
-// 	// providers: [ChatGateway], // BAK BAK BU MAHLUKAT, AQ PROVIDERS'I 2 KERE CALISMASINI SAGLIYORMUS... 2 HAFTADIR BUNUNLA UGRASIYORUZ AQ.
-// })
-// export class ChatModule {}
-
-// BU YUKARIDAKI chat.gateway.ts dosyasi.
-
-
 /**
  * LINK: https://dzone.com/articles/build-a-real-time-chat-application-with-nestjs-and-postgresql
  */
@@ -114,13 +101,14 @@ export class ChatGateway {
 		const	responseChannel = await this.chatService.findOneChannel(undefined, data.channel);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
+			console.log("RESPONSE USER:", responseUser);
 			const	createChannelDto: CreateChannelDto = {
 				name: data.channel as string,
 				isActive: data.isActive as boolean,
 				// users: [responseUser],
-				users: [],
+				users: [responseUser],
 				// admins: [responseUser],
-				admins: [],
+				admins: [responseUser],
 				type: data.type as string,
 				password: data.password as string,
 			};
