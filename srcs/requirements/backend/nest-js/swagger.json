@@ -228,15 +228,6 @@
             "description": ""
           }
         }
-      },
-      "delete": {
-        "operationId": "ChatController_removeAllChannel",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
       }
     },
     "/chat/{message}": {
@@ -263,6 +254,24 @@
     "/chat/@{channel}": {
       "get": {
         "operationId": "ChatController_findChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "ChatController_removeChannel",
         "parameters": [
           {
             "name": "channel",

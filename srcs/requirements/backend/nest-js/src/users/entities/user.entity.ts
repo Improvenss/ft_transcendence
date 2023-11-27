@@ -3,6 +3,10 @@ import { Channel, Message } from "src/chat/entities/chat.entity";
 
 @Entity()
 export class User {
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
+
 	@PrimaryGeneratedColumn()
 	public id: number
 
@@ -42,68 +46,7 @@ export class User {
 
 	@OneToMany(() => Message, message => message.user)
 	public messages: Message[];
-
-	constructor(user: Partial<User>) {
-		Object.assign(this, user);
-	}
 }
-
-
-
-
-
-
-
-
-
-
-
-// @Entity()
-// export class User {
-// 	@PrimaryGeneratedColumn()
-// 	public id: number
-
-// 	@Column()
-// 	public login: string
-
-// 	@Column({nullable: true})
-// 	public socket_id?: string
-
-// 	@Column()
-// 	public first_name: string
-
-// 	@Column()
-// 	public last_name: string
-
-// 	@Column({type: "text", nullable: true})
-// 	public email: string
-
-// 	// @OneToOne(() => Image)
-// 	// @JoinColumn()
-// 	@Column({type: "text", nullable: true})
-// 	// image: string
-// 	public image: {
-// 		link: string,
-// 		versions: {
-// 			large: string;
-// 			medium: string;
-// 			micro: string;
-// 			small: string;
-// 		}
-// 	}
-// 	// image: Image;
-
-// 	@ManyToMany(() => Channel, channel => channel.admins)
-// 	@JoinTable()
-// 	public channels: Channel[];
-  
-// 	@OneToMany(() => Message, message => message.user)
-// 	public messages: Message[];
-
-// 	constructor(user: Partial<User>) {
-// 		Object.assign(this, user);
-// 	}
-// }
 
 /**
  * LINK: https://medium.com/@mohitu531/nestjs-7c0eb5655bde

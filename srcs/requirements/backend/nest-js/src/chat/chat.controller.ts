@@ -21,25 +21,25 @@ export class ChatController {
 	// ---------- Get ------------
 	@Get('@:channel')
 	async findChannel(@Param('channel') channel: string) {
-		console.log(`Channel: ${channel}`);
+		console.log(`GET: Channel: ${channel}`);
 		if (channel === 'all')
 		{
 			console.log("Butun Channel'ler alindi.")
-			return this.chatService.findAllChannel();
+			return this.chatService.findChannel();
 		}
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
 		if (isId === true)
 		{
-			const tmpUser = await this.chatService.findOneChannel(+channel, undefined);
+			const tmpUser = await this.chatService.findChannel(+channel);
 			if (!tmpUser)
-				throw (new NotFoundException("@Get('@:channel'): findChannel(): Channel does not exist!"));
+				throw (new NotFoundException("@Get('@:channel'): findChannel(): id: Channel does not exist!"));
 			return (tmpUser);
 		}
 		else
 		{
-			const tmpUser = await this.chatService.findOneChannel(undefined, channel);
+			const tmpUser = await this.chatService.findChannel(channel);
 			if (!tmpUser)
-				throw (new NotFoundException("@Get('@:channel'): findChannel(): Channel does not exist!"));
+				throw (new NotFoundException("@Get('@:channel'): findChannel(): name: Channel does not exist!"));
 			return (tmpUser);
 		}
 	}
@@ -77,9 +77,32 @@ export class ChatController {
 
 	// ---------- Delete ---------
 
-	@Delete(':channel')
-	removeAllChannel() {
-		return this.chatService.removeAllChannel();
+	@Delete('@:channel')
+	async removeChannel(@Param('channel') channel: string) {
+		console.log(`DELETE: Channel: ${channel}`);
+		if (channel === "all")
+		{
+			console.log(`Butun Channel'ler 'silindi'!`);
+			return (await this.chatService.removeAllChannel());
+		}
+		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
+		if (isId === true)
+		{
+			console.log(`id ->>>>>>>>>>>`);
+			const tmpUser = await this.chatService.removeChannel(+channel);
+			if (!tmpUser)
+				throw (new NotFoundException("@Delete('@:channel'): removeChannel(): id: Channel does not exist!"));
+			return (tmpUser);
+		}
+		else
+		{
+			console.log(`nameeeeeeeee ----------->`);
+			const tmpUser = await this.chatService.removeChannel(channel);
+			console.log("donen deger", tmpUser);
+			if (!tmpUser)
+				throw (new NotFoundException("@Delete('@:channel'): removeChannel(): name: Channel does not exist!"));
+			return (tmpUser);
+		}
 	}
 
 	@Delete(':messages')
@@ -89,7 +112,7 @@ export class ChatController {
 
 	@Delete(':channel:id(\\d+)')
 	async removeChannelId(@Param('id') id: string) {
-		const	tmpChannel = this.chatService.findOneChannel(+id, undefined);
+		const	tmpChannel = this.chatService.findChannel(+id);
 
 		return (this.chatService.removeChannel(+id));
 	}

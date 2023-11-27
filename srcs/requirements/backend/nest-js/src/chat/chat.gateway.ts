@@ -11,6 +11,7 @@ import { ChatService } from './chat.service';
 import { Body } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { Channel } from './entities/chat.entity';
 
 var count: number = 0;
 
@@ -98,7 +99,7 @@ export class ChatGateway {
 		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
 		if (responseUser === null)
 			return (new Error("ERROR: User not found for create Channel!"))
-		const	responseChannel = await this.chatService.findOneChannel(undefined, data.channel);
+		const	responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(data.channel);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
 			console.log("RESPONSE USER:", responseUser);
