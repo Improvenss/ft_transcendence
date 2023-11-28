@@ -67,8 +67,8 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			last_name: dataClient.last_name,
 			email: dataClient.email,
 			image: dataClient.image,
-			channels: null,
-			messages: null
+			channels: [],
+			messages: [],
 		};
 
 		const	responseData = await this.apiService.fetchUserData(createUserDto);

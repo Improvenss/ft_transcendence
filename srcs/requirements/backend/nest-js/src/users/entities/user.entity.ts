@@ -1,19 +1,16 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 
-@Entity()
+@Entity({name: 'user'})
 export class User {
-	constructor(user: Partial<User>) {
-		Object.assign(this, user);
-	}
-
 	@PrimaryGeneratedColumn()
 	public id: number
 
 	@Column()
 	public login: string
 
-	@Column({nullable: true}) public socket_id?: string
+	@Column({nullable: true})
+	public socket_id?: string
 
 	@Column()
 	public first_name: string
@@ -35,9 +32,9 @@ export class User {
 		}
 	}
 
-	// @ManyToMany(() => Channel, channel => channel.users)
-	// @JoinTable()
-	// public channels: Channel[];
+	@ManyToMany(() => Channel, channel => channel.users)
+	@JoinTable()
+	public channels: Channel[];
 
 	// @ManyToMany(() => Channel, channel => channel.admins)
 	// @JoinTable()
@@ -45,6 +42,10 @@ export class User {
 
 	@OneToMany(() => Message, message => message.user)
 	public messages: Message[];
+
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
 }
 
 /**

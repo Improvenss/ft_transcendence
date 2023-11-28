@@ -28,10 +28,6 @@ export class ChatService {
 		return (`New Message created: id:[${newMessage.id}]`);
 	}
 
-	// async findAllChannel() {
-	// 	return (await this.channelRepository.find());
-	// }
-
 	async findAllMessage() {
 		return (await this.messageRepository.find());
 	}
@@ -40,8 +36,6 @@ export class ChatService {
 		channel: number | string | null = null,
 		relations: any | null = null)
 	{
-		// if (!channel)
-		// 	throw (new Error(`chat: service: findOneChannel(): Must be enter ID or login!`));
 		try {
 			if (channel === null)
 				return (await this.channelRepository.find());
@@ -88,11 +82,11 @@ export class ChatService {
 				);
 			}
 
-			if (Array.isArray(tmpChannel))
-				for (const channelItem of tmpChannel)
-					await this.entityManager.remove(channelItem.messages);
-			else
-				await this.entityManager.remove(tmpChannel.messages);
+			// if (Array.isArray(tmpChannel))
+			// 	for (const channelItem of tmpChannel)
+			// 		await this.entityManager.remove(channelItem.messages);
+			// else
+			// 	await this.entityManager.remove(tmpChannel.messages);
 
 			if (typeof channel === 'number') {
 				return await this.channelRepository.delete({ id: channel });

@@ -8,10 +8,11 @@ import { ConnectedSocket, MessageBody,
 import { Socket } from 'socket.io';
 import { CreateChannelDto } from './dto/chat-channel.dto';
 import { ChatService } from './chat.service';
-import { Body } from '@nestjs/common';
+import { Body, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 var count: number = 0;
 
@@ -98,16 +99,15 @@ export class ChatGateway {
 			@ConnectedSocket() socket: Socket) {
 		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
 		if (responseUser === null)
-			return (new Error("ERROR: User not found for create Channel!"))
+			return (new NotFoundException("ERROR: User not found for create Channel!"))
 		const	responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(data.channel);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
-			console.log("RESPONSE USER:", responseUser);
 			const	createChannelDto: CreateChannelDto = {
 				name: data.channel as string,
 				isActive: data.isActive as boolean,
-				// users: [responseUser],
-				// users: [responseUser],
+				// users: [],
+				users: [responseUser],
 				// admins: [responseUser],
 				// admins: [responseUser],
 				type: data.type as string,
