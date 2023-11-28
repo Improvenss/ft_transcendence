@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChannelDto, UpdateChannelDto} from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
@@ -19,25 +19,33 @@ export class ChatController {
 	}
 
 	// ---------- Get ------------
-	@Get('@:channel')
-	async findChannel(@Param('channel') channel: string) {
-		console.log(`GET: Channel: ${channel}`);
+	// @Get('@:channel') -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+	@Get('@:channel/:relation')
+	// @Get('@:channel')
+	async findChannel(
+		@Param('channel') channel: string,
+		@Param('relation') relation: string[],
+		// @Body() relationData: string[], -> Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
+		@Query('relations') relations: string[], // -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+	) {
+		console.log(`GET: Channel: ${channel}, Relation: ${relation}, Relations: ${relations}`);
+		// if (relation)
 		if (channel === 'all')
 		{
 			console.log("Butun Channel'ler alindi.")
-			return this.chatService.findChannel();
+			return this.chatService.findChannel(null, relation);
 		}
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
 		if (isId === true)
 		{
-			const tmpUser = await this.chatService.findChannel(+channel);
+			const tmpUser = await this.chatService.findChannel(+channel, relation);
 			if (!tmpUser)
 				throw (new NotFoundException("@Get('@:channel'): findChannel(): id: Channel does not exist!"));
 			return (tmpUser);
 		}
 		else
 		{
-			const tmpUser = await this.chatService.findChannel(channel);
+			const tmpUser = await this.chatService.findChannel(channel, relation);
 			if (!tmpUser)
 				throw (new NotFoundException("@Get('@:channel'): findChannel(): name: Channel does not exist!"));
 			return (tmpUser);
@@ -82,8 +90,9 @@ export class ChatController {
 		console.log(`DELETE: Channel: ${channel}`);
 		if (channel === "all")
 		{
+			const	response = await this.chatService.removeAllChannel();
 			console.log(`Butun Channel'ler 'silindi'!`);
-			return (await this.chatService.removeAllChannel());
+			return (response);
 		}
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
 		if (isId === true)

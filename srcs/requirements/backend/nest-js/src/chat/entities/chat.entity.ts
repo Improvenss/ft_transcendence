@@ -9,6 +9,11 @@ import { Entity,
 import { User } from '../../users/entities/user.entity';
 import { IsNotEmpty } from 'class-validator';
 
+// @Entity('asdf')
+// export class Asdf {
+
+// }
+
 @Entity('channel')
 export class Channel {
 	@PrimaryGeneratedColumn()
@@ -26,11 +31,11 @@ export class Channel {
 	public messages: Message[];
 
 	@ManyToMany(() => User, user => user.channels, {nullable: true, onDelete: 'CASCADE'})
-	// @JoinTable()
+	@JoinTable()
 	public users: User[];
 
-	// @ManyToMany(() => User, user => user.adminChannels)
-	// public admins: User[];
+	@ManyToMany(() => User, user => user.adminChannels, {onDelete: 'CASCADE'})
+	public admins: User[];
 
 	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
 	public type: string;

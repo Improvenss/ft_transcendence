@@ -4,6 +4,20 @@ import * as fs from 'fs';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+/**
+ * NOTES: GET: Bu @channel/:relation bu 1 tane string oluyor.
+ * 
+ * relations'u yap {{baseUrl}}:3000/chat/@all?relations=users&relations=admins. Bu string[] oluyor.
+ * 
+ * Sonra bunlari Users entity'sine de ekle.
+ * 
+ * Channel'e yazilan mesajlari DB'ye Messages[] tablosuna kaydet.
+ * 
+ * Ilk giris ekraninda login ve profile photo secim ekranindaki gelen verileri isle,
+ *  fotografi DB'de ['bytea'] seklinde kaydet. Dosya olarak local'de falan bulunmayacak.
+ *  postgres Db'nin icerisinde tutulacak bu bytea'nin icinde. istedigimizde indirebilecegiz.
+ * 
+ */
 async function bootstrap() {
 	const	httpsOptions = {
 		key: fs.readFileSync(process.env.SSL_KEY_FILE as string),

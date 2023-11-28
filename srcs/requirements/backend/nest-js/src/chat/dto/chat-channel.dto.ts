@@ -15,10 +15,10 @@ export class CreateChannelDto {
 	@IsOptional()
 	users: User[];
 
-	// @IsArray()
-	// @IsOptional()
-	// @IsNotEmpty() // veya @IsDefined()
-	// admins: User[];
+	@IsArray()
+	@IsOptional()
+	@IsNotEmpty() // veya @IsDefined()
+	admins: User[];
 
 	@IsEnum(['public', 'private', 'protected'])
 	type: string;

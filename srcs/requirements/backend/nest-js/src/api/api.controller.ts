@@ -66,7 +66,10 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			first_name: dataClient.first_name,
 			last_name: dataClient.last_name,
 			email: dataClient.email,
-			image: dataClient.image,
+			// image:{
+			// 	link: dataClient.image.link,
+			// },
+			image: dataClient.image.link,
 			channels: [],
 			messages: [],
 		};

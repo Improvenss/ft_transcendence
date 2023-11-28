@@ -108,8 +108,8 @@ export class ChatGateway {
 				isActive: data.isActive as boolean,
 				// users: [],
 				users: [responseUser],
-				// admins: [responseUser],
-				// admins: [responseUser],
+				// admins: [],
+				admins: [responseUser],
 				type: data.type as string,
 				password: data.password as string,
 			};

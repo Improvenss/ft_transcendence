@@ -4,41 +4,42 @@ import { Channel, Message } from "src/chat/entities/chat.entity";
 @Entity({name: 'user'})
 export class User {
 	@PrimaryGeneratedColumn()
-	public id: number
+	public id: number;
 
 	@Column()
-	public login: string
+	public login: string;
 
 	@Column({nullable: true})
-	public socket_id?: string
+	public socket_id?: string;
 
 	@Column()
-	public first_name: string
+	public first_name: string;
 
 	@Column()
-	public last_name: string
+	public last_name: string;
 
 	@Column({type: "text", nullable: true})
-	public email: string
+	public email: string;
 
 	@Column({type: "text", nullable: true})
-	public image: {
-		link: string,
-		versions: {
-			large: string;
-			medium: string;
-			micro: string;
-			small: string;
-		}
-	}
+	public image: string;
+	// public image: {
+		// link: string,
+		// versions: {
+		// 	large: string;
+		// 	medium: string;
+		// 	micro: string;
+		// 	small: string;
+		// }
+	// }
 
-	@ManyToMany(() => Channel, channel => channel.users)
+	@ManyToMany(() => Channel, channel => channel.users, {cascade: true})
 	@JoinTable()
 	public channels: Channel[];
 
-	// @ManyToMany(() => Channel, channel => channel.admins)
-	// @JoinTable()
-	// public adminChannels: Channel[];
+	@ManyToMany(() => Channel, channel => channel.admins)
+	@JoinTable()
+	public adminChannels: Channel[];
 
 	@OneToMany(() => Message, message => message.user)
 	public messages: Message[];
