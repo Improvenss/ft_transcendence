@@ -1,31 +1,31 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 
 @Entity()
 export class User {
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
+
 	@PrimaryGeneratedColumn()
-	id: number
+	public id: number
 
 	@Column()
-	login: string
+	public login: string
 
-	@Column({nullable: true})
-	socket_id?: string
-
-	@Column()
-	first_name: string
+	@Column({nullable: true}) public socket_id?: string
 
 	@Column()
-	last_name: string
+	public first_name: string
+
+	@Column()
+	public last_name: string
 
 	@Column({type: "text", nullable: true})
-	email: string
+	public email: string
 
-	// @OneToOne(() => Image)
-	// @JoinColumn()
 	@Column({type: "text", nullable: true})
-	// image: string
-	image: {
+	public image: {
 		link: string,
 		versions: {
 			large: string;
@@ -34,18 +34,17 @@ export class User {
 			small: string;
 		}
 	}
-	// image: Image;
 
-	@ManyToMany(() => Channel, channel => channel.admin)
-	@JoinTable()
-	channels: Channel[];
-  
+	// @ManyToMany(() => Channel, channel => channel.users)
+	// @JoinTable()
+	// public channels: Channel[];
+
+	// @ManyToMany(() => Channel, channel => channel.admins)
+	// @JoinTable()
+	// public adminChannels: Channel[];
+
 	@OneToMany(() => Message, message => message.user)
-	messages: Message[];
-
-	constructor(user: Partial<User>) {
-		Object.assign(this, user);
-	}
+	public messages: Message[];
 }
 
 /**
@@ -55,4 +54,7 @@ export class User {
  * Nedir?: Veritabani'nin her bir satirini temsil eder.
  * 
  * Bu Entity 'veritabani'mizdaki her bir satiri temsil eden bir siniftir.
+ * 
+ * LINK: https://wanago.io/2020/06/22/api-nestjs-relationships-postgres-typeorm/
+ * Iliskili(Relationship) DB'leri ornekleri.
  */

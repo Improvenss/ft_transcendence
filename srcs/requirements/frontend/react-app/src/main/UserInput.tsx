@@ -34,7 +34,7 @@ function UserInput({setVisible}: IUserProps) {
   return (
 	<div id="user-status">
 		<form onSubmit={handleSubmit}>
-		<div className="close-button" onClick={handleClose} title='Close'>X</div>
+			<div className="close-button" onClick={handleClose} title='Close'>X</div>
 			<label>
 				Nickname:
 				<input type="text" value={username} onChange={handleUsernameChange} />

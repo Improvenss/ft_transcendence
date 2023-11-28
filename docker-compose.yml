@@ -78,7 +78,7 @@ services:
     volumes:
       # - postgres_data:/var/lib/postgresql/data
       - ./srcs/requirements/ssl:/etc/ssl/certs
-      - ./srcs/requirements/postgres/create-database.sh:/docker-entrypoint-initdb.d/create-database.sh # PostgreSQL bu 'docker-entypoing-initdb.d' klasorunun icerisindekileri container olusup postgresql calistirildiktan sonra otomatik bir sekilde bu icerisindeki dosyalari calistiriyor.
+      # - ./srcs/requirements/postgres/create-database.sh:/docker-entrypoint-initdb.d/create-database.sh # PostgreSQL bu 'docker-entypoing-initdb.d' klasorunun icerisindekileri container olusup postgresql calistirildiktan sonra otomatik bir sekilde bu icerisindeki dosyalari calistiriyor.
     networks:
       - transcendence_network
     restart: unless-stopped # Durdurulmadigi surece.

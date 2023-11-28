@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { EntityManager, JsonContains, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class UsersService {
@@ -11,7 +12,7 @@ export class UsersService {
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
 		private readonly	entityManager: EntityManager
-		) {}
+	) {}
 
 	/**
 	 * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
@@ -41,6 +42,12 @@ export class UsersService {
 		if (!id && !login)
 			throw new Error('Must be enter ID or login.');
 		return (await this.usersRepository.findOne({where: {id: id, login: login}}));
+	}
+
+	async findOneSocket(socket: Socket): Promise<User | null> {
+		if (!socket)
+			throw new Error('Must be enter Socket.');
+		return (await this.usersRepository.findOne({where: {socket_id: socket.id as string}}));
 	}
 	
 
@@ -85,7 +92,6 @@ export class UsersService {
 	async	remove(id: number) {
 		return (this.usersRepository.delete(id));
 	}
-
 }
 
 
@@ -117,8 +123,6 @@ export class UsersService {
  * 
  * 
  * 
-gsever@k2m14s08 ~ % echo 'Gorkem BEY hos geldiniz efendim.'
-Gorkem BEY hos geldiniz efendim.
 gsever@k2m14s08 ~ % docker exec -it postgres /bin/sh
 
 

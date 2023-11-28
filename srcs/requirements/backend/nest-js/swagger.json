@@ -12,36 +12,6 @@
         }
       }
     },
-    "/api": {
-      "post": {
-        "operationId": "ApiController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateApiDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      },
-      "get": {
-        "operationId": "ApiController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/login": {
       "post": {
         "operationId": "ApiController_loginStatus",
@@ -70,72 +40,6 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/{id}": {
-      "get": {
-        "operationId": "ApiController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "ApiController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateApiDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ApiController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
             "description": ""
           }
         }
@@ -305,16 +209,16 @@
         }
       }
     },
-    "/chat": {
+    "/chat/{channel}": {
       "post": {
-        "operationId": "ChatController_create",
+        "operationId": "ChatController_createChannel",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateChatDto"
+                "$ref": "#/components/schemas/CreateChannelDto"
               }
             }
           }
@@ -324,9 +228,70 @@
             "description": ""
           }
         }
-      },
+      }
+    },
+    "/chat/{message}": {
+      "post": {
+        "operationId": "ChatController_createMessage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/@{channel}": {
       "get": {
-        "operationId": "ChatController_findAll",
+        "operationId": "ChatController_findChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "ChatController_removeChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/messages/all": {
+      "get": {
+        "operationId": "ChatController_findAllMessage",
         "parameters": [],
         "responses": {
           "200": {
@@ -335,9 +300,49 @@
         }
       }
     },
-    "/chat/{id}": {
+    "/chat/:/id{0}": {
       "get": {
-        "operationId": "ChatController_findOne",
+        "operationId": "ChatController_findOneChannelId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{name}": {
+      "get": {
+        "operationId": "ChatController_findOneChannelName",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{message}{id}": {
+      "get": {
+        "operationId": "ChatController_findOneMessage",
         "parameters": [
           {
             "name": "id",
@@ -355,7 +360,7 @@
         }
       },
       "patch": {
-        "operationId": "ChatController_update",
+        "operationId": "ChatController_updateMessage",
         "parameters": [
           {
             "name": "id",
@@ -371,7 +376,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateChatDto"
+                "$ref": "#/components/schemas/UpdateMessageDto"
               }
             }
           }
@@ -383,10 +388,61 @@
         }
       },
       "delete": {
-        "operationId": "ChatController_remove",
+        "operationId": "ChatController_removeMessage",
         "parameters": [
           {
             "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{messages}": {
+      "delete": {
+        "operationId": "ChatController_removeAllMessage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{channel}{id}": {
+      "delete": {
+        "operationId": "ChatController_removeChannelId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{channel}{name}": {
+      "delete": {
+        "operationId": "ChatController_removeChannelName",
+        "parameters": [
+          {
+            "name": "name",
             "required": true,
             "in": "path",
             "schema": {
@@ -412,14 +468,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateApiDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateApiDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateUserDto": {
         "type": "object",
         "properties": {}
@@ -428,11 +476,19 @@
         "type": "object",
         "properties": {}
       },
-      "CreateChatDto": {
+      "CreateChannelDto": {
         "type": "object",
         "properties": {}
       },
-      "UpdateChatDto": {
+      "CreateMessageDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateChannelDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateMessageDto": {
         "type": "object",
         "properties": {}
       }

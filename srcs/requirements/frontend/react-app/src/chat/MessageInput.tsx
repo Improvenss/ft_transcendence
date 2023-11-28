@@ -1,10 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import './MessageInput.css';
+import { useSocket } from "../main/SocketHook";
 
-function	MessageInput({send}: {send: (val: string) => void}) {
+// function	MessageInput({send}: {send: (val: string) => void}) {
+function	MessageInput() {
+	const	socket = useSocket();
 	const	[value, setValue] = useState("");
 	const	maxCharLimit = 1024;
 	const	inputRef = useRef<HTMLInputElement>(null);
+	const	onChannel = localStorage.getItem("onChannel") || "global";
+
+
+	// const	send = (value: string) => {
+	// 	socket?.emit("createMessage", value);
+	// }
+
+	const	send = (channel: string, value: string) => {
+		console.log("send'e geldi createMessage:", { channel: channel, message: value });
+		socket?.emit("createMessage", { channel: channel, message: value });
+	}
 
 	// /chat sayfasi acildigi anda cursor focus'unu direkt input'a yoneltmek icin.
 	useEffect(() => {
@@ -17,7 +30,7 @@ function	MessageInput({send}: {send: (val: string) => void}) {
 			event.preventDefault();
 			const trimmedValue = value.replace(/^\s+/, "");
 			if (trimmedValue !== "" && trimmedValue.length <= maxCharLimit) {
-				send(trimmedValue);
+				send(onChannel, trimmedValue);
 				setValue("");
 			}
 		}
@@ -27,14 +40,14 @@ function	MessageInput({send}: {send: (val: string) => void}) {
 	const handleClick = () => {
 		const trimmedValue = value.replace(/^\s+/, "");
 		if (trimmedValue !== "" && trimmedValue.length <= maxCharLimit) {
-			send(trimmedValue);
+			send(onChannel, trimmedValue);
 			setValue("");
 		}
 		inputRef.current?.focus(); // Cursor tekrardan input'a focus olmasi gerek.
 	}
 
 	return (
-		<div>
+		<div id="input-page">
 			<input
 				ref={inputRef}
 				onChange={(e) => setValue(e.target.value)}

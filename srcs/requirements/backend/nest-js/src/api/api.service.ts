@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateApiDto } from './dto/create-api.dto';
-import { UpdateApiDto } from './dto/update-api.dto';
+// import { CreateApiDto } from './dto/create-api.dto';
+// import { UpdateApiDto } from './dto/update-api.dto';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -9,25 +9,25 @@ export class ApiService {
 		private readonly	usersService: UsersService
 		) {}
 
-	create(createApiDto: CreateApiDto) {
-		return 'This action adds a new api';
-	}
+	// create(createApiDto: CreateApiDto) {
+	// 	return 'This action adds a new api';
+	// }
 
-	findAll() {
-		return `This action returns all api`;
-	}
+	// findAll() {
+	// 	return `This action returns all api`;
+	// }
 
-	findOne(id: number) {
-		return `This action returns a #${id} api`;
-	}
+	// findOne(id: number) {
+	// 	return `This action returns a #${id} api`;
+	// }
 
-	update(id: number, updateApiDto: UpdateApiDto) {
-		return `This action updates a #${id} api`;
-	}
+	// update(id: number, updateApiDto: UpdateApiDto) {
+	// 	return `This action updates a #${id} api`;
+	// }
 
-	remove(id: number) {
-		return `This action removes a #${id} api`;
-	}
+	// remove(id: number) {
+	// 	return `This action removes a #${id} api`;
+	// }
 
 	/**
 	 * 2/3. adim.
