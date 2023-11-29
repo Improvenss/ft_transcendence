@@ -9,11 +9,6 @@ import { Entity,
 import { User } from '../../users/entities/user.entity';
 import { IsNotEmpty } from 'class-validator';
 
-// @Entity('asdf')
-// export class Asdf {
-
-// }
-
 @Entity('channel')
 export class Channel {
 	@PrimaryGeneratedColumn()

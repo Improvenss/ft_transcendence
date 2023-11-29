@@ -1,5 +1,3 @@
-import React from "react";
-
 function NoMatchPage(){
 	return (
 		<div id="404">
@@ -7,4 +5,5 @@ function NoMatchPage(){
 		</div>
 	)
 }
+
 export default NoMatchPage;

@@ -1,6 +1,4 @@
-/*---------------------------------------------------------------------------------------------------------*/
-
-.bn5 {
+#login-button {
 	padding: 0.6em 2em;
 	border: none;
 	outline: none;
@@ -14,21 +12,21 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-  }
-  
-  .bn5:before {
+}
+
+#login-button:before {
 	content: "";
 	background: linear-gradient(
-	  90deg,
-	  #020204,
-	  #204829,
-	  #22b455,
-	  #80ce87,
-	  #92e5a1,
-	  #80ce87,
-	  #22b455,
-	  #204829,
-	  #020204
+		90deg,
+		#020204,
+		#204829,
+		#22b455,
+		#80ce87,
+		#92e5a1,
+		#80ce87,
+		#22b455,
+		#204829,
+		#020204
 	);
 	position: absolute;
 	top: -2px;
@@ -42,33 +40,33 @@
 	opacity: 0;
 	transition: opacity 0.3s ease-in-out;
 	border-radius: 10px;
-  }
-  
-  @keyframes glowingbn5 {
+}
+
+@keyframes glowingbn5 {
 	0% {
-	  background-position: 0 0;
+		background-position: 0 0;
 	}
 	50% {
-	  background-position: 400% 0;
+		background-position: 400% 0;
 	}
 	100% {
-	  background-position: 0 0;
+		background-position: 0 0;
 	}
-  }
-  
-  .bn5:active {
+}
+
+#login-button:active {
 	color: #000;
-  }
-  
-  .bn5:active:after {
+}
+
+#login-button:active:after {
 	background: transparent;
-  }
-  
-  .bn5:hover:before {
+}
+
+#login-button:hover:before {
 	opacity: 1;
-  }
-  
-  .bn5:after {
+}
+
+#login-button:after {
 	z-index: -1;
 	content: "";
 	position: absolute;
@@ -78,30 +76,7 @@
 	left: 0;
 	top: 0;
 	border-radius: 10px;
-  }
-
-/*---------------------------------------------------------------------------------------------------------*/
-/*
-#login-page button {
-	font-size: 4vw;
-	position: absolute;
-	top: 66.67%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	border-width: 0.6vw;
-	text-shadow: 2px 2px red;
-	border-radius: 5px;
 }
-
-#login-page button:active {
-	text-shadow: 2px 2px blue;
-}
-
-#login-page button:hover {
-	font-size: 5vw;
-}
-*/
-/*---------------------------------------------------------------------------------------------------------*/
 
 #login-page button {
 	/*cursor: url('../../public/42icon.svg'), auto;*/

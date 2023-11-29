@@ -95,6 +95,17 @@
         }
       }
     },
+    "/users/user": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/{id}": {
       "get": {
         "operationId": "UsersController_findOneId",

@@ -1,18 +1,21 @@
-#bar {
+#app-header {
 	display: flex;
 	gap: 10px;
 	justify-content: flex-end;
 	/* background-color: red; */
 	font-size: 3vw;
 	padding-right: 5%;
+	user-select: none;
+
+	align-items: center;
 }
 
-#bar span{
+#app-header span{
 	cursor: pointer;
 }
 
-/* #bar *:hover { */
-#bar *:not(.site-name):hover {
+/* #app-header *:hover { */
+#app-header *:not(#site-name):hover {
 	transform: rotateY(20deg) rotateX(10deg);
 	transition: transform 0.5s;
 	color: red;
@@ -21,14 +24,21 @@
 		-2px -2px green;
 }
 
-.site-name {
+#app-header img {
+	height: 80px;
+	width: 80px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+#site-name {
 	position: fixed;
 	left: 20px;
 	/* pointer-events: none; */
 	letter-spacing: 0.2em;
 }
 
-.github-icon  {
+#icon-github {
 	position: fixed;
 	right: 20px;
 	bottom: 20px;

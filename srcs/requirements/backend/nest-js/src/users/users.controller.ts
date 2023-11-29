@@ -37,6 +37,20 @@ export class UsersController {
 		return ({message: "Socket not updated."});
 	}
 
+	@Post('user')
+	async createUser(@Body() status: {cookie: string}) {
+		const jwt = require('jsonwebtoken');
+		
+		try {
+			const decoded = jwt.verify(status.cookie, 'your_secret_key');
+			const user = await this.usersService.findOne(null, decoded.login as string);
+			return ({message: "USER OK", user: user});
+		} catch(err){
+			console.error("Cookie err:", err);
+		}
+		return ({message: "USER NOK"});
+	}
+
 	/**
 	 * DB'den butun 'User' verilerini donduruyoruz.
 	 * @returns All Users.

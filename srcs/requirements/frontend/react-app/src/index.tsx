@@ -1,10 +1,11 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './login/AuthHook';
-import { SocketProvider } from './main/SocketHook';
+import { AuthProvider } from './hooks/AuthHook';
+import { SocketProvider } from './hooks/SocketHook';
+import { UserProvider } from './hooks/UserHook';
+import { FontLoadedProvider } from './hooks/LoadHook';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -29,15 +30,19 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 root.render(
-	<AuthProvider>
-		<SocketProvider>
-			{/* <React.StrictMode> */}
-				<BrowserRouter>
-					<App />
-				</BrowserRouter>
-			{/* </React.StrictMode> */}
-		</SocketProvider>
-	</AuthProvider>
+	<FontLoadedProvider>
+		<AuthProvider>
+			<SocketProvider>
+				<UserProvider>
+					{/*<React.StrictMode>*/}
+						<BrowserRouter>
+							<App />
+						</BrowserRouter>
+					{/*</React.StrictMode>*/}
+				</UserProvider>
+			</SocketProvider>
+		</AuthProvider>
+	</FontLoadedProvider>
 );
 
 /**
