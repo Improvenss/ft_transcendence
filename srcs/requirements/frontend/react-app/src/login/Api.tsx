@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
-import { useAuth } from './AuthHook';
+import { useAuth } from "../hooks/AuthHook";
+import LoadingPage from "../utils/LoadingPage";
 
-function Api()
-{
+function Api(){
 	console.log("---------API-PAGE---------");
 	const	{isAuth, setAuth} = useAuth();
+	const	[isLoading, setLoading] = useState<boolean>(true);
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	uriCode = urlParams.get('code');
 	const	navigate = useNavigate();
@@ -32,10 +33,9 @@ function Api()
 					console.log("III: ---API Token Backend Response '✅'---");
 					localStorage.setItem("user", data.cookie);
 					Cookies.set("user", data.cookie);
-					setAuth(true);
 					localStorage.setItem("userLoginPage", "true");
+					setAuth(true);
 					navigate('/', {replace: true});
-					//navigate("/", {replace: true, state: true});
 				}
 				else{
 					console.log("III: ---API Token Backend Response '❌'---");
@@ -43,16 +43,10 @@ function Api()
 			}
 			else
 				console.log("III: ---API Token Connection '❌'---");
+			setLoading(false);
 		}
-		// { !isAuth && sendCode() }
-		if (!isAuth)
-			sendCode();
-	}, [isAuth, setAuth, uriCode, navigate]);
-	// }, []);
-	
-	if (isAuth){
-		return (<Navigate to='/' replace />);
-	}
+		{ !window.opener && !isAuth && sendCode() }
+	}, []);
 
 	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor
 		window.opener.postMessage({ message: 'popupRedirect', additionalData: uriCode }, process.env.REACT_APP_IP);
@@ -60,11 +54,14 @@ function Api()
 		return (<></>);
 	}
 
+	if (isAuth){
+		return (<Navigate to='/' replace />);
+	}
+
 	return (
 		<>
-			{ !isAuth && <Navigate to='/login' replace/> }
-			{/*{ isAuth ? <Navigate to='/' replace /> : <></>}*/}
-			{/*{ isAuth ? <Navigate to='/' replace state={{ userStatus: true }}/> : <></>}*/}
+			{ isLoading ? <LoadingPage /> : <Navigate to='/login' replace/>}
+			{/* { !isAuth && <Navigate to='/login' replace/>} */}
 		</>
 		);
 };

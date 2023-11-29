@@ -4,6 +4,7 @@ import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, Message } from './entities/chat.entity';
 import { EntityManager, Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ChatService {
@@ -17,7 +18,6 @@ export class ChatService {
 
 	async createChannel(createChannelDto: CreateChannelDto) {
 		const	newChannel = new Channel(createChannelDto);
-		// const newChannel = new Channel({ ...createChannelDto, adminId: createChannelDto.adminId as number[] });
 		await this.entityManager.save(newChannel);
 		return (`New Channel created: #${newChannel.name}:[${newChannel.id}]`);
 	}
@@ -28,32 +28,40 @@ export class ChatService {
 		return (`New Message created: id:[${newMessage.id}]`);
 	}
 
-	// async findAllChannel() {
-	// 	return (await this.channelRepository.find());
-	// }
-
 	async findAllMessage() {
 		return (await this.messageRepository.find());
 	}
 
 	async findChannel(
 		channel: number | string | null = null,
-		relations: any | null = null)
+		relations: string[] | 'all' | null = null)
 	{
-		// if (!channel)
-		// 	throw (new Error(`chat: service: findOneChannel(): Must be enter ID or login!`));
+		console.log("icindeyim aslinm:", typeof(relations));
 		try {
+			let relationObject = {};
+			if (relations === 'all') { // Iliskili tablolardan hangilerini de bu Channel datasina eklemek istiyorsun?
+				relationObject = {users: true, admins: true, messages: true}; // Add all relations here
+			} else if (Array.isArray(relations)) {
+				console.log("icindeyim aslinm:", "ohhhhhhhhhhhhhhh");
+				relations.forEach(relation => {
+					console.log("icindeyim aslinm:", relation);
+					relationObject[relation] = true;
+				});
+			}
+
 			if (channel === null)
-				return (await this.channelRepository.find());
+				return (await this.channelRepository.find({relations: relationObject}));
 			else if (typeof(channel) === 'number')
 				return (await this.channelRepository.findOne({
 					where: {id: channel}, // Burada 'id:' key'inin value'sini parametre olarak aldigimiz channel'in degerini atiyoruz.
-					relations: relations,
+					// relations: {users: true},
+					relations: relationObject,
 				}));
 			else if (typeof(channel) === 'string')
 				return await this.channelRepository.findOne({
 					where: {name: channel}, // Burada 'name:' key'inin value'sini parametre olarak aldigimiz channel'in degerini atiyoruz.
-					relations: relations,
+					// relations: {users: true},
+					relations: relationObject,
 				});
 			else
 				return null;

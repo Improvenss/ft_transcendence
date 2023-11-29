@@ -1,50 +1,52 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 
-@Entity()
+@Entity({name: 'user'})
 export class User {
-	constructor(user: Partial<User>) {
-		Object.assign(this, user);
-	}
-
 	@PrimaryGeneratedColumn()
-	public id: number
+	public id: number;
 
 	@Column()
-	public login: string
+	public login: string;
 
-	@Column({nullable: true}) public socket_id?: string
-
-	@Column()
-	public first_name: string
+	@Column({nullable: true})
+	public socket_id?: string;
 
 	@Column()
-	public last_name: string
+	public first_name: string;
+
+	@Column()
+	public last_name: string;
 
 	@Column({type: "text", nullable: true})
-	public email: string
+	public email: string;
 
 	@Column({type: "text", nullable: true})
-	public image: {
-		link: string,
-		versions: {
-			large: string;
-			medium: string;
-			micro: string;
-			small: string;
-		}
-	}
+	public image: string;
+	// public image: {
+		// link: string,
+		// versions: {
+		// 	large: string;
+		// 	medium: string;
+		// 	micro: string;
+		// 	small: string;
+		// }
+	// }
 
-	// @ManyToMany(() => Channel, channel => channel.users)
-	// @JoinTable()
-	// public channels: Channel[];
+	@ManyToMany(() => Channel, channel => channel.users, {cascade: true})
+	@JoinTable()
+	public channels: Channel[];
 
-	// @ManyToMany(() => Channel, channel => channel.admins)
-	// @JoinTable()
-	// public adminChannels: Channel[];
+	@ManyToMany(() => Channel, channel => channel.admins)
+	@JoinTable()
+	public adminChannels: Channel[];
 
 	@OneToMany(() => Message, message => message.user)
 	public messages: Message[];
+
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
 }
 
 /**

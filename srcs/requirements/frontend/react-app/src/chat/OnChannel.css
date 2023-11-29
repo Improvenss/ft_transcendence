@@ -1,0 +1,141 @@
+#onChannel {
+	display: flex;
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	flex: 4;
+	overflow: hidden;
+	flex-direction: column;
+}
+
+/* --------------- */
+
+#channel-header {
+	display: flex;
+	align-items: center;
+	padding: 7px;
+	border-bottom: 1px solid #ccc;
+	/*position: relative;*/
+	user-select: none;
+}
+
+#channel-header img {
+	width: 30px;
+	height: 30px;
+	transform: scale(1.2);
+	margin-right: 10px;
+	border-radius: 20%;
+}
+
+#channel-header h2 {
+	margin: 0;
+}
+
+#channel-header {
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
+}
+
+#channel-header svg {
+	width: 20px;
+	height: 20px;
+}
+
+/* ------------ */
+
+#additional-menu-trigger {
+	display: flex;
+	justify-content: center; /* Yatay ortala */
+	align-items: center; /* Dikey ortala */
+	/*place-items: center; /* Hem yatay hem de dikey ortala */
+	margin-left: auto;
+	cursor: pointer;
+}
+
+#additional-menu-trigger:hover {
+	transform: scale(1.1); /* veya istediğiniz bir ölçüde büyütme */
+}
+
+/* --------- */
+
+#message-container {
+	flex: 1;
+	overflow: auto;
+	padding: 10px;
+	border-bottom: 1px solid #ccc;
+	/*position: relative;*/
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
+}
+
+/* -------------- */
+
+.message {
+	border: 1px solid #ccc;
+	display: flex;
+	overflow: hidden;
+	border-radius: 10px;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.message img {
+	height: 50px;
+	width: 50px;
+	margin-right: 10px;
+	margin-left: 10px;
+	border-radius: 30%;
+	transform: scale(0.9);
+}
+
+/* ----------- */
+
+#message-input {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 5px;
+	/*position: relative;*/
+	user-select: none;
+	border-bottom: 1px solid #ccc;
+}
+
+#message-input input {
+	flex: 1;
+	padding: 5px;
+	border-radius: 8px;
+	border: 1px solid;
+}
+
+#message-input input:focus {
+	font-size: 20px;
+}
+
+#message-input button {
+	padding: 5px 10px;
+	background-color: darkred;
+	color: white;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+#message-input button:hover {
+	background-color: #45a049;
+}
+
+#message-input {
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
+}
+
+/* ------ */
+
+#char-count {
+	padding-right: 5px;
+	padding-left: 5px;
+}

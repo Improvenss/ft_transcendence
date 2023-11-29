@@ -1,4 +1,4 @@
-#user-status {
+#user-customize {
 	display: flex;
 	flex-direction: column;
 	height: 30vh;
@@ -26,13 +26,13 @@
 	color: black;
 }
 
-.close-button {
+#close {
 	cursor: pointer;
 	position: absolute;
 	top: 10px;
 	right: 10px;
 }
 
-.close-button:hover{
+#close:hover{
 	color: red;
 }

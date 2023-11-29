@@ -1,0 +1,147 @@
+#channel {
+	border: 1px solid #ccc;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+	border-radius: 10px;
+	user-select: none;
+}
+
+#channel button {
+	background-color: darkred;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+#channel button:hover{
+	background-color: #45a049;
+}
+
+/* ---------- */
+
+#container {
+	display: flex;
+	position: relative;
+}
+
+#container .channel.active {
+	background-color: #7a0e0e;
+}
+
+.channel {
+	border-radius: 10px;
+	font-size: 10px;
+	flex: 1;
+	cursor: pointer;
+	padding: 10px;
+	border: 1px solid #ccc;
+	text-align: center;
+  }
+
+.channel svg {
+	width: 20px;
+	height: 20px;
+  }
+
+/* ------ */
+
+.tab {
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
+}
+
+.tab:hover {
+	background-color: #45a049;
+}
+
+/* ----------- */
+
+#container-content {
+	flex: 1;
+	padding: 10px;
+	border: 1px solid #ccc;
+	position: relative;
+	overflow-y: auto; /* Add this line to enable vertical scrolling */
+	max-height: calc(100% - 20px); /* Set a maximum height for the container */
+}
+
+#container-content {
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
+}
+
+/* ---------- */
+
+.content-header {
+	font-size: 8px;
+	text-align: center;
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 5px;
+}
+
+/* ------------- */
+
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+#channel-type{
+	background-color: black;
+}
+
+#image-file {
+	padding: 5px;
+	border-radius: 5px;
+	background-color: black;
+	color: #ccc;
+}
+
+#set-channel-image {
+	display: block;
+	margin: auto;
+	max-width: 100px;
+	max-height: 100px;
+}
+
+/* ----------- */
+
+#channel-search {
+   margin-bottom: 10px; /* İstenilen boşluk değeri */
+   padding: 6px; /* İstenilen iç boşluk değeri */
+   border: 1px solid #ccc; /* Sınır rengi */
+   border-radius: 4px; /* Köşe yuvarlatma */
+   width: 100%; /* Tam genişlik */
+   box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
+}
+
+#public-channel, #involved-channel {
+	border: 1px solid #ccc;
+	display: flex;
+	flex: 1;
+	overflow: hidden;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	padding: 10px;
+	align-items: center;
+}
+
+#public-channel:hover,
+#involved-channel:hover {
+	background-color: darkred;
+}
+
+#public-channel img,
+#involved-channel img {
+   height: 30px;
+   width: 30px;
+   border-radius: 50%;
+   margin-right: 5px;
+}

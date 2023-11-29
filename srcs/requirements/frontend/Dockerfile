@@ -61,8 +61,7 @@ EXPOSE 443
 # ENTRYPOINT ["/bin/sh", "-c", "chmod 777 /usr/local/share/ca-certificates/ft_transcendence.crt"]
 # ENTRYPOINT ["/bin/sh", "-c", "update-ca-certificates"]
 
-ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive\
-&& npm start"]
+ENTRYPOINT ["/bin/sh", "-c", "npm install --non-interactive && npm start"]
 
 
 # We are installing React package for global.

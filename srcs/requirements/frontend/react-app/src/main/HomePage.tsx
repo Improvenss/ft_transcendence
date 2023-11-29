@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigationType } from "react-router-dom";
 import './HomePage.css';
-import { useAuth } from '../login/AuthHook';
+import { useAuth } from "../hooks/AuthHook";
 import UserInput from "./UserInput";
 
 function HomePage(){
@@ -11,7 +11,6 @@ function HomePage(){
 	const navigationType = useNavigationType();
 	const status = localStorage.getItem('userLoginPage');
 
-
 	useEffect(() => {
 		window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
 		return () => {
@@ -20,14 +19,13 @@ function HomePage(){
 	}, []);
 
 	useEffect(() => {
-			if (navigationType === 'PUSH') // Bir sayfadan diğerine "push" ile geçildi.
-				localStorage.removeItem('userLoginPage');
-			if (navigationType === 'REPLACE') // Bir sayfanın üzerine "replace" ile yazıldı.
-				localStorage.removeItem('userLoginPage');
-			if (navigationType === 'POP') // Geri düğmesine tıklandı.
-				localStorage.removeItem('userLoginPage');
+		if (navigationType === 'PUSH') // Bir sayfadan diğerine "push" ile geçildi.
+			localStorage.removeItem('userLoginPage');
+		if (navigationType === 'REPLACE') // Bir sayfanın üzerine "replace" ile yazıldı.
+			localStorage.removeItem('userLoginPage');
+		if (navigationType === 'POP') // Geri düğmesine tıklandı.
+			localStorage.removeItem('userLoginPage');
 	}, [navigationType]);
-
 
 	if (!isAuth)
 	{
@@ -43,4 +41,5 @@ function HomePage(){
 		</div>
 	)
 }
+
 export default HomePage;

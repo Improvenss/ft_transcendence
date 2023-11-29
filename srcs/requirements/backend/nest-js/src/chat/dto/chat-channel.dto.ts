@@ -11,14 +11,14 @@ export class CreateChannelDto {
 	@IsOptional()
 	isActive: boolean;
 
-	// @IsArray()
-	// @IsOptional()
-	// users: User[];
+	@IsArray()
+	@IsOptional()
+	users: User[];
 
-	// @IsArray()
-	// @IsOptional()
-	// @IsNotEmpty() // veya @IsDefined()
-	// admins: User[];
+	@IsArray()
+	@IsOptional()
+	@IsNotEmpty() // veya @IsDefined()
+	admins: User[];
 
 	@IsEnum(['public', 'private', 'protected'])
 	type: string;

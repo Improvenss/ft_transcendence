@@ -1,47 +1,39 @@
 #chat-page {
-	font-size: 20px;
+	font-size: 1vw;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	height: 66vh;
-	width: 66vw;
+	width: 77vw;
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	border: 1px solid #ccc;
+	/* border: 1px solid #ccc; */
 	border-radius: 10px;
 	overflow: hidden;
 	align-items: stretch;
+	gap: 5px;
 }
 
-#chat-page > #channel-page {
-	border-right: 1px solid white;
-	overflow: auto;
-	flex-grow: 1;
-	padding: 1em;
-	word-wrap: break-word;
-	white-space: pre-wrap;
-	width: 200px;
+@media (max-width: 600px) {
+	#chat-page {
+		width: 90vw; /* Ekran genişliği 600px'den küçükse genişliği azalt */
+	}
 }
 
-#chat-page > #message-page > p {
-	background-color: rgb(31, 31, 31);
-	margin: 10px 0;
-	padding: 10px;
-	border-radius: 10px;
+*::-webkit-scrollbar {
+	width: 8px;
+  }
+  
+*::-webkit-scrollbar-thumb {
+	background-color:  #7a0e0e;
+	border-radius: 4px;
 }
 
-#chat-page > #input-page {
-	padding: 1em;
-	border-top: 1px solid #ccc;
+*::-webkit-scrollbar-button {
+	height: 5px;
 }
 
-#chat-page input {
-	width: calc(100% - 80px);
-	margin-right: 23px;
-	font-size: 20px;
-}
-
-#chat-page button {
-	font-size: 20px;
+*::-webkit-scrollbar-thumb:hover {
+	background-color: #45a049;
 }

@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import Countdown from "./Countdown";
+import Countdown from "../utils/Countdown";
 import './LoginPage.css';
-import { useAuth } from './AuthHook';
-import LoadingPage from "./LoadingPage";
-import MatrixRain from './MatrixRain';
+import { useAuth } from "../hooks/AuthHook";
+import MatrixRain from '../utils/MatrixRain';
 
 interface ILoginProps{
 	setClicked: (value: boolean) => void,
 	navigate: (to: string, options?: { replace: boolean }) => void,
-	//navigate: (to: string, options?: { replace: boolean; state: { userStatus: boolean }; }) => void,
 }
 
 async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
@@ -27,13 +25,11 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 	{
 		console.log("II: ---API Login Connection '✅'---");
 		const	data = await response.json();
-		// window.location.href = data.requestLogin;
 		const	messageHandler = function(event: MessageEvent<any>) {
 			if (event.origin === process.env.REACT_APP_IP) {
 				const data = event.data;
 				if (data.message === 'popupRedirect'){
 					navigate('/api?code=' + data.additionalData, { replace: true });
-					//navigate('/api?code=' + data.additionalData, { replace: true, state: { userStatus: true } });
 					window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
 				}
 			}
@@ -50,18 +46,10 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 }
 
 function LoginPage(){
-	//console.log("---------LOGIN-PAGE---------");
+	console.log("---------LOGIN-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const [clicked, setClicked] = useState(false);
 	const navigate = useNavigate();
-	const [fontsLoaded, setFontsLoaded] = useState(false);
-
-	useEffect(() => {
-		Promise.all([
-		  document.fonts.load('900 10pt "Big Shoulders Stencil Text"'),
-		  document.fonts.load('600 10pt "Big Shoulders Stencil Display"')
-		]).then(() => setFontsLoaded(true));
-	}, []);
 
 	useEffect(() => {
 		if (clicked === true)
@@ -75,13 +63,10 @@ function LoginPage(){
 		);
 	}
 
-	if (!fontsLoaded)
-	  return (<LoadingPage />);
-	  
 	return (
 		<div id="login-page">
 			<MatrixRain />
-			<button className='bn5' onClick={() => setClicked(true)}  disabled={clicked} >
+			<button id='login-button' onClick={() => setClicked(true)}  disabled={clicked} >
 				<Countdown />
 			</button>
 		</div>

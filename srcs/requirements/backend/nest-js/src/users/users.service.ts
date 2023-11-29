@@ -29,7 +29,7 @@ export class UsersService {
 	 * DB'deki butun Users kayitlarini aliyor.
 	 */
 	async	findAll() {
-		return (await this.usersRepository.find());
+		return (await this.usersRepository.find({relations: {channels: true}}));
 	}
 
 	/**

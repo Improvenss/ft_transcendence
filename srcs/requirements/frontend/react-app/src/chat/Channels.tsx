@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSocket } from '../main/SocketHook';
+import { useSocket } from '../hooks/SocketHook';
 import { Socket } from 'socket.io-client';
 
 /**
@@ -54,20 +54,20 @@ function Channels() {
 		const	lastChannel = localStorage.getItem("onChannel");
 		// if (lastChannel !== "global") {
 			console.log(`Sayfa yenilendi ve '${lastChannel}' channel'inden otomatik olarak 'global' channeline katilindi.`);
-			joinChannel("global", socket);
+			// joinChannel("global", socket);
 		// }
 	}, [socket])
 
 	return (
 		<div id='channel-page'>
-			<ul>
+			{/* <ul>
 				{channelList.map(channel => (
 					<li key={channel}
 					onClick={
 						() => joinChannel(channel, socket)
 					}>{channel}<button onClick={(e) => { e.stopPropagation(); leaveChannel(channel, socket); }}>Leave</button> </li>
 				))}
-			</ul>
+			</ul> */}
 		</div>
 	);
 };

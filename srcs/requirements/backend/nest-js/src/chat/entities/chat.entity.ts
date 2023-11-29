@@ -25,12 +25,12 @@ export class Channel {
 	@JoinColumn()
 	public messages: Message[];
 
-	// @ManyToMany(() => User, user => user.channels, {nullable: true})
-	// @JoinTable()
-	// public users: User[];
+	@ManyToMany(() => User, user => user.channels, {nullable: true, onDelete: 'CASCADE'})
+	@JoinTable()
+	public users: User[];
 
-	// @ManyToMany(() => User, user => user.adminChannels)
-	// public admins: User[];
+	@ManyToMany(() => User, user => user.adminChannels, {onDelete: 'CASCADE'})
+	public admins: User[];
 
 	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
 	public type: string;
@@ -48,10 +48,10 @@ export class Message {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column()
+	@Column({type: 'varchar', length: 1024})
 	public message: string;
 
-	@Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public sentAt: Date;
 
 	@ManyToOne(() => User, user => user.messages)
