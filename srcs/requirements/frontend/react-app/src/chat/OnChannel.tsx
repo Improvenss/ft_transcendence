@@ -3,9 +3,8 @@ import { IOnChannelProps  } from './iChannel';
 import { ReactComponent as IconMenu } from '../assets/chat/iconMenu.svg';
 import { useState } from 'react';
 
-function OnChannel({ selectedChannel }: IOnChannelProps){
+function OnChannel({ selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps){
 	const MAX_CHARACTERS = 100; // İstenilen maksimum karakter sayısı
-	const [isInfoChannelActive, setIsInfoChannelActive] = useState(false);
 	const userList = [
 		{id: 'akaraca', name: 'akaraca', image:'/userImg.png'},
 		{id: 'damnn', name: 'damnn', image:'/userImg2.png'},

@@ -48,14 +48,16 @@ function ChatPage () {
 		return (globalChannel);
 	});
 
+	const [isInfoChannelActive, setIsInfoChannelActive] = useState(false);
+
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
 
 	return (
 		<div id="chat-page">
 			<Channel setSelectedChannel={setSelectedChannel} channels={channels} />
-			<OnChannel selectedChannel={selectedChannel} />
-			<InfoChannel selectedChannel={selectedChannel} />
+			<OnChannel selectedChannel={selectedChannel} isInfoChannelActive={isInfoChannelActive} setIsInfoChannelActive={setIsInfoChannelActive}/>
+			<InfoChannel selectedChannel={selectedChannel} isInfoChannelActive={isInfoChannelActive} setIsInfoChannelActive={setIsInfoChannelActive}/>
 			{/* <Channels /> */}
 			{/* <Message /> */}
 			{/* <MessageInput /> */}

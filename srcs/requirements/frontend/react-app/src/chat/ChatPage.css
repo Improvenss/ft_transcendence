@@ -20,3 +20,20 @@
 		width: 90vw; /* Ekran genişliği 600px'den küçükse genişliği azalt */
 	}
 }
+
+*::-webkit-scrollbar {
+	width: 8px;
+  }
+  
+*::-webkit-scrollbar-thumb {
+	background-color:  #7a0e0e;
+	border-radius: 4px;
+}
+
+*::-webkit-scrollbar-button {
+	height: 5px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background-color: #45a049;
+}

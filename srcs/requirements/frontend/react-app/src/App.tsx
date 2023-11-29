@@ -19,12 +19,12 @@ function App() {
 	const navigate = useNavigate();
 
 	function logOut() {
-	localStorage.clear();
-	Cookies.remove('user');
+		localStorage.clear();
+		Cookies.remove('user');
 		setAuth(false);
 		// localStorage.removeItem('user');
 		//return <Navigate to='/login' replace />; //geri butonuna basınca mal olmasın diye ekleniyor
-	navigate('/login', {replace: true}); //return kullanarak çevirince set'lemeler bitmeden HOME-PAGE'ye giriyor.
+		navigate('/login', {replace: true}); //return kullanarak çevirince set'lemeler bitmeden HOME-PAGE'ye giriyor.
 	}
 
 	return (

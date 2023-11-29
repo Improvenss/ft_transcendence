@@ -26,8 +26,10 @@ export interface IChannelProps{
 	channels: IChannel[];
 }
 
-export interface IOnChannelProps {
+export interface IOnChannelProps {
 	selectedChannel: IChannel | null;
+	isInfoChannelActive: boolean;
+	setIsInfoChannelActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface IFriend {

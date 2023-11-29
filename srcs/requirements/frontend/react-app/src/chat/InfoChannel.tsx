@@ -3,9 +3,9 @@ import { IFriend, IOnChannelProps } from "./iChannel";
 import { ReactComponent as IconUsers } from '../assets/chat/iconUsers.svg';
 import { ReactComponent as IconSettings } from '../assets/chat/iconSettings.svg';
 import { ReactComponent as IconAddUser } from '../assets/chat/iconAddUser.svg';
+import './InfoChannel.css';
 
-function InfoChannel({ selectedChannel }: IOnChannelProps) {
-	const [isInfoChannelActive, setIsInfoChannelActive] = useState(false);
+function InfoChannel({ selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps) {
 	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
 	const [userSearchTerm, setUserSearchTerm] = useState('');
 	const inputRefUpdateChannelName = useRef<HTMLInputElement>(null);
@@ -30,7 +30,6 @@ function InfoChannel({ selectedChannel }: IOnChannelProps) {
 		// For now, let's just log a message to the console
 		console.log(`Switched to channel ${tabId}`);
 	};
-
 
 	const handleUpdateChannelName = () => {
 		if (inputRefUpdateChannelName.current) {
