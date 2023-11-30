@@ -12,10 +12,10 @@ import { ChatService } from './chat/chat.service';
 
 @Module({
 	imports: [
-		ConfigModule.forRoot({
-			envFilePath: '.env',
-			expandVariables: true,
-		}),
+		// ConfigModule.forRoot({
+		// 	envFilePath: '.env',
+		// 	expandVariables: true,
+		// }),
 		TypeOrmModule.forRoot({
 			type: 'postgres',
 			port: parseInt(process.env.B_POSTGRES_PORT),

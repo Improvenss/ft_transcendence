@@ -9,6 +9,7 @@
 	left: 50%;
 	text-shadow: 2px 2px 1px #9aff84;
 	/*padding-top: 25%;*/
+	user-select: none;
 }
 /* font-size: 8vw; Canli bir sekilde genisligi degistirirken font'un boyutunu guncelliyor. */
 
