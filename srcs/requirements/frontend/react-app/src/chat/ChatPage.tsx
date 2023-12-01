@@ -3,18 +3,32 @@
  */
 import { Navigate } from "react-router-dom";
 import './ChatPage.css';
-import Channels from "./Channels";
-import Message from "./Message";
-import MessageInput from "./MessageInput";
 import { useAuth } from "../hooks/AuthHook";
-import Users from "./Users";
 import Channel from "./Channel";
 import OnChannel from "./OnChannel";
 import { useState } from "react";
 import { IChannel } from './iChannel';
 import InfoChannel from "./InfoChannel";
-// import { useEffect } from "react";
-// import { useSocket } from "../main/SocketHook";
+import Cookies from "js-cookie";
+
+// Buradan alinan veri ya full buradaki gibi olacak. ya da buradaki gibi veriye donusturulecek.
+// Ama DB'yi full buradan gonderilen verilere gore tekrar yap...
+async function getChannels(): Promise<any> {
+	const userCookie = Cookies.get("user");
+	const	responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/@all/all", {
+		method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+		headers: {
+			'Content-Type': 'application/json', // İstediğiniz içerik türüne göre uygun başlık ekleyin
+			// Diğer isteğe bağlı başlıkları eklemek istiyorsanız burada ekleyebilirsiniz
+		},
+		// Eğer bir request body kullanmanız gerekiyorsa, aşağıdaki kısmı açabilir ve gerekli bilgileri ekleyebilirsiniz
+		body: JSON.stringify({userCookie}),
+	});
+	const	data = await responseAllChannels.json();
+	console.log("ALDIGIMIZ channel json data:", data);
+	// return (data);
+	return (data);
+}
 
 function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
@@ -22,6 +36,7 @@ function ChatPage () {
 	
 	const [channels, setChannels] = useState<IChannel[]>(() => {
 		// Kanal listesini burada güncelleyin (örneğin, bir API'den kanal verilerini alabilirsiniz)
+		const	dataChannels = getChannels();
 		const fetchedChannels: IChannel[] = [
 			{ status: 'involved', name: 'Global Channel', type: 'involved', image: '/global.png',
 				users: [{name: 'akaraca', image: '/userImg.png'}, {name: 'damnn', image: '/userImg2.png'}],

@@ -1,16 +1,65 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChannelDto, UpdateChannelDto} from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('/chat')
 export class ChatController {
-	constructor(private readonly chatService: ChatService) {}
+	constructor(
+		private readonly chatService: ChatService,
+		private readonly usersService: UsersService) {}
 
 	// ---------- Create ---------
 	@Post(':channel')
 	async createChannel(@Body() createChannelDto: CreateChannelDto) {
 		return await this.chatService.createChannel(createChannelDto);
+	}
+
+	// @Post('@:channel') -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+	@Post('@:channel/:relation')
+	// @Post('@:channel')
+	async findChannelFirst(
+		@Param('channel') channel: string,
+		@Param('relation') relation: string[],
+		@Body() relationData: {userCookie: string, socketID: string}, // -> Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
+		@Query('relations') relations: string[], // -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+	) {
+		console.log(`Post: Channel: ${channel}, Relation: ${relation}, Relations: ${relations}, RelationData: ${relationData}`);
+
+		// Cookie kontrol alani
+		console.log("POST ile gleen cooki verisi:", relationData);
+		if (!relationData)
+			return (new Error("@Post('@:channel/:relation'): findChannelFirst(): @Body(): Cokie not found!"));
+		const jwt = require('jsonwebtoken');
+		const decoded = jwt.verify(relationData.userCookie, 'your_secret_key');
+		const tmpUser = await this.usersService.findOne(null, decoded.login as string);
+		if (!tmpUser)
+			throw (new HttpException("@Post(':channel/:relation'): (Cookie): @findOne(): login: User does not exist!",
+				HttpStatus.INTERNAL_SERVER_ERROR));
+		// -----------------------
+
+		if (channel === 'all')
+		{
+			console.log("Butun Channel'ler alindi.")
+			const allChannels = await this.chatService.findChannel(null, relation);
+			return (allChannels)
+		}
+		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
+		if (isId === true)
+		{
+			const tmpUser = await this.chatService.findChannel(+channel, relation);
+			if (!tmpUser)
+				throw (new NotFoundException("@Post('@:channel'): findChannel(): id: Channel does not exist!"));
+			return (tmpUser);
+		}
+		else
+		{
+			const tmpUser = await this.chatService.findChannel(channel, relation);
+			if (!tmpUser)
+				throw (new NotFoundException("@Post('@:channel'): findChannel(): name: Channel does not exist!"));
+			return (tmpUser);
+		}
 	}
 
 	@Post(':message')
@@ -33,7 +82,8 @@ export class ChatController {
 		if (channel === 'all')
 		{
 			console.log("Butun Channel'ler alindi.")
-			return this.chatService.findChannel(null, relation);
+			const allChannels = await this.chatService.findChannel(null, relation);
+			return (allChannels)
 		}
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
 		if (isId === true)

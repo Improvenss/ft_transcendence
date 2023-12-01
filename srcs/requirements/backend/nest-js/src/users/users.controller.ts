@@ -28,7 +28,7 @@ export class UsersController {
 			const decoded = jwt.verify(status.cookie, 'your_secret_key');
 			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login as string, status.socketID);
 			if (!tmpUser)
-				throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
+				throw (new HttpException("@Patch(':login'): update(): login: User does not exist!",
 					HttpStatus.INTERNAL_SERVER_ERROR));
 			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socket_id}]`});
 		} catch(err) {

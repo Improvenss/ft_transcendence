@@ -7,9 +7,16 @@ export class CreateChannelDto {
 	@IsNotEmpty()
 	name: string;
 
-	@IsBoolean()
+	@IsEnum(['public', 'private', 'protected'])
+	type: string;
+
+	@IsString()
 	@IsOptional()
-	isActive: boolean;
+	password: string | "none";
+
+	@IsString()
+	@IsOptional()
+	image: string;
 
 	@IsArray()
 	@IsOptional()
@@ -19,13 +26,6 @@ export class CreateChannelDto {
 	@IsOptional()
 	@IsNotEmpty() // veya @IsDefined()
 	admins: User[];
-
-	@IsEnum(['public', 'private', 'protected'])
-	type: string;
-
-	@IsString()
-	@IsOptional()
-	password: string | "none";
 }
 
 export class UpdateChannelDto extends PartialType(CreateChannelDto) {}

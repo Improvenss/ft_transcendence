@@ -14,12 +14,18 @@ export class Channel {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column({ length: 50, unique: true , nullable: false})
+	@Column({ length: 10, unique: true , nullable: false})
 	@IsNotEmpty()
 	public name: string;
 
-	@Column({ default: true })
-	public isActive: boolean;
+	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
+	public type: string;
+
+	@Column({ nullable: true })
+	public password: string;
+
+	@Column({ nullable: true })
+	public image: string;
 
 	@OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
 	@JoinColumn()
@@ -31,12 +37,6 @@ export class Channel {
 
 	@ManyToMany(() => User, user => user.adminChannels, {onDelete: 'CASCADE'})
 	public admins: User[];
-
-	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
-	public type: string;
-
-	@Column({ nullable: true })
-	public password: string;
 
 	constructor(channel: Partial<Channel>) {
 		Object.assign(this, channel);

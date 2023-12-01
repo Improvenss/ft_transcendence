@@ -241,28 +241,47 @@
         }
       }
     },
-    "/chat/{message}": {
+    "/chat/@{channel}/{relation}": {
       "post": {
-        "operationId": "ChatController_createMessage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
+        "operationId": "ChatController_findChannelFirst",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "relation",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "relations",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
               }
             }
           }
-        },
+        ],
         "responses": {
           "201": {
             "description": ""
           }
         }
-      }
-    },
-    "/chat/@{channel}/{relation}": {
+      },
       "get": {
         "operationId": "ChatController_findChannel",
         "parameters": [
@@ -299,6 +318,27 @@
         ],
         "responses": {
           "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/{message}": {
+      "post": {
+        "operationId": "ChatController_createMessage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
             "description": ""
           }
         }

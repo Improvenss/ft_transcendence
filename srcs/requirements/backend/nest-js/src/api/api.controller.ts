@@ -1,20 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ApiService } from './api.service';
-// import { CreateApiDto } from './dto/create-api.dto';
-// import { UpdateApiDto } from './dto/update-api.dto';
 import * as fs from 'fs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-// import { channel } from 'diagnostics_channel';
 
 
 @Controller('api')
 export class ApiController {
 	constructor(private readonly apiService: ApiService) {}
-
-	// @Post()
-	// create(@Body() createApiDto: CreateApiDto) {
-	// 	return this.apiService.create(createApiDto);
-	// }
 
 	/**
 	 * React'tan ilk butona tikandigi anda buraya geliyor.
@@ -34,10 +26,8 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 
 	/**
 	 * 2/3 & 3/3 adimlar burada gerceklesiyor.
-	 * 
 	 * Buradaki islemler bittigi anda 42 API'den user'in butun
 	 *  bilgileri alinmis olacak.
-	 * 
 	 * @param status 
 	 * @returns 
 	 */
@@ -55,6 +45,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			return {message: "BACKEND responseAccessToken NOK"};
 		const	dataClient = await responseAccessToken.json(); // User data (json file).
 
+		// 42 API'sinden alinan butun veriyi dosyaya kaydet.(opsiyonel)
 		const path = require('path');
 		const filename = "me_data.json";
 		const filepath = path.join(process.cwd(), filename);
@@ -66,19 +57,17 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			first_name: dataClient.first_name,
 			last_name: dataClient.last_name,
 			email: dataClient.email,
-			// image:{
-			// 	link: dataClient.image.link,
-			// },
 			image: dataClient.image.link,
 			channels: [],
 			messages: [],
 		};
 
 		const	responseData = await this.apiService.fetchUserData(createUserDto);
+		if (!responseData)
+			return ({message: 'BACKEND NOK'});
 		const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
 		const cookie = jwt.sign(createUserDto, 'your_secret_key', { expiresIn: '1h' });
 
-		// return ({message: "User data successfully saved database."});
 		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", responseData: createUserDto, cookie: cookie};
 	}
@@ -100,23 +89,4 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		}
 		return ({message: "COOKIE NOK"});
 	}
-
-	// @Get()
-	// findAll() {
-	// 	return this.apiService.findAll();
-	// }
-
-	// @Get(':id')
-	// findOne(@Param('id') id: string) {
-	// 	return this.apiService.findOne(+id);
-	// }
-
-	// @Patch(':id')
-	// update(@Param('id') id: string, @Body() updateApiDto: UpdateApiDto) {
-	// 	return this.apiService.update(+id, updateApiDto);
-	// }
-
-	// @Delete(':id')
-	// remove(@Param('id') id: string) { return this.apiService.remove(+id);
-	// }
 }

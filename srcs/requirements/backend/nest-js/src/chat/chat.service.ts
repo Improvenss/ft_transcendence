@@ -4,7 +4,6 @@ import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, Message } from './entities/chat.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ChatService {
@@ -36,15 +35,15 @@ export class ChatService {
 		channel: number | string | null = null,
 		relations: string[] | 'all' | null = null)
 	{
-		console.log("icindeyim aslinm:", typeof(relations));
+		// console.log("111111111:", typeof(relations));
 		try {
 			let relationObject = {};
 			if (relations === 'all') { // Iliskili tablolardan hangilerini de bu Channel datasina eklemek istiyorsun?
 				relationObject = {users: true, admins: true, messages: true}; // Add all relations here
 			} else if (Array.isArray(relations)) {
-				console.log("icindeyim aslinm:", "ohhhhhhhhhhhhhhh");
+				// console.log("222222222222:");
 				relations.forEach(relation => {
-					console.log("icindeyim aslinm:", relation);
+					// console.log("333333333333333:", relation);
 					relationObject[relation] = true;
 				});
 			}
