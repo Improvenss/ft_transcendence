@@ -38,10 +38,13 @@ export class UsersService {
 	 * @param login
 	 * @returns User.
 	 */
-	async findOne(id?: number, login?: string) {
+	async findOne(id?: number, login?: string, relations?: string[]) {
 		if (!id && !login)
 			throw new Error('Must be enter ID or login.');
-		return (await this.usersRepository.findOne({where: {id: id, login: login}}));
+		return await this.usersRepository.findOne({
+			where: { id: id, login: login },
+			relations: relations,
+		});
 	}
 
 	async findOneSocket(socket: Socket): Promise<User | null> {

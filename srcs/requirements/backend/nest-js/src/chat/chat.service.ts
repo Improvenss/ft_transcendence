@@ -36,18 +36,28 @@ export class ChatService {
 		channel: number | string | null = null,
 		relations: string[] | 'all' | null = null)
 	{
-		console.log("icindeyim aslinm:", typeof(relations));
+		console.log(`chat.service.ts: findChannel(): relations:[${typeof(relations)}], [${relations}]`);
 		try {
 			let relationObject = {};
-			if (relations === 'all') { // Iliskili tablolardan hangilerini de bu Channel datasina eklemek istiyorsun?
-				relationObject = {users: true, admins: true, messages: true}; // Add all relations here
-			} else if (Array.isArray(relations)) {
-				console.log("icindeyim aslinm:", "ohhhhhhhhhhhhhhh");
+
+			if (relations === null)
+			{
+				console.log(`null'a geldik ustam`);
+				relationObject = null;
+			}
+			if (relations === 'all')
+			{
+				console.log(`alllllll'a geldik ustam`);
+				relationObject = {users: true, admins: true, messages: true};
+			}
+			else if (Array.isArray(relations))
+			{
+				console.log(`Array'li olana geldik: relation:${relations}`)
 				relations.forEach(relation => {
-					console.log("icindeyim aslinm:", relation);
 					relationObject[relation] = true;
 				});
 			}
+			console.log("istedigim relationObject:", relationObject, `Channel:[${channel}]`);
 
 			if (channel === null)
 				return (await this.channelRepository.find({relations: relationObject}));
@@ -72,12 +82,41 @@ export class ChatService {
 		}
 	}
 
+	async checkInvolvedUser(channels: Channel | Channel[], user: User) {
+		const channelArray = Array.isArray(channels) ? channels : [channels];
+	
+		const involvedChannelsInfo = channelArray.map((channel) => {
+			if (channel.users.some((channelUser) => channelUser.login === user.login)) {
+				// User is involved in this channel
+				return {
+					status: 'involved',
+					name: channel.name,
+					type: 'involved',
+					image: channel.image || 'default_image_url',
+				};
+			} else if (channel.type === 'public') {
+				// Public channel with no user involvement
+				return {
+					status: 'public',
+					name: channel.name,
+					type: 'public',
+					image: channel.image || 'default_image_url',
+				};
+			}
+			return null;
+		}).filter(Boolean); // Filter out null values
+	
+		return involvedChannelsInfo;
+	}
+	
+	
+
 	async findOneMessage(id: number) {
 		return (`Eklenecek`)
 	}
 
-	async updateChannel(id: number, updateChannelDto: UpdateChannelDto) {
-
+	async updateChannel(channel: number | string | null, updateChannelDto: UpdateChannelDto) {
+		// const tmpChannel = await this.channelRepository.findOne(channel, { relations: ['users'] });
 	}
 
 	async updateMessage(id: number, updateMessageDto: UpdateMessageDto) {

@@ -1,38 +1,13 @@
 import { Injectable } from '@nestjs/common';
-// import { CreateApiDto } from './dto/create-api.dto';
-// import { UpdateApiDto } from './dto/update-api.dto';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ApiService {
-	constructor(
-		private readonly	usersService: UsersService
-		) {}
-
-	// create(createApiDto: CreateApiDto) {
-	// 	return 'This action adds a new api';
-	// }
-
-	// findAll() {
-	// 	return `This action returns all api`;
-	// }
-
-	// findOne(id: number) {
-	// 	return `This action returns a #${id} api`;
-	// }
-
-	// update(id: number, updateApiDto: UpdateApiDto) {
-	// 	return `This action updates a #${id} api`;
-	// }
-
-	// remove(id: number) {
-	// 	return `This action removes a #${id} api`;
-	// }
+	constructor( private readonly	usersService: UsersService ) {}
 
 	/**
 	 * 2/3. adim.
 	 * Token kodunu aliyoruz.
-	 * 
 	 * @param status Auth'dan onayladiktan sonra donen link'i
 	 * 	aldik buraya verdik.
 	 * @returns access_token from 42 API.
@@ -56,10 +31,8 @@ export class ApiService {
 
 	/**
 	 * 3/3. adim.
-	 * 
 	 * fetchToken()'den aldigimiz 'access_token' ile 'user'
 	 *  verisini cekmek icin 3. istegimizi atiyoruz.
-	 * 
 	 * @param dataToken access_token
 	 * @returns 'user's all data from 42 API.
 	 */

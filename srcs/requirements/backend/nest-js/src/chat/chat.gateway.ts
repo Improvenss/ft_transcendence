@@ -12,7 +12,6 @@ import { Body, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 var count: number = 0;
 
@@ -95,42 +94,43 @@ export class ChatGateway {
 
 	@SubscribeMessage('joinChannel')
 	// async handleJoinChannel(@MessageBody() channel: string,
-	async handleJoinChannel(@Body() data: any,
+	async handleJoinChannel(@Body() formData: any,
 			@ConnectedSocket() socket: Socket) {
 		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
 		if (responseUser === null)
 			return (new NotFoundException("ERROR: User not found for create Channel!"))
-		const	responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(data.channel);
+		const	responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(formData.name);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
 			const	createChannelDto: CreateChannelDto = {
-				name: data.channel as string,
-				isActive: data.isActive as boolean,
-				// users: [],
+				name: formData.name as string,
+				type: formData.type as string,
+				password: formData.password as string,
+				image: null,
 				users: [responseUser],
-				// admins: [],
 				admins: [responseUser],
-				type: data.type as string,
-				password: data.password as string,
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
 			console.log(response, `ADMIN: ${socket.id}`); // Basarili bir sekidle Channel olusturuldu mu onu kontrol edebiliriz.
-			socket.join(data.channel);
-			this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}) created: ${socket.id} you are admin!`);
+			socket.join(formData.name);
+			this.server.emit('channelListener', formData);
 		}
 		else if (responseChannel !== null
-			&& responseChannel.name === data.channel)
+			&& responseChannel.name === formData.name)
 		{
-			if (!socket.rooms.has(data.channel))
+			if (!socket.rooms.has(formData.name))
 			{
-				socket.join(data.channel);
+				socket.join(formData.name);
 				if (responseUser.socket_id === socket.id) {
-					console.log(`${data.channel} kanalina katıldı: ${socket.id}`);
-					this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}): ${socket.id} joined!`);
+					console.log(`${formData.name} kanalina katıldı: ${socket.id}`);
+					this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
 				}
 			}
 			else
-				console.log(`${socket.id} zaten ${data.channel} kanalında! :)`);
+			{
+				console.log(`${socket.id} zaten ${formData.name} kanalında! :)`);
+				// this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
+			}
 		}
 	}
 
@@ -138,7 +138,6 @@ export class ChatGateway {
 	async handleLeaveChannel(@Body() data: any,
 			@ConnectedSocket() socket: Socket)
 	{
-		// Eger kanalda kimse kalmadiysa isActive false olacak.
 		// users[] kimse kalmamasi lazim cikan cikacak.
 		// admins[] ciksalar bile adminler kalacak.
 		if (socket.rooms.has(data.channel))

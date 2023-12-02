@@ -4,14 +4,21 @@ export interface IMessage {
 	timestamp: number;
 }
 
+// Backend DTO
+export interface CreateChannelDto {
+	status: 'public' | 'involved';
+	name: string;
+	type: 'public' | 'private' | 'protected';
+	password?: string;
+	image: string;
+}
+
 export interface IChannel {
 	status: 'public' | 'involved';
 	name: string;
 	type: 'public' | 'involved';
 	password?: string;
 	image: string;
-	users: {name: string, image: string}[];
-	chat: IMessage[];
 }
 
 export interface IChannelFormData {
@@ -22,7 +29,7 @@ export interface IChannelFormData {
 }
 
 export interface IChannelProps{
-	setSelectedChannel:  React.Dispatch<React.SetStateAction<IChannel | null>>;
+	// setSelectedChannel:  React.Dispatch<React.SetStateAction<IChannel | null>>;
 	channels: IChannel[];
 }
 

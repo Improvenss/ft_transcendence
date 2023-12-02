@@ -4,13 +4,16 @@ import { ReactComponent as IconPublic } from '../assets/chat/iconPublic.svg';
 import { ReactComponent as IconInvolved } from '../assets/chat/iconInvolved.svg';
 import './Channel.css';
 import { IChannelProps, IChannelFormData, IChannel, IMessage } from './iChannel';
+import { useSocket } from '../hooks/SocketHook';
 
-function Channel({ setSelectedChannel, channels }: IChannelProps) {
+// function Channel({ setSelectedChannel, channels }: IChannelProps) {
+	function Channel({ channels }: IChannelProps) {
 	const [activeTab, setActiveTab] = useState('involved');
 	const [showPassword, setShowPassword] = useState(false);
 	const CreateChannelForm = useRef<HTMLFormElement>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState('');
+	const socket = useSocket();
 
 	const handleTabClick = (tabId: string) => {
 		if (tabId !== 'create') {
@@ -27,23 +30,25 @@ function Channel({ setSelectedChannel, channels }: IChannelProps) {
 		// Implement your channel creation logic here
 		// For now, let's just log a message to the console
 		const formData = new FormData(CreateChannelForm.current as HTMLFormElement);
+		console.log('channelData baslangiciiiiiiiiiiii');
 		const channelData: IChannelFormData = {
 			name: formData.get('name') as string,
 			type: formData.get('type') as string,
 			password: formData.get('password') as string || '',
-			image: formData.get('image') as string,
+			// image: formData.get('image') as string,
+			image: "denemee image",
 		};
-		console.log(channelData);
+		socket?.emit('joinChannel', channelData);
 		console.log('Channel created');
 		CreateChannelForm.current?.reset();
 		setSelectedImage(null);
-		if (channelData.type === 'involved')
+		if (channelData.type === 'private')
 			setShowPassword(false);
 	};
 
 	const handleChannelTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		console.log('Selected Channel Type:', e.target.value);
-		setShowPassword(e.target.value === 'involved');
+		setShowPassword(e.target.value === 'private');
 	};
 
 	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +78,7 @@ function Channel({ setSelectedChannel, channels }: IChannelProps) {
 	};
 
 	const handleChannelClick = (channel: IChannel) => {
-			setSelectedChannel(channel);
+			// setSelectedChannel(channel);
 	};
 
 	return (
@@ -111,7 +116,7 @@ function Channel({ setSelectedChannel, channels }: IChannelProps) {
 							<label htmlFor="channelType">Channel Type:</label>
 							<select id="channel-type" name="type" onChange={handleChannelTypeChange} required>
 								<option value="public">Public</option>
-								<option value="involved">involved</option>
+								<option value="private">Private</option>
 							</select>
 
 							{showPassword && (
@@ -164,7 +169,14 @@ function Channel({ setSelectedChannel, channels }: IChannelProps) {
 								<div
 									key={channel.name}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
-									onClick={() => handleChannelClick(channel)} // Tıklama olayı
+									onClick={() => {
+										if (activeTab === 'public'){
+
+										}
+										else
+											handleChannelClick(channel)
+									
+									}} // Tıklama olayı
 								>
 									<img src={channel.image} alt={channel.image} />
 									<span>{channel.name}</span>
