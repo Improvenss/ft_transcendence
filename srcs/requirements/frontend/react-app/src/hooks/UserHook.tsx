@@ -36,7 +36,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 					},
 					body: JSON.stringify({
 						cookie: userCookie as string
-
 					})
 				});
 				if (response.ok){

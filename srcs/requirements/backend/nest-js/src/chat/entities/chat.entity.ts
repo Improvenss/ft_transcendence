@@ -18,7 +18,7 @@ export class Channel {
 	@IsNotEmpty()
 	public name: string;
 
-	@Column({ type: 'enum', enum: ['public', 'private', 'password'] })
+	@Column({ type: 'enum', enum: ['public', 'private']})
 	public type: string;
 
 	@Column({ nullable: true })

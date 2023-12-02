@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSocket } from '../hooks/SocketHook';
+import { useSocket } from '../../hooks/SocketHook';
 import { Socket } from 'socket.io-client';
 
 /**

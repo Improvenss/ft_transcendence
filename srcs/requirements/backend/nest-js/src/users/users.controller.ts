@@ -43,7 +43,10 @@ export class UsersController {
 		
 		try {
 			const decoded = jwt.verify(status.cookie, 'your_secret_key');
-			const user = await this.usersService.findOne(null, decoded.login as string);
+			// const user = await this.usersService.findOne(null, decoded.login as string);
+			const user = await this.usersService.findOne(
+				null, decoded.login, ['channels']
+			);
 			return ({message: "USER OK", user: user});
 		} catch(err){
 			console.error("Cookie err:", err);

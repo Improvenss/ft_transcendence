@@ -6,7 +6,8 @@ import './Channel.css';
 import { IChannelProps, IChannelFormData, IChannel, IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 
-function Channel({ setSelectedChannel, channels }: IChannelProps) {
+// function Channel({ setSelectedChannel, channels }: IChannelProps) {
+	function Channel({ channels }: IChannelProps) {
 	const [activeTab, setActiveTab] = useState('involved');
 	const [showPassword, setShowPassword] = useState(false);
 	const CreateChannelForm = useRef<HTMLFormElement>(null);
@@ -77,7 +78,7 @@ function Channel({ setSelectedChannel, channels }: IChannelProps) {
 	};
 
 	const handleChannelClick = (channel: IChannel) => {
-			setSelectedChannel(channel);
+			// setSelectedChannel(channel);
 	};
 
 	return (
@@ -168,7 +169,14 @@ function Channel({ setSelectedChannel, channels }: IChannelProps) {
 								<div
 									key={channel.name}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
-									onClick={() => handleChannelClick(channel)} // Tıklama olayı
+									onClick={() => {
+										if (activeTab === 'public'){
+
+										}
+										else
+											handleChannelClick(channel)
+									
+									}} // Tıklama olayı
 								>
 									<img src={channel.image} alt={channel.image} />
 									<span>{channel.name}</span>

@@ -7,7 +7,7 @@ export class CreateChannelDto {
 	@IsNotEmpty()
 	name: string;
 
-	@IsEnum(['public', 'private', 'protected'])
+	@IsEnum(['public', 'private'])
 	type: string;
 
 	@IsString()

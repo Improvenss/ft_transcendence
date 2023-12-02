@@ -110,11 +110,10 @@ export class ChatGateway {
 				users: [responseUser],
 				admins: [responseUser],
 			};
-			console.log("atandiktansonra: ", createChannelDto);
 			const response = await this.chatService.createChannel(createChannelDto);
 			console.log(response, `ADMIN: ${socket.id}`); // Basarili bir sekidle Channel olusturuldu mu onu kontrol edebiliriz.
 			socket.join(formData.name);
-			this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}) created: ${socket.id} you are admin!`);
+			this.server.emit('channelListener', formData);
 		}
 		else if (responseChannel !== null
 			&& responseChannel.name === formData.name)

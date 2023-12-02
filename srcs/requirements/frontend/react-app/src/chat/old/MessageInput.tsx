@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSocket } from "../hooks/SocketHook";
+import { useSocket } from "../../hooks/SocketHook";
 
 // function	MessageInput({send}: {send: (val: string) => void}) {
 function	MessageInput() {

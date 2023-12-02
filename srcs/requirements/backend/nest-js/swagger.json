@@ -220,28 +220,7 @@
         }
       }
     },
-    "/chat/{channel}": {
-      "post": {
-        "operationId": "ChatController_createChannel",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateChannelDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/@{channel}/{relation}": {
+    "/chat/@{channel}": {
       "post": {
         "operationId": "ChatController_findChannelFirst",
         "parameters": [
@@ -251,28 +230,6 @@
             "in": "path",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "relation",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "relations",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
             }
           }
         ],
@@ -292,27 +249,23 @@
             "schema": {
               "type": "string"
             }
-          },
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "ChatController_removeChannel",
+        "parameters": [
           {
-            "name": "relation",
+            "name": "channel",
             "required": true,
             "in": "path",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "relations",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           }
         ],
@@ -461,26 +414,6 @@
         }
       }
     },
-    "/chat/@{channel}": {
-      "delete": {
-        "operationId": "ChatController_removeChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/chat/{messages}": {
       "delete": {
         "operationId": "ChatController_removeAllMessage",
@@ -548,10 +481,6 @@
         "properties": {}
       },
       "UpdateUserDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreateChannelDto": {
         "type": "object",
         "properties": {}
       },

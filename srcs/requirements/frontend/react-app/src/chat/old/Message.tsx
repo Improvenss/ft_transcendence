@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSocket } from "../hooks/SocketHook";
+import { useSocket } from "../../hooks/SocketHook";
 
 // function	Message({messages}: {messages: string[]}) {
 function	Message() {
