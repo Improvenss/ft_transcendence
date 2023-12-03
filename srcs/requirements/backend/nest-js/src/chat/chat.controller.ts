@@ -1,8 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { CreateChannelDto, UpdateChannelDto} from './dto/chat-channel.dto';
+import { UpdateChannelDto } from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
+import { Colors as C } from '../colors';
 
 @Controller('/chat')
 export class ChatController {
@@ -22,6 +23,7 @@ export class ChatController {
 		@Body() relationData: {userCookie: string, socketID: string}, // -> Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
 		@Query('relations') relations: string[] | null | 'all', // -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
 	) {
+		console.log(`${C.B_YELLOW}POST: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 		if (!relationData)
 			return (new Error("@Post('@:channel/:relation'): findChannelFirst(): @Body(): Cookie not found!"));
 		const jwt = require('jsonwebtoken');
@@ -32,31 +34,14 @@ export class ChatController {
 				HttpStatus.INTERNAL_SERVER_ERROR));
 		// -----------------------
 
-		if (channel === 'all')
-		{
-			console.log("Butun Channel'ler alindi.", relations)
-			const allChannels = await this.chatService.findChannel(null, relations);
-			// console.log(allChannels);
-			// return (allChannels)
-			const invData = await this.chatService.checkInvolvedUser(allChannels, tmpUser);
-			console.log(invData);
-			return (invData);
-		}
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
-		if (isId === true)
-		{
-			const tmpUser = await this.chatService.findChannel(+channel, relations);
-			if (!tmpUser)
-				throw (new NotFoundException("@Post('@:channel'): findChannel(): id: Channel does not exist!"));
-			return (tmpUser);
-		}
-		else
-		{
-			const tmpUser = await this.chatService.findChannel(channel, relations);
-			if (!tmpUser)
-				throw (new NotFoundException("@Post('@:channel'): findChannel(): name: Channel does not exist!"));
-			return (tmpUser);
-		}
+		const tmpChannel = await this.chatService.findChannel(isId ? +channel : channel, relations);
+		if (!tmpChannel)
+			throw (new NotFoundException("@Get('@:channel'): findChannel(): id&name: Channel does not exist!"));
+		const invData = await this.chatService.checkInvolvedUser(tmpChannel, tmpUser);
+		console.log(`POST ile alinan ve involved olarak duzenlenmis data: ${invData} alttaki`, invData);
+		return (invData);
+		// return (tmpChannel);
 	}
 
 	@Post(':message')
@@ -65,33 +50,31 @@ export class ChatController {
 	}
 
 	// ---------- Get ------------
-	@Get('@:channel') // -> {{baseUrl}}/chat/@all/?relations=all
+	/**
+	 * @Usage {{baseUrl}}:3000/chat/@all?relations=all
+	 * 
+	 * @Body() relationData: string[],
+	 *  Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
+	 * 
+	 * @Query('relations') relations: string[] | null | 'all', 
+	 *  {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+	 * @param channel 
+	 * @param relations 
+	 * @returns 
+	 */
+	@Get('@:channel')
 	async findChannel(
 		@Param('channel') channel: string,
-		// @Param('relations') relations: string[],
-		// @Body() relationData: string[], -> Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
-		@Query('relations') relations: string[] | null | 'all', // -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+		@Query('relations') relations: string[] | null | 'all', 
 	) {
-		console.log(`GET: Channel: [${channel}], Relation: [${relations}]`);
-		if (channel === 'all')
-			return (await this.chatService.findChannel(null, relations));
-
+		console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
-		if (isId === true)
-		{
-			const tmpUser = await this.chatService.findChannel(+channel, relations);
-			if (!tmpUser)
-				throw (new NotFoundException("@Get('@:channel'): findChannel(): id: Channel does not exist!"));
-			return (tmpUser);
-		}
-		else
-		{
-			const tmpUser = await this.chatService.findChannel(channel, relations);
-			if (!tmpUser)
-				throw (new NotFoundException("@Get('@:channel'): findChannel(): name: Channel does not exist!"));
-			return (tmpUser);
-		}
+		const tmpChannel = await this.chatService.findChannel(isId ? +channel : channel, relations);
+		if (!tmpChannel)
+			throw (new NotFoundException("@Get('@:channel'): findChannel(): id&name: Channel does not exist!"));
+		return (tmpChannel);
 	}
+
 // Burada kaldin
 	@Get('messages/all')
 	findAllMessage() {

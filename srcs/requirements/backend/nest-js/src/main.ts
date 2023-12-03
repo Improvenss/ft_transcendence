@@ -17,6 +17,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
  *  fotografi DB'de ['bytea'] seklinde kaydet. Dosya olarak local'de falan bulunmayacak.
  *  postgres Db'nin icerisinde tutulacak bu bytea'nin icinde. istedigimizde indirebilecegiz.
  * 
+ * TypeORM @Guards() bakilacak.
+ * 
+ * 
+ * 
  */
 async function bootstrap() {
 	const	httpsOptions = {

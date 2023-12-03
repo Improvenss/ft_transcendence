@@ -16,7 +16,6 @@ export class UsersService {
 
 	/**
 	 * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
-	 * 
 	 * @param createUserDto 
 	 */
 	async	create(createUserDto: CreateUserDto) {
@@ -52,7 +51,6 @@ export class UsersService {
 			throw new Error('Must be enter Socket.');
 		return (await this.usersRepository.findOne({where: {socket_id: socket.id as string}}));
 	}
-	
 
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.
