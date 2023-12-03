@@ -36,46 +36,30 @@ export class ChatService {
 		channel: number | string | null = null,
 		relations: string[] | 'all' | null = null)
 	{
-		console.log(`chat.service.ts: findChannel(): relations:[${typeof(relations)}], [${relations}]`);
-		try {
-			let relationObject = {};
-
-			if (relations === null)
-			{
-				console.log(`null'a geldik ustam`);
-				relationObject = null;
-			}
-			if (relations === 'all')
-			{
-				console.log(`alllllll'a geldik ustam`);
-				relationObject = {users: true, admins: true, messages: true};
-			}
-			else if (Array.isArray(relations))
-			{
-				console.log(`Array'li olana geldik: relation:${relations}`)
-				relations.forEach(relation => {
-					relationObject[relation] = true;
-				});
-			}
-			console.log("istedigim relationObject:", relationObject, `Channel:[${channel}]`);
-
-			if (channel === null)
-				return (await this.channelRepository.find({relations: relationObject}));
-			else if (typeof(channel) === 'number')
-				return (await this.channelRepository.findOne({
-					where: {id: channel}, // Burada 'id:' key'inin value'sini parametre olarak aldigimiz channel'in degerini atiyoruz.
-					// relations: {users: true},
-					relations: relationObject,
+		try
+		{
+			console.log(`Service Chat: findChannel(): relations(${typeof(relations)}): [${relations}]`);
+			const relationObject = relations === 'all'
+				? {users: true, admins: true, messages: true} // relations all ise hepsini ata.
+				: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
+					? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
+					: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
+						? { [relations]: true } // sadece bunu ata.
+						: null)); // hicbiri degilse null ata.
+			console.log(`Service Chat: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
+			if (channel === 'all')
+				return (await this.channelRepository.find({
+					relations: relationObject
 				}));
-			else if (typeof(channel) === 'string')
-				return await this.channelRepository.findOne({
-					where: {name: channel}, // Burada 'name:' key'inin value'sini parametre olarak aldigimiz channel'in degerini atiyoruz.
-					// relations: {users: true},
-					relations: relationObject,
-				});
-			else
-				return null;
-		} catch (error) {
+			const whereCondition = typeof(channel) === 'number'
+				? {id: +channel} : {name: channel};
+			return (await this.channelRepository.findOne({
+				where: whereCondition,
+				relations: relationObject
+			}));
+		}
+		catch (error)
+		{
 			throw new Error(
 				`chat.service.ts: findOneChannel(): ${error.message || 'Channel not found!'}`
 			);

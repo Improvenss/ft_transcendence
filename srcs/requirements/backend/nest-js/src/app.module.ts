@@ -28,7 +28,7 @@ import { ChatService } from './chat/chat.service';
 		}),
 		ApiModule,
 		UsersModule,
-		ChatModule, // BU OC EVET EVET BU OC SOKETIN 2 KERE CALISMASINI SAGLIYOR. EVET EVET BU OC.
+		ChatModule, // BU SOKETIN 2 KERE CALISMASINI SAGLIYOR...
 	],
 	controllers: [AppController],
 	providers: [AppService, ChatGateway, ChatService], // Buraya da nest g gateway chat kodunu calistirinca geldi.
