@@ -1,0 +1,96 @@
+/* #game-page {
+	font-size: 20px;
+	display: flex;
+	flex-direction: column;
+	height: 66vh;
+	width: 66vw;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	overflow: hidden;
+	align-items: stretch; /* Tüm öğeleri dikeyde genişlet
+} */
+
+.gameArea {
+	border: 8px solid #ccc;;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	border-radius: 5px;
+	background-color: black;
+	display: flex;
+	position: absolute;
+	height: 66vh;
+	width: 66vw;
+	align-items: stretch;
+}
+
+.gameArea:before {
+	left: 50%;
+	content:'';
+	width: 10px;
+	height: 100%;
+	position: absolute;
+	border-left: 8px dashed #ccc;
+}
+
+.score {
+	font-size: 50px;
+	left: 50%;
+	text-align:center;
+	vertical-align: center;
+	position: absolute;
+	display: table-cell;
+	/* display: flex; */
+}
+.LeftScore{
+	font-size: 50px;
+	left: 50%;
+	text-align:center;
+	vertical-align: center;
+	position: absolute;
+	display: table-cell;
+	/* display: flex; */
+}
+.RightScore{
+	font-size: 50px;
+	left: 50%;
+	text-align:center;
+	vertical-align: center;
+	position: absolute;
+	display: table-cell;
+	/* display: flex; */
+}
+.LeftScore{
+	font-size: 50px;
+	left: 50%;
+	text-align:center;
+	vertical-align: center;
+	position: absolute;
+	display: table-cell;
+	/* display: flex; */
+}
+
+.PlayerLeft {
+	border:1px solid #ccc;
+	background-color: #ccc;
+	width: 42px;
+	height: 125px;
+	margin-left: 10px;
+	margin-top: 10px;
+	position: absolute;
+}
+
+#ball {
+	position: absolute;
+	width: 60px;
+	height: 60px;
+	margin-left: 100%;
+	display: block;
+	background :#ccc;
+	border-radius: 50%;
+	transform: translate3d(10px,0,0)
+}

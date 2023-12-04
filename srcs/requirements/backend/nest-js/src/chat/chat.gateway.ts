@@ -64,6 +64,60 @@ export class ChatGateway {
 	}
 
 	/**
+	 * Oyun odasina baglandiktan sonra gelen komutlari burada
+	 *  ele aliyouz.
+	 * @param param0 
+	 */
+	@SubscribeMessage('commandGameRoom')
+	async handleCommandGameRoom(
+		@MessageBody() 
+		{ gameRoom, command }:
+			{ gameRoom: string, command: string })
+	{
+		console.log(`GAME ROOM: gelen command[${count++}]:`, command);
+		console.log('GAME ROOM: MessageBody():', {gameRoom, command});
+		this.server.to(gameRoom).emit("gameRoomCommandListener", command);
+	}
+
+	/**
+	 * Oyun odasini burada olusturuyoruz.
+	 * @param roomData 
+	 * @param socket 
+	 * @returns 
+	 */
+	@SubscribeMessage('joinGameRoom')
+	async handleJoinGameRoom(@Body() roomData: any,
+		@ConnectedSocket() socket: Socket)
+	{
+		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
+		if (responseUser === null)
+			return (new NotFoundException("ERROR: User not found for create game room!"))
+		socket.join(roomData.name);
+		console.log(`GAME: Socket joined: ${roomData.name}, ${responseUser.login}(${socket.id})`);
+		this.server.to(roomData.name).emit("gameRoomJoinListener",
+			`GAME: Socket joined: ${roomData.name}, ${socket.id}`);
+	}
+
+	/**
+	 * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
+	 * @param roomData 
+	 * @param socket 
+	 */
+	@SubscribeMessage('leaveGameRoom')
+	async handleLeaveGameRoom(@Body() roomData: any,
+		@ConnectedSocket() socket: Socket)
+	{
+		if (socket.rooms.has(roomData.name))
+		{
+			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
+			socket.leave(roomData.name)
+			console.log(`${roomData.name} kanalindan cikti: ${socket.id}`);
+		}
+		else
+			console.log(`${socket.id} zaten ${roomData.name} kanalinda degil! :D?`);
+	}
+
+	/**
 	 * https://<project_ip>:3000/chat'e baglanan socket'in;
 	 *  .emit() fonksiyonu ile 'createMessage' istegi attiginda calistigi yer.
 	 * 

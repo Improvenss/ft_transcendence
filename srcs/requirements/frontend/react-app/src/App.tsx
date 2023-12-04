@@ -11,6 +11,7 @@ import { ReactComponent as GithubIcon } from './github.svg';
 import FallingChars from "./utils/FallingChars";
 import { useUser } from "./hooks/UserHook";
 import ProfilePage from "./user/ProfilePage";
+import GamePage from './game/GamePage';
 
 function App() {
 	console.log("---------APP-PAGE---------");
@@ -36,6 +37,7 @@ function App() {
 						<Link to='/' id="site-name">TRANSCENDENCE</Link>
 						<Link to="/">Home</Link>
 						<Link to="/chat">Chat</Link>
+						<Link to="/game">Game</Link>
 						<span onClick={logOut}>Logout</span>
 						<Link to="/profile">
 							<img src={userInfo?.image} alt="Profile" />
@@ -53,6 +55,7 @@ function App() {
 				<Route path='/' element={<HomePage />} />
 				<Route path='/profile' element={<ProfilePage />} />
 				<Route path='/chat' element={<ChatPage />} />
+				<Route path='/game' element={<GamePage />} />
 				<Route path='*' element={<NoMatchPage />} />
 				<Route path='/api' element={<Api />} />
 				<Route path='/login' element={<LoginPage />} />
@@ -60,5 +63,4 @@ function App() {
 		</div>
 	);
 };
-
 export default App;
