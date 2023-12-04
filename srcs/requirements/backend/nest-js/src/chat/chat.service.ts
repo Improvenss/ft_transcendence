@@ -33,7 +33,7 @@ export class ChatService {
 	}
 
 	async findChannel(
-		channel: number | string | null = null,
+		channel: number | string | undefined,
 		relations: string[] | 'all' | null = null)
 	{
 		try
@@ -47,7 +47,7 @@ export class ChatService {
 						? { [relations]: true } // sadece bunu ata.
 						: null)); // hicbiri degilse null ata.
 			console.log(`Service Chat: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
-			if (channel === 'all')
+			if (channel === undefined)
 				return (await this.channelRepository.find({
 					relations: relationObject
 				}));

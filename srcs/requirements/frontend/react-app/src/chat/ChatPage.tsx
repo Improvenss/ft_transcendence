@@ -1,7 +1,7 @@
 /**
  * LINK: https://socket.io/docs/v4/server-socket-instance/
  */
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigationType } from "react-router-dom";
 import './ChatPage.css';
 import { useAuth } from "../hooks/AuthHook";
 import Channel from "./Channel";
@@ -28,6 +28,15 @@ function ChatPage () {
 	const isAuth = useAuth().isAuth;
 	const socket = useSocket();
 	const userCookie = Cookies.get("user");
+	const navigationType = useNavigationType();
+	const status = localStorage.getItem('userLoginPage');
+
+	useEffect(() => {
+		window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
+		return () => {
+			window.onbeforeunload = null;
+		};
+	}, []);
 	// const [selectedChannel, setSelectedChannel] = useState<IChannel | null>(() => {
 	// 	const globalChannel = channels.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
 	// 	if (globalChannel === undefined)
@@ -43,7 +52,7 @@ function ChatPage () {
 	useEffect(() => {
 		const fetchChannels = async () => {
 		  try {
-			const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/@all?relations=all", {
+			const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?relations=all", {
 				method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
 				headers: {
 					'Content-Type': 'application/json',
@@ -76,12 +85,12 @@ function ChatPage () {
 
 	}, []);
 
+	if (!isAuth)
+		return (<Navigate to='/login' replace />);
+
 	if (channels === undefined){
 		return (<LoadingPage />);
 	}
-
-	if (!isAuth)
-		return (<Navigate to='/login' replace />);
 
 	return (
 		<div id="chat-page">

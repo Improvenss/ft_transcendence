@@ -74,4 +74,6 @@ bootstrap();
  * nest generate gateway chat -> Socket ile mesajlasabilmek icin 'gateway' yapisini ekledik.
  * 
  * @OK npm install jsonwebtoken -> JWT token icin.
+ * @OK npm install --save-dev @types/bcrypt -> DB'deki password'lari sifreli bir sekilde tutmak icin.
+ * @OK npm install --save-dev bcrypt -> Gormuyordu bcrypt'i o yuzden hepsini kurdum.
  */

@@ -55,6 +55,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 						console.log("userInfo:", data.user);
 					} else {
 						console.log("IV: ---User Response '❌'---");
+						Cookies.remove('user');
 					}
 				} else {
 					console.log("IV: ---User Backend Connection '❌'---");

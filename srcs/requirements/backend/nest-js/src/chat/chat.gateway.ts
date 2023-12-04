@@ -12,6 +12,7 @@ import { Body, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
+import * as bcrypt from 'bcrypt';
 
 var count: number = 0;
 
@@ -156,10 +157,15 @@ export class ChatGateway {
 		const	responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(formData.name);
 		if (responseChannel === null) {
 			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
+			console.log("formData password: ", typeof(formData.password), formData.password);
 			const	createChannelDto: CreateChannelDto = {
 				name: formData.name as string,
 				type: formData.type as string,
-				password: formData.password as string,
+				password: formData.password === '' || undefined || null
+					? null
+					: bcrypt.hashSync(
+						formData.password,
+						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 				image: null,
 				users: [responseUser],
 				admins: [responseUser],
@@ -172,18 +178,14 @@ export class ChatGateway {
 		else if (responseChannel !== null
 			&& responseChannel.name === formData.name)
 		{
-			if (!socket.rooms.has(formData.name))
-			{
-				socket.join(formData.name);
-				if (responseUser.socket_id === socket.id) {
-					console.log(`${formData.name} kanalina katıldı: ${socket.id}`);
-					this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
-				}
-			}
-			else
-			{
-				console.log(`${socket.id} zaten ${formData.name} kanalında! :)`);
-				// this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
+			if (socket.rooms.has(formData.name))
+				return (console.log(`${socket.id} zaten ${formData.name} kanalında! :)`));
+			if (!bcrypt.compareSync(formData.password, responseChannel.password))
+				return (console.log(`${responseChannel.name}: Wrong PASSWORD!`));
+			socket.join(formData.name);
+			if (responseUser.socket_id === socket.id) {
+				console.log(`${formData.name} kanalina katıldı: ${socket.id}`);
+				this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
 			}
 		}
 	}

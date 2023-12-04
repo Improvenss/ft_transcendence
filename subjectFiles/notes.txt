@@ -52,7 +52,7 @@ NESTJS {
 	}
 	How can i create nestjs? {
 		Install nestjs/cli.
-			npm i -g @nestjs/cli
+			npm i -g @nestjs/cli --skip-git
 		npm {
 			nest new nestjs-sample
 		}

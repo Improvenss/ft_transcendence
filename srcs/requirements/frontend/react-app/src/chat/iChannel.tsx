@@ -24,7 +24,7 @@ export interface IChannel {
 export interface IChannelFormData {
 	name: string;
 	type: string;
-	password: string;
+	password: string | null;
 	image: string;
 }
 

@@ -34,7 +34,7 @@ import { useSocket } from '../hooks/SocketHook';
 		const channelData: IChannelFormData = {
 			name: formData.get('name') as string,
 			type: formData.get('type') as string,
-			password: formData.get('password') as string || '',
+			password: formData.get('password') as string || null,
 			// image: formData.get('image') as string,
 			image: "denemee image",
 		};

@@ -25,31 +25,32 @@ export class UsersController {
 	async	createSocket(@Body() status: {cookie: string, socketID: string}) {
 		const jwt = require('jsonwebtoken');
 		try {
-			const decoded = jwt.verify(status.cookie, 'your_secret_key');
+			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
 			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login as string, status.socketID);
 			if (!tmpUser)
 				throw (new HttpException("@Patch(':login'): update(): login: User does not exist!",
 					HttpStatus.INTERNAL_SERVER_ERROR));
 			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socket_id}]`});
 		} catch(err) {
-			console.error("Cookie err:", err);
+			console.error("@Post('socket'): Cookie err:", err);
+			return ({message: "Socket not updated."});
 		}
-		return ({message: "Socket not updated."});
 	}
 
 	@Post('user')
 	async createUser(@Body() status: {cookie: string}) {
 		const jwt = require('jsonwebtoken');
-		
 		try {
-			const decoded = jwt.verify(status.cookie, 'your_secret_key');
+			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
 			// const user = await this.usersService.findOne(null, decoded.login as string);
 			const user = await this.usersService.findOne(
 				null, decoded.login, ['channels']
 			);
+			if (!user)
+				return ({message: "USER NOK"});
 			return ({message: "USER OK", user: user});
 		} catch(err){
-			console.error("Cookie err:", err);
+			console.error("@Post('user'): Cookie err:", err);
 		}
 		return ({message: "USER NOK"});
 	}

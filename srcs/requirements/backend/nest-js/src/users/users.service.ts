@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -73,6 +73,8 @@ export class UsersService {
 	 */
 	async	updateSocketLogin(login: string, socketData: string) {
 		const	tmpUser = await this.findOne(undefined, login);
+		if (!tmpUser)
+			throw (new HttpException("users.service.ts: updateSocketLogin: User not found", HttpStatus.NOT_FOUND));
 		Object.assign(tmpUser, socketData);
 		return (await this.entityManager.save(tmpUser));
 	}

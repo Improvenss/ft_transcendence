@@ -17,17 +17,19 @@ export class ChatController {
 	// 	return await this.chatService.createChannel(createChannelDto);
 	// }
 
-	@Post('@:channel')
+	// @Post('@:channel')
+	@Post('/channel')
 	async findChannelFirst(
-		@Param('channel') channel: string,
-		@Body() relationData: {userCookie: string, socketID: string}, // -> Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
+		// @Param('channel') channel: string,
+		@Query('channel') channel: string,
 		@Query('relations') relations: string[] | null | 'all', // -> {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+		@Body() relationData: {userCookie: string, socketID: string}, // -> Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
 	) {
 		console.log(`${C.B_YELLOW}POST: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 		if (!relationData)
 			return (new Error("@Post('@:channel/:relation'): findChannelFirst(): @Body(): Cookie not found!"));
 		const jwt = require('jsonwebtoken');
-		const decoded = jwt.verify(relationData.userCookie, 'your_secret_key');
+		const decoded = jwt.verify(relationData.userCookie, process.env.JWT_PASSWORD_HASH);
 		const tmpUser = await this.usersService.findOne(null, decoded.login as string);
 		if (!tmpUser)
 			throw (new HttpException("@Post(':channel/:relation'): (Cookie): @findOne(): login: User does not exist!",
@@ -62,16 +64,19 @@ export class ChatController {
 	 * @param relations 
 	 * @returns 
 	 */
-	@Get('@:channel')
+	// @Get('@:channel')
+	@Get('/channel')
 	async findChannel(
-		@Param('channel') channel: string,
-		@Query('relations') relations: string[] | null | 'all', 
+		// @Param('channel') channel: string,
+		@Query('channel') channel: string,
+		@Query('relations') relations: string[] | null | 'all',
 	) {
 		console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 		const isId = /^\d+$/.test(channel); // Bakiyor bu girilen deger numara mi degil mi? numaraysa true donduruyor.
+		console.log("isId:", isId);
 		const tmpChannel = await this.chatService.findChannel(isId ? +channel : channel, relations);
 		if (!tmpChannel)
-			throw (new NotFoundException("@Get('@:channel'): findChannel(): id&name: Channel does not exist!"));
+			throw (new NotFoundException("@Get(): findChannel(): id&name: Channel does not exist!"));
 		return (tmpChannel);
 	}
 

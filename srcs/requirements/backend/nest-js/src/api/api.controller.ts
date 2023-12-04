@@ -66,7 +66,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		if (!responseData)
 			return ({message: 'BACKEND NOK'});
 		const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
-		const cookie = jwt.sign(createUserDto, 'your_secret_key', { expiresIn: '1h' });
+		const cookie = jwt.sign(createUserDto, process.env.JWT_PASSWORD_HASH, { expiresIn: '1h' });
 
 		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", responseData: createUserDto, cookie: cookie};
@@ -82,7 +82,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 
 		// JWT'yi doğrulayın
 		try {
-			const decoded = jwt.verify(status.cookie, 'your_secret_key');
+			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
 			return ({message: "COOKIE OK"});
 		} catch(err) {
 			console.error("Cookie err:", err);

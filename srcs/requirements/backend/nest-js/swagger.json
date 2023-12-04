@@ -220,14 +220,14 @@
         }
       }
     },
-    "/chat/@{channel}": {
+    "/chat/channel": {
       "post": {
         "operationId": "ChatController_findChannelFirst",
         "parameters": [
           {
             "name": "channel",
             "required": true,
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -245,25 +245,7 @@
           {
             "name": "channel",
             "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ChatController_removeChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -400,6 +382,26 @@
         "parameters": [
           {
             "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/@{channel}": {
+      "delete": {
+        "operationId": "ChatController_removeChannel",
+        "parameters": [
+          {
+            "name": "channel",
             "required": true,
             "in": "path",
             "schema": {
