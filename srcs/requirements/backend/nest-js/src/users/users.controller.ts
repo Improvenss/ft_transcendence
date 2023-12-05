@@ -2,10 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, H
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly jwtService: JwtService,
+	) {}
 
 	/**
 	 * Yeni bir 'User'i DB'ye kaydediyoruz.
@@ -23,9 +27,10 @@ export class UsersController {
 
 	@Post('socket')
 	async	createSocket(@Body() status: {cookie: string, socketID: string}) {
-		const jwt = require('jsonwebtoken');
+		// const jwt = require('jsonwebtoken');
 		try {
-			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
+			const	decoded = this.jwtService.verify(status.cookie);
+			// const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
 			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login as string, status.socketID);
 			if (!tmpUser)
 				throw (new HttpException("@Patch(':login'): update(): login: User does not exist!",
@@ -39,9 +44,10 @@ export class UsersController {
 
 	@Post('user')
 	async createUser(@Body() status: {cookie: string}) {
-		const jwt = require('jsonwebtoken');
+		// const jwt = require('jsonwebtoken');
 		try {
-			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
+			// const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
+			const decoded = this.jwtService.verify(status.cookie);
 			// const user = await this.usersService.findOne(null, decoded.login as string);
 			const user = await this.usersService.findOne(
 				null, decoded.login, ['channels']
@@ -67,8 +73,7 @@ export class UsersController {
 	/**
 	 * Verilen id'nin ya da login'in karsilik
 	 *  geldigi 'User' verisini donduruyoruz.
-	 * @param id Istenilen 'user'in 'id'si.
-	 * @param login Istenilen 'user'in login'i.
+	 * @param id Istenilen 'user'in 'id'si.  * @param login Istenilen 'user'in login'i.
 	 * @returns 'user'.
 	 */
 	// @Get(':id/:login?')

@@ -56,6 +56,7 @@ function ChatPage () {
 				method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
 				headers: {
 					'Content-Type': 'application/json',
+					"Authorization": "Bearer " + userCookie,
 				},
 				// Eğer bir request body kullanmanız gerekiyorsa, aşağıdaki kısmı açabilir ve gerekli bilgileri ekleyebilirsiniz
 				body: JSON.stringify({userCookie: userCookie, socketID: socket?.id}),

@@ -35,11 +35,11 @@
       }
     },
     "/api/cookie": {
-      "post": {
+      "get": {
         "operationId": "ApiController_userCookie",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }

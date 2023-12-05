@@ -73,7 +73,14 @@ bootstrap();
  * @OK npm install --save @nestjs/websockets @nestjs/platform-socket.io -> WebSocket'leri icin gerekli kutuphaneleri kurduk.
  * nest generate gateway chat -> Socket ile mesajlasabilmek icin 'gateway' yapisini ekledik.
  * 
- * @OK npm install jsonwebtoken -> JWT token icin.
+ * npm install jsonwebtoken -> Artik kullanmiyoruz. Cunku; @nestjs yapisindaki guard'larda falan kullanamiyoruz.
+ * @OK npm install @nestjs/jwt -> JWT token icin.
  * @OK npm install --save-dev @types/bcrypt -> DB'deki password'lari sifreli bir sekilde tutmak icin.
  * @OK npm install --save-dev bcrypt -> Gormuyordu bcrypt'i o yuzden hepsini kurdum.
+ * @OK /app/nest-js # nest generate guard auth -> Bilgilerin guvenligi icin guard.
+ * 	CREATE src/auth/auth.guard.spec.ts (160 bytes)
+ * 	CREATE src/auth/auth.guard.ts (299 bytes)
+ * @OK /app/nest-js # nest generate module auth
+ * 	CREATE src/auth/auth.module.ts (81 bytes)
+ * 	UPDATE src/app.module.ts (1603 bytes)
  */
