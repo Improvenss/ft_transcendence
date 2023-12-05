@@ -53,13 +53,11 @@ function ChatPage () {
 		const fetchChannels = async () => {
 		  try {
 			const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?relations=all", {
-				method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+				method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
 				headers: {
 					'Content-Type': 'application/json',
 					"Authorization": "Bearer " + userCookie,
 				},
-				// Eğer bir request body kullanmanız gerekiyorsa, aşağıdaki kısmı açabilir ve gerekli bilgileri ekleyebilirsiniz
-				body: JSON.stringify({userCookie: userCookie, socketID: socket?.id}),
 			});
 	
 			if (!responseAllChannels.ok) {

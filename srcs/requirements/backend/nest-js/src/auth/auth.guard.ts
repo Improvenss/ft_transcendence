@@ -17,20 +17,20 @@ export class AuthGuard implements CanActivate {
 		{
 			console.log("AuthGuard: inside the guard.");
 			const request = context.switchToHttp().getRequest();
-			console.log("once", request.headers);
+			// console.log("once", request.headers);
 			const authHeader = request.headers.authorization;
 			if (!authHeader || !authHeader.startsWith('Bearer '))
-				throw (new UnauthorizedException("AuthGuard: Invalid 'Authorization' header format!"));
+				throw (new UnauthorizedException("Invalid 'Authorization' header format!"));
 			const token = authHeader.split(' ')[1];
-			console.log("TOKENIN:", token);
+			// console.log("TOKENIN:", token);
 			if (!token)
-				throw (new UnauthorizedException("AuthGuard: Token not found!"));
+				throw (new UnauthorizedException("Token not found!"));
 			request.user = this.jwtService.verify(token);
-			console.log("request.user: ", request.user);
+			// console.log("request.user: ", request.user);
 		}
 		catch (error)
 		{
-			console.log("hehe", error);
+			console.log("AuthGuard: ", error);
 			throw (new UnauthorizedException());
 		}
 		// throw (new UnauthorizedException("AuthGuard: You can't acces.")); // Bu 401(Unauthorized) error'u dondurur.

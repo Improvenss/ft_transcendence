@@ -30,13 +30,11 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
 				const response = await fetch(process.env.REACT_APP_USER as string, {
-					method: "POST",
+					method: "GET",
 					headers: {
-						"Content-Type": "application/json"
+						"Content-Type": "application/json",
+						"Authorization": "Bearer " + userCookie as string,
 					},
-					body: JSON.stringify({
-						cookie: userCookie as string
-					})
 				});
 				if (response.ok){
 					console.log("IV: ---User Backend Connection '✅'---");

@@ -34,17 +34,6 @@
         }
       }
     },
-    "/api/cookie": {
-      "get": {
-        "operationId": "ApiController_userCookie",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/users": {
       "post": {
         "operationId": "UsersController_create",
@@ -95,12 +84,23 @@
         }
       }
     },
+    "/users/cookie": {
+      "get": {
+        "operationId": "UsersController_userCookie",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/user": {
-      "post": {
+      "get": {
         "operationId": "UsersController_createUser",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
@@ -220,44 +220,6 @@
         }
       }
     },
-    "/chat/channel": {
-      "post": {
-        "operationId": "ChatController_findChannelFirst",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      },
-      "get": {
-        "operationId": "ChatController_findChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/chat/{message}": {
       "post": {
         "operationId": "ChatController_createMessage",
@@ -279,14 +241,32 @@
         }
       }
     },
-    "/chat/@{channel}": {
+    "/chat/channel": {
+      "get": {
+        "operationId": "ChatController_findChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
       "delete": {
         "operationId": "ChatController_removeChannel",
         "parameters": [
           {
             "name": "channel",
             "required": true,
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string"
             }

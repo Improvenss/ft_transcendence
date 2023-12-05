@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -28,7 +28,10 @@ export class UsersService {
 	 * DB'deki butun Users kayitlarini aliyor.
 	 */
 	async	findAll() {
-		return (await this.usersRepository.find({relations: {channels: true}}));
+		const tmpUser = await this.usersRepository.find({relations: {channels: true}});
+		if (!tmpUser)
+			throw (new NotFoundException("user.service.ts: find(): User not found!"));
+		return (tmpUser);
 	}
 
 	/**
@@ -40,16 +43,19 @@ export class UsersService {
 	async findOne(id?: number, login?: string, relations?: string[]) {
 		if (!id && !login)
 			throw new Error('Must be enter ID or login.');
-		return await this.usersRepository.findOne({
+		const tmpUser = await this.usersRepository.findOne({
 			where: { id: id, login: login },
 			relations: relations,
 		});
+		return (tmpUser);
 	}
 
 	async findOneSocket(socket: Socket): Promise<User | null> {
 		if (!socket)
 			throw new Error('Must be enter Socket.');
-		return (await this.usersRepository.findOne({where: {socket_id: socket.id as string}}));
+		console.log("socket.id:", socket.id);
+		const tmpUser = await this.usersRepository.findOne({where: {socket_id: socket.id as string}});
+		return (tmpUser);
 	}
 
 	/**
@@ -74,7 +80,7 @@ export class UsersService {
 	async	updateSocketLogin(login: string, socketData: string) {
 		const	tmpUser = await this.findOne(undefined, login);
 		if (!tmpUser)
-			throw (new HttpException("users.service.ts: updateSocketLogin: User not found", HttpStatus.NOT_FOUND));
+			throw (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
 		Object.assign(tmpUser, socketData);
 		return (await this.entityManager.save(tmpUser));
 	}

@@ -152,10 +152,14 @@ export class ChatGateway {
 	async handleJoinChannel(@Body() formData: any,
 			@ConnectedSocket() socket: Socket)
 	{
+		console.log("CHANNEL OLISTITILMAK IOSTENYOR");
 		const responseUser: User | null = await this.usersService.findOneSocket(socket);
+		console.log("CHANNEL OLISTITILMAK IOSTENYOR", responseUser);
 		if (responseUser === null)
 			return (new NotFoundException("ERROR: User not found for create Channel!"))
+		console.log("CHANNEL OLISTITILMAK IOSTENYOR");
 		const responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(formData.name);
+		console.log("CHANNEL OLISTITILMAK IOSTENYOR");
 		if (responseChannel === null)
 			await handleCreateChannel(this.chatService, formData, responseUser, socket, this.server);
 		else if (responseChannel !== null

@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setAuth(false);
 				return ;
 			}
-			const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
+			const response = await fetch(process.env.REACT_APP_USER_COOKIE as string, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json",

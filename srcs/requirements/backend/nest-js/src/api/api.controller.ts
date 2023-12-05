@@ -3,7 +3,6 @@ import { ApiService } from './api.service';
 import * as fs from 'fs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('api')
 export class ApiController {
@@ -74,24 +73,5 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		console.log("cookie ama jwt olan", cookie);
 		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", responseData: createUserDto, cookie: cookie};
-	}
-
-	@UseGuards(AuthGuard)
-	@Get('cookie')
-	async userCookie(
-		@Req() {user},
-	){
-		try
-		{
-			if (!user)
-				throw (new Error("Cookie not provided"));
-			console.log("GUARD'dan gelen decoded edilmis user:", user);
-			return ({message: "COOKIE OK"});
-		}
-		catch(err)
-		{
-			console.error("Cookie err:", err);
-			return ({message: "COOKIE NOK"});
-		}
 	}
 }
