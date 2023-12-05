@@ -3,7 +3,7 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ApiService {
-	constructor( private readonly	usersService: UsersService ) {}
+	constructor( private readonly usersService: UsersService ) {}
 
 	/**
 	 * 2/3. adim.

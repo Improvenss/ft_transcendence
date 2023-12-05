@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head, SetMetadata } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { UpdateChannelDto } from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
@@ -59,13 +59,14 @@ export class ChatController {
 	 *  Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
 	 * 
 	 * @Query('relations') relations: string[] | null | 'all', 
-	 *  {{baseUrl}}:3000/chat/@all?relations=users&relations=admins.
+	 *  {{baseUrl}}:3000/chat/channel?relations=users&relations=admins.
 	 * @param channel 
 	 * @param relations 
 	 * @returns 
 	 */
 	// @Get('@:channel')
 	@Get('/channel')
+	@SetMetadata('roles', ['admin'])
 	async findChannel(
 		// @Param('channel') channel: string,
 		@Query('channel') channel: string,
@@ -80,37 +81,37 @@ export class ChatController {
 		return (tmpChannel);
 	}
 
-// Burada kaldin
-	@Get('messages/all')
-	findAllMessage() {
-		console.log("Butun Message'ler alindi.")
-		return this.chatService.findAllMessage();
-	}
+// // Burada kaldin
+// 	@Get('messages/all')
+// 	findAllMessage() {
+// 		console.log("Butun Message'ler alindi.")
+// 		return this.chatService.findAllMessage();
+// 	}
 
-	// oneeeeeeeeeeeeeeee
-	@Get(':/id(\\d+)')
-	async findOneChannelId(@Param('id') id?: string) {
-	}
+// 	// oneeeeeeeeeeeeeeee
+// 	@Get(':/id(\\d+)')
+// 	async findOneChannelId(@Param('id') id?: string) {
+// 	}
 
-	@Get(':name')
-	async findOneChannelName(@Param('name') name: string) {
-	}
+// 	@Get(':name')
+// 	async findOneChannelName(@Param('name') name: string) {
+// 	}
 
-	@Get(':message:id(\\d+)')
-	findOneMessage(@Param('id') id: string) {
-		return this.chatService.findOneMessage(+id);
-	}
+// 	@Get(':message:id(\\d+)')
+// 	findOneMessage(@Param('id') id: string) {
+// 		return this.chatService.findOneMessage(+id);
+// 	}
 
-	// ---------- Update ---------
-	@Patch(':message:id(\\d+)')
-	updateChannel(@Param('id') id: string, @Body() updateChannelDto: UpdateChannelDto) {
-		return this.chatService.updateChannel(+id, updateChannelDto);
-	}
+// 	// ---------- Update ---------
+// 	@Patch(':message:id(\\d+)')
+// 	updateChannel(@Param('id') id: string, @Body() updateChannelDto: UpdateChannelDto) {
+// 		return this.chatService.updateChannel(+id, updateChannelDto);
+// 	}
 
-	@Patch(':message:id(\\d+)')
-	updateMessage(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-		return this.chatService.updateMessage(+id, updateMessageDto);
-	}
+// 	@Patch(':message:id(\\d+)')
+// 	updateMessage(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
+// 		return this.chatService.updateMessage(+id, updateMessageDto);
+// 	}
 
 	// ---------- Delete ---------
 
@@ -143,25 +144,25 @@ export class ChatController {
 		}
 	}
 
-	@Delete(':messages')
-	removeAllMessage() {
-		return this.chatService.removeAllMessage();
-	}
+	// @Delete(':messages')
+	// removeAllMessage() {
+	// 	return this.chatService.removeAllMessage();
+	// }
 
-	@Delete(':channel:id(\\d+)')
-	async removeChannelId(@Param('id') id: string) {
-		const	tmpChannel = this.chatService.findChannel(+id);
+	// @Delete(':channel:id(\\d+)')
+	// async removeChannelId(@Param('id') id: string) {
+	// 	const	tmpChannel = this.chatService.findChannel(+id);
 
-		return (this.chatService.removeChannel(+id));
-	}
+	// 	return (this.chatService.removeChannel(+id));
+	// }
 
-	@Delete(':channel:name(\\d+)')
-	async removeChannelName(@Param('name') name: string) {
-		// return this.chatService.removeAllChannel();
-	}
+	// @Delete(':channel:name(\\d+)')
+	// async removeChannelName(@Param('name') name: string) {
+	// 	// return this.chatService.removeAllChannel();
+	// }
 
-	@Delete(':message:id(\\d+)')
-	removeMessage(@Param('id') id: string) {
-		return this.chatService.removeAllMessage();
-	}
+	// @Delete(':message:id(\\d+)')
+	// removeMessage(@Param('id') id: string) {
+	// 	return this.chatService.removeAllMessage();
+	// }
 }

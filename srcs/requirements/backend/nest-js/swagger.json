@@ -279,180 +279,12 @@
         }
       }
     },
-    "/chat/messages/all": {
-      "get": {
-        "operationId": "ChatController_findAllMessage",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/:/id{0}": {
-      "get": {
-        "operationId": "ChatController_findOneChannelId",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{name}": {
-      "get": {
-        "operationId": "ChatController_findOneChannelName",
-        "parameters": [
-          {
-            "name": "name",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{message}{id}": {
-      "get": {
-        "operationId": "ChatController_findOneMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "ChatController_updateMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMessageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ChatController_removeMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/chat/@{channel}": {
       "delete": {
         "operationId": "ChatController_removeChannel",
         "parameters": [
           {
             "name": "channel",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{messages}": {
-      "delete": {
-        "operationId": "ChatController_removeAllMessage",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{channel}{id}": {
-      "delete": {
-        "operationId": "ChatController_removeChannelId",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{channel}{name}": {
-      "delete": {
-        "operationId": "ChatController_removeChannelName",
-        "parameters": [
-          {
-            "name": "name",
             "required": true,
             "in": "path",
             "schema": {
@@ -487,14 +319,6 @@
         "properties": {}
       },
       "CreateMessageDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateChannelDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateMessageDto": {
         "type": "object",
         "properties": {}
       }

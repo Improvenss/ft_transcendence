@@ -13,6 +13,7 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import * as bcrypt from 'bcrypt';
+import { handleCreateChannel } from './channel.handler';
 
 var count: number = 0;
 
@@ -112,10 +113,10 @@ export class ChatGateway {
 		{
 			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
 			socket.leave(roomData.name)
-			console.log(`${roomData.name} kanalindan cikti: ${socket.id}`);
+			console.log(`${roomData.name} odasindan cikti: ${socket.id}`);
 		}
 		else
-			console.log(`${socket.id} zaten ${roomData.name} kanalinda degil! :D?`);
+			console.log(`${socket.id} zaten ${roomData.name} oyun odasinda degil! :D?`);
 	}
 
 	/**
@@ -148,33 +149,15 @@ export class ChatGateway {
 	}
 
 	@SubscribeMessage('joinChannel')
-	// async handleJoinChannel(@MessageBody() channel: string,
 	async handleJoinChannel(@Body() formData: any,
-			@ConnectedSocket() socket: Socket) {
-		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
+			@ConnectedSocket() socket: Socket)
+	{
+		const responseUser: User | null = await this.usersService.findOneSocket(socket);
 		if (responseUser === null)
 			return (new NotFoundException("ERROR: User not found for create Channel!"))
-		const	responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(formData.name);
-		if (responseChannel === null) {
-			// Eger Channel bulunmaz ise 'null' dondurur ve Channel'i olusturur.
-			console.log("formData password: ", typeof(formData.password), formData.password);
-			const	createChannelDto: CreateChannelDto = {
-				name: formData.name as string,
-				type: formData.type as string,
-				password: formData.password === '' || undefined || null
-					? null
-					: bcrypt.hashSync(
-						formData.password,
-						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
-				image: null,
-				users: [responseUser],
-				admins: [responseUser],
-			};
-			const response = await this.chatService.createChannel(createChannelDto);
-			console.log(response, `ADMIN: ${socket.id}`); // Basarili bir sekidle Channel olusturuldu mu onu kontrol edebiliriz.
-			socket.join(formData.name);
-			this.server.emit('channelListener', formData);
-		}
+		const responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(formData.name);
+		if (responseChannel === null)
+			await handleCreateChannel(this.chatService, formData, responseUser, socket, this.server);
 		else if (responseChannel !== null
 			&& responseChannel.name === formData.name)
 		{
@@ -188,11 +171,13 @@ export class ChatGateway {
 				this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
 			}
 		}
+		else
+			return (new Error("Socket: 'joinChannel': Unexpected error!"));
 	}
 
 	@SubscribeMessage('leaveChannel')
 	async handleLeaveChannel(@Body() data: any,
-			@ConnectedSocket() socket: Socket)
+		@ConnectedSocket() socket: Socket)
 	{
 		// users[] kimse kalmamasi lazim cikan cikacak.
 		// admins[] ciksalar bile adminler kalacak.

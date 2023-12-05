@@ -3,7 +3,6 @@ import { ApiService } from './api.service';
 import * as fs from 'fs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 
-
 @Controller('api')
 export class ApiController {
 	constructor(private readonly apiService: ApiService) {}
