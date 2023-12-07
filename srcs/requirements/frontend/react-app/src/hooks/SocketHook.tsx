@@ -22,13 +22,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 				const response = await fetch(process.env.REACT_APP_SOCKET as string, {
 					method: "POST",
 					headers: {
-						"Content-Type": "application/json"
+						"Content-Type": "application/json",
+						"Authorization": "Bearer " + userCookie as string,
 					},
 					body: JSON.stringify({
-						cookie: userCookie as string,
-						socketID: {
-							socket_id: newSocket.id as string
-						}
+						socketID: newSocket.id as string,
 					})
 				})
 				if (response.ok)

@@ -1,11 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from 'src/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly jwtService: JwtService,
+	) {}
 
 	/**
 	 * Yeni bir 'User'i DB'ye kaydediyoruz.
@@ -22,37 +28,50 @@ export class UsersController {
 	}
 
 	@Post('socket')
-	async	createSocket(@Body() status: {cookie: string, socketID: string}) {
-		const jwt = require('jsonwebtoken');
+	async	createSocket(
+		@Req() {user},
+		@Body() status: {socketID: string}) {
 		try {
-			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
-			const	tmpUser = await this.usersService.updateSocketLogin(decoded.login as string, status.socketID);
-			if (!tmpUser)
-				throw (new HttpException("@Patch(':login'): update(): login: User does not exist!",
-					HttpStatus.INTERNAL_SERVER_ERROR));
-			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socket_id}]`});
+			console.log("POST socket:", status);
+			const	tmpUser = await this.usersService.updateSocketLogin(user.login as string, status.socketID);
+			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
-			console.error("@Post('socket'): Cookie err:", err);
+			console.error("@Post('socket'): ", err);
 			return ({message: "Socket not updated."});
 		}
 	}
 
-	@Post('user')
-	async createUser(@Body() status: {cookie: string}) {
-		const jwt = require('jsonwebtoken');
-		try {
-			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
-			// const user = await this.usersService.findOne(null, decoded.login as string);
-			const user = await this.usersService.findOne(
-				null, decoded.login, ['channels']
-			);
+	@Get('cookie')
+	async userCookie(
+		@Req() {user},
+	){
+		try
+		{
 			if (!user)
-				return ({message: "USER NOK"});
-			return ({message: "USER OK", user: user});
-		} catch(err){
-			console.error("@Post('user'): Cookie err:", err);
+				throw (new Error("Cookie not provided"));
+			console.log("GUARD'dan gelen decoded edilmis user:", user);
+			return ({message: "COOKIE OK"});
 		}
-		return ({message: "USER NOK"});
+		catch(err)
+		{
+			console.error("Cookie err:", err);
+			return ({message: "COOKIE NOK"});
+		}
+	}
+
+	@Get('user')
+	async createUser(
+		@Req() {user}
+	){
+		try {
+			const tmpUser = await this.usersService.findOne(null, user.login, ['channels']);
+			if (!tmpUser)
+				throw (new NotFoundException("@Get('user'): findOne(): User does not exist!"));
+			return ({message: "USER OK", user: tmpUser});
+		} catch(err){
+			console.error("@Get('user'): ", err);
+			return ({message: "USER NOK"});
+		}
 	}
 
 	/**
@@ -67,8 +86,7 @@ export class UsersController {
 	/**
 	 * Verilen id'nin ya da login'in karsilik
 	 *  geldigi 'User' verisini donduruyoruz.
-	 * @param id Istenilen 'user'in 'id'si.
-	 * @param login Istenilen 'user'in login'i.
+	 * @param id Istenilen 'user'in 'id'si.  * @param login Istenilen 'user'in login'i.
 	 * @returns 'user'.
 	 */
 	// @Get(':id/:login?')

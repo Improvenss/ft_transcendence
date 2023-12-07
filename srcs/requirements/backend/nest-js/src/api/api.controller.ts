@@ -1,12 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ApiService } from './api.service';
 import * as fs from 'fs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('api')
 export class ApiController {
-	constructor(private readonly apiService: ApiService) {}
+	constructor(
+		private readonly apiService: ApiService,
+		private readonly jwtService: JwtService,
+	) {}
 
 	/**
 	 * React'tan ilk butona tikandigi anda buraya geliyor.
@@ -53,40 +56,19 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
 
 		const createUserDto: CreateUserDto = {
-			login: dataClient.login,
-			first_name: dataClient.first_name,
-			last_name: dataClient.last_name,
 			email: dataClient.email,
-			image: dataClient.image.link,
-			channels: [],
-			messages: [],
+			login: dataClient.login,
+			displayname: dataClient.displayname,
+			imageUrl: dataClient.image.link,
 		};
 
 		const	responseData = await this.apiService.fetchUserData(createUserDto);
 		if (!responseData)
 			return ({message: 'BACKEND NOK'});
-		const jwt = require('jsonwebtoken'); // npm install jsonwebtoken
-		const cookie = jwt.sign(createUserDto, process.env.JWT_PASSWORD_HASH, { expiresIn: '1h' });
+		const cookie = await this.jwtService.signAsync(createUserDto, {expiresIn: '1h'});
 
+		console.log("cookie ama jwt olan", cookie);
 		// Burada return ederken cookie bilgisini ve ok diye return edecegiz
 		return {message: "BACKEND OK", responseData: createUserDto, cookie: cookie};
-	}
-
-	@Post('cookie')
-	async userCookie(@Body() status: {cookie: string}){
-		const jwt = require('jsonwebtoken');
-		if (!status.cookie) {
-			console.error("Cookie not provided");
-			return { message: "COOKIE NOK" };
-		}
-
-		// JWT'yi doğrulayın
-		try {
-			const decoded = jwt.verify(status.cookie, process.env.JWT_PASSWORD_HASH);
-			return ({message: "COOKIE OK"});
-		} catch(err) {
-			console.error("Cookie err:", err);
-		}
-		return ({message: "COOKIE NOK"});
 	}
 }

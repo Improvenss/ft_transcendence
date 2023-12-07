@@ -23,17 +23,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			const userCookie = Cookies.get("user");
 			// const userLStore = localStorage.getItem("user");
 			// 'https://localhost/backend/api/cookie' veya /backend/api/cookie
-			const response = await fetch(process.env.REACT_APP_API_COOKIE as string, {
-				method: "POST",
+			if (userCookie === undefined)
+			{
+				console.log("I: ---Cookie Not Found '❌'---");
+				setAuth(false);
+				return ;
+			}
+			const response = await fetch(process.env.REACT_APP_USER_COOKIE as string, {
+				method: "GET",
 				headers: {
-					"Content-Type": "application/json"
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + userCookie as string,
 				},
-				body: JSON.stringify({
-					cookie: userCookie as string
-				})
 			});
-
-			if (response.ok) {
+			if (response.ok)
+			{
 				console.log("I: ---Cookie Backend Connection '✅'---");
 				const data = await response.json();
 				if (data.message === "COOKIE OK") {

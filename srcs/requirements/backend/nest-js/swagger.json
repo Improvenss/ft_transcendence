@@ -12,6 +12,26 @@
         }
       }
     },
+    "/uploads/{imageName}": {
+      "get": {
+        "operationId": "AppController_getImage",
+        "parameters": [
+          {
+            "name": "imageName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/login": {
       "post": {
         "operationId": "ApiController_loginStatus",
@@ -26,17 +46,6 @@
     "/api/token": {
       "post": {
         "operationId": "ApiController_loginToken",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/cookie": {
-      "post": {
-        "operationId": "ApiController_userCookie",
         "parameters": [],
         "responses": {
           "201": {
@@ -95,12 +104,23 @@
         }
       }
     },
+    "/users/cookie": {
+      "get": {
+        "operationId": "UsersController_userCookie",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/user": {
-      "post": {
+      "get": {
         "operationId": "UsersController_createUser",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
@@ -220,44 +240,6 @@
         }
       }
     },
-    "/chat/channel": {
-      "post": {
-        "operationId": "ChatController_findChannelFirst",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      },
-      "get": {
-        "operationId": "ChatController_findChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/chat/{message}": {
       "post": {
         "operationId": "ChatController_createMessage",
@@ -279,65 +261,25 @@
         }
       }
     },
-    "/chat/messages/all": {
-      "get": {
-        "operationId": "ChatController_findAllMessage",
+    "/chat/channel/create": {
+      "post": {
+        "operationId": "ChatController_createChannel",
         "parameters": [],
         "responses": {
-          "200": {
+          "201": {
             "description": ""
           }
         }
       }
     },
-    "/chat/:/id{0}": {
+    "/chat/channel": {
       "get": {
-        "operationId": "ChatController_findOneChannelId",
+        "operationId": "ChatController_findChannel",
         "parameters": [
           {
-            "name": "id",
+            "name": "channel",
             "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{name}": {
-      "get": {
-        "operationId": "ChatController_findOneChannelName",
-        "parameters": [
-          {
-            "name": "name",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{message}{id}": {
-      "get": {
-        "operationId": "ChatController_findOneMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -349,112 +291,13 @@
           }
         }
       },
-      "patch": {
-        "operationId": "ChatController_updateMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMessageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ChatController_removeMessage",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/@{channel}": {
       "delete": {
         "operationId": "ChatController_removeChannel",
         "parameters": [
           {
             "name": "channel",
             "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{messages}": {
-      "delete": {
-        "operationId": "ChatController_removeAllMessage",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{channel}{id}": {
-      "delete": {
-        "operationId": "ChatController_removeChannelId",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{channel}{name}": {
-      "delete": {
-        "operationId": "ChatController_removeChannelName",
-        "parameters": [
-          {
-            "name": "name",
-            "required": true,
-            "in": "path",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -469,8 +312,8 @@
     }
   },
   "info": {
-    "title": "ft_transcendence",
-    "description": "ft_transcendence API UI!",
+    "title": "NestJS API",
+    "description": "NestJS API Documentation",
     "version": "1.0",
     "contact": {}
   },
@@ -487,14 +330,6 @@
         "properties": {}
       },
       "CreateMessageDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateChannelDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateMessageDto": {
         "type": "object",
         "properties": {}
       }

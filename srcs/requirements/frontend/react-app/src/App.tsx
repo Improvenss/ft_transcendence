@@ -40,7 +40,7 @@ function App() {
 						<Link to="/game">Game</Link>
 						<span onClick={logOut}>Logout</span>
 						<Link to="/profile">
-							<img src={userInfo?.image} alt="Profile" />
+							<img src={userInfo?.imageUrl} alt="Profile" />
 						</Link>
 					</ul>
 				) : (

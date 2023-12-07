@@ -9,6 +9,7 @@ import { ApiModule } from './api/api.module';
 import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
 import { ChatService } from './chat/chat.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
 	imports: [
@@ -16,6 +17,11 @@ import { ChatService } from './chat/chat.service';
 		// 	envFilePath: '.env',
 		// 	expandVariables: true,
 		// }),
+		JwtModule.register({
+			global: true,
+			secret: process.env.JWT_PASSWORD_HASH,
+			// signOptions: {expiresIn: '1h'},
+		}),
 		TypeOrmModule.forRoot({
 			type: 'postgres',
 			port: parseInt(process.env.B_POSTGRES_PORT),
@@ -28,7 +34,7 @@ import { ChatService } from './chat/chat.service';
 		}),
 		ApiModule,
 		UsersModule,
-		ChatModule, // BU SOKETIN 2 KERE CALISMASINI SAGLIYOR...
+		ChatModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, ChatGateway, ChatService], // Buraya da nest g gateway chat kodunu calistirinca geldi.

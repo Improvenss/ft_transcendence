@@ -3,6 +3,19 @@ import { AppModule } from './app.module';
 import * as fs from 'fs';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { INestApplication } from '@nestjs/common';
+
+function setupSwagger(app: INestApplication) {
+	const options = new DocumentBuilder() // Bu ve altindakiler 'swagger' icin;
+	  .setTitle('NestJS API') // Config olusturduk.
+	  .setDescription('NestJS API Documentation')  // Direkt icerisine yazmaktansa,
+	  .setVersion('1.0')// bu config'i verecegiz.
+	  .build();
+
+	const document = SwaggerModule.createDocument(app, options);
+	SwaggerModule.setup('swagger', app, document);
+	fs.writeFileSync('swagger.json', JSON.stringify(document, null, 2)); // Buradaki swagger'in json dosyasini kaydediyoruz; boylelikle Postman uygulamasindan direkt olarak swagger'in butun http isteklerini Postman'dan atabiliyoruz.
+}
 
 /**
  * NOTES: GET: Bu @channel/:relation bu 1 tane string oluyor.
@@ -35,15 +48,11 @@ async function bootstrap() {
 			methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'], // İzin verilen HTTP yöntemleri
 		})
 	);
-	const	configSwagger = new DocumentBuilder() // Bu ve altindakiler 'swagger' icin;
-		.setTitle('ft_transcendence') // Config olusturduk.
-		.setDescription('ft_transcendence API UI!') // Direkt icerisine yazmaktansa,
-		.setVersion('1.0') // bu config'i verecegiz.
-		.build()
-	const	documentSwagger = SwaggerModule.createDocument(app, configSwagger);
-	fs.writeFileSync('swagger.json', JSON.stringify(documentSwagger, null, 2)); // Buradaki swagger'in json dosyasini kaydediyoruz; boylelikle Postman uygulamasindan direkt olarak swagger'in butun http isteklerini Postman'dan atabiliyoruz.
-	SwaggerModule.setup('swagger', app, documentSwagger);
 
+	// app.use(express.json({ limit: '50mb' }));
+	// app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+	setupSwagger(app);
 	await app.listen(process.env.B_PORT);
 	console.log(`Application is running on: ${await app.getUrl()}`);}
 bootstrap();
@@ -73,7 +82,14 @@ bootstrap();
  * @OK npm install --save @nestjs/websockets @nestjs/platform-socket.io -> WebSocket'leri icin gerekli kutuphaneleri kurduk.
  * nest generate gateway chat -> Socket ile mesajlasabilmek icin 'gateway' yapisini ekledik.
  * 
- * @OK npm install jsonwebtoken -> JWT token icin.
+ * npm install jsonwebtoken -> Artik kullanmiyoruz. Cunku; @nestjs yapisindaki guard'larda falan kullanamiyoruz.
+ * @OK npm install @nestjs/jwt -> JWT token icin.
  * @OK npm install --save-dev @types/bcrypt -> DB'deki password'lari sifreli bir sekilde tutmak icin.
  * @OK npm install --save-dev bcrypt -> Gormuyordu bcrypt'i o yuzden hepsini kurdum.
+ * @OK /app/nest-js # nest generate guard auth -> Bilgilerin guvenligi icin guard.
+ * 	CREATE src/auth/auth.guard.spec.ts (160 bytes)
+ * 	CREATE src/auth/auth.guard.ts (299 bytes)
+ * @OK /app/nest-js # nest generate module auth
+ * 	CREATE src/auth/auth.module.ts (81 bytes)
+ * 	UPDATE src/app.module.ts (1603 bytes)
  */
