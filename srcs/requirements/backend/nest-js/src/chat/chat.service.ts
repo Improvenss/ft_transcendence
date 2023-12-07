@@ -38,7 +38,7 @@ export class ChatService {
 	){
 		console.log(`Service Chat: findChannel(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
-			? {users: true, admins: true, messages: true} // relations all ise hepsini ata.
+			? {members: true, admins: true, messages: true} // relations all ise hepsini ata.
 			: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
 				? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
 				: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
@@ -60,13 +60,16 @@ export class ChatService {
 		const channelArray = Array.isArray(channels) ? channels : [channels];
 	
 		const involvedChannelsInfo = channelArray.map((channel) => {
-			if (channel.users.some((channelUser) => channelUser.login === user.login)) {
+			if (channel.members.some((channelUser) => channelUser.login === user.login)) {
 				// User is involved in this channel
 				return {
 					status: 'involved',
 					name: channel.name,
-					type: 'involved',
+					type: channel.type,
 					image: channel.image || 'default_image_url',
+					members: channel.members,
+					admins: channel.admins,
+					messages: channel.messages
 				};
 			} else if (channel.type === 'public') {
 				// Public channel with no user involvement

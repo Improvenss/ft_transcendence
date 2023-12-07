@@ -13,9 +13,12 @@ function ProfilePage() {
 
 	return (
 		<div id="profile-page">
-			<img src={userInfo.image} alt={`${userInfo.first_name} ${userInfo.last_name}`} />
-			<p>{userInfo.first_name} {userInfo.last_name}</p>
+			<img src={userInfo.imageUrl} alt={`${userInfo.displayname}`} />
 			<p>{userInfo.email}</p>
+			<p>{userInfo.login}</p>
+			<p>{userInfo.displayname}</p>
+			<p>{userInfo.nickname}</p>
+			<p>{userInfo.avatar}</p>
 		</div>
 	);
 }

@@ -12,6 +12,26 @@
         }
       }
     },
+    "/uploads/{imageName}": {
+      "get": {
+        "operationId": "AppController_getImage",
+        "parameters": [
+          {
+            "name": "imageName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/login": {
       "post": {
         "operationId": "ApiController_loginStatus",
@@ -241,6 +261,17 @@
         }
       }
     },
+    "/chat/channel/create": {
+      "post": {
+        "operationId": "ChatController_createChannel",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/channel": {
       "get": {
         "operationId": "ChatController_findChannel",
@@ -281,8 +312,8 @@
     }
   },
   "info": {
-    "title": "ft_transcendence",
-    "description": "ft_transcendence API UI!",
+    "title": "NestJS API",
+    "description": "NestJS API Documentation",
     "version": "1.0",
     "contact": {}
   },

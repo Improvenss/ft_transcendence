@@ -5,7 +5,7 @@ import { ConnectedSocket, MessageBody,
 	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { CreateChannelDto } from './dto/chat-channel.dto';
 import { ChatService } from './chat.service';
 import { Body, NotFoundException } from '@nestjs/common';
@@ -36,7 +36,7 @@ export class ChatGateway {
 	) {}
 
 	@WebSocketServer()
-	server;
+	server: Server;
 
 	// @SubscribeMessage('createMessage')
 	// async handleMessage(@MessageBody() message: string) {
@@ -170,7 +170,7 @@ export class ChatGateway {
 			if (!bcrypt.compareSync(formData.password, responseChannel.password))
 				return (console.log(`${responseChannel.name}: Wrong PASSWORD!`));
 			socket.join(formData.name);
-			if (responseUser.socket_id === socket.id) {
+			if (responseUser.socketId === socket.id) {
 				console.log(`${formData.name} kanalina katıldı: ${socket.id}`);
 				this.server.to(formData.name).emit('messageToClient', `Channel(${formData.name}): ${socket.id} joined!`);
 			}

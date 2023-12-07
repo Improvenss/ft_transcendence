@@ -30,7 +30,7 @@ export async function handleCreateChannel(
 				formData.password,
 				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 		image: null,
-		users: [responseUser],
+		members: [responseUser],
 		admins: [responseUser],
 	};
 	const response = await chatService.createChannel(createChannelDto);

@@ -1,0 +1,23 @@
+form {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+#channel-type{
+	background-color: black;
+}
+
+#image-file {
+	padding: 5px;
+	border-radius: 5px;
+	background-color: black;
+	color: #ccc;
+}
+
+#set-channel-image {
+	display: block;
+	margin: auto;
+	max-width: 100px;
+	max-height: 100px;
+}

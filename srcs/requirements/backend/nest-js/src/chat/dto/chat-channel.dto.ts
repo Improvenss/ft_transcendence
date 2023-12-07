@@ -7,12 +7,12 @@ export class CreateChannelDto {
 	@IsNotEmpty()
 	name: string;
 
-	@IsEnum(['public', 'private'])
+	@IsEnum(['public', 'private', 'direct_message'])
 	type: string;
 
 	@IsString()
 	@IsOptional()
-	password: string | "none";
+	password: string;
 
 	@IsString()
 	@IsOptional()
@@ -20,7 +20,7 @@ export class CreateChannelDto {
 
 	@IsArray()
 	@IsOptional()
-	users: User[];
+	members: User[];
 
 	@IsArray()
 	@IsOptional()

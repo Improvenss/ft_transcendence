@@ -56,13 +56,10 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 		fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
 
 		const createUserDto: CreateUserDto = {
-			login: dataClient.login,
-			first_name: dataClient.first_name,
-			last_name: dataClient.last_name,
 			email: dataClient.email,
-			image: dataClient.image.link,
-			channels: [],
-			messages: [],
+			login: dataClient.login,
+			displayname: dataClient.displayname,
+			imageUrl: dataClient.image.link,
 		};
 
 		const	responseData = await this.apiService.fetchUserData(createUserDto);

@@ -4,13 +4,13 @@ import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
 
 interface IUserProps{
-	id: number;
-	login: string;
-	socket_id: string;
-	first_name: string;
-	last_name: string;
 	email: string;
-	image: string;
+	login: string;
+	displayname: string;
+	imageUrl: string;
+	socketId?: string;
+	nickname?: string;
+	avatar?: string;
 }
 
 const UserContext = createContext<{
@@ -42,13 +42,13 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 					if (data.message === 'USER OK'){
 						console.log("IV: ---User Response '✅'---");
 						setUserInfo({
-							id: data.user.id,
-							login: data.user.login,
-							socket_id: data.user.socket_id,
-							first_name: data.user.first_name,
-							last_name: data.user.last_name,
 							email: data.user.email,
-							image: data.user.image,
+							login: data.user.login,
+							displayname: data.user.displayname,
+							imageUrl: data.user.imageUrl,
+							socketId: data.user.socketId,
+							nickname: data.user.nickname,
+							avatar: data.user.avatar
 						});
 						console.log("userInfo:", data.user);
 					} else {

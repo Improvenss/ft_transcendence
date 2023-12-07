@@ -1,48 +1,56 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
+import { IsEmail } from "class-validator";
 
-@Entity({name: 'user'})
+// Public olarak belirtilmese dahi public olarak ele alınmaktadır.
+// @Entity({name: 'user'})
+@Entity('user')
 export class User {
 	@PrimaryGeneratedColumn()
-	public id: number;
+	public id: number; // Database'deki sıralama için değişken
+
+	//----------------------Mandatory----------------------------//
+
+	// @Column({type: "text", nullable: true})
+	@Column({ unique: true })
+	@IsEmail()
+	public email: string; // Intra email
+
+	@Column({ unique: true })
+	public login: string; // Intra login
 
 	@Column()
-	public login: string;
-
-	@Column({nullable: true})
-	public socket_id?: string;
+	public displayname: string; // Intra ad-soyad
 
 	@Column()
-	public first_name: string;
+	public imageUrl: string; // Intra resim linki
 
-	@Column()
-	public last_name: string;
+	@Column({ nullable: true })
+	public socketId: string; // Websocket
 
-	@Column({type: "text", nullable: true})
-	public email: string;
+	//----------------------Optional----------------------------//
 
-	@Column({type: "text", nullable: true})
-	public image: string;
-	// public image: {
-		// link: string,
-		// versions: {
-		// 	large: string;
-		// 	medium: string;
-		// 	micro: string;
-		// 	small: string;
-		// }
-	// }
+	@Column({ nullable: true })
+	public nickname: string; // Kullanıcı tarafından eklenen ekstra isim
 
-	@ManyToMany(() => Channel, channel => channel.users, {cascade: true})
+	@Column({ nullable: true })
+	public avatar: string; // Kullanıcı tarafından eklenen ekstra resim
+
+	//----------------------Channel----------------------------//
+
+	@ManyToMany(() => Channel, channel => channel.members, {cascade: true})
 	@JoinTable()
-	public channels: Channel[];
+	public channels: Channel[]; // Kullanıcının üye olduğu kanallar
 
 	@ManyToMany(() => Channel, channel => channel.admins)
 	@JoinTable()
-	public adminChannels: Channel[];
+	public adminChannels: Channel[]; // Kullanıcının yönetici olduğu kanallar
 
-	@OneToMany(() => Message, message => message.user)
-	public messages: Message[];
+	//----------------------Message----------------------------//
+
+	@ManyToMany(() => Message, message => message.author)
+	// @JoinTable()
+	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
 
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);

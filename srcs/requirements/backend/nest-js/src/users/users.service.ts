@@ -54,7 +54,7 @@ export class UsersService {
 		if (!socket)
 			throw new Error('Must be enter Socket.');
 		console.log("socket.id:", socket.id);
-		const tmpUser = await this.usersRepository.findOne({where: {socket_id: socket.id as string}});
+		const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
 		return (tmpUser);
 	}
 

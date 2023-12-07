@@ -34,7 +34,7 @@ export class UsersController {
 		try {
 			console.log("POST socket:", status);
 			const	tmpUser = await this.usersService.updateSocketLogin(user.login as string, status.socketID);
-			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socket_id}]`});
+			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
 			console.error("@Post('socket'): ", err);
 			return ({message: "Socket not updated."});
@@ -65,6 +65,8 @@ export class UsersController {
 	){
 		try {
 			const tmpUser = await this.usersService.findOne(null, user.login, ['channels']);
+			if (!tmpUser)
+				throw (new NotFoundException("@Get('user'): findOne(): User does not exist!"));
 			return ({message: "USER OK", user: tmpUser});
 		} catch(err){
 			console.error("@Get('user'): ", err);

@@ -1,9 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head, SetMetadata, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head, SetMetadata, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
 import { Colors as C } from '../colors';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateChannelDto } from './dto/chat-channel.dto';
+
+// Dosya Adı Değiştirme Fonksiyonu
+	const editFileName = (req, file, callback) => {
+		const randomName = Array(15)
+		.fill(null)
+		.map(() => Math.round(Math.random() * 16).toString(16))
+		.join('');
+
+		// Dosya adını sanitize et
+		// const sanitizeFilename = require('sanitize-filename');
+		// const sanitizedFilename = sanitizeFilename(file.originalname);
+		// Eğerki dosya adı My/File:Name.png ise MyFileName.png yapıyor.
+
+		// callback(null, `${randomName}${sanitizedFilename}`);
+		callback(null, `${randomName}${extname(file.originalname)}`);
+  	};
+  
+// Dosya Türü Kontrolü Fonksiyonu
+	const imageFileFilter = (req, file, callback) => {
+		if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/) 
+			|| !file.mimetype.startsWith('image/')) {
+		return callback(new Error('Only image files are allowed!'), false);
+		}
+		callback(null, true);
+  	};
+
+	const MAX_FILE_SIZE = 1024 * 1024 * 2; // 2MB
+
+	const storage = diskStorage({
+		destination: './uploads/',
+		filename: editFileName,
+	});
+
+ 	const multerConfig = {
+		storage,
+		limits: {
+			fileSize: MAX_FILE_SIZE,
+		},
+		fileFilter: imageFileFilter,
+	};
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -28,6 +72,51 @@ export class ChatController {
 		return this.chatService.createMessage(createMessageDto);
 	}
 
+	@Post('/channel/create')
+	@UseInterceptors(FileInterceptor('image', multerConfig))
+	async createChannel(
+		@Req() {user},
+		@UploadedFile() image,
+		@Body('name') name: string,
+		@Body('type') type: string,
+		@Body('password') password: string,
+		@Body('description') description: string,
+	  ) {
+		try {
+			console.log("----------->", name, type, password, description);
+			const tmpUser = await this.usersService.findOne(null, user.login);
+			if (!tmpUser) {
+				throw new HttpException(
+					`User with login '${user.login}' does not exist.`,
+					HttpStatus.INTERNAL_SERVER_ERROR,
+				);
+			}
+			if (!image){
+				throw new Error('No file uploaded');
+			}
+			console.log("image:>",image);
+			console.log("user:>",tmpUser);
+			const imgUrl =  "https://192.168.1.120:3000/uploads/" + image.filename;
+
+			const	createChannelDto: CreateChannelDto = {
+				name: name as string,
+				type: type as string,
+				password: password as string,
+				image: imgUrl as string,
+				members: [tmpUser],
+				admins: [tmpUser],
+			};
+			const response = await this.chatService.createChannel(createChannelDto);
+			console.log(response);
+			return ({
+				message: `${response}`,
+			});
+		} catch (err) {
+			console.error("@Post('/channel/create'): ", err);
+			return ({ message: "Channel not created." });
+		}
+	}
+
 	// ---------- Get ------------
 	/**
 	 * @Usage {{baseUrl}}:3000/chat/@all?relations=all
@@ -41,8 +130,8 @@ export class ChatController {
 	 * @param relations 
 	 * @returns 
 	 */
-	@Get('/channel')
 	// @SetMetadata('login', ['gsever', 'akaraca'])
+	@Get('/channel')
 	async findChannel(
 		@Req() {user},
 		@Query('channel') channel: string | undefined,
@@ -52,7 +141,7 @@ export class ChatController {
 		{
 			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 			console.log("@Req() user:", user);
-			return (await this.chatService.findChannel(channel, relations));
+			return (await this.chatService.checkInvolvedUser((await this.chatService.findChannel(channel, relations)), user));
 		}
 		catch (err)
 		{
