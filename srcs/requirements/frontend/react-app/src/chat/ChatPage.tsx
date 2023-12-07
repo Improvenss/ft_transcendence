@@ -1,34 +1,43 @@
 /**
  * LINK: https://socket.io/docs/v4/server-socket-instance/
  */
-import { Navigate, useNavigationType } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import './ChatPage.css';
 import { useAuth } from "../hooks/AuthHook";
 import Channel from "./Channel";
-// import OnChannel from "./OnChannel";
-import { useEffect, useState } from "react";
-import { CreateChannelDto, IChannel, IChannelProps } from './iChannel';
+import ActiveChannel from "./ActiveChannel";
+import { createContext, useContext, useEffect, useState } from "react";
+import { IChannel, IChannelContext } from './iChannel';
 // import InfoChannel from "./InfoChannel";
 import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
 
-const mapBackendToFrontend = (backendData: CreateChannelDto[]): IChannel[] => {
-	return backendData.map(item => ({
-	  status: item.status as 'public' | 'involved', // Eğer backend'de "status" varsa, uyarlama yapmalısınız
-	  name: item.name,
-	  type: item.type as 'public' | 'involved',
-	  password: item.password || '', // Eğer backend'de "password" varsa, uyarlama yapmalısınız
-	  image: item.image,
-	}));
-  };
+// const mapBackendToFrontend = (backendData: CreateChannelDto[]): IChannel[] => {
+// 	return backendData.map(item => ({
+// 	  status: item.status as 'public' | 'involved', // Eğer backend'de "status" varsa, uyarlama yapmalısınız
+// 	  name: item.name,
+// 	  type: item.type as 'public' | 'involved',
+// 	  password: item.password || '', // Eğer backend'de "password" varsa, uyarlama yapmalısınız
+// 	  image: item.image,
+// 	}));
+//   };
+
+export const ChannelContext = createContext<IChannelContext>({
+	channels: undefined,
+	activeChannel: null,
+	setActiveChannel: () => {},
+});
+
+export const useChannelContext = () => {
+	return useContext(ChannelContext);
+};
 
 function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const socket = useSocket();
 	const userCookie = Cookies.get("user");
-	const navigationType = useNavigationType();
 	// const status = localStorage.getItem('userLoginPage');
 
 	// useEffect(() => {
@@ -37,18 +46,17 @@ function ChatPage () {
 	// 		window.onbeforeunload = null;
 	// 	};
 	// }, []);
-	// const [selectedChannel, setSelectedChannel] = useState<IChannel | null>(() => {
-	// 	const globalChannel = channels.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
-	// 	if (globalChannel === undefined)
-	// 		return (null);
-	// 		// {status: 'involved', name: 'Global Channel', type: 'involved', image: 'img3' };
-	// 	return (globalChannel);
-	// });
+
 
 	// const [isInfoChannelActive, setIsInfoChannelActive] = useState(false);
-
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
-
+	const [activeChannel, setActiveChannel] = useState<IChannel | null>(() => {
+		const globalChannel = channels?.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
+		if (globalChannel === undefined) //Henüz global channel olmadığı için null dönüyor, ama boş channel oluşturup seçilirse pencere açılır.
+			return (null);
+		return (globalChannel);
+	});
+	
 	useEffect(() => {
 		const fetchChannels = async () => {
 		  try {
@@ -66,8 +74,11 @@ function ChatPage () {
 			}
 
 			const data = await responseAllChannels.json();
-			const frontendChannels = mapBackendToFrontend(data);
-			setChannels(frontendChannels);
+			// console.log("--->", data);
+			// const frontendChannels = mapBackendToFrontend(data); ///buna gerek olmayabilir, sonra kontrol et.
+			// console.log("--->", frontendChannels);
+			// setChannels(frontendChannels);
+			setChannels(data);
 		  } catch (error) {
 			console.error('Veri getirme hatası:', error);
 		  }
@@ -83,7 +94,6 @@ function ChatPage () {
 		return () => {
 			socket?.off("channelListener", channelListener);
 		}
-
 	}, []);
 
 	if (!isAuth)
@@ -92,16 +102,22 @@ function ChatPage () {
 	if (channels === undefined){
 		return (<LoadingPage />);
 	}
+
 	return (
 		<div id="chat-page">
-			<Channel channels={channels} />	
-			{/* <Channel setSelectedChannel={setSelectedChannel} channels={channels} /> */}
-			{/* <OnChannel selectedChannel={selectedChannel} isInfoChannelActive={isInfoChannelActive} setIsInfoChannelActive={setIsInfoChannelActive}/> */}
-			{/* <InfoChannel selectedChannel={selectedChannel} isInfoChannelActive={isInfoChannelActive} setIsInfoChannelActive={setIsInfoChannelActive}/> */}
-			{/* <Channels /> */}
-			{/* <Message /> */}
-			{/* <MessageInput /> */}
-			{/* <Users /> */}
+			<ChannelContext.Provider value={{ channels, activeChannel, setActiveChannel }}>
+				<Channel />	
+				{/* <Channel channelsData={channels} />	 */}
+				{/* <Channel setActiveChannel={setActiveChannel} channels={channels} /> */}
+
+				<ActiveChannel />
+				{/* <ActiveChannel channelsData={activeChannel}/> */}
+				{/* <InfoChannel activeChannel={activeChannel} isInfoChannelActive={isInfoChannelActive} setIsInfoChannelActive={setIsInfoChannelActive}/> */}
+				{/* <Channels /> */}
+				{/* <Message /> */}
+				{/* <MessageInput /> */}
+				{/* <Users /> */}
+			</ChannelContext.Provider>
 		</div>
 	)
 }

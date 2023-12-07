@@ -3,29 +3,33 @@ import { ReactComponent as IconCreate } from '../assets/chat/iconCreate.svg';
 import { ReactComponent as IconPublic } from '../assets/chat/iconPublic.svg';
 import { ReactComponent as IconInvolved } from '../assets/chat/iconInvolved.svg';
 import './Channel.css';
-import { IChannelProps, IChannel, IMessage } from './iChannel';
+import { IChannel, IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 import ChannelCreate from './ChannelCreate';
+import { useChannelContext } from './ChatPage';
 
 // function Channel({ setSelectedChannel, channels }: IChannelProps) {
-	function Channel({ channels }: IChannelProps) {
+	function Channel() {
 	console.log("---------CHAT-CHANNELS---------");
+	const { channels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
-	// const [showPassword, setShowPassword] = useState(false);
-	// const CreateChannelForm = useRef<HTMLFormElement>(null);
-	// const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState('');
 	const socket = useSocket();
 
 	const handleTabClick = (tabId: string) => {
-		setActiveTab(tabId);
-		// Implement logic to update content based on the selected tab
-		// For now, let's just log a message to the console
-		console.log(`Switched to ${tabId} channel`);
+		if (activeTab != tabId){
+			setActiveTab(tabId);
+			// Implement logic to update content based on the selected tab
+			// For now, let's just log a message to the console
+			console.log(`Switched to ${tabId} tab`);
+		}
 	};
 
 	const handleChannelClick = (channel: IChannel) => {
-			// setSelectedChannel(channel);
+		if (activeChannel != channel){
+			setActiveChannel(channel);
+			console.log(`Switched to ${channel.name} channel`);
+		}
 	};
 
 	return (
@@ -60,7 +64,7 @@ import ChannelCreate from './ChannelCreate';
 							onChange={(e) => setSearchTerm(e.target.value)}
 							placeholder="Search channels..."
 						/>
-						{channels
+						{channels && channels
 							.filter((channel) => channel.status === activeTab && channel.name.toLowerCase().includes(searchTerm.toLowerCase()))
 							.map((channel) => (
 								<div

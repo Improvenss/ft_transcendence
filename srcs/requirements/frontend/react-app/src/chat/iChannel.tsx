@@ -4,19 +4,30 @@ export interface IMessage {
 	timestamp: number;
 }
 
-// Backend DTO
-export interface CreateChannelDto {
-	status: 'public' | 'involved';
-	name: string;
-	type: 'public' | 'private' | 'protected';
-	password?: string;
-	image: string;
+export interface IUser {
+	login: string;
+	imageUrl: string;
+	nickname: string;
+	avatar: string;
 }
 
 export interface IChannel {
 	status: 'public' | 'involved';
 	name: string;
+	description: string;
 	type: 'public' | 'involved';
+	password?: string;
+	image: string;
+	members: IUser[];
+	admins: IUser[];
+	messages: IMessage[];
+}
+
+// Backend DTO
+export interface CreateChannelDto {
+	status: 'public' | 'involved';
+	name: string;
+	type: 'public' | 'private' | 'protected';
 	password?: string;
 	image: string;
 }
@@ -29,13 +40,22 @@ export interface IChannelFormData {
 	description: string;
 }
 
-export interface IChannelProps{
-	// setSelectedChannel:  React.Dispatch<React.SetStateAction<IChannel | null>>;
-	channels: IChannel[];
+export interface IChannelContext {
+	channels: IChannel[] | undefined;
+	activeChannel: IChannel | null;
+	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
 }
 
+// export interface IChannelProps{
+// 	// setActiveChannel:  React.Dispatch<React.SetStateAction<IChannel | null>>;
+// 	channelsData: {
+// 		channels: IChannel[];
+// 		activeChannel: IChannel;
+// 	}
+// }
+
 export interface IOnChannelProps {
-	selectedChannel: IChannel | null;
+	activeChannel: IChannel | null;
 	isInfoChannelActive: boolean;
 	setIsInfoChannelActive: React.Dispatch<React.SetStateAction<boolean>>;
 }
