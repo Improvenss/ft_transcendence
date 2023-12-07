@@ -18,6 +18,9 @@ export class Channel {
 	@IsNotEmpty()
 	public name: string;
 
+	@Column({ nullable: false})
+	public description: string; // Kanal tanımı
+
 	@Column({ type: 'enum', enum: ['public', 'private', 'direct_message']})
 	public type: string; // Kanal tipi: public, private, direct_message
 

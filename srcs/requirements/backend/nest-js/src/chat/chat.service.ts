@@ -66,6 +66,7 @@ export class ChatService {
 					status: 'involved',
 					name: channel.name,
 					type: channel.type,
+					description: channel.description,
 					image: channel.image || 'default_image_url',
 					members: channel.members,
 					admins: channel.admins,

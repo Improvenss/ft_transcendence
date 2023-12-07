@@ -8,6 +8,10 @@ import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateChannelDto } from './dto/chat-channel.dto';
+import { promisify } from 'util';
+import * as fs from 'fs';
+import { ChatGateway } from './chat.gateway';
+import * as bcrypt from 'bcrypt';
 
 // Dosya Adı Değiştirme Fonksiyonu
 	const editFileName = (req, file, callback) => {
@@ -59,6 +63,7 @@ export class ChatController {
 	constructor(
 		private readonly chatService: ChatService,
 		private readonly usersService: UsersService,
+		private readonly chatGateway: ChatGateway,
 	) {}
 
 	// ---------- Create ---------
@@ -83,35 +88,44 @@ export class ChatController {
 		@Body('description') description: string,
 	  ) {
 		try {
-			console.log("----------->", name, type, password, description);
+			// const findChannel: Channel | Channel[] | any = await this.chatService.findChannel(name);
+			// if (findChannel !== null){
+			// 	throw new Error("A channel with the same name already exists.");
+			// }
 			const tmpUser = await this.usersService.findOne(null, user.login);
 			if (!tmpUser) {
-				throw new HttpException(
-					`User with login '${user.login}' does not exist.`,
-					HttpStatus.INTERNAL_SERVER_ERROR,
-				);
+				throw new NotFoundException(`User not found for channel create: ${user.login}`);
 			}
 			if (!image){
 				throw new Error('No file uploaded');
 			}
-			console.log("image:>",image);
-			console.log("user:>",tmpUser);
 			const imgUrl =  "https://192.168.1.120:3000/uploads/" + image.filename;
-
 			const	createChannelDto: CreateChannelDto = {
 				name: name as string,
 				type: type as string,
-				password: password as string,
+				description: description as string,
+				// password: password as string,
+				password: password === ('' || undefined || null)
+					? null
+					: bcrypt.hashSync(
+						password,
+						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 				image: imgUrl as string,
 				members: [tmpUser],
 				admins: [tmpUser],
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
 			console.log(response);
+			console.log(createChannelDto);
+			this.chatGateway.server.emit('channelListener'); // kullancılara yeni channel oluşturuldu infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
 			return ({
 				message: `${response}`,
 			});
 		} catch (err) {
+			if (image) {
+				await promisify(fs.promises.unlink)(image.path);
+				console.log('Image remove successfully.');
+			}
 			console.error("@Post('/channel/create'): ", err);
 			return ({ message: "Channel not created." });
 		}

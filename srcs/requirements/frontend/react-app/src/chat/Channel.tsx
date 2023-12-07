@@ -9,6 +9,7 @@ import ChannelCreate from './ChannelCreate';
 
 // function Channel({ setSelectedChannel, channels }: IChannelProps) {
 	function Channel({ channels }: IChannelProps) {
+	console.log("---------CHAT-CHANNELS---------");
 	const [activeTab, setActiveTab] = useState('involved');
 	// const [showPassword, setShowPassword] = useState(false);
 	// const CreateChannelForm = useRef<HTMLFormElement>(null);
@@ -17,9 +18,6 @@ import ChannelCreate from './ChannelCreate';
 	const socket = useSocket();
 
 	const handleTabClick = (tabId: string) => {
-		// if (tabId !== 'create') {
-		// 	setShowPassword(false);
-		// }
 		setActiveTab(tabId);
 		// Implement logic to update content based on the selected tab
 		// For now, let's just log a message to the console
@@ -50,7 +48,7 @@ import ChannelCreate from './ChannelCreate';
 						{activeTab === 'involved' && <h1>Involved Rooms</h1>}
 					</div>
 					{activeTab === 'create' && (
-						<ChannelCreate />
+						<ChannelCreate onSuccess={handleTabClick}/>
 					)}
 
 					{(activeTab === 'public' || activeTab === 'involved') && (

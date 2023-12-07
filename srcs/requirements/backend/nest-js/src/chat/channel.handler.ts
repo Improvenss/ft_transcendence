@@ -24,6 +24,7 @@ export async function handleCreateChannel(
 	const createChannelDto: CreateChannelDto = {
 		name: formData.name as string,
 		type: formData.type as string,
+		description: null,
 		password: formData.password === ('' || undefined || null)
 			? null
 			: bcrypt.hashSync(

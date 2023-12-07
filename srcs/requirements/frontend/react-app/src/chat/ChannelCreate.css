@@ -8,14 +8,14 @@ form {
 	background-color: black;
 }
 
-#image-file {
+#channel-image {
 	padding: 5px;
 	border-radius: 5px;
 	background-color: black;
 	color: #ccc;
 }
 
-#set-channel-image {
+#channel-image-output {
 	display: block;
 	margin: auto;
 	max-width: 100px;

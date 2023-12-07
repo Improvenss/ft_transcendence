@@ -29,14 +29,14 @@ function ChatPage () {
 	const socket = useSocket();
 	const userCookie = Cookies.get("user");
 	const navigationType = useNavigationType();
-	const status = localStorage.getItem('userLoginPage');
+	// const status = localStorage.getItem('userLoginPage');
 
-	useEffect(() => {
-		window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
-		return () => {
-			window.onbeforeunload = null;
-		};
-	}, []);
+	// useEffect(() => {
+	// 	window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
+	// 	return () => {
+	// 		window.onbeforeunload = null;
+	// 	};
+	// }, []);
 	// const [selectedChannel, setSelectedChannel] = useState<IChannel | null>(() => {
 	// 	const globalChannel = channels.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
 	// 	if (globalChannel === undefined)
@@ -76,7 +76,8 @@ function ChatPage () {
 		fetchChannels();
 
 		const	channelListener = (channel: IChannel) => {
-			fetchChannels();
+			console.log("socket listen");
+			fetchChannels(); // channel list update için
 		}
 		socket?.on("channelListener", channelListener);
 		return () => {
@@ -91,7 +92,6 @@ function ChatPage () {
 	if (channels === undefined){
 		return (<LoadingPage />);
 	}
-
 	return (
 		<div id="chat-page">
 			<Channel channels={channels} />	

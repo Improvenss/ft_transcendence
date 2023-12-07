@@ -11,6 +11,9 @@ export class CreateChannelDto {
 	type: string;
 
 	@IsString()
+	description: string;
+
+	@IsString()
 	@IsOptional()
 	password: string;
 
