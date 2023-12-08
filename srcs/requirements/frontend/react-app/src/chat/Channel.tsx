@@ -17,7 +17,7 @@ import { useChannelContext } from './ChatPage';
 	const socket = useSocket();
 
 	const handleTabClick = (tabId: string) => {
-		if (activeTab != tabId){
+		if (activeTab !== tabId){
 			setActiveTab(tabId);
 			// Implement logic to update content based on the selected tab
 			// For now, let's just log a message to the console
@@ -26,9 +26,12 @@ import { useChannelContext } from './ChatPage';
 	};
 
 	const handleChannelClick = (channel: IChannel) => {
-		if (activeChannel != channel){
+		if (activeChannel !== channel){
 			setActiveChannel(channel);
 			console.log(`Switched to ${channel.name} channel`);
+		}
+		else {
+			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
 		}
 	};
 
@@ -69,6 +72,7 @@ import { useChannelContext } from './ChatPage';
 							.map((channel) => (
 								<div
 									key={channel.name}
+									className={activeChannel && activeChannel.name === channel.name ? 'active' : 'inactive'}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
 									onClick={() => {
 										if (activeTab === 'public'){

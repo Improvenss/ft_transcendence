@@ -99,7 +99,7 @@ export class ChatController {
 			if (!image){
 				throw new Error('No file uploaded');
 			}
-			const imgUrl =  "https://192.168.1.120:3000/uploads/" + image.filename;
+			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
 			const	createChannelDto: CreateChannelDto = {
 				name: name as string,
 				type: type as string,

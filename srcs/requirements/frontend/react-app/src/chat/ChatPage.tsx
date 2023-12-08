@@ -8,7 +8,7 @@ import Channel from "./Channel";
 import ActiveChannel from "./ActiveChannel";
 import { createContext, useContext, useEffect, useState } from "react";
 import { IChannel, IChannelContext } from './iChannel';
-// import InfoChannel from "./InfoChannel";
+import ChannelInfo from "./ChannelInfo";
 import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
@@ -27,6 +27,8 @@ export const ChannelContext = createContext<IChannelContext>({
 	channels: undefined,
 	activeChannel: null,
 	setActiveChannel: () => {},
+	channelInfo: false,
+	setChannelInfo: () => {},
 });
 
 export const useChannelContext = () => {
@@ -48,7 +50,7 @@ function ChatPage () {
 	// }, []);
 
 
-	// const [isInfoChannelActive, setIsInfoChannelActive] = useState(false);
+	const [channelInfo, setChannelInfo] = useState(false);
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
 	const [activeChannel, setActiveChannel] = useState<IChannel | null>(() => {
 		const globalChannel = channels?.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
@@ -78,6 +80,7 @@ function ChatPage () {
 			// const frontendChannels = mapBackendToFrontend(data); ///buna gerek olmayabilir, sonra kontrol et.
 			// console.log("--->", frontendChannels);
 			// setChannels(frontendChannels);
+			console.log("Get Channels: ", data);
 			setChannels(data);
 		  } catch (error) {
 			console.error('Veri getirme hatası:', error);
@@ -105,14 +108,10 @@ function ChatPage () {
 
 	return (
 		<div id="chat-page">
-			<ChannelContext.Provider value={{ channels, activeChannel, setActiveChannel }}>
+			<ChannelContext.Provider value={{ channels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
 				<Channel />	
-				{/* <Channel channelsData={channels} />	 */}
-				{/* <Channel setActiveChannel={setActiveChannel} channels={channels} /> */}
-
 				<ActiveChannel />
-				{/* <ActiveChannel channelsData={activeChannel}/> */}
-				{/* <InfoChannel activeChannel={activeChannel} isInfoChannelActive={isInfoChannelActive} setIsInfoChannelActive={setIsInfoChannelActive}/> */}
+				<ChannelInfo />
 				{/* <Channels /> */}
 				{/* <Message /> */}
 				{/* <MessageInput /> */}

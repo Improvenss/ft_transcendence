@@ -1,34 +1,27 @@
 import './ActiveChannel.css';
-import { IOnChannelProps } from './iChannel';
+//import { IOnChannelProps } from './iChannel';
 import { ReactComponent as IconMenu } from '../assets/chat/iconMenu.svg';
 import { useState } from 'react';
 import { useChannelContext } from './ChatPage';
 
 // function ActiveChannel({ activeChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps){
 function ActiveChannel(){
-	const { activeChannel } = useChannelContext();
+	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 
 	const MAX_CHARACTERS = 100; // İstenilen maksimum karakter sayısı
-	const userList = [
-		{id: 'akaraca', name: 'akaraca', image:'/userImg.png'},
-		{id: 'damnn', name: 'damnn', image:'/userImg2.png'},
-		{id: 'uercan', name: 'uercan', image:'/dogSlayer.png'},
-		{id: 'gsever', name: 'gsever', image:'/heart.jpg'},
-		{id: 'admin', name: 'admin', image:'/watcher.jpg'}
-	];
-	// const userList = activeChannel?.members;
+	const userList = activeChannel?.members;
 	const [messageInput, setMessageInput] = useState('');
 
 	const handleAdditionalMenuClick = () => {
 		// Toggle the state to activate/deactivate infoChannel
-		// setIsInfoChannelActive(!isInfoChannelActive);
+		setChannelInfo(!channelInfo);
 	};
 
-	function getUserImage(senderId: string) {
-		const user = userList.find(user => user.id === senderId);
+	function getUserImage(sender: string) {
+		const user = userList?.find(user => user.login === sender);
 	  
 		if (user) {
-		  return user.image;
+		  return user.imageUrl;
 		} else {
 		  // Kullanıcı bulunamazsa bir varsayılan resim veya boş bir dize dönebilirsiniz.
 		  return 'default-image.jpg';
