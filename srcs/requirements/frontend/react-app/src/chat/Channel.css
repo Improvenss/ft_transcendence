@@ -119,8 +119,23 @@
    width: 30px;
    border-radius: 50%;
    margin-right: 5px;
+   object-fit: cover; /* Resmin orantılı olarak kaplanması */
 }
 
 #container-content .active {
 	background-color: darkred;
+}
+
+/*------------ */
+
+#joinChannel {
+	position: sticky;
+	bottom: 0;
+	width: 100%;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+#joinChannel:hover {
+	background-color: #45a049;
 }

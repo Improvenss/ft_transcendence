@@ -11,8 +11,8 @@ const defaultForm: IChannelFormData = {
 	description: ''
 }
 
-function CreateChannelForm({ onSuccess }: { onSuccess: (tabId: string) => void }){
-	console.log("---------CHANNEL-CREATE-FORM---------");
+function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
+	console.log("---------CHANNEL-CREATE----------");
 	const userCookie = Cookies.get("user");
 	const CreateChannelForm = useRef<HTMLFormElement>(null);
 	const [channelData, setChannelData] = useState<IChannelFormData>(defaultForm);
@@ -40,7 +40,11 @@ function CreateChannelForm({ onSuccess }: { onSuccess: (tabId: string) => void }
 	//	}
 //-------------------------------------------------------------------//
 
-		if (name === 'image' && files && !files[0].type.startsWith('image/')){
+		if (name === 'image' && files && !files[0]?.type.startsWith('image/')){
+			setChannelData((prevData) => ({
+				...prevData,
+				image: null,
+			}));
 			console.error('Lütfen bir resim dosyası seçin.');
 		} else {
 			setChannelData({
@@ -147,4 +151,4 @@ function CreateChannelForm({ onSuccess }: { onSuccess: (tabId: string) => void }
 	);
 }
 
-export default CreateChannelForm;
+export default ChannelCreate;

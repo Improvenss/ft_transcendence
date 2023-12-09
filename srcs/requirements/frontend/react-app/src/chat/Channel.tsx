@@ -7,6 +7,7 @@ import { IChannel, IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 import ChannelCreate from './ChannelCreate';
 import { useChannelContext } from './ChatPage';
+import ChannelJoin from './ChannelJoin';
 
 // function Channel({ setSelectedChannel, channels }: IChannelProps) {
 	function Channel() {
@@ -53,11 +54,14 @@ import { useChannelContext } from './ChatPage';
 						{activeTab === 'create' && <h1>Create a Channel</h1>}
 						{activeTab === 'public' && <h1>Public Channels</h1>}
 						{activeTab === 'involved' && <h1>Involved Rooms</h1>}
+						{activeTab === 'join' && <h1>Join Channel</h1>}
 					</div>
 					{activeTab === 'create' && (
 						<ChannelCreate onSuccess={handleTabClick}/>
 					)}
-
+					{activeTab === 'join' && (
+						<ChannelJoin onSuccess={handleTabClick} />
+					)}
 					{(activeTab === 'public' || activeTab === 'involved') && (
 						<div>
 						<input
@@ -87,6 +91,9 @@ import { useChannelContext } from './ChatPage';
 									<span>{channel.name}</span>
 								</div>
 						))}
+						{activeTab === 'involved' &&
+ 							<button id="joinChannel" onClick={() => handleTabClick('join')}> Join Channel </button>
+						}
 						</div>
 					)}
 				</div>

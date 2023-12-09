@@ -24,6 +24,7 @@
 	transform: scale(1.2);
 	margin-right: 10px;
 	border-radius: 20%;
+	object-fit: cover; /* Resmin orantılı olarak kaplanması */
 }
 
 #channel-header h2 {
