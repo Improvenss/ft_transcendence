@@ -1,9 +1,9 @@
-import { useState, ChangeEvent, FormEvent, useRef } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
+import { IChannelCreateForm } from "./iChannel";
 import './ChannelCreate.css';
-import { IChannelFormData } from "./iChannel";
 import Cookies from "js-cookie";
 
-const defaultForm: IChannelFormData = {
+const defaultForm: IChannelCreateForm = {
 	name: '',
 	type: 'public',
 	password: null,
@@ -14,8 +14,7 @@ const defaultForm: IChannelFormData = {
 function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 	console.log("---------CHANNEL-CREATE----------");
 	const userCookie = Cookies.get("user");
-	const CreateChannelForm = useRef<HTMLFormElement>(null);
-	const [channelData, setChannelData] = useState<IChannelFormData>(defaultForm);
+	const [channelData, setChannelData] = useState<IChannelCreateForm>(defaultForm);
 
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value } = e.currentTarget;
@@ -56,6 +55,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		const formElement = e.currentTarget as HTMLFormElement;
 
 		console.log(channelData);
 
@@ -84,11 +84,11 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 			console.error(error);
 		}
 		setChannelData(defaultForm);
-		CreateChannelForm.current?.reset();
+		formElement.reset();
 	  };
 
 	return (
-		<form ref={CreateChannelForm} onSubmit={handleSubmit}>
+		<form onSubmit={handleSubmit}>
 			<label htmlFor="channel-name">Channel Name: <span className="required">*</span></label>
 			<input
 				id="channel-name"
@@ -142,7 +142,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 			{channelData.image && (
 				<img 
 					src={URL.createObjectURL(channelData.image)}
-					alt="Selected Channel Image"
+					alt={channelData.image.name}
 					id="channel-image-output"
 				/>
 			)}

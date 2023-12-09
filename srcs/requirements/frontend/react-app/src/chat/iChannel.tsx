@@ -23,21 +23,18 @@ export interface IChannel {
 	messages: IMessage[];
 }
 
-// Backend DTO
-export interface CreateChannelDto {
-	status: 'public' | 'involved';
-	name: string;
-	type: 'public' | 'private' | 'protected';
-	password?: string;
-	image: string;
-}
-
-export interface IChannelFormData {
+export interface IChannelCreateForm {
 	name: string;
 	type: 'public' | 'private';
 	password: string | null;
 	image: File | null;
 	description: string;
+}
+
+export interface IChannelJoinForm {
+	name: string,
+	password: string,
+	type: 'private',
 }
 
 export interface IChannelContext {
@@ -46,6 +43,15 @@ export interface IChannelContext {
 	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
 	channelInfo: boolean;
 	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+// Backend DTO
+export interface CreateChannelDto {
+	status: 'public' | 'involved';
+	name: string;
+	type: 'public' | 'private' | 'protected';
+	password?: string;
+	image: string;
 }
 
 // export interface IChannelProps{
@@ -67,3 +73,4 @@ export interface IFriend {
 	status: 'online' | 'offline' | 'AFK';
 	image: string;
 }
+

@@ -1,28 +1,31 @@
-import { ChangeEvent, FormEvent, useRef } from 'react';
+import { FormEvent } from 'react';
+import { IChannelJoinForm } from './iChannel';
 import './ChannelJoin.css';
 
 function ChannelJoin({ onSuccess }: { onSuccess: (tabId: string) => void}){
 	console.log("---------CHANNEL-JOIN----------");
-	const joinChannelForm = useRef<HTMLFormElement>(null);
-
-	const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-
-	}
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
-
+		const formElement = e.currentTarget as HTMLFormElement;
+		const formObject: IChannelJoinForm = {
+			name: (formElement.elements.namedItem('name') as HTMLInputElement).value,
+			password: (formElement.elements.namedItem('password') as HTMLInputElement).value,
+			type: 'private',
+		};
+		console.log(formObject.name);
+		console.log(formObject.password);
+		formElement.reset();
 	}
 
 	return (
-		<form ref={joinChannelForm} onSubmit={handleSubmit}>
+		<form onSubmit={handleSubmit}>
 			<label htmlFor="channel-name">Channel Name:</label>
 			<input
 				id="channel-name"
 				placeholder="Enter channel name"
 				type="text"
 				name="name"
-				onChange={handleInputChange}
 				required
 			/>
 			<label htmlFor="channel-password">Channel Password:</label>
@@ -31,7 +34,6 @@ function ChannelJoin({ onSuccess }: { onSuccess: (tabId: string) => void}){
 				placeholder="Enter channel password"
 				type="password"
 				name="password"
-				onChange={handleInputChange}
 				required
 			/>
 			<button type="submit">Join Channel</button>
