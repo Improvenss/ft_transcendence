@@ -115,8 +115,6 @@ export class ChatController {
 				admins: [tmpUser],
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
-			console.log(response);
-			console.log(createChannelDto);
 			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
 			// this.chatGateway.server.to(name).emit('channelListener');
 			// this.chatGateway.joinChannel(name); // Kullanıcının kanala katılması gerekiyor //1 kere çalışıyor
@@ -157,8 +155,8 @@ export class ChatController {
 		try
 		{
 			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
-			console.log("@Req() user:", user);
-			return (await this.chatService.checkInvolvedUser((await this.chatService.findChannel(channel, relations)), user));
+			const	tmpChannel = await this.chatService.findChannel(channel, relations);
+			return (await this.chatService.checkInvolvedUser(tmpChannel, user));
 		}
 		catch (err)
 		{
@@ -167,31 +165,47 @@ export class ChatController {
 		}
 	}
 
+	@Get('/channel/message')
+	async findMessage(
+		@Req() {user},
+		@Query('message') message: string | undefined,
+		@Query('relations') relations: string[] | null | 'all',
+	) {
+		try
+		{
+			console.log(`${C.B_GREEN}GET: Message: [${message}], Relation: [${relations}]${C.END}`);
+			const	tmpMessage = await this.chatService.findMessage(message, relations);
+			console.log("tmpMessage:", tmpMessage);
+			return (tmpMessage);
+		}
+		catch(err)
+		{
+			console.log("@Get('/channel/message'):", err);
+			return (null)
+		}
+	}
+
 	// ---------- Delete ---------
 	@Delete('/channel')
 	async removeChannel(
 		@Req() {user},
-		@Query('channel') channel: string | undefined
+		@Query('channel') channel: string | undefined,
 	){
 		try
 		{
-			console.log(`DELETE: Channel: ${channel}`);
-			if (channel === "all")
-			{
-				const	response = await this.chatService.removeAllChannel();
-				console.log(`All channels removed!`);
-				return (response);
-			}
-			const tmpUser = await this.chatService.removeChannel(channel);
-			if (!tmpUser)
-				throw (new NotFoundException("name: Channel does not exist!"));
-			return (tmpUser);
+			console.log(`${C.B_RED}DELETE: Channel: ${channel}${C.END}`);
+			const tmpChannel = await this.chatService.removeChannel(channel);
+			if (!tmpChannel)
+				throw (new NotFoundException("Channel does not exist!"));
+				// throw (new NotFoundException("name: Channel does not exist!"));
+			this.chatGateway.server.emit('channelListener'); // Kullanicilara channel'in silinme infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
+			console.log("return'dan onceki tmpChannel:", tmpChannel);
+			return (tmpChannel);
 		}
 		catch (err)
 		{
-			console.error("@Delete('/channel'): removeChannel(): ", err);
-			return (null);
+			console.error("@Delete('/channel'): removeChannel():", err);
+			return ({error: err.response});
 		}
-
 	}
 }

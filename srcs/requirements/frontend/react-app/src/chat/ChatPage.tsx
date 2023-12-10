@@ -90,14 +90,14 @@ function ChatPage () {
 		fetchChannels();
 
 		const	channelListener = (channel: IChannel) => {
-			console.log("socket listen");
+			console.log("Channel listesi guncelleniyor cunku degisiklik oldu.");
 			fetchChannels(); // channel list update için
 		}
 		socket?.on("channelListener", channelListener);
 		return () => {
 			socket?.off("channelListener", channelListener);
 		}
-	}, []);
+	}, [activeChannel]);
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);

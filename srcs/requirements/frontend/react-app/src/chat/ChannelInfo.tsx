@@ -1,14 +1,16 @@
- import { useRef, useState } from "react";
- import { IFriend } from "./iChannel";
- import { ReactComponent as IconUsers } from '../assets/chat/iconUsers.svg';
- import { ReactComponent as IconSettings } from '../assets/chat/iconSettings.svg';
- import { ReactComponent as IconAddUser } from '../assets/chat/iconAddUser.svg';
- import './ChannelInfo.css';
+import { useRef, useState } from "react";
+import { IFriend } from "./iChannel";
+import { ReactComponent as IconUsers } from '../assets/chat/iconUsers.svg';
+import { ReactComponent as IconSettings } from '../assets/chat/iconSettings.svg';
+import { ReactComponent as IconAddUser } from '../assets/chat/iconAddUser.svg';
+import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
+import Cookies from "js-cookie";
 
  function InfoChannel() {
 	// { selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps
 	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
+	const userCookie = Cookies.get("user");
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
  	const inputRefUpdateChannelName = useRef<HTMLInputElement>(null);
@@ -26,6 +28,22 @@ import { useChannelContext } from "./ChatPage";
  	//	// Toggle the state to activate/deactivate infoChannel
  	//	setChannelInfo(!channelInfo);
  	//};
+
+	 const	handleChannelDelete = async (selectedChannel: string) => {
+		console.log("Silinecek Channel:", selectedChannel);
+		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
+			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+			},
+		});
+		if (!responseChannelDelete.ok) {
+			throw new Error('API-den veri alınamadı.');
+		}
+		const data = await responseChannelDelete.json();
+		console.log("DELETE Channel:", data);
+	}
 
  	const handleTabInfoClick = (tabId: string) => {
  		setActiveTabInfo(tabId);
@@ -103,7 +121,9 @@ import { useChannelContext } from "./ChatPage";
  								<button id='leaveButton'>
  									Leave Channel
  								</button>
- 								<button id='deleteButton'>
+ 								<button
+									id='deleteButton'
+									onClick={() => {handleChannelDelete(activeChannel.name)}}>
  									Delete Channel
  								</button>
  							</div>

@@ -42,8 +42,10 @@ export class Channel {
 
 	//----------------------Message----------------------------//
 
-	@OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
-	@JoinColumn()
+	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
+	// @OneToMany(() => Message, message => message.channel, {nullable: true, cascade: true})
+	// @OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
+	// @JoinColumn()
 	public messages: Message[]; // Kanalın mesajları
 
 	constructor(channel: Partial<Channel>) {
@@ -67,8 +69,8 @@ export class Message {
 	// @JoinColumn({ name: 'userId' })
 	public author: User; // Mesajın yazarı
 
-	@ManyToOne(() => Channel, { eager: true })
-	// @ManyToOne(() => Channel, channel => channel.messages)
+	// @ManyToOne(() => Channel, { eager: true })
+	@ManyToOne(() => Channel, channel => channel.messages)
 	// @JoinColumn({ name: 'channelId' })
 	public channel: Channel; // Mesajın gönderildiği kanal
 
