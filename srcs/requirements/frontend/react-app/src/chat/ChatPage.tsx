@@ -58,7 +58,7 @@ function ChatPage () {
 			return (null);
 		return (globalChannel);
 	});
-	
+
 	useEffect(() => {
 		const fetchChannels = async () => {
 		  try {

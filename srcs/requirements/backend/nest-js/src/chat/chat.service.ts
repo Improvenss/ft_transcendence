@@ -36,7 +36,7 @@ export class ChatService {
 		channel: string | undefined,
 		relations?: string[] | 'all' | null
 	){
-		console.log(`Service Chat: findChannel(): relations(${typeof(relations)}): [${relations}]`);
+		// console.log(`Service Chat: findChannel(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
 			? {members: true, admins: true, messages: true} // relations all ise hepsini ata.
 			: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
@@ -44,7 +44,7 @@ export class ChatService {
 				: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
 					? { [relations]: true } // sadece bunu ata.
 					: null)); // hicbiri degilse null ata.
-		console.log(`Service Chat: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		// console.log(`Service Chat: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
 		const tmpChannel = (channel === undefined)
 			? await this.channelRepository.find({relations: relationObject})
 			: await this.channelRepository.findOne({
@@ -70,7 +70,13 @@ export class ChatService {
 					image: channel.image || 'default_image_url',
 					members: channel.members,
 					admins: channel.admins,
-					messages: channel.messages
+					// messages: channel.messages
+					messages: channel.messages.map((message) => ({
+						id: message.id,
+						sender: message.author,
+						content: message.message,
+						timestamp: message.sentAt,
+					})),
 				};
 			} else if (channel.type === 'public') {
 				// Public channel with no user involvement

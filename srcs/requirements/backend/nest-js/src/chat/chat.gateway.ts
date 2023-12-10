@@ -14,6 +14,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import * as bcrypt from 'bcrypt';
 import { handleCreateChannel } from './channel.handler';
+import { CreateMessageDto } from './dto/chat-message.dto';
 
 var count: number = 0;
 
@@ -63,6 +64,27 @@ export class ChatGateway {
 	handleDisconnect(client: Socket) {
 		console.log(`Client disconnected 💔: socket.id[${client.id}]`);
 		//Do stuffs
+	}
+
+	// joinChannel(channel: Channel){
+	// joinChannel(name: string){ //1 kere çalışıyor, o da kanal oluşturunca 
+	// 	// Socket.IO'nun sağladığı join fonksiyonunu kullanarak kanala katılma işlemi
+	// 	// this.server.socketsJoin(channel.name);
+	// 	console.log(`Client joined channel: [${name}]`);
+	// 	this.server.socketsJoin(name);
+	// }
+
+	@SubscribeMessage('joinChannel')
+	async joinChannel(@Body() channel: {name: string},
+		@ConnectedSocket() socket: Socket)
+	{
+		const	responseUser: User | null = await this.usersService.findOneSocket(socket);
+		if (responseUser === null)
+			return (new NotFoundException("ERROR: User not found for create game room!"))
+		console.log("Joined new room:",channel);
+		socket.join(channel.name);
+		// this.server.to(channel).emit('channelListener', `Joined ${channel} room`); 
+		// this.server.socketsJoin(channel);
 	}
 
 	/**
@@ -139,15 +161,45 @@ export class ChatGateway {
 	 */
 	@SubscribeMessage('createMessage')
 	async handleMessage(
-			@MessageBody() 
-			{ channel, message }:
-				{ channel: string, message: string })
-	{
-		console.log(`BACKEND: gelen msg[${count++}]:`, message);
-		console.log('MessageBody():', {channel, message});
-		this.server.to(channel).emit("messageToClient", message);
-	}
+		@MessageBody() 
+		{ channel, author, message }:
+			{ channel: Channel, author: User, message: string }
+	){
+		try {
+			const tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(channel.name);
+			const tmpUser: User = await this.usersService.findOne(null, author.login);
 
+			const createMessageDto: CreateMessageDto = {
+				message: message,
+				sentAt: new Date(),
+				author: tmpUser,
+				channel: tmpChannel,
+			};
+			// console.log("createMessageDto:", createMessageDto);
+			const response = await this.chatService.createMessage(createMessageDto);
+
+			const returnMessage = {
+				sender: createMessageDto.author,
+				content: createMessageDto.message,
+				timestamp: createMessageDto.sentAt,
+			}
+			console.log("Message Save response:", response);
+			this.server.to(channel.name).emit("listenChannelMessage", returnMessage);
+		} catch (err){
+			console.log("CreateMessage Err: ", err);
+		}		
+	}
+	// async handleMessage(
+	// 		@MessageBody() 
+	// 		{ channel, message }:
+	// 			{ channel: string, message: string })
+	// {
+	// 	console.log(`BACKEND: gelen msg[${count++}]:`, message);
+	// 	console.log('MessageBody():', {channel, message});
+	// 	this.server.to(channel).emit("messageToClient", message);
+	// }
+
+/*
 	@SubscribeMessage('joinChannel')
 	async handleJoinChannel(@Body() formData: any,
 			@ConnectedSocket() socket: Socket)
@@ -178,6 +230,7 @@ export class ChatGateway {
 		else
 			return (new Error("Socket: 'joinChannel': Unexpected error!"));
 	}
+*/
 
 	@SubscribeMessage('leaveChannel')
 	async handleLeaveChannel(@Body() data: any,

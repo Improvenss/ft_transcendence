@@ -117,6 +117,9 @@ export class ChatController {
 			const response = await this.chatService.createChannel(createChannelDto);
 			console.log(response);
 			console.log(createChannelDto);
+			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
+			// this.chatGateway.server.to(name).emit('channelListener');
+			// this.chatGateway.joinChannel(name); // Kullanıcının kanala katılması gerekiyor //1 kere çalışıyor
 			this.chatGateway.server.emit('channelListener'); // kullancılara yeni channel oluşturuldu infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
 			return ({
 				message: `${response}`,

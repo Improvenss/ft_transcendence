@@ -1,5 +1,6 @@
 export interface IMessage {
-	sender: string;
+	id: number;
+	sender: IUser;
 	content: string;
 	timestamp: number;
 }

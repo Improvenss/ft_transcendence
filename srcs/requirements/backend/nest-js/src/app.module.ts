@@ -37,6 +37,7 @@ import { JwtModule } from '@nestjs/jwt';
 		ChatModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, ChatGateway, ChatService], // Buraya da nest g gateway chat kodunu calistirinca geldi.
+	providers: [AppService, ChatService], // Buraya da nest g gateway chat kodunu calistirinca geldi.
+	// providers: [AppService, ChatGateway, ChatService],
 })
 export class AppModule {}

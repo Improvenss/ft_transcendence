@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ReactComponent as IconCreate } from '../assets/chat/iconCreate.svg';
 import { ReactComponent as IconPublic } from '../assets/chat/iconPublic.svg';
 import { ReactComponent as IconInvolved } from '../assets/chat/iconInvolved.svg';
@@ -35,6 +35,29 @@ import ChannelJoin from './ChannelJoin';
 			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
 		}
 	};
+
+	useEffect(() => {
+		if (channels){
+			channels
+			.filter((channel) => channel.status === 'involved')
+			.forEach((channel) => {
+				socket?.emit('joinChannel', { name: channel.name });
+			});
+		}
+	}, [channels, socket]);
+
+	// useEffect(() => {
+	// 	const channelListener = (data: any) => {
+	// 	if (activeChannel && activeChannel.name === data.channelName) {
+	// 		console.log("Received command for active channel:", data);
+	// 	}
+	// 	};
+	
+	// 	socket?.on("channelListener", channelListener);
+	// 	return () => {
+	// 		socket?.off("channelListener", channelListener);
+	// 	};
+	// }, [socket, activeChannel]);
 
 	return (
 		<div id="channel">

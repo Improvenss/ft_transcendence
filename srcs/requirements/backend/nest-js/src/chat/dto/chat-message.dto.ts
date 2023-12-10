@@ -1,19 +1,25 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsString, IsDate, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsDate, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
+import { User } from 'src/users/entities/user.entity';
+import { Channel } from '../entities/chat.entity';
 
 export class CreateMessageDto {
 	@IsString()
+	@IsNotEmpty()
 	message: string;
 
 	@IsDate()
 	@IsOptional()
-	sentAt?: Date;
+	@IsNotEmpty()
+	sentAt: Date;
 
-	@IsNumber()
-	userId: number;
+	// @IsNumber()
+	@IsNotEmpty()
+	author: User;
 
-	@IsNumber()
-	channelId: number;
+	// @IsNumber()
+	@IsNotEmpty()
+	channel: Channel;
 }
 
 export class UpdateMessageDto extends PartialType(CreateMessageDto) {}
