@@ -143,6 +143,16 @@ export class ChatController {
 			this.chatGateway.server.emit('channelListener'); // kullancılara yeni channel oluşturuldu infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
 			return ({
 				message: `${response}`,
+				channel: {
+					status: 'involved',
+					name: name,
+					type: type,
+					description: description,
+					image: imgUrl,
+					members: [tmpUser],
+					admins: [tmpUser],
+					messages: [],
+				},
 			});
 		} catch (err) {
 			if (image) {

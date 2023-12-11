@@ -138,16 +138,29 @@ export class ChatService {
 	async removeChannel(
 		channel: string | undefined,
 	){
-		console.log("chat.service.ts: removeChannel(): Channel:", channel);
-		const tmpChannel = (channel === undefined)
-			? await this.channelRepository.delete({})
-			: await this.channelRepository.findOne({
-					where: { name: channel },
-				});
-		if (!tmpChannel)
-			return (null);
-		await this.channelRepository.remove(tmpChannel as Channel);
-		return (tmpChannel);
+		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel } });
+		if (!tmpChannel) {
+			throw new NotFoundException('Channel does not exist!');
+		}
+
+		// Kanala ait mesajları sil veya ilişkilendirmeyi kes
+		await this.messageRepository.delete({ channel: { id: tmpChannel.id } });
+		
+		// Kanalı sil
+		const deletedChannel = await this.channelRepository.remove(tmpChannel);
+
+		return deletedChannel;
+
+		// console.log("chat.service.ts: removeChannel(): Channel:", channel);
+		// const tmpChannel = (channel === undefined)
+		// 	? await this.channelRepository.delete({})
+		// 	: await this.channelRepository.findOne({
+		// 			where: { name: channel },
+		// 		});
+		// if (!tmpChannel)
+		// 	return (null);
+		// await this.channelRepository.remove(tmpChannel as Channel);
+		// return (tmpChannel);
 		// not: await this.channelRepository.delete({ name: channel }); bunu yaptigimizda channel'in sadece name'sini siliyor.
 	}
 
