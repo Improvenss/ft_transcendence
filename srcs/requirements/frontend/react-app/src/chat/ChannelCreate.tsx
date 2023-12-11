@@ -62,7 +62,8 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 		const formData = new FormData();
 		formData.append('name', channelData.name);
 		formData.append('type', channelData.type);
-		formData.append('password', channelData.password as string);
+		if (channelData.password != null)
+			formData.append('password', channelData.password);
 		formData.append('description', channelData.description);
 		formData.append('image', channelData.image as File);
 

@@ -7,11 +7,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateChannelDto } from './dto/chat-channel.dto';
+import { CreateChannelDto, UpdateChannelDto } from './dto/chat-channel.dto';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { ChatGateway } from './chat.gateway';
 import * as bcrypt from 'bcrypt';
+import { Channel } from './entities/chat.entity';
+import { channel } from 'diagnostics_channel';
 
 // Dosya Adı Değiştirme Fonksiyonu
 	const editFileName = (req, file, callback) => {
@@ -77,6 +79,27 @@ export class ChatController {
 		return this.chatService.createMessage(createMessageDto);
 	}
 
+	@Post('/channel/register')
+	async registerChannel(
+		@Req() {user},
+		@Body() payload: {channel: string, password: string}
+	){
+		try
+		{
+			const	tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(payload.channel, ['members']);
+			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
+				throw (new Error("Password is WRONG!!!"));
+			const tmpUser = await this.usersService.findOne(null, user.login);
+			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser);
+			return ({response: true, message: `${user.login} registered in this ${channel}.`});
+		}
+		catch (err)
+		{
+			console.error("@Post('/channel/register'): registerChannel:", err);
+			return ({warning: err});
+		}
+	}
+
 	@Post('/channel/create')
 	@UseInterceptors(FileInterceptor('image', multerConfig))
 	async createChannel(
@@ -84,7 +107,7 @@ export class ChatController {
 		@UploadedFile() image,
 		@Body('name') name: string,
 		@Body('type') type: string,
-		@Body('password') password: string,
+		@Body('password') password: string | undefined,
 		@Body('description') description: string,
 	  ) {
 		try {
@@ -104,8 +127,7 @@ export class ChatController {
 				name: name as string,
 				type: type as string,
 				description: description as string,
-				// password: password as string,
-				password: password === ('' || undefined || null)
+				password: (password === undefined)
 					? null
 					: bcrypt.hashSync(
 						password,

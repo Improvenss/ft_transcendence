@@ -79,7 +79,9 @@ export class ChatService {
 	async findChannelUser(channel: Channel, user: User) {
 		if (!channel || !user)
 			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
-		const foundUser = channel.members.find((channelUser) => channelUser.id === user.id);
+		console.log(channel.members);
+		console.log(user);
+		const foundUser = channel.members.find((channelUser) => channelUser.login === user.login);
 		if (!foundUser)
 			return (false);
 		return (true);
@@ -119,8 +121,11 @@ export class ChatService {
 		return involvedChannelsInfo;
 	}
 	
-	async updateChannel(channel: number | string | null, updateChannelDto: UpdateChannelDto) {
-		// const tmpChannel = await this.channelRepository.findOne(channel, { relations: ['users'] });
+	async updateChannel(channel: Channel | Channel[] | any, user: User) {
+		if (await this.findChannelUser(channel, user))
+			throw (new Error(`${user.login} already in this ${channel.name}.`));
+		channel.members.push(user);
+		return (this.entityManager.save(channel));
 	}
 
 	async updateMessage(id: number, updateMessageDto: UpdateMessageDto) {
@@ -150,30 +155,3 @@ export class ChatService {
 		return (await this.messageRepository.delete({}));
 	}
 }
-
-	// async removeChannel(id: number | null = null, name: string | null = null) {
-	// 	if (!id && !name)
-	// 		throw (new Error(`chat: service: removeChannel(): Must be enter ID or login!`));
-	// 	try {
-	// 		if (id !== null)
-	// 		{
-	// 			const tmpChannel = await this.findOneChannel(id, null);
-	// 			if (tmpChannel)
-	// 				return (await this.channelRepository.delete({id: id}));
-	// 			return (null);
-	// 		}
-	// 		else if (name !== null)
-	// 		{
-	// 			const tmpChannel = await this.findOneChannel(null, name);
-	// 			if (tmpChannel)
-	// 				return (await this.channelRepository.delete({name: name }));
-	// 			return (null);
-	// 		}
-	// 		else
-	// 			return (null);
-	// 	} catch (error) {
-	// 		return (new Error(error + "chat.service.ts: removeChannel(): Channel not found!"));
-	// 	}
-	// }
-
-

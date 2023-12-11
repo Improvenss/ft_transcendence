@@ -28,6 +28,32 @@ import Cookies from 'js-cookie';
 		}
 	};
 
+	const handleRegisterChannel = async (channel: string, password: string | null) => {
+		try
+		{
+			const response = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/register`, {
+				method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+				headers: {
+					'Content-Type': 'application/json',
+					"Authorization": "Bearer " + userCookie,
+				},
+				body: JSON.stringify({
+					channel: channel,
+					password: password,
+				}),
+			});
+			if (!response.ok)
+				throw (new Error("API fetch error."));
+			const data = await response.json();
+			if (!data.response)
+				throw (new Error("user can't registered!"));
+		}
+		catch (err)
+		{
+			console.error("ERROR: Channel.tsx: handleRegisterChannel():", err);
+		}
+	}
+
 	const handleChannelClick = async (channel: IChannel) => {
 		try
 		{
@@ -52,9 +78,9 @@ import Cookies from 'js-cookie';
 		catch (err)
 		{
 			console.error("ERROR: handleChannelClick():", err);
-			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
-		}
-	};
+			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.  }
+		};
+	}
 
 	return (
 		<div id="channel">
@@ -80,7 +106,7 @@ import Cookies from 'js-cookie';
 						<ChannelCreate onSuccess={handleTabClick}/>
 					)}
 					{activeTab === 'join' && (
-						<ChannelJoin onSuccess={handleTabClick} />
+						<ChannelJoin onSuccess={handleTabClick} handleRegisterChannel={handleRegisterChannel} />
 					)}
 					{(activeTab === 'public' || activeTab === 'involved') && (
 						<div>
@@ -100,7 +126,7 @@ import Cookies from 'js-cookie';
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
 									onClick={() => {
 										if (activeTab === 'public'){
-
+											handleRegisterChannel(channel.name, null);
 										}
 										else
 											handleChannelClick(channel)
