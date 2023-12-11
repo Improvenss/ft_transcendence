@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { IChannelCreateForm } from "./iChannel";
 import './ChannelCreate.css';
 import Cookies from "js-cookie";
+import { useChannelContext } from "./ChatPage";
 
 const defaultForm: IChannelCreateForm = {
 	name: '',
@@ -13,9 +14,9 @@ const defaultForm: IChannelCreateForm = {
 
 function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 	console.log("---------CHANNEL-CREATE----------");
+	const { setActiveChannel,  } = useChannelContext();
 	const userCookie = Cookies.get("user");
 	const [channelData, setChannelData] = useState<IChannelCreateForm>(defaultForm);
-
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value } = e.currentTarget;
 		const files = e.target instanceof HTMLInputElement && 'files' in e.target ? e.target.files : null;
@@ -80,6 +81,9 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 				throw new Error('Kanal oluşturulurken bir hata oluştu.');
 			}
 			console.log('Kanal başarıyla oluşturuldu!');
+			const data = await createChannelResponse.json();
+			// console.log(data.channel);
+			setActiveChannel(data.channel);
 			onSuccess('involved');
 		} catch (error) {
 			console.error(error);

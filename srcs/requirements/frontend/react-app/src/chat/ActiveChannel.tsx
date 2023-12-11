@@ -96,6 +96,12 @@ function ActiveChannel(){
 						<div id="channel-header">
 							<img src={activeChannel.image} alt={activeChannel.image} />
 							<h2>{activeChannel.name}</h2>
+							{activeChannel.description && (
+								<>
+									<h2>|</h2>
+									<h2>{activeChannel.description}</h2>
+								</>
+							)}
 							<div id="additional-menu-trigger" onClick={handleAdditionalMenuClick}>
 								<IconMenu />
 							</div>

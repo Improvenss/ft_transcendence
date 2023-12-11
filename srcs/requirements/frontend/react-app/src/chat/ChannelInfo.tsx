@@ -9,7 +9,7 @@ import Cookies from "js-cookie";
 
  function InfoChannel() {
 	// { selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps
-	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
+	const { activeChannel, setActiveChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const userCookie = Cookies.get("user");
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -29,7 +29,11 @@ import Cookies from "js-cookie";
  	//	setChannelInfo(!channelInfo);
  	//};
 
-	 const	handleChannelDelete = async (selectedChannel: string) => {
+	const	handleChannelLeave = async (selectedChannel: string) => {
+		console.log(`User leave ${selectedChannel} channel`);
+	}
+
+	const	handleChannelDelete = async (selectedChannel: string) => {
 		console.log("Silinecek Channel:", selectedChannel);
 		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
 			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
@@ -43,6 +47,7 @@ import Cookies from "js-cookie";
 		}
 		const data = await responseChannelDelete.json();
 		console.log("DELETE Channel:", data);
+		setActiveChannel(null);
 	}
 
  	const handleTabInfoClick = (tabId: string) => {
@@ -118,12 +123,16 @@ import Cookies from "js-cookie";
  									Update Channel Name
  								</button>
 
- 								<button id='leaveButton'>
+ 								<button
+									id='leaveButton'
+									onClick={() => {handleChannelLeave(activeChannel.name)}}
+									>
  									Leave Channel
  								</button>
  								<button
 									id='deleteButton'
-									onClick={() => {handleChannelDelete(activeChannel.name)}}>
+									onClick={() => {handleChannelDelete(activeChannel.name)}}
+									>
  									Delete Channel
  								</button>
  							</div>
