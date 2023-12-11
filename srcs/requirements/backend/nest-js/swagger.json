@@ -261,6 +261,17 @@
         }
       }
     },
+    "/chat/channel/register": {
+      "post": {
+        "operationId": "ChatController_registerChannel",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/channel/create": {
       "post": {
         "operationId": "ChatController_createChannel",
