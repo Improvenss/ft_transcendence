@@ -30,10 +30,9 @@ export class UsersController {
 	@Post('socket')
 	async	createSocket(
 		@Req() {user},
-		@Body() status: {socketID: string}) {
+		@Body() status: {socketId: string}) {
 		try {
-			console.log("POST socket:", status);
-			const	tmpUser = await this.usersService.updateSocketLogin(user.login as string, status.socketID);
+			const	tmpUser = await this.usersService.updateSocketLogin(user.login as string, status.socketId);
 			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
 			console.error("@Post('socket'): ", err);
@@ -49,7 +48,6 @@ export class UsersController {
 		{
 			if (!user)
 				throw (new Error("Cookie not provided"));
-			console.log("GUARD'dan gelen decoded edilmis user:", user);
 			return ({message: "COOKIE OK"});
 		}
 		catch(err)

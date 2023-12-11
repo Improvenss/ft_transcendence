@@ -19,10 +19,10 @@ export class AppController {
 		@Res() res: Response): Promise<void>
 	{
 		const imagePath = path.join(process.cwd(), './uploads/', imageName);
-
 		// Dosya var mı diye kontrol et
 		if (fs.existsSync(imagePath)) {
 			// Dosyayı oku ve istemciye gönder
+			//res.download(imagePath); // Dosya indirme işlemi, dosyanın HTTPS üzerinden gönderilmesini sağlar
 			res.sendFile(imagePath, (err) => {
 			if (err) {
 				console.error(err);
@@ -34,6 +34,31 @@ export class AppController {
 			throw new NotFoundException('File not found');
 		}
 	}
+
+	//@Get('uploads/:imageName')
+	//async getImage(
+	//	@Param('imageName') imageName: string,
+	//	@Res() res: Response
+	//): Promise<void> {
+	//	const imagePath = path.join(process.cwd(), './uploads/', imageName);
+	//	console.log(imagePath);
+
+	//	if (fs.existsSync(imagePath)) {
+	//		res.sendFile(imagePath, {
+	//			headers: {
+	//				'Content-Type': 'image/jpeg', // Dosya türüne göre düzenleyebilirsiniz
+	//				'Content-Security-Policy': 'upgrade-insecure-requests' // Ek güvenlik önlemi
+	//			}
+	//		}, (err) => {
+	//			if (err) {
+	//				console.error(err);
+	//				throw new NotFoundException('File not found');
+	//			}
+	//		});
+	//	} else {
+	//		throw new NotFoundException('File not found');
+	//	}
+	//}
 }
 
 

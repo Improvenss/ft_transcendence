@@ -1,9 +1,9 @@
-import { useState, ChangeEvent, FormEvent, useRef } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
+import { IChannelCreateForm } from "./iChannel";
 import './ChannelCreate.css';
-import { IChannelFormData } from "./iChannel";
 import Cookies from "js-cookie";
 
-const defaultForm: IChannelFormData = {
+const defaultForm: IChannelCreateForm = {
 	name: '',
 	type: 'public',
 	password: null,
@@ -11,11 +11,10 @@ const defaultForm: IChannelFormData = {
 	description: ''
 }
 
-function CreateChannelForm(){
-	console.log("---------CHANNEL-CREATE-FORM---------");
+function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
+	console.log("---------CHANNEL-CREATE----------");
 	const userCookie = Cookies.get("user");
-	const CreateChannelForm = useRef<HTMLFormElement>(null);
-	const [channelData, setChannelData] = useState<IChannelFormData>(defaultForm);
+	const [channelData, setChannelData] = useState<IChannelCreateForm>(defaultForm);
 
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value } = e.currentTarget;
@@ -40,7 +39,11 @@ function CreateChannelForm(){
 	//	}
 //-------------------------------------------------------------------//
 
-		if (name === 'image' && files && !files[0].type.startsWith('image/')){
+		if (name === 'image' && files && !files[0]?.type.startsWith('image/')){
+			setChannelData((prevData) => ({
+				...prevData,
+				image: null,
+			}));
 			console.error('Lütfen bir resim dosyası seçin.');
 		} else {
 			setChannelData({
@@ -52,6 +55,7 @@ function CreateChannelForm(){
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		const formElement = e.currentTarget as HTMLFormElement;
 
 		console.log(channelData);
 
@@ -75,41 +79,38 @@ function CreateChannelForm(){
 				throw new Error('Kanal oluşturulurken bir hata oluştu.');
 			}
 			console.log('Kanal başarıyla oluşturuldu!');
+			onSuccess('involved');
 		} catch (error) {
 			console.error(error);
 		}
 		setChannelData(defaultForm);
-		CreateChannelForm.current?.reset();
+		formElement.reset();
 	  };
 
 	return (
-		<form ref={CreateChannelForm} onSubmit={handleSubmit}>
-			<label>
-				Channel Name:
-				<input
-					id="channel-name"
-					placeholder="Enter channel name"
-					type="text"
-					name="name"
-					onChange={handleInputChange}
-					required
-				/>
-			</label>
-			<label>
-				Channel Type:
-				<select
-					id="channel-type"
-					name="type"
-					onChange={handleInputChange}
-					required
-				>
-					<option value="public">Public</option>
-					<option value="private">Private</option>
-				</select>
-			</label>
+		<form onSubmit={handleSubmit}>
+			<label htmlFor="channel-name">Channel Name: <span className="required">*</span></label>
+			<input
+				id="channel-name"
+				placeholder="Enter channel name"
+				type="text"
+				name="name"
+				onChange={handleInputChange}
+				required
+			/>
+			<label htmlFor="channel-type">Channel Type:</label>
+			<select
+				id="channel-type"
+				name="type"
+				onChange={handleInputChange}
+				required
+			>
+				<option value="public">Public</option>
+				<option value="private">Private</option>
+			</select>
 			{channelData.type === 'private' && (
-				<label>
-					Channel Password:
+				<>
+					<label htmlFor="channel-password">Channel Password: <span className="required">*</span></label>
 					<input
 						id="channel-password"
 						placeholder="Enter channel password"
@@ -118,34 +119,31 @@ function CreateChannelForm(){
 						onChange={handleInputChange}
 						required
 					/>
-				</label>
+				</>
 			)}
-			<label>
-				Channel Description:
-				<input
-					id="channel-description"
-					type="text"
-					name="description"
-					onChange={handleInputChange}
-				/>
-			</label>
-			<label>
-				Channel Image:
-				<input
-					id="image-file"
-					type="file"
-					// accept="image/*"
-					accept="image/jpg, image/jpeg, image/png, image/gif"
-					name="image"
-					onChange={handleInputChange}
-					required
-				/>
-			</label>
+			<label htmlFor="channel-description">Channel Description:</label>
+			<input
+				id="channel-description"
+				placeholder="Enter channel description"
+				type="text"
+				name="description"
+				onChange={handleInputChange}
+			/>
+			<label htmlFor="channel-image">Channel Image: <span className="required">*</span></label>
+			<input
+				id="channel-image"
+				type="file"
+				// accept="image/*"
+				accept="image/jpg, image/jpeg, image/png, image/gif"
+				name="image"
+				onChange={handleInputChange}
+				required
+			/>
 			{channelData.image && (
 				<img 
 					src={URL.createObjectURL(channelData.image)}
-					alt="Selected Channel Image"
-					id="set-channel-image"
+					alt={channelData.image.name}
+					id="channel-image-output"
 				/>
 			)}
 			<button type="submit">Create Channel</button>
@@ -153,4 +151,4 @@ function CreateChannelForm(){
 	);
 }
 
-export default CreateChannelForm;
+export default ChannelCreate;

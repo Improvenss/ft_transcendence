@@ -26,7 +26,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 						"Authorization": "Bearer " + userCookie as string,
 					},
 					body: JSON.stringify({
-						socketID: newSocket.id as string,
+						socketId: newSocket.id as string,
 					})
 				})
 				if (response.ok)

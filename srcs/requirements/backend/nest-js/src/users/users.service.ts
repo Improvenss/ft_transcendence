@@ -77,11 +77,11 @@ export class UsersService {
 	 *  olusturulan Socket.id'sini DB'de guncellemek icin.
 	 * @param login 
 	 */
-	async	updateSocketLogin(login: string, socketData: string) {
+	async	updateSocketLogin(login: string, socketId: string) {
 		const	tmpUser = await this.findOne(undefined, login);
 		if (!tmpUser)
 			throw (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
-		Object.assign(tmpUser, socketData);
+		Object.assign(tmpUser, {socketId: socketId});
 		return (await this.entityManager.save(tmpUser));
 	}
 

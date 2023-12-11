@@ -38,6 +38,7 @@ export class User {
 
 	//----------------------Channel----------------------------//
 
+	// @ManyToMany(() => Channel, channel => channel.members)
 	@ManyToMany(() => Channel, channel => channel.members, {cascade: true})
 	@JoinTable()
 	public channels: Channel[]; // Kullanıcının üye olduğu kanallar

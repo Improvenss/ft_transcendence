@@ -18,6 +18,9 @@ export class Channel {
 	@IsNotEmpty()
 	public name: string;
 
+	@Column({ nullable: false})
+	public description: string; // Kanal tanımı
+
 	@Column({ type: 'enum', enum: ['public', 'private', 'direct_message']})
 	public type: string; // Kanal tipi: public, private, direct_message
 
@@ -30,7 +33,7 @@ export class Channel {
 	//----------------------User----------------------------//
 
 	@ManyToMany(() => User, user => user.channels, {nullable: true, onDelete: 'CASCADE'})
-	@JoinTable()
+	// @JoinTable()
 	public members: User[]; // Kanalın üyeleri
 
 	@ManyToMany(() => User, user => user.adminChannels, {onDelete: 'CASCADE'})
@@ -39,8 +42,10 @@ export class Channel {
 
 	//----------------------Message----------------------------//
 
-	@OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
-	@JoinColumn()
+	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
+	// @OneToMany(() => Message, message => message.channel, {nullable: true, cascade: true})
+	// @OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
+	// @JoinColumn()
 	public messages: Message[]; // Kanalın mesajları
 
 	constructor(channel: Partial<Channel>) {
@@ -59,12 +64,14 @@ export class Message {
 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public sentAt: Date; // Mesajın gönderildiği tarih
 
-	@ManyToOne(() => User, user => user.messages)
-	@JoinColumn({ name: 'userId' })
+	@ManyToOne(() => User, { eager: true })
+	// @ManyToOne(() => User, user => user.messages)
+	// @JoinColumn({ name: 'userId' })
 	public author: User; // Mesajın yazarı
 
+	// @ManyToOne(() => Channel, { eager: true })
 	@ManyToOne(() => Channel, channel => channel.messages)
-	@JoinColumn({ name: 'channelId' })
+	// @JoinColumn({ name: 'channelId' })
 	public channel: Channel; // Mesajın gönderildiği kanal
 
 	constructor(message: Partial<Message>) {

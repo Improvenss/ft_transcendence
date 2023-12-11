@@ -1,33 +1,59 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ReactComponent as IconCreate } from '../assets/chat/iconCreate.svg';
 import { ReactComponent as IconPublic } from '../assets/chat/iconPublic.svg';
 import { ReactComponent as IconInvolved } from '../assets/chat/iconInvolved.svg';
 import './Channel.css';
-import { IChannelProps, IChannel, IMessage } from './iChannel';
+import { IChannel, IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 import ChannelCreate from './ChannelCreate';
+import { useChannelContext } from './ChatPage';
+import ChannelJoin from './ChannelJoin';
+import Cookies from 'js-cookie';
 
 // function Channel({ setSelectedChannel, channels }: IChannelProps) {
-	function Channel({ channels }: IChannelProps) {
+	function Channel() {
+	console.log("---------CHAT-CHANNELS---------");
+	const { channels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
-	// const [showPassword, setShowPassword] = useState(false);
-	// const CreateChannelForm = useRef<HTMLFormElement>(null);
-	// const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState('');
 	const socket = useSocket();
-
+	const userCookie = Cookies.get("user");
+	
 	const handleTabClick = (tabId: string) => {
-		// if (tabId !== 'create') {
-		// 	setShowPassword(false);
-		// }
-		setActiveTab(tabId);
-		// Implement logic to update content based on the selected tab
-		// For now, let's just log a message to the console
-		console.log(`Switched to ${tabId} channel`);
+		if (activeTab !== tabId){
+			setActiveTab(tabId);
+			// Implement logic to update content based on the selected tab
+			// For now, let's just log a message to the console
+			console.log(`Switched to ${tabId} tab`);
+		}
 	};
 
-	const handleChannelClick = (channel: IChannel) => {
-			// setSelectedChannel(channel);
+	const handleChannelClick = async (channel: IChannel) => {
+		try
+		{
+			if (activeChannel?.name !== channel.name){
+				const response = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${channel.name}&relations=all`, {
+					method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+					headers: {
+						'Content-Type': 'application/json',
+						"Authorization": "Bearer " + userCookie,
+					},
+				});
+				if (!response.ok)
+					throw (new Error("API fetch error."));
+				const data = await response.json();
+				setActiveChannel(data[0]);
+				console.log(`Switched to ${channel.name} channel.`);
+			}
+			else {
+				setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
+			}
+		}
+		catch (err)
+		{
+			console.error("ERROR: handleChannelClick():", err);
+			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
+		}
 	};
 
 	return (
@@ -48,11 +74,14 @@ import ChannelCreate from './ChannelCreate';
 						{activeTab === 'create' && <h1>Create a Channel</h1>}
 						{activeTab === 'public' && <h1>Public Channels</h1>}
 						{activeTab === 'involved' && <h1>Involved Rooms</h1>}
+						{activeTab === 'join' && <h1>Join Channel</h1>}
 					</div>
 					{activeTab === 'create' && (
-						<ChannelCreate />
+						<ChannelCreate onSuccess={handleTabClick}/>
 					)}
-
+					{activeTab === 'join' && (
+						<ChannelJoin onSuccess={handleTabClick} />
+					)}
 					{(activeTab === 'public' || activeTab === 'involved') && (
 						<div>
 						<input
@@ -62,11 +91,12 @@ import ChannelCreate from './ChannelCreate';
 							onChange={(e) => setSearchTerm(e.target.value)}
 							placeholder="Search channels..."
 						/>
-						{channels
+						{channels && channels
 							.filter((channel) => channel.status === activeTab && channel.name.toLowerCase().includes(searchTerm.toLowerCase()))
 							.map((channel) => (
 								<div
 									key={channel.name}
+									className={activeChannel && activeChannel.name === channel.name ? 'active' : 'inactive'}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
 									onClick={() => {
 										if (activeTab === 'public'){
@@ -81,6 +111,9 @@ import ChannelCreate from './ChannelCreate';
 									<span>{channel.name}</span>
 								</div>
 						))}
+						{activeTab === 'involved' &&
+ 							<button id="joinChannel" onClick={() => handleTabClick('join')}> Join Channel </button>
+						}
 						</div>
 					)}
 				</div>

@@ -309,6 +309,26 @@
           }
         }
       }
+    },
+    "/chat/channel/message": {
+      "get": {
+        "operationId": "ChatController_findMessage",
+        "parameters": [
+          {
+            "name": "message",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
