@@ -1,7 +1,7 @@
 import './ActiveChannel.css';
 //import { IOnChannelProps } from './iChannel';
 import { ReactComponent as IconMenu } from '../assets/chat/iconMenu.svg';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useChannelContext } from './ChatPage';
 import { IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
@@ -12,6 +12,7 @@ function ActiveChannel(){
 	const MAX_CHARACTERS = 100; // İstenilen maksimum karakter sayısı
 	const [messageInput, setMessageInput] = useState('');
 	const [messages, setMessages] = useState<IMessage[]>([]);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const socket = useSocket();
 	const author = useUser().userInfo;
 
@@ -78,11 +79,15 @@ function ActiveChannel(){
 		}
 
 		socket?.on('listenChannelMessage', handleListenMessage);
-	
 		return () => {
 			socket?.off('listenChannelMessage', handleListenMessage);
 		};
 	}, [socket]);
+
+	useEffect(() => {
+		// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
 
 	return (
 		<>
@@ -105,15 +110,7 @@ function ActiveChannel(){
 									</div>
 								</div>
 							))}
-							{/* {activeChannel.messages.map((message, index) => (
-								<div key={index} className="message">
-									<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
-									<div className="message-content">
-										<strong>{message.sender.login}:</strong> {message.content}
-										<div className="timestamp">{formatTimestamp(message.timestamp)}</div>
-									</div>
-								</div>
-							))} */}
+							<div ref={messagesEndRef} />
 						</div>
 						<div id="message-input">
 							<input

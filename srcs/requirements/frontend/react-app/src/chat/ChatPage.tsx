@@ -13,16 +13,6 @@ import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
 
-// const mapBackendToFrontend = (backendData: CreateChannelDto[]): IChannel[] => {
-// 	return backendData.map(item => ({
-// 	  status: item.status as 'public' | 'involved', // Eğer backend'de "status" varsa, uyarlama yapmalısınız
-// 	  name: item.name,
-// 	  type: item.type as 'public' | 'involved',
-// 	  password: item.password || '', // Eğer backend'de "password" varsa, uyarlama yapmalısınız
-// 	  image: item.image,
-// 	}));
-//   };
-
 export const ChannelContext = createContext<IChannelContext>({
 	channels: undefined,
 	activeChannel: null,
@@ -40,15 +30,6 @@ function ChatPage () {
 	const isAuth = useAuth().isAuth;
 	const socket = useSocket();
 	const userCookie = Cookies.get("user");
-	// const status = localStorage.getItem('userLoginPage');
-
-	// useEffect(() => {
-	// 	window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
-	// 	return () => {
-	// 		window.onbeforeunload = null;
-	// 	};
-	// }, []);
-
 
 	const [channelInfo, setChannelInfo] = useState(false);
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
@@ -62,29 +43,24 @@ function ChatPage () {
 	useEffect(() => {
 		const fetchChannels = async () => {
 		  try {
-			//  const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channels?channel=abc&relations=all", {
-				const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?relations=all", {
-				method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-				headers: {
-					'Content-Type': 'application/json',
-					"Authorization": "Bearer " + userCookie,
-				},
-			});
+			//  const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?channel=abc&relations=all", {
+				const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?relations=members", {
+					method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+					headers: {
+						'Content-Type': 'application/json',
+						"Authorization": "Bearer " + userCookie,
+					},
+				});
 	
-			if (!responseAllChannels.ok) {
-			  throw new Error('API-den veri alınamadı.');
+				if (!responseAllChannels.ok) {
+					throw new Error('API-den veri alınamadı.');
+				}
+				const data = await responseAllChannels.json();
+				console.log("Get Channels: ", data);
+				setChannels(data);
+			} catch (error) {
+				console.error('Veri getirme hatası:', error);
 			}
-
-			const data = await responseAllChannels.json();
-			// console.log("--->", data);
-			// const frontendChannels = mapBackendToFrontend(data); ///buna gerek olmayabilir, sonra kontrol et.
-			// console.log("--->", frontendChannels);
-			// setChannels(frontendChannels);
-			console.log("Get Channels: ", data);
-			setChannels(data);
-		  } catch (error) {
-			console.error('Veri getirme hatası:', error);
-		  }
 		};
 	
 		fetchChannels();
@@ -97,7 +73,17 @@ function ChatPage () {
 		return () => {
 			socket?.off("channelListener", channelListener);
 		}
-	}, [activeChannel]);
+	}, []);
+
+	useEffect(() => {
+		if (isAuth && channels){
+			channels
+			.filter((channel) => channel.status === 'involved')
+			.forEach((channel) => {
+				socket?.emit('joinChannel', { name: channel.name });
+			});
+		}
+	}, [channels, socket]);
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
@@ -112,10 +98,6 @@ function ChatPage () {
 				<Channel />	
 				<ActiveChannel />
 				<ChannelInfo />
-				{/* <Channels /> */}
-				{/* <Message /> */}
-				{/* <MessageInput /> */}
-				{/* <Users /> */}
 			</ChannelContext.Provider>
 		</div>
 	)

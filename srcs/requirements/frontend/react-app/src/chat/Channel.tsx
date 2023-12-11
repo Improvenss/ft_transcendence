@@ -8,6 +8,7 @@ import { useSocket } from '../hooks/SocketHook';
 import ChannelCreate from './ChannelCreate';
 import { useChannelContext } from './ChatPage';
 import ChannelJoin from './ChannelJoin';
+import Cookies from 'js-cookie';
 
 // function Channel({ setSelectedChannel, channels }: IChannelProps) {
 	function Channel() {
@@ -16,7 +17,8 @@ import ChannelJoin from './ChannelJoin';
 	const [activeTab, setActiveTab] = useState('involved');
 	const [searchTerm, setSearchTerm] = useState('');
 	const socket = useSocket();
-
+	const userCookie = Cookies.get("user");
+	
 	const handleTabClick = (tabId: string) => {
 		if (activeTab !== tabId){
 			setActiveTab(tabId);
@@ -26,38 +28,33 @@ import ChannelJoin from './ChannelJoin';
 		}
 	};
 
-	const handleChannelClick = (channel: IChannel) => {
-		if (activeChannel !== channel){
-			setActiveChannel(channel);
-			console.log(`Switched to ${channel.name} channel`);
+	const handleChannelClick = async (channel: IChannel) => {
+		try
+		{
+			if (activeChannel?.name !== channel.name){
+				const response = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${channel.name}&relations=all`, {
+					method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+					headers: {
+						'Content-Type': 'application/json',
+						"Authorization": "Bearer " + userCookie,
+					},
+				});
+				if (!response.ok)
+					throw (new Error("API fetch error."));
+				const data = await response.json();
+				setActiveChannel(data[0]);
+				console.log(`Switched to ${channel.name} channel.`);
+			}
+			else {
+				setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
+			}
 		}
-		else {
+		catch (err)
+		{
+			console.error("ERROR: handleChannelClick():", err);
 			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
 		}
 	};
-
-	useEffect(() => {
-		if (channels){
-			channels
-			.filter((channel) => channel.status === 'involved')
-			.forEach((channel) => {
-				socket?.emit('joinChannel', { name: channel.name });
-			});
-		}
-	}, [channels, socket]);
-
-	// useEffect(() => {
-	// 	const channelListener = (data: any) => {
-	// 	if (activeChannel && activeChannel.name === data.channelName) {
-	// 		console.log("Received command for active channel:", data);
-	// 	}
-	// 	};
-	
-	// 	socket?.on("channelListener", channelListener);
-	// 	return () => {
-	// 		socket?.off("channelListener", channelListener);
-	// 	};
-	// }, [socket, activeChannel]);
 
 	return (
 		<div id="channel">

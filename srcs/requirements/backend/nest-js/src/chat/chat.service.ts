@@ -76,44 +76,41 @@ export class ChatService {
 		return (tmpMessage);
 	}
 
+	async findChannelUser(channel: Channel, user: User) {
+		if (!channel || !user)
+			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
+		const foundUser = channel.members.find((channelUser) => channelUser.id === user.id);
+		if (!foundUser)
+			return (false);
+		return (true);
+	}
+
 	async checkInvolvedUser(channels: Channel | Channel[], user: User) {
 		const channelArray = Array.isArray(channels) ? channels : [channels];
 	
 		const involvedChannelsInfo = channelArray.map((channel) => {
 			if (channel.members.some((channelUser) => channelUser.login === user.login)) {
-				// User is involved in this channel
 				return {
 					status: 'involved',
 					name: channel.name,
 					type: channel.type,
 					description: channel.description,
 					image: channel.image || 'default_image_url',
-					members: channel.members,
-					admins: channel.admins,
-					// messages: channel.messages
-					messages: channel.messages.map((message) => ({
+					members: channel.members || null,
+					admins: channel.admins || null,
+					messages: channel.messages ? channel.messages.map((message) => ({
 						id: message.id,
 						sender: message.author,
 						content: message.message,
 						timestamp: message.sentAt,
-					})),
+					})) : null,
 				};
 			} else if (channel.type === 'public') {
-				// Public channel with no user involvement
 				return {
 					status: 'public',
 					name: channel.name,
 					type: channel.type,
-					description: channel.description,
 					image: channel.image || 'default_image_url',
-					members: channel.members,
-					admins: channel.admins,
-					messages: channel.messages.map((message) => ({
-						id: message.id,
-						sender: message.author,
-						content: message.message,
-						timestamp: message.sentAt,
-					})),
 				};
 			}
 			return null;
