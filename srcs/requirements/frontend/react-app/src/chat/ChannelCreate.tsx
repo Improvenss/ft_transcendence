@@ -82,7 +82,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 			}
 			console.log('Kanal başarıyla oluşturuldu!');
 			const data = await createChannelResponse.json();
-			// console.log(data.channel);
+			console.log(data.channel);
 			setActiveChannel(data.channel);
 			onSuccess('involved');
 		} catch (error) {

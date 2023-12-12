@@ -40,7 +40,7 @@ import { channel } from 'diagnostics_channel';
 		callback(null, true);
   	};
 
-	const MAX_FILE_SIZE = 1024 * 1024 * 2; // 2MB
+	const MAX_FILE_SIZE = 1024 * 1024 * 3; // 3MB
 
 	const storage = diskStorage({
 		destination: './uploads/',
@@ -91,7 +91,11 @@ export class ChatController {
 				throw (new Error("Password is WRONG!!!"));
 			const tmpUser = await this.usersService.findOne(null, user.login);
 			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser);
-			return ({response: true, message: `${user.login} registered in this ${channel}.`});
+			//await this.chatService.updateChannel(tmpChannel, tmpUser);
+			this.chatGateway.server.emit('channelListener');
+			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
+			return (await this.chatService.checkInvolvedUser(returnChannel, user));
+			//return ({response: true, message: `${user.login} registered in this ${channel}.`});
 		}
 		catch (err)
 		{
@@ -238,6 +242,31 @@ export class ChatController {
 		{
 			console.error("@Delete('/channel'): removeChannel():", err);
 			return ({error: err.response});
+		}
+	}
+
+	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
+		// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
+	@Get('/channel/leave')
+	async leaveChannel(
+		@Req() {user},
+		@Query ('channel') channel: string,
+		@Query ('user') name: string | undefined,
+	){
+		try{
+			if (name === undefined){ //eğer kullanıcı adı tanımlı değilse kişi leave işlemini gerçekleştiriyor.
+				await this.chatService.removeUser(channel, user.login);
+				console.log(`${C.B_RED}GET: Channel Leave: ${channel} - ${user.login}${C.END}`);
+				//return ({message: 'User left the channel successfully'});
+			}
+			else{ //user'ın bir admin, name'in ise kicklenen kişi olduğu kontrol edilmelidir.
+				console.log(`${C.B_RED}GET: Channel Kick: ${channel} - ${user.login}${C.END}`);
+			}
+			this.chatGateway.server.emit('channelListener');
+			return ({message: 'User left the channel successfully'});
+		} catch(err){
+			console.error("@Get('/channel/leave'):", err);
+			return ({error: err});
 		}
 	}
 }

@@ -31,10 +31,22 @@ import Cookies from "js-cookie";
 
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
+		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
+			method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+			},
+		});
+		if (!responseChannelDelete.ok) {
+			throw new Error('API-den veri alınamadı.');
+		}
+		const data = await responseChannelDelete.json();
+		console.log("Leave Channel:", data);
+		setActiveChannel(null);
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
-		console.log("Silinecek Channel:", selectedChannel);
 		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
 			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
 			headers: {
@@ -115,13 +127,14 @@ import Cookies from "js-cookie";
  							<div>
  								<label htmlFor="channelName">Channel Name:</label>
  								<input
- 								ref={inputRefUpdateChannelName}
- 								type="text"
- 								placeholder="Edit Channel Name..."
+									ref={inputRefUpdateChannelName}
+									type="text"
+									placeholder="Edit Channel Name..."
  								/>
  								<button onClick={handleUpdateChannelName}>
  									Update Channel Name
  								</button>
+
 
  								<button
 									id='leaveButton'
@@ -172,10 +185,3 @@ import Cookies from "js-cookie";
  }
 
  export default InfoChannel;
-
-//function ChannelInfo(){
-	
-//}
-//export default ChannelInfo;
-
-

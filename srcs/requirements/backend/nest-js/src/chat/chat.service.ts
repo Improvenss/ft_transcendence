@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, Message } from './entities/chat.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ChatService {
@@ -13,6 +14,9 @@ export class ChatService {
 		private readonly	channelRepository: Repository<Channel>,
 		@InjectRepository(Message)
 		private readonly	messageRepository: Repository<Message>,
+		@InjectRepository(User)
+		private readonly	userRepository: Repository<User>,
+		private readonly	usersService: UsersService,
 		private readonly	entityManager: EntityManager,
 	) {}
 
@@ -162,6 +166,35 @@ export class ChatService {
 		// await this.channelRepository.remove(tmpChannel as Channel);
 		// return (tmpChannel);
 		// not: await this.channelRepository.delete({ name: channel }); bunu yaptigimizda channel'in sadece name'sini siliyor.
+	}
+
+	async removeUser(
+		channel: string,
+		user: string
+	){
+		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: ['members']});
+		if (!tmpChannel){
+			throw new NotFoundException('Channel does not exist!');
+		}
+
+		const tmpUser = await this.usersService.findOne(null, user, ['channels']);
+		if (!tmpUser){
+			throw new NotFoundException('User does not exist!');
+		}
+
+		if (!tmpUser.channels || !tmpChannel.members) {
+			throw new Error('Invalid state: User or Channel data is incomplete');
+		}
+
+		// Kullanıcının channels ilişkisinden kanalı çıkarın
+		tmpUser.channels = tmpUser.channels.filter(c => c.id !== tmpChannel.id);
+
+		// Kanalın members ilişkisinden kullanıcıyı çıkarın
+		tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser.id);
+
+		await this.userRepository.save(tmpUser);
+		await this.channelRepository.save(tmpChannel);
+		return ({message: 'User removed from the channel successfully' });
 	}
 
 	async removeMessage() {

@@ -45,8 +45,11 @@ import Cookies from 'js-cookie';
 			if (!response.ok)
 				throw (new Error("API fetch error."));
 			const data = await response.json();
-			if (!data.response)
-				throw (new Error("user can't registered!"));
+			//console.log("-------<",data[0]);
+			setActiveChannel(data[0]);
+			setActiveTab('involved');
+			//if (!data.response)
+				//throw (new Error("user can't registered!"));
 		}
 		catch (err)
 		{
