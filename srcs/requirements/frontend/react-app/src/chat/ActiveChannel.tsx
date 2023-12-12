@@ -78,11 +78,11 @@ function ActiveChannel(){
 			]);
 		}
 
-		socket?.on('listenChannelMessage', handleListenMessage);
+		socket?.on(`listenChannelMessage:${activeChannel?.name}`, handleListenMessage);
 		return () => {
-			socket?.off('listenChannelMessage', handleListenMessage);
+			socket?.off(`listenChannelMessage:${activeChannel?.name}`, handleListenMessage);
 		};
-	}, [socket]);
+	}, [activeChannel, socket]);
 
 	useEffect(() => {
 		// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.

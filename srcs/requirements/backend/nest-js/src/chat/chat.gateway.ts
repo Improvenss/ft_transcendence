@@ -194,7 +194,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 				timestamp: createMessageDto.sentAt,
 			}
 			console.log("Message Save response:", response, returnMessage);
-			this.server.to(channel.name).emit("listenChannelMessage", returnMessage);
+			this.server.to(channel.name).emit(`listenChannelMessage:${channel.name}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err);
 		}		
