@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
 import { ChatService } from './chat/chat.service';
 import { JwtModule } from '@nestjs/jwt';
+import { GameModule } from './game/game.module';
 
 @Module({
 	imports: [
@@ -35,6 +36,7 @@ import { JwtModule } from '@nestjs/jwt';
 		ApiModule,
 		UsersModule,
 		ChatModule,
+		GameModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, ChatService], // Buraya da nest g gateway chat kodunu calistirinca geldi.

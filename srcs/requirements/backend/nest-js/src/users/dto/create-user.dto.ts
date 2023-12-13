@@ -1,27 +1,5 @@
-import { Channel, Message } from "src/chat/entities/chat.entity";
 import { IsEmail, IsNotEmpty, IsString, IsOptional } from 'class-validator';
-
-// class Image {
-	// link: string;
-	// versions: {
-	// 	large: string;
-	// 	medium: string;
-	// 	micro: string;
-	// 	small: string;
-	// }
-// }
-
-// export class CreateUserDto {
-// 	login: string;
-// 	socket_id?: string | null;
-// 	first_name: string;
-// 	last_name: string;
-// 	email: string;
-// 	// image: Image;
-// 	image: string;
-// 	channels: Channel[];
-// 	messages: Message[];
-// }
+import { PartialType } from "@nestjs/swagger";
 
 export class CreateUserDto {
 	@IsNotEmpty({ message: 'Email cannot be empty' })
@@ -51,4 +29,13 @@ export class CreateUserDto {
 	@IsOptional()
 	@IsString({ message: 'Avatar must be a string' })
 	avatar?: string;
+}
+
+/**
+ * Burada extends PartialType(CreateUserDto) olarak eklenen kisimda,
+ *  buradaki 'dto' dosyasinin icerisinden cekiyor da olabilir veriyi...
+ */
+export class UpdateUserDto extends PartialType(CreateUserDto) {
+	// extends olarak tanimladigimiz icin bu CreateUserDto'nun
+	//  icindeki her seyi buraya da yazdigimizi dusun.
 }

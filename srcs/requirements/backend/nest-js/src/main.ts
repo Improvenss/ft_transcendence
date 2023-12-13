@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as cors from 'cors';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication } from '@nestjs/common';
+import { EventEmitter } from 'events';
 
 function setupSwagger(app: INestApplication) {
 	const options = new DocumentBuilder() // Bu ve altindakiler 'swagger' icin;
@@ -36,6 +37,8 @@ function setupSwagger(app: INestApplication) {
  * 
  */
 async function bootstrap() {
+	const myEmitter = new EventEmitter();
+	myEmitter.setMaxListeners(15);
 	const	httpsOptions = {
 		key: fs.readFileSync(process.env.KEY_FILE as string),
 		cert: fs.readFileSync(process.env.CERT_FILE as string),

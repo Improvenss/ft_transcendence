@@ -11,6 +11,10 @@ import { IsNotEmpty } from 'class-validator';
 
 @Entity('channel')
 export class Channel {
+	constructor(channel: Partial<Channel>) {
+		Object.assign(this, channel);
+	}
+
 	@PrimaryGeneratedColumn()
 	public id: number;
 
@@ -47,14 +51,14 @@ export class Channel {
 	// @OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
 	// @JoinColumn()
 	public messages: Message[]; // Kanalın mesajları
-
-	constructor(channel: Partial<Channel>) {
-		Object.assign(this, channel);
-	}
 }
 
 @Entity('message')
 export class Message {
+	constructor(message: Partial<Message>) {
+		Object.assign(this, message);
+	}
+
 	@PrimaryGeneratedColumn()
 	public id: number;
 
@@ -73,8 +77,4 @@ export class Message {
 	@ManyToOne(() => Channel, channel => channel.messages)
 	// @JoinColumn({ name: 'channelId' })
 	public channel: Channel; // Mesajın gönderildiği kanal
-
-	constructor(message: Partial<Message>) {
-		Object.assign(this, message);
-	}
 }
