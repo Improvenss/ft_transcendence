@@ -39,7 +39,10 @@ function App() {
 						<Link to="/chat">Chat</Link>
 						<Link to="/game">Game</Link>
 						<span onClick={logOut}>Logout</span>
-						<Link to="/profile">
+						{/*<Link to="/profile">
+							<img src={userInfo?.imageUrl} alt="Profile" />
+						</Link>*/}
+						<Link to={`/profile/${userInfo?.login}`}>
 							<img src={userInfo?.imageUrl} alt="Profile" />
 						</Link>
 					</ul>
@@ -54,6 +57,7 @@ function App() {
 			<Routes>
 				<Route path='/' element={<HomePage />} />
 				<Route path='/profile' element={<ProfilePage />} />
+				<Route path='/profile/:username' element={<ProfilePage />} />
 				<Route path='/chat' element={<ChatPage />} />
 				<Route path='/game' element={<GamePage />} />
 				<Route path='*' element={<NoMatchPage />} />

@@ -118,7 +118,16 @@
     "/users/user": {
       "get": {
         "operationId": "UsersController_createUser",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
