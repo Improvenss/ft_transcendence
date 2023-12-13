@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -59,9 +59,17 @@ export class UsersController {
 
 	@Get('user')
 	async createUser(
-		@Req() {user}
+		@Req() {user},
+		@Query ('user') finduser: string | undefined
 	){
 		try {
+			if (finduser !== undefined){
+				const tmpUser = await this.usersService.findOne(null, finduser, ['channels']);
+				if (!tmpUser)
+					throw (new NotFoundException("@Get('user'): findOne(): User does not exist!"));
+				return ({message: "USER OK", user: tmpUser});
+			}
+
 			const tmpUser = await this.usersService.findOne(null, user.login, ['channels']);
 			if (!tmpUser)
 				throw (new NotFoundException("@Get('user'): findOne(): User does not exist!"));
