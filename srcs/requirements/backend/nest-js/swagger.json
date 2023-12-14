@@ -397,6 +397,15 @@
           }
         }
       },
+      "post": {
+        "operationId": "GameController_createGameRoom",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
       "delete": {
         "operationId": "GameController_deleteGameRoom",
         "parameters": [
@@ -429,17 +438,6 @@
         ],
         "responses": {
           "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/game/room/create": {
-      "post": {
-        "operationId": "GameController_createGameRoom",
-        "parameters": [],
-        "responses": {
-          "201": {
             "description": ""
           }
         }

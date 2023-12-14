@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, H
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Colors as C } from 'src/colors';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -169,6 +170,24 @@ export class UsersController {
 	async	removeAll() {
 		return this.usersService.removeAll();
 	}
+
+	// @Delete()
+	// async	deleteUser(
+	// 	@Req() {user},
+	// 	@Query('user') quser: string | undefined,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_RED}DELETE: @Query('user'): [${quser}]${C.END}`);
+	// 		const	responseGameuser = await this.usersService.deleteUser(quser);
+	// 		return (responseGameuser);
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.log("@Delete(): ", err);
+	// 		return ({err: err});
+	// 	}
+	// }
 
 	/**
 	 * Disaridan 'string' olarak aldigimiz 'id' parametremizi

@@ -34,7 +34,7 @@ export class GameController {
 		}
 	}
 
-	@Post('/room/create')
+	@Post('/room')
 	async	createGameRoom(
 		@Req() {user},
 		@Body() body: {
