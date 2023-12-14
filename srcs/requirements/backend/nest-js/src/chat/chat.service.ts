@@ -36,7 +36,7 @@ export class ChatService {
 		channel: string | undefined,
 		relations?: string[] | 'all' | null
 	){
-		// console.log(`Service Chat: findChannel(): relations(${typeof(relations)}): [${relations}]`);
+		// console.log(`ChatService: findChannel(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
 			? {members: true, admins: true, messages: true} // relations all ise hepsini ata.
 			: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
@@ -44,7 +44,7 @@ export class ChatService {
 				: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
 					? { [relations]: true } // sadece bunu ata.
 					: null)); // hicbiri degilse null ata.
-		// console.log(`Service Chat: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		// console.log(`ChatService: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
 		const tmpChannel = (channel === undefined)
 			? await this.channelRepository.find({relations: relationObject})
 			: await this.channelRepository.findOne({
@@ -83,8 +83,6 @@ export class ChatService {
 	async findChannelUser(channel: Channel, user: User) {
 		if (!channel || !user)
 			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
-		console.log(channel.members);
-		console.log(user);
 		const foundUser = channel.members.find((channelUser) => channelUser.login === user.login);
 		if (!foundUser)
 			return (false);
@@ -148,11 +146,11 @@ export class ChatService {
 		}
 
 		// Kanala ait mesajları sil veya ilişkilendirmeyi kes
-		await this.messageRepository.delete({ channel: { id: tmpChannel.id } });
+		// NOT: Biz Channel'i silmek istedigimizde iliskili olan Message[] tablosunun {onDelete: 'CASCADE'} kodunu ekledigimizde burada elimizle silmemize gerek kalmiyor.
+		// await this.messageRepository.delete({ channel: { id: tmpChannel.id } });
 		
 		// Kanalı sil
 		const deletedChannel = await this.channelRepository.remove(tmpChannel);
-
 		return deletedChannel;
 
 		// console.log("chat.service.ts: removeChannel(): Channel:", channel);
@@ -176,22 +174,17 @@ export class ChatService {
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
-
 		const tmpUser = await this.usersService.findOne(null, user, ['channels']);
 		if (!tmpUser){
 			throw new NotFoundException('User does not exist!');
 		}
-
 		if (!tmpUser.channels || !tmpChannel.members) {
 			throw new Error('Invalid state: User or Channel data is incomplete');
 		}
-
 		// Kullanıcının channels ilişkisinden kanalı çıkarın
 		tmpUser.channels = tmpUser.channels.filter(c => c.id !== tmpChannel.id);
-
 		// Kanalın members ilişkisinden kullanıcıyı çıkarın
 		tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser.id);
-
 		await this.userRepository.save(tmpUser);
 		await this.channelRepository.save(tmpChannel);
 		return ({message: 'User removed from the channel successfully' });

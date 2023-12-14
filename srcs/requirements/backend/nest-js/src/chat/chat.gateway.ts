@@ -253,7 +253,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 		// admins[] ciksalar bile adminler kalacak.
 		if (socket.rooms.has(data.channel))
 		{
-			this.server.to(data.channel).emit('messageToClient', `Channel(${data.channel}): ${socket.id} left the channel!`);
+			this.server.to(data.channel).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${data.channel}): ${socket.id} left the channel!`);
 			socket.leave(data.channel)
 			console.log(`${data.channel} kanalindan cikti: ${socket.id}`);
 		}

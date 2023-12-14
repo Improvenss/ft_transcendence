@@ -1,16 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @UseGuards(AuthGuard)
-@Controller('users')
+@Controller('/users')
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
-		private readonly jwtService: JwtService,
 	) {}
 
 	/**
@@ -27,7 +24,7 @@ export class UsersController {
 		return (newUser);
 	}
 
-	@Post('socket')
+	@Post('/socket')
 	async	createSocket(
 		@Req() {user},
 		@Body() status: {socketId: string}) {
@@ -40,7 +37,7 @@ export class UsersController {
 		}
 	}
 
-	@Get('cookie')
+	@Get('/cookie')
 	async userCookie(
 		@Req() {user},
 	){
@@ -57,7 +54,7 @@ export class UsersController {
 		}
 	}
 
-	@Get('user')
+	@Get('/user')
 	async createUser(
 		@Req() {user},
 		@Query ('user') finduser: string | undefined
@@ -96,7 +93,7 @@ export class UsersController {
 	 * @returns 'user'.
 	 */
 	// @Get(':id/:login?')
-	@Get(':id(\\d+)')
+	@Get('/:id(\\d+)')
 	async findOneId(@Param('id') id: string) {
 		const tmpUser = await this.usersService.findOne(+id, undefined);
 		if (!tmpUser)
@@ -109,7 +106,7 @@ export class UsersController {
 	 * @param login Istenilen 'user'in login'i.
 	 * @returns 'user'.
 	 */
-	@Get(':login')
+	@Get('/:login')
 	async findOneLogin(@Param('login') login: string) {
 		const tmpUser = await this.usersService.findOne(undefined, login);
 		if (!tmpUser)
@@ -123,7 +120,7 @@ export class UsersController {
 	 * @param updateUserDto 
 	 * @returns 
 	 */
-	@Patch(':id(\\d+)')
+	@Patch('/:id(\\d+)')
 	async	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
 		const	tmpDb: UpdateUserDto = {}; // DB'deki guncellenmis degerler atanacak.
 		const	tmpUser = await this.usersService.update(+id, updateUserDto); // DB'deki eskisi yenisiyle guncelliyoruz, yeni halini donduruyoruz.
@@ -158,7 +155,7 @@ export class UsersController {
 		return ({message: "User updated successfully."});
 	}
 
-	@Patch(':login')
+	@Patch('/:login')
 	async	updateSocketLogin(@Param('login') login: string,
 	@Body() socketData: string) {
 		const	tmpUser = await this.usersService.updateSocketLogin(login, socketData);
@@ -179,7 +176,7 @@ export class UsersController {
 	 * @param id String
 	 * @returns 
 	 */
-	@Delete(':id')
+	@Delete('/:id')
 	async	remove(@Param('id') id: string) {
 		const	tmpUser = await this.usersService.findOne(Number(id));
 		if (!tmpUser)

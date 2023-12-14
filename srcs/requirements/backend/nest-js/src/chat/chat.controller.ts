@@ -1,19 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head, SetMetadata, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
+import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
 import { Colors as C } from '../colors';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateChannelDto, UpdateChannelDto } from './dto/chat-channel.dto';
+import { CreateChannelDto } from './dto/chat-channel.dto';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { ChatGateway } from './chat.gateway';
 import * as bcrypt from 'bcrypt';
 import { Channel } from './entities/chat.entity';
-import { channel } from 'diagnostics_channel';
 
 // Dosya Adı Değiştirme Fonksiyonu
 	const editFileName = (req, file, callback) => {
@@ -108,7 +107,7 @@ export class ChatController {
 	@UseInterceptors(FileInterceptor('image', multerConfig))
 	async createChannel(
 		@Req() {user},
-		@UploadedFile() image,
+		@UploadedFile() image: any,
 		@Body('name') name: string,
 		@Body('type') type: string,
 		@Body('password') password: string | undefined,

@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -53,7 +52,6 @@ export class UsersService {
 	async findOneSocket(socket: Socket): Promise<User | null> {
 		if (!socket)
 			throw new Error('Must be enter Socket.');
-		console.log("socket.id:", socket.id);
 		const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
 		return (tmpUser);
 	}

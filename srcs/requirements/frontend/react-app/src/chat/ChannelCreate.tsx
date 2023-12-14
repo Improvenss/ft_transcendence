@@ -76,7 +76,6 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 				},
 				body: formData,
 			});
-		
 			if (!createChannelResponse.ok) {
 				throw new Error('Kanal oluşturulurken bir hata oluştu.');
 			}
@@ -90,7 +89,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 		}
 		setChannelData(defaultForm);
 		formElement.reset();
-	  };
+	};
 
 	return (
 		<form onSubmit={handleSubmit}>

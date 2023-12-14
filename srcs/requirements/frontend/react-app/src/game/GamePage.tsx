@@ -8,6 +8,7 @@ import {useUser} from "../hooks/UserHook";
 import './GamePage.css';
 // -----------------V
 import { Socket } from 'socket.io-client';
+import Cookies from "js-cookie";
 // -----------------^
 function GamePage()
 {
@@ -20,11 +21,32 @@ function GamePage()
 	var	playerLeftName = useRef<HTMLDivElement>(null);
 	var	playerRightName = useRef<HTMLDivElement>(null);
 	const	[commands, setCommands] = useState<string[]>([]);
+	const userCookie = Cookies.get('user');
 	const userInfo = useUser();
 
 	const	commandListener = (command: string) => {
 		setCommands(prevCommand => [...prevCommand, command]);
 	}
+
+	const	createGameRoom = async (name: string) => {
+		const createGameRoomResponse = await fetch(process.env.REACT_APP_GAME_ROOM_CREATE as string, {
+			method: 'POST',
+			headers: {
+				"Authorization": "Bearer " + userCookie,
+			},
+			body: JSON.stringify({
+				creator: userInfo,
+				roomName: name,
+			}),
+		});
+	
+		if (!createGameRoomResponse.ok) {
+			throw new Error('Oyun odasi oluşturulurken bir hata oluştu.');
+		}
+		console.log('Kanal başarıyla oluşturuldu!');
+		const data = await createGameRoomResponse.json();
+		console.log(data.channel);
+	};
 
 	const	listenJoinGameRoom = (gameRoom: string, socket: Socket | undefined) => {
 		if (socket === null)

@@ -377,6 +377,73 @@
           }
         }
       }
+    },
+    "/game/room": {
+      "get": {
+        "operationId": "GameController_getGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GameController_deleteGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "GameController_patchGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/game/room/create": {
+      "post": {
+        "operationId": "GameController_createGameRoom",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
