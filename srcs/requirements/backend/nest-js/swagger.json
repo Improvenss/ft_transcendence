@@ -396,6 +396,24 @@
             "description": ""
           }
         }
+      },
+      "delete": {
+        "operationId": "GameController_deleteGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/game/room/create": {

@@ -1,7 +1,6 @@
 import { Entity,
 	PrimaryGeneratedColumn,
 	Column,
-	OneToMany,
 	ManyToMany } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
@@ -17,7 +16,7 @@ export class Game {
 	@Column({ length: 15, unique: true , nullable: false})
 	public name: string;
 
-	@Column({ length: 15, nullable: false})
+	@Column({ length: 30, nullable: true})
 	public description: string;
 
 	@Column({ nullable: true })
@@ -37,14 +36,12 @@ export class Game {
 
 	//----------------------User----------------------------//
 
-	@OneToMany(() => User, user => user.gameRooms, {nullable: true, onDelete: 'CASCADE'})
-
+	@ManyToMany(() => User, user => user.gameRooms, {nullable: true, onDelete: 'CASCADE'})
 	public players: User[];
 
-	@OneToMany(() => User, user => user.gameRoomsAdmin, {onDelete: 'CASCADE'})
+	@ManyToMany(() => User, user => user.gameRoomsAdmin, {onDelete: 'CASCADE'})
 	public admins: User[];
 
-	// watchers users
-	@OneToMany(() => User, user => user.gameRoomsWatcher, {nullable: true, onDelete: 'CASCADE'})
+	@ManyToMany(() => User, user => user.gameRoomsWatcher, {nullable: true, onDelete: 'CASCADE'})
 	public watchers: User[];
 }

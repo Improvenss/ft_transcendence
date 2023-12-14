@@ -21,15 +21,16 @@ export class GameController {
 	){
 		try
 		{
-			console.log("user veirsi", user);
-			console.log(`${C.B_GREEN}GET: Room: [${room}], Relation: [${relations}]${C.END}`);
+			console.log(`${C.B_GREEN}GET: /room: @Query('room'): [${room}], @Query('relations'): [${relations}]${C.END}`);
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
-			console.log("tmpGameRoom:", tmpGameRoom);
+			if (!tmpGameRoom)
+				return (`There is no GameRoom with '${room}' name`);
+			return (tmpGameRoom);
 		}
 		catch (err)
 		{
 			console.log("@Get('/room'): ", err);
-			return (null)
+			return ({err: err});
 		}
 	}
 
@@ -39,24 +40,50 @@ export class GameController {
 		@Body() body: {
 			roomName: string,
 			description: string,
-			creator: string,
 		},
 		// @Req() {body}: {body: {creator: string, roomName: string}},
 		// @Req() { user, body }: { user: any; body: { creator: string; roomName: string } },
 	){
-		console.log(`${C.B_YELLOW}POST: /room/create: @Body: [${body}]${C.END}`);
-		const tmpUser = await this.usersService.findOne(null, user.login);
-		if (!tmpUser) {
-			throw new NotFoundException(`User not found for GameRoom create: ${user.login}`);
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /room/create: @Body(): [${body}]${C.END}`);
+			const tmpUser = await this.usersService.findOne(null, user.login);
+			if (!tmpUser) {
+				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
+			}
+			const	createGameDto: CreateGameDto = {
+				name: body.roomName,
+				description: body.description,
+				players: [tmpUser],
+				admins: [tmpUser],
+				watchers: [],
+			}
+			const	newGameRoom = await this.gameService.createGameRoom(createGameDto);
+			return (newGameRoom);
 		}
-		const	createGameDto: CreateGameDto = {
-			name: body.roomName,
-			players: [tmpUser],
-			admins: [tmpUser],
-			watchers: [tmpUser],
+		catch (err)
+		{
+			console.log("@Post('/room/create'): ", err);
+			return ({err: err});
 		}
-		console.log("createGameDto:", createGameDto);
-		const	newGameRoom = await this.gameService.createChannel(createGameDto);
-		console.log(newGameRoom);
 	}
+
+	@Delete('/room')
+	async	deleteGameRoom(
+		@Req() {user},
+		@Query('room') room: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_RED}DELETE: /room: @Query('room'): [${room}]${C.END}`);
+			const	responseGameRoom = await this.gameService.deleteGameRoom(room);
+			return (responseGameRoom);
+		}
+		catch (err)
+		{
+			console.log("@Delete('/room'): ", err);
+			return ({err: err});
+		}
+	}
+
 }

@@ -83,8 +83,6 @@ export class ChatService {
 	async findChannelUser(channel: Channel, user: User) {
 		if (!channel || !user)
 			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
-		console.log(channel.members);
-		console.log(user);
 		const foundUser = channel.members.find((channelUser) => channelUser.login === user.login);
 		if (!foundUser)
 			return (false);
@@ -148,11 +146,11 @@ export class ChatService {
 		}
 
 		// Kanala ait mesajları sil veya ilişkilendirmeyi kes
-		await this.messageRepository.delete({ channel: { id: tmpChannel.id } });
+		// NOT: Biz Channel'i silmek istedigimizde iliskili olan Message[] tablosunun {onDelete: 'CASCADE'} kodunu ekledigimizde burada elimizle silmemize gerek kalmiyor.
+		// await this.messageRepository.delete({ channel: { id: tmpChannel.id } });
 		
 		// Kanalı sil
 		const deletedChannel = await this.channelRepository.remove(tmpChannel);
-
 		return deletedChannel;
 
 		// console.log("chat.service.ts: removeChannel(): Channel:", channel);

@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, Query, HttpException, HttpStatus, UseGuards, Head, SetMetadata, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
+import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
 import { Colors as C } from '../colors';
 import { AuthGuard } from 'src/auth/auth.guard';

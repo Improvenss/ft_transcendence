@@ -3,8 +3,6 @@ import { Entity,
 	PrimaryGeneratedColumn,
 	ManyToOne,
 	ManyToMany,
-	JoinColumn,
-	JoinTable,
 	OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { IsNotEmpty } from 'class-validator';
@@ -37,19 +35,14 @@ export class Channel {
 	//----------------------User----------------------------//
 
 	@ManyToMany(() => User, user => user.channels, {nullable: true, onDelete: 'CASCADE'})
-	// @JoinTable()
 	public members: User[]; // Kanalın üyeleri
 
 	@ManyToMany(() => User, user => user.adminChannels, {onDelete: 'CASCADE'})
-	// @JoinTable()
 	public admins: User[]; // Kanalın yöneticileri
 
 	//----------------------Message----------------------------//
 
 	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
-	// @OneToMany(() => Message, message => message.channel, {nullable: true, cascade: true})
-	// @OneToMany(() => Message, message => message.channel, {nullable: true, onDelete: 'CASCADE'})
-	// @JoinColumn()
 	public messages: Message[]; // Kanalın mesajları
 }
 
@@ -70,11 +63,8 @@ export class Message {
 
 	@ManyToOne(() => User, { eager: true })
 	// @ManyToOne(() => User, user => user.messages)
-	// @JoinColumn({ name: 'userId' })
 	public author: User; // Mesajın yazarı
 
-	// @ManyToOne(() => Channel, { eager: true })
-	@ManyToOne(() => Channel, channel => channel.messages)
-	// @JoinColumn({ name: 'channelId' })
+	@ManyToOne(() => Channel, channel => channel.messages, {onDelete: 'CASCADE'}) // Buradaki olay channel silinirken bu mesajlar da silinme durumuna giriyor, bu durumda ne yapacagini soyluyoruz biz { onDelete: 'CASCADE' } diyere. Yani sil diyoruz.
 	public channel: Channel; // Mesajın gönderildiği kanal
 }

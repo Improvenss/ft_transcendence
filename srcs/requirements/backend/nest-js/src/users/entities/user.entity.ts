@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail } from "class-validator";
@@ -65,16 +65,16 @@ export class User {
 	// game achievementler
 
 	@ManyToMany(() => Game, game => game.players, { nullable: true, onDelete: 'CASCADE' })
-	// @JoinTable()
-	public gameRooms: Game[]; // Kullanıcının katıldığı oyunlar
+	@JoinTable()
+	public gameRooms: Game[];
 
 	@ManyToMany(() => Game, game => game.admins, { nullable: true, onDelete: 'CASCADE' })
-	// @JoinTable()
-	public gameRoomsAdmin: Game[]; // Kullanıcının yönetici olduğu oyunlar
+	@JoinTable()
+	public gameRoomsAdmin: Game[];
 
 	@ManyToMany(() => Game, game => game.watchers, { nullable: true, onDelete: 'CASCADE' })
-	// @JoinTable()
-	public gameRoomsWatcher: Game[]; // Kullanıcının yönetici olduğu oyunlar
+	@JoinTable()
+	public gameRoomsWatcher: Game[];
 
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);
