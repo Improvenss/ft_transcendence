@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsInt, Min } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsInt, Min, isNumber, IsNumber } from "class-validator";
 import { User } from "src/users/entities/user.entity";
 
 export class CreateGameDto {
@@ -22,12 +22,14 @@ export class CreateGameDto {
 	@IsOptional()
 	playerRightLocation?: string;
 
+	@IsNumber()
 	@IsInt()
 	@Min(0)
 	@IsOptional()
 	playerLeftScore?: number;
 
 	@IsInt()
+	@IsNumber()
 	@Min(0)
 	@IsOptional()
 	playerRightScore?: number;

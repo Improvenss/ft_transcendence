@@ -414,6 +414,24 @@
             "description": ""
           }
         }
+      },
+      "patch": {
+        "operationId": "GameController_patchGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/game/room/create": {

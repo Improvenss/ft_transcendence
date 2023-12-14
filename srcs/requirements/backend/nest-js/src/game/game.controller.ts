@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req, UseGuards, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -86,4 +86,17 @@ export class GameController {
 		}
 	}
 
+	@Patch('/room')
+	async	patchGameRoom(
+		@Req() {user},
+		@Query('room') room: string | undefined,
+		@Body() body: Partial<CreateGameDto>,
+	){
+		console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${body}]${C.END}`);
+		const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
+		return (responseGameRoom);
+	}
+
+	// @Put('/room')
+	// async	putGameRoom()
 }

@@ -3,6 +3,7 @@ import { Entity,
 	Column,
 	ManyToMany } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { IsInt, IsNumber, IsString } from 'class-validator';
 
 @Entity('game')
 export class Game {
@@ -10,27 +11,37 @@ export class Game {
 		Object.assign(this, game);
 	}
 
+	@IsNumber()
 	@PrimaryGeneratedColumn()
 	public id: number;
 
+	@IsString()
 	@Column({ length: 15, unique: true , nullable: false})
 	public name: string;
 
+	@IsString()
 	@Column({ length: 30, nullable: true})
 	public description: string;
 
+	@IsString()
 	@Column({ nullable: true })
 	public ballLocation: string;
 
+	@IsString()
 	@Column({ nullable: true })
 	public playerLeftLocation: string;
 
+	@IsString()
 	@Column({ nullable: true })
 	public playerRightLocation: string;
 
+	@IsInt()
+	@IsNumber()
 	@Column({ default: 0 })
 	public playerLeftScore: number;
 
+	@IsInt()
+	@IsNumber()
 	@Column({ default: 0 })
 	public playerRightScore: number;
 

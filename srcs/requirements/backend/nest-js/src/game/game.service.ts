@@ -60,4 +60,30 @@ export class GameService {
 		// const	responseGameRoom = await this.entityManager.delete(room);
 		return (responseGameRoom)
 	}
+
+	/**
+	 * PATCH genellikle guncellemek icin kullanilir.
+	 */
+	async	patchGameRoom(
+		room: string | undefined,
+		body: Partial<CreateGameDto>,
+	){
+		const	tmpGameRooms = await this.findGameRoom(room, 'all');
+		if (!Array.isArray(tmpGameRooms))
+		{ // Game seklinde gelirse alttaki for()'un kafasi karismasin diye.
+			Object.assign(tmpGameRooms, body);
+			return (await this.gameRepository.save(tmpGameRooms));
+		}
+		for (const room of tmpGameRooms)
+		{ // Game[] seklinde gelirse hepsini tek tek guncellemek icin.
+			Object.assign(room, body);
+			await this.gameRepository.save(room);
+		}
+		return (tmpGameRooms);
+	}
+
+	/**
+	 * PUT kaynagin tamamini degistirmek icin kullanilir.
+	 */
+	// async	putGameRoom()
 }
