@@ -46,7 +46,7 @@ export class GameController {
 	){
 		try
 		{
-			console.log(`${C.B_YELLOW}POST: /room/create: @Body(): [${body}]${C.END}`);
+			console.log(`${C.B_YELLOW}POST: /room: @Body(): [${body}]${C.END}`);
 			const tmpUser = await this.usersService.findOne(null, user.login);
 			if (!tmpUser) {
 				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
@@ -63,7 +63,7 @@ export class GameController {
 		}
 		catch (err)
 		{
-			console.log("@Post('/room/create'): ", err);
+			console.log("@Post('/room'): ", err);
 			return ({err: err});
 		}
 	}

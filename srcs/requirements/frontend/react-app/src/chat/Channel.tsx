@@ -11,7 +11,7 @@ import ChannelJoin from './ChannelJoin';
 import Cookies from 'js-cookie';
 
 // function Channel({ setSelectedChannel, channels }: IChannelProps) {
-	function Channel() {
+function Channel() {
 	console.log("---------CHAT-CHANNELS---------");
 	const { channels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
