@@ -27,6 +27,10 @@ export class Game {
 	@Column({ nullable: true })
 	public ballLocation: string;
 
+	@IsNumber()
+	@Column({ default: 10})
+	public ballSpeed: number;
+
 	@IsString()
 	@Column({ nullable: true })
 	public playerLeftLocation: string;

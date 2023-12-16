@@ -91,6 +91,18 @@ export class UsersService {
 		return (this.usersRepository.delete({}));
 	}
 
+	// async	deleteUser(
+	// 	user: string | undefined,
+	// ){
+	// 	const	tmpGameRoom = await this.findUser(user);
+	// 	if (!tmpGameRoom)
+	// 		return (`GameRoom: '${user}' not found.`);
+	// 	// await	this.userRepository.delete()
+	// 	const	responseGameRoom = await this.gameRepository.remove(tmpGameRoom as User);
+	// 	// const	responseGameRoom = await this.entityManager.delete(user);
+	// 	return (responseGameRoom)
+	// }
+
 	/**
 	 * Sadece verilen id'ye sahip olan User tablosunu siliyor.
 	 * @param id User id.

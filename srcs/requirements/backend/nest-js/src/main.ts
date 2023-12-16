@@ -37,8 +37,10 @@ function setupSwagger(app: INestApplication) {
  * 
  */
 async function bootstrap() {
-	const myEmitter = new EventEmitter();
-	myEmitter.setMaxListeners(15);
+	// const myEmitter = new EventEmitter();
+	// myEmitter.setMaxListeners(15);
+	// emitter.setMaxListeners
+	process.setMaxListeners(0);
 	const	httpsOptions = {
 		key: fs.readFileSync(process.env.KEY_FILE as string),
 		cert: fs.readFileSync(process.env.CERT_FILE as string),
