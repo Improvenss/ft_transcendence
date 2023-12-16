@@ -47,15 +47,15 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room: @Body(): [${body}]${C.END}`);
-			const tmpUser = await this.usersService.findOne(null, user.login);
+			const tmpUser = await this.usersService.findUser(user.login);
 			if (!tmpUser) {
 				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
 			}
 			const	createGameDto: CreateGameDto = {
 				name: body.roomName,
 				description: body.description,
-				players: [tmpUser],
-				admins: [tmpUser],
+				players: [tmpUser[0].user],
+				admins: [tmpUser[0].user],
 				watchers: [],
 			}
 			const	newGameRoom = await this.gameService.createGameRoom(createGameDto);

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
@@ -10,51 +10,85 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
-		private readonly	entityManager: EntityManager
+		// private readonly	entityManager: EntityManager,
 	) {}
 
-	/**
-	 * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
-	 * @param createUserDto 
-	 */
-	async	create(createUserDto: CreateUserDto) {
+	// /**
+	//  * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
+	//  * @param createUserDto 
+	//  */
+	// async	createUser(createUserDto: CreateUserDto) {
+	// 	const	newUser = new User(createUserDto);
+	// 	await this.entityManager.save(newUser);
+	// 	return (`New user created: id[${newUser.id}]`);
+	// }
+
+	async	createUser(createUserDto: CreateUserDto) {
+		const	tmpUser = await this.findUser(createUserDto.login);
+		if (tmpUser)
+			return (`User: '${createUserDto.login}' already created.`);
 		const	newUser = new User(createUserDto);
-		await this.entityManager.save(newUser);
-		return (`New user created: id[${newUser.id}]`);
+		const	response = await this.usersRepository.save(newUser);
+		console.log("responseeeeee createUser:", response);
+		console.log(`New User created: #${newUser.login}:[${newUser.id}]`);
+		return (`New User created: #${newUser.login}:[${newUser.id}]`);
 	}
 
-	/**
-	 * DB'deki butun Users kayitlarini aliyor.
-	 */
-	async	findAll() {
-		const tmpUser = await this.usersRepository.find({relations: {channels: true}});
-		if (!tmpUser)
-			throw (new NotFoundException("user.service.ts: find(): User not found!"));
+	// /**
+	//  * DB'deki butun Users kayitlarini aliyor.
+	//  */
+	// async	findAll() {
+	// 	const tmpUser = await this.usersRepository.find({relations: {channels: true}});
+	// 	if (!tmpUser)
+	// 		throw (new NotFoundException("user.service.ts: find(): User not found!"));
+	// 	return (tmpUser);
+	// }
+
+	async	findUser(
+		user: string | undefined,
+		socket?: Socket,
+		relations?: string[] | 'all' | null,
+	){
+		console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
+		const relationObject = (relations === 'all')
+		? {channels: true, adminChannels: true, messages: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
+		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
+			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
+			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
+				? { [relations]: true } // sadece bunu ata.
+				: null)); // hicbiri degilse null ata.
+		console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		const tmpUser = (user === undefined)
+			? await this.usersRepository.find({relations: relationObject})
+			: await this.usersRepository.findOne({
+					where: {login: user, socketId: socket.id},
+					relations: relationObject
+				});
 		return (tmpUser);
 	}
 
-	/**
-	 * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
-	 * @param id
-	 * @param login
-	 * @returns User.
-	 */
-	async findOne(id?: number, login?: string, relations?: string[]) {
-		if (!id && !login)
-			throw new Error('Must be enter ID or login.');
-		const tmpUser = await this.usersRepository.findOne({
-			where: { id: id, login: login },
-			relations: relations,
-		});
-		return (tmpUser);
-	}
+	// /**
+	//  * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
+	//  * @param id
+	//  * @param login
+	//  * @returns User.
+	//  */
+	// async findOne(id?: number, login?: string, relations?: string[]) {
+	// 	if (!id && !login)
+	// 		throw new Error('Must be enter ID or login.');
+	// 	const tmpUser = await this.usersRepository.findOne({
+	// 		where: { id: id, login: login },
+	// 		relations: relations,
+	// 	});
+	// 	return (tmpUser);
+	// }
 
-	async findOneSocket(socket: Socket): Promise<User | null> {
-		if (!socket)
-			throw new Error('Must be enter Socket.');
-		const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
-		return (tmpUser);
-	}
+	// async findOneSocket(socket: Socket): Promise<User | null> {
+	// 	if (!socket)
+	// 		throw new Error('Must be enter Socket.');
+	// 	const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
+	// 	return (tmpUser);
+	// }
 
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.
@@ -64,10 +98,24 @@ export class UsersService {
 	 * @param updateUserDto Guncellemek istedigmiz parametre.
 	 * @returns Guncellenen User.
 	 */
-	async	update(id: number, updateUserDto: UpdateUserDto) {
-		const	tmpUser = await this.findOne(id);
-		Object.assign(tmpUser, updateUserDto);
-		return (await this.entityManager.save(tmpUser));
+	async	patchUser(
+		user: string | undefined,
+		body: Partial<UpdateUserDto>,
+	){
+		const	tmpUsers = await this.findUser(user, null, 'all');
+		if (!tmpUsers)
+			return (`User'${user}' not found.`);
+		if (!Array.isArray(tmpUsers))
+		{ // User seklinde gelirse alttaki for()'un kafasi karismasin diye.
+			Object.assign(tmpUsers, body);
+			return (await this.usersRepository.save(tmpUsers));
+		}
+		for (const tmpUser of tmpUsers)
+		{ // User[] seklinde gelirse hepsini tek tek guncellemek icin.
+			Object.assign(tmpUser, body);
+			await this.usersRepository.save(tmpUser);
+		}
+		return (tmpUsers);
 	}
 
 	/**
@@ -76,11 +124,11 @@ export class UsersService {
 	 * @param login 
 	 */
 	async	updateSocketLogin(login: string, socketId: string) {
-		const	tmpUser = await this.findOne(undefined, login);
+		const	tmpUser = await this.findUser(login);
 		if (!tmpUser)
 			throw (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
 		Object.assign(tmpUser, {socketId: socketId});
-		return (await this.entityManager.save(tmpUser));
+		return (await this.usersRepository.save(tmpUser[0]));
 	}
 
 	/**
@@ -96,8 +144,7 @@ export class UsersService {
 	// ){
 	// 	const	tmpGameRoom = await this.findUser(user);
 	// 	if (!tmpGameRoom)
-	// 		return (`GameRoom: '${user}' not found.`);
-	// 	// await	this.userRepository.delete()
+	// 		return (`GameRoom: '${user}' not found.`); // 	// await	this.userRepository.delete()
 	// 	const	responseGameRoom = await this.gameRepository.remove(tmpGameRoom as User);
 	// 	// const	responseGameRoom = await this.entityManager.delete(user);
 	// 	return (responseGameRoom)

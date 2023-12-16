@@ -54,9 +54,40 @@
         }
       }
     },
+    "/users/user": {
+      "get": {
+        "operationId": "UsersController_getUser",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/cookie": {
+      "get": {
+        "operationId": "UsersController_userCookie",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users": {
       "post": {
-        "operationId": "UsersController_create",
+        "operationId": "UsersController_createUser",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -70,15 +101,6 @@
         },
         "responses": {
           "201": {
-            "description": ""
-          }
-        }
-      },
-      "get": {
-        "operationId": "UsersController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
             "description": ""
           }
         }
@@ -104,122 +126,7 @@
         }
       }
     },
-    "/users/cookie": {
-      "get": {
-        "operationId": "UsersController_userCookie",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/user": {
-      "get": {
-        "operationId": "UsersController_createUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/{id}": {
-      "get": {
-        "operationId": "UsersController_findOneId",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "UsersController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "UsersController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/users/{login}": {
-      "get": {
-        "operationId": "UsersController_findOneLogin",
-        "parameters": [
-          {
-            "name": "login",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
       "patch": {
         "operationId": "UsersController_updateSocketLogin",
         "parameters": [
@@ -455,10 +362,6 @@
   "components": {
     "schemas": {
       "CreateUserDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateUserDto": {
         "type": "object",
         "properties": {}
       },
