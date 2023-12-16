@@ -30,7 +30,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
 				//const response = await fetch(process.env.REACT_APP_USER as string, {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user`, {
+				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me`, {
 					method: "GET",
 					headers: {
 						"Content-Type": "application/json",

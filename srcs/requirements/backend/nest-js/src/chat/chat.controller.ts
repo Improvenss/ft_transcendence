@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { ChatGateway } from './chat.gateway';
 import * as bcrypt from 'bcrypt';
 import { Channel } from './entities/chat.entity';
+import { User } from 'src/users/entities/user.entity';
 
 // Dosya Adı Değiştirme Fonksiyonu
 	const editFileName = (req, file, callback) => {
@@ -89,7 +90,7 @@ export class ChatController {
 			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
 				throw (new Error("Password is WRONG!!!"));
 			const tmpUser = await this.usersService.findUser(user.login);
-			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser[0]);
+			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser as User);
 			//await this.chatService.updateChannel(tmpChannel, tmpUser);
 			this.chatGateway.server.emit('channelListener');
 			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
@@ -120,7 +121,7 @@ export class ChatController {
 			// }
 			const tmpUser = await this.usersService.findUser(user.login);
 			if (!tmpUser) {
-				throw new NotFoundException(`User not found for channel create: ${user[0].login}`);
+				throw new NotFoundException(`User not found for channel create: ${user.login as User}`);
 			}
 			if (!image){
 				throw new Error('No file uploaded');
@@ -136,8 +137,8 @@ export class ChatController {
 						password,
 						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 				image: imgUrl as string,
-				members: [tmpUser[0]],
-				admins: [tmpUser[0]],
+				members: [tmpUser as User],
+				admins: [tmpUser as User],
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
 			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
@@ -152,8 +153,8 @@ export class ChatController {
 					type: type,
 					description: description,
 					image: imgUrl,
-					members: [tmpUser[0]],
-					admins: [tmpUser[0]],
+					members: [tmpUser as User],
+					admins: [tmpUser as User],
 					messages: [],
 				},
 			});
@@ -191,7 +192,12 @@ export class ChatController {
 		{
 			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 			const	tmpChannel = await this.chatService.findChannel(channel, relations);
-			return (await this.chatService.checkInvolvedUser(tmpChannel, user));
+			// if (!tmpChannel)
+			// 	throw (new NotFoundException(`Channel '${channel}' not found`))
+			const channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
+			if (channelArray && channelArray.members)
+				return (await this.chatService.checkInvolvedUser(tmpChannel, user));
+			return (tmpChannel);
 		}
 		catch (err)
 		{
@@ -232,9 +238,7 @@ export class ChatController {
 			const tmpChannel = await this.chatService.removeChannel(channel);
 			if (!tmpChannel)
 				throw (new NotFoundException("Channel does not exist!"));
-				// throw (new NotFoundException("name: Channel does not exist!"));
 			this.chatGateway.server.emit('channelListener'); // Kullanicilara channel'in silinme infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
-			console.log("return'dan onceki tmpChannel:", tmpChannel);
 			return (tmpChannel);
 		}
 		catch (err)

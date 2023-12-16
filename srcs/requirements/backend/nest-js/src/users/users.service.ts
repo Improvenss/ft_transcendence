@@ -18,7 +18,7 @@ export class UsersService {
 		socket?: Socket,
 		relations?: string[] | 'all' | null,
 	){
-		console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
+		// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
 		? {channels: true, adminChannels: true, messages: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
 		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
@@ -26,7 +26,7 @@ export class UsersService {
 			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
 				? { [relations]: true } // sadece bunu ata.
 				: null)); // hicbiri degilse null ata.
-		console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		// console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
 		const tmpUser = (user === undefined)
 			? await this.usersRepository.find({relations: relationObject})
 			: await this.usersRepository.findOne({
@@ -93,7 +93,6 @@ export class UsersService {
 	 * DB'de var olan User verisini guncelliyoruz.
 	 * Object.assign(); function'unda updateUserDto json bilgilerini
 	 *  tmpUser'e atiyoruz.
-	 * @param id Guncellenecek olan User id'si.
 	 * @param updateUserDto Guncellemek istedigmiz parametre.
 	 * @returns Guncellenen User.
 	 */
@@ -125,9 +124,9 @@ export class UsersService {
 	async	updateSocketLogin(login: string, socketId: string) {
 		const	tmpUser = await this.findUser(login);
 		if (!tmpUser)
-			return (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
+			return (null);
 		Object.assign(tmpUser, {socketId: socketId});
-		return (await this.usersRepository.save(tmpUser[0]));
+		return (await this.usersRepository.save(tmpUser as User));
 	}
 
 	// /**

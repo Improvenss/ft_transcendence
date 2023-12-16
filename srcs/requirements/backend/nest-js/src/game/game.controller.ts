@@ -4,6 +4,7 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Colors as C } from '../colors';
 import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/entities/user.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -54,8 +55,8 @@ export class GameController {
 			const	createGameDto: CreateGameDto = {
 				name: body.roomName,
 				description: body.description,
-				players: [tmpUser[0]],
-				admins: [tmpUser[0]],
+				players: [tmpUser as User],
+				admins: [tmpUser as User],
 				watchers: [],
 			}
 			const	newGameRoom = await this.gameService.createGameRoom(createGameDto);

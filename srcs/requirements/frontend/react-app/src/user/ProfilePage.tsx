@@ -28,7 +28,7 @@ function ProfilePage() {
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
 	const	[friendList, setFriendList] = useState<IFriend[]>( () => {
-		const fetchFriendList: IFriend[] = [
+	const	fetchFriendList: IFriend[] = [
 			{ name: 'uercan', status: 'offline', image: '/dogSlayer.png' },
 			{ name: 'gsever', status: 'online', image: '/heart.jpg' },
 			{ name: 'Admin', status: 'AFK', image: '/watcher.jpg' }

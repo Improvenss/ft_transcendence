@@ -15,14 +15,18 @@ export class UsersController {
 	@Get('/user')
 	async getUser(
 		@Req() {user},
-		@Query ('user') findUser: string | undefined,
+		@Query ('user') findUser: string | 'me' | undefined,
 		@Query ('socket') findSocket?: Socket | undefined,
 		@Query('relations') relations?: string[] | null | 'all',
 	){
 		try
 		{
 			console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('socket'): [${findSocket}], @Query('relations'): [${relations}]${C.END}`);
-			const	tmpUser = await this.usersService.findUser(findUser, findSocket, relations);
+			const	tmpUser = await this.usersService.findUser(
+				(findUser === 'me') ? user.login : findUser,
+				findSocket,
+				relations
+			);
 			if (!tmpUser)
 				return ({message: "USER NOK", user: `User '${findUser}' not found.`});
 			return ({message: "USER OK", user: tmpUser});
@@ -72,9 +76,11 @@ export class UsersController {
 		try
 		{
 			const	tmpUser = await this.usersService.updateSocketLogin(user.login, status.socketId);
+			if (!tmpUser)
+				throw (new NotFoundException(`User ${user.login} not found.`));
 			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
-			console.error("@Post('/socket'): ", err);
+			console.error("@Patch('/socket'): ", err);
 			return ({message: "Socket not updated."});
 		}
 	}
