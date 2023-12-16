@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
-import { EntityManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Game } from './entities/game.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class GameService {
@@ -69,6 +68,8 @@ export class GameService {
 		body: Partial<CreateGameDto>,
 	){
 		const	tmpGameRooms = await this.findGameRoom(room, 'all');
+		if (!tmpGameRooms)
+			return (`GameRoom '${room}' not found.`);
 		if (!Array.isArray(tmpGameRooms))
 		{ // Game seklinde gelirse alttaki for()'un kafasi karismasin diye.
 			Object.assign(tmpGameRooms, body);

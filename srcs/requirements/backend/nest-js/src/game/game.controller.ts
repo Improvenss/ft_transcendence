@@ -92,9 +92,17 @@ export class GameController {
 		@Query('room') room: string | undefined,
 		@Body() body: Partial<CreateGameDto>,
 	){
-		console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${body}]${C.END}`);
-		const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
-		return (responseGameRoom);
+		try
+		{
+			console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${body}]${C.END}`);
+			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
+			return (responseGameRoom);
+		}
+		catch (err)
+		{
+			console.log("@Patch('/room'): ", err);
+			return ({err: err});
+		}
 	}
 
 	// @Put('/room')
