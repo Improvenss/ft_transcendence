@@ -54,8 +54,8 @@ export class GameController {
 			const	createGameDto: CreateGameDto = {
 				name: body.roomName,
 				description: body.description,
-				players: [tmpUser[0].user],
-				admins: [tmpUser[0].user],
+				players: [tmpUser[0]],
+				admins: [tmpUser[0]],
 				watchers: [],
 			}
 			const	newGameRoom = await this.gameService.createGameRoom(createGameDto);
@@ -64,24 +64,6 @@ export class GameController {
 		catch (err)
 		{
 			console.log("@Post('/room'): ", err);
-			return ({err: err});
-		}
-	}
-
-	@Delete('/room')
-	async	deleteGameRoom(
-		@Req() {user},
-		@Query('room') room: string | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_RED}DELETE: /room: @Query('room'): [${room}]${C.END}`);
-			const	responseGameRoom = await this.gameService.deleteGameRoom(room);
-			return (responseGameRoom);
-		}
-		catch (err)
-		{
-			console.log("@Delete('/room'): ", err);
 			return ({err: err});
 		}
 	}
@@ -107,4 +89,22 @@ export class GameController {
 
 	// @Put('/room')
 	// async	putGameRoom()
+
+	@Delete('/room')
+	async	deleteGameRoom(
+		@Req() {user},
+		@Query('room') room: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_RED}DELETE: /room: @Query('room'): [${room}]${C.END}`);
+			const	responseGameRoom = await this.gameService.deleteGameRoom(room);
+			return (responseGameRoom);
+		}
+		catch (err)
+		{
+			console.log("@Delete('/room'): ", err);
+			return ({err: err});
+		}
+	}
 }

@@ -88,8 +88,8 @@ export class ChatController {
 			const	tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(payload.channel, ['members']);
 			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
 				throw (new Error("Password is WRONG!!!"));
-			const tmpUser = await this.usersService.findOne(null, user.login);
-			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser);
+			const tmpUser = await this.usersService.findUser(user.login);
+			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser[0]);
 			//await this.chatService.updateChannel(tmpChannel, tmpUser);
 			this.chatGateway.server.emit('channelListener');
 			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
@@ -118,9 +118,9 @@ export class ChatController {
 			// if (findChannel !== null){
 			// 	throw new Error("A channel with the same name already exists.");
 			// }
-			const tmpUser = await this.usersService.findOne(null, user.login);
+			const tmpUser = await this.usersService.findUser(user.login);
 			if (!tmpUser) {
-				throw new NotFoundException(`User not found for channel create: ${user.login}`);
+				throw new NotFoundException(`User not found for channel create: ${user[0].login}`);
 			}
 			if (!image){
 				throw new Error('No file uploaded');
@@ -136,8 +136,8 @@ export class ChatController {
 						password,
 						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 				image: imgUrl as string,
-				members: [tmpUser],
-				admins: [tmpUser],
+				members: [tmpUser[0]],
+				admins: [tmpUser[0]],
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
 			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
@@ -152,8 +152,8 @@ export class ChatController {
 					type: type,
 					description: description,
 					image: imgUrl,
-					members: [tmpUser],
-					admins: [tmpUser],
+					members: [tmpUser[0]],
+					admins: [tmpUser[0]],
 					messages: [],
 				},
 			});

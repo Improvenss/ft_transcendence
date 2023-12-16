@@ -62,7 +62,7 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			imageUrl: dataClient.image.link,
 		};
 
-		const	responseData = await this.apiService.fetchUserData(createUserDto);
+		const	responseData = await this.apiService.fetchCreateUserData(createUserDto);
 		if (!responseData)
 			return ({message: 'BACKEND NOK'});
 		const cookie = await this.jwtService.signAsync(createUserDto, {expiresIn: '1h'});

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -46,11 +47,9 @@ export class ApiService {
 		return (responseAccessToken);
 	}
 
-	async	fetchUserData(dataClient: any) {
-		const	tmpDb = await this.usersService.findOne(undefined, dataClient.login);
-		if (tmpDb)
-			return ("User already exist in DB.");
-		const	responseSave = await this.usersService.create(dataClient);
+	async	fetchCreateUserData(dataClient: CreateUserDto) {
+		console.log("kaydetemeden onceki data:", dataClient); // burasi yapilacak
+		const	responseSave = await this.usersService.createUser(dataClient);
 		return (responseSave);
 	}
 }

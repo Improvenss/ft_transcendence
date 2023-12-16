@@ -174,18 +174,18 @@ export class ChatService {
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
-		const tmpUser = await this.usersService.findOne(null, user, ['channels']);
+		const tmpUser = await this.usersService.findUser(user, null, ['channels']);
 		if (!tmpUser){
 			throw new NotFoundException('User does not exist!');
 		}
-		if (!tmpUser.channels || !tmpChannel.members) {
+		if (!tmpUser[0].channels || !tmpChannel.members) {
 			throw new Error('Invalid state: User or Channel data is incomplete');
 		}
 		// Kullanıcının channels ilişkisinden kanalı çıkarın
-		tmpUser.channels = tmpUser.channels.filter(c => c.id !== tmpChannel.id);
+		tmpUser[0].channels = tmpUser[0].channels.filter(c => c.id !== tmpChannel.id);
 		// Kanalın members ilişkisinden kullanıcıyı çıkarın
-		tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser.id);
-		await this.userRepository.save(tmpUser);
+		tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser[0].id);
+		await this.userRepository.save(tmpUser[0]);
 		await this.channelRepository.save(tmpChannel);
 		return ({message: 'User removed from the channel successfully' });
 	}

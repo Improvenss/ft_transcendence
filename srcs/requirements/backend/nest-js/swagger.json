@@ -72,6 +72,42 @@
             "description": ""
           }
         }
+      },
+      "patch": {
+        "operationId": "UsersController_patchUser",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "UsersController_deleteUser",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/users/cookie": {
@@ -85,70 +121,10 @@
         }
       }
     },
-    "/users": {
-      "post": {
-        "operationId": "UsersController_createUser",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "UsersController_removeAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/users/socket": {
-      "post": {
-        "operationId": "UsersController_createSocket",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/{login}": {
       "patch": {
-        "operationId": "UsersController_updateSocketLogin",
-        "parameters": [
-          {
-            "name": "login",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
+        "operationId": "UsersController_patchSocket",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -313,8 +289,8 @@
           }
         }
       },
-      "delete": {
-        "operationId": "GameController_deleteGameRoom",
+      "patch": {
+        "operationId": "GameController_patchGameRoom",
         "parameters": [
           {
             "name": "room",
@@ -331,8 +307,8 @@
           }
         }
       },
-      "patch": {
-        "operationId": "GameController_patchGameRoom",
+      "delete": {
+        "operationId": "GameController_deleteGameRoom",
         "parameters": [
           {
             "name": "room",
@@ -361,10 +337,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateMessageDto": {
         "type": "object",
         "properties": {}

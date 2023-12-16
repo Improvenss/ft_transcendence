@@ -13,37 +13,6 @@ export class UsersService {
 		// private readonly	entityManager: EntityManager,
 	) {}
 
-	// /**
-	//  * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
-	//  * @param createUserDto 
-	//  */
-	// async	createUser(createUserDto: CreateUserDto) {
-	// 	const	newUser = new User(createUserDto);
-	// 	await this.entityManager.save(newUser);
-	// 	return (`New user created: id[${newUser.id}]`);
-	// }
-
-	async	createUser(createUserDto: CreateUserDto) {
-		const	tmpUser = await this.findUser(createUserDto.login);
-		if (tmpUser)
-			return (`User: '${createUserDto.login}' already created.`);
-		const	newUser = new User(createUserDto);
-		const	response = await this.usersRepository.save(newUser);
-		console.log("responseeeeee createUser:", response);
-		console.log(`New User created: #${newUser.login}:[${newUser.id}]`);
-		return (`New User created: #${newUser.login}:[${newUser.id}]`);
-	}
-
-	// /**
-	//  * DB'deki butun Users kayitlarini aliyor.
-	//  */
-	// async	findAll() {
-	// 	const tmpUser = await this.usersRepository.find({relations: {channels: true}});
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("user.service.ts: find(): User not found!"));
-	// 	return (tmpUser);
-	// }
-
 	async	findUser(
 		user: string | undefined,
 		socket?: Socket,
@@ -61,11 +30,41 @@ export class UsersService {
 		const tmpUser = (user === undefined)
 			? await this.usersRepository.find({relations: relationObject})
 			: await this.usersRepository.findOne({
-					where: {login: user, socketId: socket.id},
+					where: {login: user, socketId: socket?.id},
 					relations: relationObject
 				});
 		return (tmpUser);
 	}
+
+	// /**
+	//  * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
+	//  * @param createUserDto 
+	//  */
+	// async	createUser(createUserDto: CreateUserDto) {
+	// 	const	newUser = new User(createUserDto);
+	// 	await this.entityManager.save(newUser);
+	// 	return (`New user created: id[${newUser.id}]`);
+	// }
+
+	async	createUser(createUserDto: CreateUserDto) {
+		const	tmpUser = await this.findUser(createUserDto.login);
+		if (tmpUser)
+			return (`User: '${createUserDto.login}' already created.`);
+		const	newUser = new User(createUserDto);
+		const	response = await this.usersRepository.save(newUser);
+		console.log(`New User created: #${response.login}:[${response.id}]`);
+		return (`New User created: #${response.login}:[${response.id}]`);
+	}
+
+	// /**
+	//  * DB'deki butun Users kayitlarini aliyor.
+	//  */
+	// async	findAll() {
+	// 	const tmpUser = await this.usersRepository.find({relations: {channels: true}});
+	// 	if (!tmpUser)
+	// 		throw (new NotFoundException("user.service.ts: find(): User not found!"));
+	// 	return (tmpUser);
+	// }
 
 	// /**
 	//  * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
@@ -126,17 +125,27 @@ export class UsersService {
 	async	updateSocketLogin(login: string, socketId: string) {
 		const	tmpUser = await this.findUser(login);
 		if (!tmpUser)
-			throw (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
+			return (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
 		Object.assign(tmpUser, {socketId: socketId});
 		return (await this.usersRepository.save(tmpUser[0]));
 	}
 
-	/**
-	 * Deleting all User tables.
-	 * @returns 
-	 */
-	async	removeAll() {
-		return (this.usersRepository.delete({}));
+	// /**
+	//  * Deleting all User tables.
+	//  * @returns 
+	//  */
+	// async	removeAll() {
+	// 	return (this.usersRepository.delete({}));
+	// }
+
+	async	deleteUser(
+		user: string | undefined,
+	){
+		const	tmpUser = await this.findUser(user);
+		if (!tmpUser)
+			return (`User: '${user}' not found.`);
+		const	responseUser = await this.usersRepository.remove(tmpUser as User);
+		return (responseUser)
 	}
 
 	// async	deleteUser(
@@ -150,14 +159,14 @@ export class UsersService {
 	// 	return (responseGameRoom)
 	// }
 
-	/**
-	 * Sadece verilen id'ye sahip olan User tablosunu siliyor.
-	 * @param id User id.
-	 * @returns 
-	 */
-	async	remove(id: number) {
-		return (this.usersRepository.delete(id));
-	}
+	// /**
+	//  * Sadece verilen id'ye sahip olan User tablosunu siliyor.
+	//  * @param id User id.
+	//  * @returns 
+	//  */
+	// async	remove(id: number) {
+	// 	return (this.usersRepository.delete(id));
+	// }
 }
 
 

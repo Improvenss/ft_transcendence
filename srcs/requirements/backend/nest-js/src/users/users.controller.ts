@@ -21,7 +21,7 @@ export class UsersController {
 	){
 		try
 		{
-			console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('relations'): [${relations}]${C.END}`);
+			console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('socket'): [${findSocket}], @Query('relations'): [${relations}]${C.END}`);
 			const	tmpUser = await this.usersService.findUser(findUser, findSocket, relations);
 			if (!tmpUser)
 				return ({message: "USER NOK", user: `User '${findUser}' not found.`});
@@ -34,6 +34,7 @@ export class UsersController {
 		}
 	}
 
+	// OK
 	@Get('/cookie')
 	async userCookie(
 		@Req() {user},
@@ -51,44 +52,88 @@ export class UsersController {
 		}
 	}
 
-	@Post()
-	async	createUser(
-		@Body() createUserDto: CreateUserDto
-	){
-		const	newUser = await this.usersService.createUser(createUserDto);
-		if (!newUser)
-			throw (new HttpException("@Post(): create(): User could not be created!",
-				HttpStatus.INTERNAL_SERVER_ERROR));
-		return (newUser);
-	}
+	// @Post('/create')
+	// async	createUser(
+	// 	@Body() createUserDto: CreateUserDto,
+	// ){
+	// 	const	newUser = await this.usersService.createUser(createUserDto);
+	// 	if (!newUser)
+	// 		throw (new HttpException("@Post(): create(): User could not be created!",
+	// 			HttpStatus.INTERNAL_SERVER_ERROR));
+	// 	return (newUser);
+	// }
 
-	@Post('/socket')
-	async	createSocket(
+	// OK
+	@Patch('/socket')
+	async	patchSocket(
 		@Req() {user},
-		@Body() status: {socketId: string}) {
-		try {
-			const	tmpUser = await this.usersService.updateSocketLogin(user.login as string, status.socketId);
-			return ({message: `Socket updated successfully. login[${tmpUser[0].login}], socket.id[${tmpUser[0].socketId}]`});
+		@Body() status: {socketId: string}
+	){
+		try
+		{
+			const	tmpUser = await this.usersService.updateSocketLogin(user.login, status.socketId);
+			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
-			console.error("@Post('socket'): ", err);
+			console.error("@Post('/socket'): ", err);
 			return ({message: "Socket not updated."});
 		}
 	}
 
-	@Patch('/:login')
-	async	updateSocketLogin(@Param('login') login: string,
-	@Body() socketData: string) {
-		const	tmpUser = await this.usersService.updateSocketLogin(login, socketData);
-		if (!tmpUser)
-			throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
-				HttpStatus.INTERNAL_SERVER_ERROR));
-		return ({message: "User socket_id updated."});
+	// @Patch('/:login')
+	// async	patchSocketLogin(
+	// 	@Param('login') login: string,
+	// 	@Body() socketData: string
+	// ){
+	// 	const	tmpUser = await this.usersService.updateSocketLogin(login, socketData);
+	// 	if (!tmpUser)
+	// 		throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
+	// 			HttpStatus.INTERNAL_SERVER_ERROR));
+	// 	return ({message: "User socket_id updated."});
+	// }
+
+	// OK
+	@Patch('/user')
+	async	patchUser(
+		@Req() {user},
+		@Query('user') findUser: string | undefined,
+		@Body() body: Partial<UpdateUserDto>,
+	){
+		try
+		{
+			console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${findUser}] @Body(): [${body}]${C.END}`);
+			const	responseUser = await this.usersService.patchUser(findUser, body);
+			return (responseUser);
+		}
+		catch (err)
+		{
+			console.log("@Patch('/user'): ", err);
+			return ({err: err});
+		}
 	}
 
-	@Delete()
-	async	removeAll() {
-		return this.usersService.removeAll();
+	// OK
+	@Delete('/user')
+	async	deleteUser(
+		@Req() {user},
+		@Query('user') delUser: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_RED}DELETE: /user: @Query('user'): [${delUser}]${C.END}`);
+			const	responseUser = await this.usersService.deleteUser(delUser);
+			return (responseUser);
+		}
+		catch (err)
+		{
+			console.log("@Delete('/user'): ", err);
+			return ({err: err});
+		}
 	}
+
+	// @Delete()
+	// async	removeAll() {
+	// 	return this.usersService.removeAll();
+	// }
 
 
 	// /**

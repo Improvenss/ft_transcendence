@@ -1,35 +1,66 @@
 import { IsEmail, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { PartialType } from "@nestjs/swagger";
+import { Channel } from "src/chat/entities/chat.entity";
+import { Game } from "src/game/entities/game.entity";
+import { Message } from "src/chat/entities/chat.entity";
 
 export class CreateUserDto {
-	@IsNotEmpty({ message: 'Email cannot be empty' })
-	@IsEmail({}, { message: 'Invalid email format' })
-	email: string;
+  @IsNotEmpty({ message: 'Email cannot be empty' })
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
 
-	@IsNotEmpty({ message: 'Login cannot be empty' })
-	@IsString({ message: 'Login must be a string' })
-	login: string;
+  @IsNotEmpty({ message: 'Login cannot be empty' })
+  @IsString({ message: 'Login must be a string' })
+  login: string;
 
-	@IsNotEmpty({ message: 'Display name cannot be empty' })
-	@IsString({ message: 'Display name must be a string' })
-	displayname: string;
+  @IsNotEmpty({ message: 'Display name cannot be empty' })
+  @IsString({ message: 'Display name must be a string' })
+  displayname: string;
 
-	@IsNotEmpty({ message: 'Image URL cannot be empty' })
-	@IsString({ message: 'Image URL must be a string' })
-	imageUrl: string;
+  @IsNotEmpty({ message: 'Image URL cannot be empty' })
+  @IsString({ message: 'Image URL must be a string' })
+  imageUrl: string;
 
-	@IsOptional()
-	@IsString({ message: 'Socket ID must be a string' })
-	socketId?: string;
+  @IsOptional()
+  @IsString({ message: 'Socket ID must be a string' })
+  socketId?: string;
 
-	@IsOptional()
-	@IsString({ message: 'Nickname must be a string' })
-	nickname?: string;
+  @IsOptional()
+  @IsString({ message: 'Nickname must be a string' })
+  nickname?: string;
 
-	@IsOptional()
-	@IsString({ message: 'Avatar must be a string' })
-	avatar?: string;
+  @IsOptional()
+  @IsString({ message: 'Avatar must be a string' })
+  avatar?: string;
+
+  // Channel
+  @IsOptional()
+  channels?: Channel[];
+
+  @IsOptional()
+  adminChannels?: Channel[];
+
+  // Message
+  @IsOptional()
+  messages?: Message[];
+
+  // Game
+  @IsOptional()
+  gamesWon?: number;
+
+  @IsOptional()
+  gamesLost?: number;
+
+  @IsOptional()
+  gameRooms?: Game[];
+
+  @IsOptional()
+  gameRoomsAdmin?: Game[];
+
+  @IsOptional()
+  gameRoomsWatcher?: Game[];
 }
+
 
 /**
  * Burada extends PartialType(CreateUserDto) olarak eklenen kisimda,
