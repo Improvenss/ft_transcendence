@@ -50,8 +50,8 @@ export class User {
 
 	//----------------------Message----------------------------//
 
-	@ManyToMany(() => Message, message => message.author)
-	// @JoinTable()
+	@ManyToMany(() => Message, message => message.author, {nullable: true})
+	@JoinTable()
 	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
 
 	//----------------------Game-------------------------------//

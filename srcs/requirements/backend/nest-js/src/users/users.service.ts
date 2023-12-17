@@ -102,7 +102,7 @@ export class UsersService {
 	){
 		const	tmpUsers = await this.findUser(user, null, 'all');
 		if (!tmpUsers)
-			return (`User'${user}' not found.`);
+			return (`User '${user}' not found.`);
 		if (!Array.isArray(tmpUsers))
 		{ // User seklinde gelirse alttaki for()'un kafasi karismasin diye.
 			Object.assign(tmpUsers, body);

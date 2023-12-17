@@ -15,7 +15,7 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import * as bcrypt from 'bcrypt';
-import { handleCreateChannel } from './channel.handler';
+// import { handleCreateChannel } from './channel.handler';
 import { CreateMessageDto } from './dto/chat-message.dto';
 
 var count: number = 0;

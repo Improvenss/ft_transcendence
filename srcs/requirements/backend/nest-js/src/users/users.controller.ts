@@ -99,6 +99,7 @@ export class UsersController {
 
 	// OK
 	@Patch('/user')
+	
 	async	patchUser(
 		@Req() {user},
 		@Query('user') findUser: string | undefined,
@@ -106,7 +107,9 @@ export class UsersController {
 	){
 		try
 		{
+			// console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${user.login}] @Body(): [${body}]${C.END}`);
 			console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${findUser}] @Body(): [${body}]${C.END}`);
+			// const	responseUser = await this.usersService.patchUser(user.login, body);
 			const	responseUser = await this.usersService.patchUser(findUser, body);
 			return (responseUser);
 		}
