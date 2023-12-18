@@ -85,14 +85,10 @@ export class ChatController {
 			if (!image)
 				throw new Error('No file uploaded');
 
-			console.log("yarrrrrrrrrrrrrrr");
 			if (!fs.existsSync(image.path))
 				throw new Error(`File path is not valid: ${image.path}`);
 
-			console.log("yarrrrrrrrrrrrrrr");
-			console.log("buraya girdi 1");
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
-			console.log("buraya girdi 2");
 			const	createChannelDto: CreateChannelDto = {
 				name: name as string,
 				type: type as string,
@@ -106,14 +102,11 @@ export class ChatController {
 				members: [tmpUser as User],
 				admins: [tmpUser as User],
 			};
-			console.log("buraya girdi 3");
 			const response = await this.chatService.createChannel(createChannelDto);
-			console.log("buraya girdi 4");
 			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
 			// this.chatGateway.server.to(name).emit('channelListener');
 			// this.chatGateway.joinChannel(name); // Kullanıcının kanala katılması gerekiyor //1 kere çalışıyor
 			this.chatGateway.server.emit('channelListener'); // kullancılara yeni channel oluşturuldu infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
-			console.log("buraya girdi 5");
 			return ({
 				message: `${response}`,
 				channel: {

@@ -26,7 +26,24 @@ function UserInput({setVisible}: IUserProps) {
 		// Burada dosyayı sunucuya yüklemek için bir işlem yapabilirsiniz.
 		console.log('Kullanıcı adı: ', username); // nickname
 		console.log('Seçilen dosya: ', selectedFile); // avatar
+
+		// const	responseUserAvatar = await fetch(
+		// 	process.env.REACT_APP_FETCH
+		// 	+ '/user/upload', {
+		// 		method: 'PUT',
+		// 		headers: {
+		// 			"Content-Type": "application/json",
+		// 			"Authorization": "Bearer " + userCookie as string,
+		// 		},
+		// 		body: selectedFile,
+		// 	},
+		// );
+		// if (!responseUserAvatar.ok)
+		// 	alert("User avatar update error.");
+		// const	responseData = await responseUserAvatar.json();
+		// console.log("responseData yani yukleninlen url", responseData);
 		const	responseUserCustomize = await fetch(
+
 			process.env.REACT_APP_FETCH
 				+ `/users/user?user=${user.userInfo?.login}`, { // Buradaki userInfo? olayi bug yaratabilir gibi. ama yaratmayadabilir.
 			method: 'PATCH',
@@ -36,7 +53,7 @@ function UserInput({setVisible}: IUserProps) {
 			},
 			body: JSON.stringify({
 				nickname: username,
-				// avatar: selectedFile,
+				// avatar: responseData,
 			}),
 		});
 		if (!responseUserCustomize.ok)
