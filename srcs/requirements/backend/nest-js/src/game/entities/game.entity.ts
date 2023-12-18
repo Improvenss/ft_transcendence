@@ -18,7 +18,7 @@ export class Game {
 	public name: string; // ok
 
 	@IsString()
-	@Column({ length: 15, nullable: false })
+	@Column({ length: 20, nullable: true })
 	public password: string;
 
 	@IsEnum(GameMode, { message: 'Invalid game mode' })

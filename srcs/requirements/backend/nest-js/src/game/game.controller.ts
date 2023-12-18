@@ -26,6 +26,7 @@ export class GameController {
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
 			if (!tmpGameRoom)
 				return (`There is no GameRoom with '${room}' name`);
+			console.log("dondururleecek", tmpGameRoom);
 			return (tmpGameRoom);
 		}
 		catch (err)
@@ -74,7 +75,7 @@ export class GameController {
 			Object.assign(body, {players: tmpUser, admins: tmpUser})
 			console.log("sonraki hali", body);
 			const	newGameRoom = await this.gameService.createGameRoom(body);
-			return (newGameRoom);
+			return ({newGameRoom});
 		}
 		catch (err)
 		{

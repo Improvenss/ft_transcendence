@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import "./CreateGame.css";
+import Cookies from 'js-cookie';
+import { IGameRoom } from './IGame';
 
 const configs = {
 	winningScore: {
@@ -21,8 +23,10 @@ function CreateGame() {
 	const [gameDuration, setGameDuration] = useState(configs.gameDuration.default);
 	const [password, setPassword] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
+	const userCookie = Cookies.get("user");
+	const [description, setDescription] = useState('');
 
-	const handleCreateRoom = () => {
+	const handleCreateRoom = async () => {
 		// Oda adı kontrolü
 		if (!roomName.trim()) {
 			setErrorMessage("Room name can't empty!");
@@ -41,10 +45,36 @@ function CreateGame() {
 		}
 
 		console.log("Room Name:", roomName);
+		console.log("Password:", password);
 		console.log("Game Mode:", gameMode);
 		console.log("Winning Score:", winningScore);
 		console.log("Game Duration:", gameDuration);
-		console.log("Password:", password);
+		console.log("Description:", description);
+
+
+		// const	responseCreateGame = async () => {
+			const	createRoomObject: IGameRoom = {
+				name: roomName,
+				password: password === '' ? null : password,
+				mode: gameMode,
+				winScore: winningScore,
+				duration: gameDuration,
+				description: description,
+			}
+			const	response = await fetch(
+				process.env.REACT_APP_FETCH + '/game/room', {
+					method: 'POST',
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": "Bearer " + userCookie,
+					},
+					body: JSON.stringify(createRoomObject),
+				}
+			);
+			const	data = await response.json();
+			console.log("responses", data);
+		// }
+		// responseCreateGame();
 
 		// Başarı durumunda hata mesajını sıfırla
 		if (errorMessage != null)
@@ -59,7 +89,7 @@ function CreateGame() {
 				type="text"
 				value={roomName}
 				onChange={(e) => setRoomName(e.target.value.trim())}
-				maxLength={20}
+				maxLength={15}
 			/>
 
 			<label>Game Mode:</label>
@@ -85,6 +115,14 @@ function CreateGame() {
 				<option value="default">Default (3 minutes)</option>
 				<option value="limited">Limited</option>
 			</select>
+
+			<label>Description (optional):</label>
+			<input
+				type="text"
+				value={description}
+				onChange={(e) => setDescription(e.target.value.trim())}
+				maxLength={30}
+			/>
 
 			<label>Password (optional):</label>
 			<input
