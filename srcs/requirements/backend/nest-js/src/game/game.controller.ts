@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -36,12 +36,18 @@ export class GameController {
 	}
 
 	@Post('/room')
+	@UsePipes(new ValidationPipe())
 	async	createGameRoom(
 		@Req() {user},
-		@Body() body: {
-			roomName: string,
-			description: string,
-		},
+		// @Body() body: {
+		// 	roomName: string,
+		// 	description?: string,
+		// 	gameMode: string,
+		// 	winScore: number,
+		// 	duration: number,
+		// 	password?: string,
+		// },
+		@Body() body: CreateGameDto,
 		// @Req() {body}: {body: {creator: string, roomName: string}},
 		// @Req() { user, body }: { user: any; body: { creator: string; roomName: string } },
 	){
@@ -52,14 +58,22 @@ export class GameController {
 			if (!tmpUser) {
 				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
 			}
-			const	createGameDto: CreateGameDto = {
-				name: body.roomName,
-				description: body.description,
-				players: [tmpUser as User],
-				admins: [tmpUser as User],
-				watchers: [],
-			}
-			const	newGameRoom = await this.gameService.createGameRoom(createGameDto);
+			// const	createGameDto: CreateGameDto = {
+			// 	name: body.roomName,
+			// 	description: body.description,
+			// 	mode: body.gameMode,
+			// 	winScore: body.winScore,
+			// 	duration: body.duration,
+			// 	password: body.password,
+			// 	players: [tmpUser as User],
+			// 	admins: [tmpUser as User],
+			// 	watchers: [],
+			// }
+			// const	newGameRoom = await this.gameService.createGameRoom(createGameDto);
+			console.log("onceki hali", body);
+			Object.assign(body, {players: tmpUser, admins: tmpUser})
+			console.log("sonraki hali", body);
+			const	newGameRoom = await this.gameService.createGameRoom(body);
 			return (newGameRoom);
 		}
 		catch (err)

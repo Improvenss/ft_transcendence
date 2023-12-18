@@ -1,58 +1,58 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import "./CreateGame.css";
 
 const configs = {
 	winningScore: {
-	  default: 5,
-	  limited: 1,
+		default: 5,
+		limited: 1,
 	},
 	gameDuration: {
-	  default: 180,
-	  limited: 30,
+		default: 180,
+		limited: 30,
 	},
-  };
+};
 
 function CreateGame() {
-  console.log("---------CREATE-GAME---------");
-  const [roomName, setRoomName] = useState('');
-  const [gameMode, setGameMode] = useState('classic');
-//   const [map, setMap] = useState('classic');
-  const [winningScore, setWinningScore] = useState(configs.winningScore.default);
-  const [gameDuration, setGameDuration] = useState(configs.gameDuration.default);
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+	console.log("---------CREATE-GAME---------");
+	const [roomName, setRoomName] = useState('');
+	const [gameMode, setGameMode] = useState('classic');
+	// const [map, setMap] = useState('classic');
+	const [winningScore, setWinningScore] = useState(configs.winningScore.default);
+	const [gameDuration, setGameDuration] = useState(configs.gameDuration.default);
+	const [password, setPassword] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
 
-  const handleCreateRoom = () => {
-    // Oda adı kontrolü
-    if (!roomName.trim()) {
-		setErrorMessage("Room name can't empty!");
-		return;
-	}
+	const handleCreateRoom = () => {
+		// Oda adı kontrolü
+		if (!roomName.trim()) {
+			setErrorMessage("Room name can't empty!");
+			return;
+		}
 
-    if (roomName.length > 20) {
-		setErrorMessage('Oda adı en fazla 20 karakter olabilir.');
-		return;
-	}
-  
-	// Şifre kontrolü
-	if (password.length > 20) {
-		setErrorMessage('Şifre en fazla 20 karakter olabilir.');
-		return;
-	}
+		if (roomName.length > 20) {
+			setErrorMessage('Oda adı en fazla 20 karakter olabilir.');
+			return;
+		}
+	
+		// Şifre kontrolü
+		if (password.length > 20) {
+			setErrorMessage('Şifre en fazla 20 karakter olabilir.');
+			return;
+		}
 
-	console.log("Room Name:", roomName);
-	console.log("Game Mode:", gameMode);
-	console.log("Winning Score:", winningScore);
-	console.log("Game Duration:", gameDuration);
-	console.log("Password:", password);
+		console.log("Room Name:", roomName);
+		console.log("Game Mode:", gameMode);
+		console.log("Winning Score:", winningScore);
+		console.log("Game Duration:", gameDuration);
+		console.log("Password:", password);
 
-	// Başarı durumunda hata mesajını sıfırla
-	if (errorMessage != null)
-		setErrorMessage('');
-  };
+		// Başarı durumunda hata mesajını sıfırla
+		if (errorMessage != null)
+			setErrorMessage('');
+	};
 
   return (
-    <div id="create-game">
+	<div id="create-game">
 		<div className="default-section">
 			<label>Room Name:</label>
 			<input
@@ -98,7 +98,7 @@ function CreateGame() {
 			{errorMessage && <p className="error-message">{errorMessage}</p>}
 
 			<button onClick={handleCreateRoom}>Create Game</button>
-	   </div>
+		</div>
 	   <div className="detail-section">
 	   		{winningScore !== configs.winningScore.default && (
 				<>
@@ -126,9 +126,9 @@ function CreateGame() {
 					/>
 				</>
 			)}
-      </div>
-    </div>
-  );
+		</div>
+	</div>
+	);
 }
 
 export default CreateGame;

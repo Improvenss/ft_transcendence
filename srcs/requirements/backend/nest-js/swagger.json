@@ -305,6 +305,16 @@
       "post": {
         "operationId": "GameController_createGameRoom",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -360,6 +370,10 @@
   "components": {
     "schemas": {
       "CreateMessageDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateGameDto": {
         "type": "object",
         "properties": {}
       }

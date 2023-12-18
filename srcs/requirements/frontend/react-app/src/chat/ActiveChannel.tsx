@@ -140,22 +140,21 @@ function ActiveChannel(){
 							</div>
 						</div>
 						<div id="message-container">
-							{messages.map((message, index, array) => (
-								// <div key={index} className={`message-content${index === array.length - 1 ? ' end-message' : ''}`}>
+							{messages.map((message, index) => (
 								<>
 									{index === 0 || isDifferentDay(message.timestamp, messages[index - 1].timestamp) ? (
-										<div className="sticky">
+										<div className="day-sticky">
 											<span className="daystamp">{formatDaytamp(message.timestamp)}</span>
 										</div>
 									) : null}
 								<div key={index} className={`message-content`}>
 									{(message.sender.login !== author?.login) ? (
-										<div className='others-messages'>
+										<div className='message taken'>
 											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) ? (
 												<>
 													<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
-													<span className="icon-span"><MessageIcon /></span>
 													<div className='first-message'>
+													<span className="icon-span"><MessageIcon /></span>
 														<span className='username'>{message.sender.login}</span>
 														<p>{message.content}</p>
 														<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
@@ -169,9 +168,9 @@ function ActiveChannel(){
 											)}
 										</div>
 									) : (
-										<div className='my-messages'>
+										<div className='message sent'>
 											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) && (
-												<span className="icon-span-reverse"><MessageIcon /></span>
+												<span className="icon-span"><MessageIcon /></span>
 											)}
 											<p>{message.content}</p>
 											<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
