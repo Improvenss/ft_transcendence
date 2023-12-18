@@ -4,6 +4,7 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Colors as C } from '../colors';
 import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/entities/user.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -47,15 +48,15 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room: @Body(): [${body}]${C.END}`);
-			const tmpUser = await this.usersService.findOne(null, user.login);
+			const tmpUser = await this.usersService.findUser(user.login);
 			if (!tmpUser) {
 				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
 			}
 			const	createGameDto: CreateGameDto = {
 				name: body.roomName,
 				description: body.description,
-				players: [tmpUser],
-				admins: [tmpUser],
+				players: [tmpUser as User],
+				admins: [tmpUser as User],
 				watchers: [],
 			}
 			const	newGameRoom = await this.gameService.createGameRoom(createGameDto);
@@ -67,6 +68,28 @@ export class GameController {
 			return ({err: err});
 		}
 	}
+
+	@Patch('/room')
+	async	patchGameRoom(
+		@Req() {user},
+		@Query('room') room: string | undefined,
+		@Body() body: Partial<CreateGameDto>,
+	){
+		try
+		{
+			console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${body}]${C.END}`);
+			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
+			return (responseGameRoom);
+		}
+		catch (err)
+		{
+			console.log("@Patch('/room'): ", err);
+			return ({err: err});
+		}
+	}
+
+	// @Put('/room')
+	// async	putGameRoom()
 
 	@Delete('/room')
 	async	deleteGameRoom(
@@ -85,18 +108,4 @@ export class GameController {
 			return ({err: err});
 		}
 	}
-
-	@Patch('/room')
-	async	patchGameRoom(
-		@Req() {user},
-		@Query('room') room: string | undefined,
-		@Body() body: Partial<CreateGameDto>,
-	){
-		console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${body}]${C.END}`);
-		const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
-		return (responseGameRoom);
-	}
-
-	// @Put('/room')
-	// async	putGameRoom()
 }

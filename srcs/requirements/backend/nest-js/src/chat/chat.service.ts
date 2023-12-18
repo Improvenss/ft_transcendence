@@ -21,6 +21,7 @@ export class ChatService {
 	) {}
 
 	async createChannel(createChannelDto: CreateChannelDto) {
+		console.log("createChannel", createChannelDto);
 		const	newChannel = new Channel(createChannelDto);
 		await this.entityManager.save(newChannel);
 		return (`New Channel created: #${newChannel.name}:[${newChannel.id}]`);
@@ -174,18 +175,17 @@ export class ChatService {
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
-		const tmpUser = await this.usersService.findOne(null, user, ['channels']);
-		if (!tmpUser){
+		const tmpUser = await this.usersService.findUser(user, null, ['channels']);
+		if (!tmpUser)
 			throw new NotFoundException('User does not exist!');
-		}
-		if (!tmpUser.channels || !tmpChannel.members) {
+		const singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+		if (!singleUser.channels || !tmpChannel.members)
 			throw new Error('Invalid state: User or Channel data is incomplete');
-		}
 		// Kullanıcının channels ilişkisinden kanalı çıkarın
-		tmpUser.channels = tmpUser.channels.filter(c => c.id !== tmpChannel.id);
+		singleUser.channels = singleUser.channels.filter(c => c.id !== tmpChannel.id);
 		// Kanalın members ilişkisinden kullanıcıyı çıkarın
-		tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser.id);
-		await this.userRepository.save(tmpUser);
+		tmpChannel.members = tmpChannel.members.filter(m => m.id !== singleUser.id);
+		await this.userRepository.save(singleUser);
 		await this.channelRepository.save(tmpChannel);
 		return ({message: 'User removed from the channel successfully' });
 	}

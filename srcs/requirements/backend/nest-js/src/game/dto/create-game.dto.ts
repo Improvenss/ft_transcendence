@@ -1,3 +1,4 @@
+import { PartialType } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber } from "class-validator";
 import { User } from "src/users/entities/user.entity";
 
@@ -46,3 +47,5 @@ export class CreateGameDto {
 	// @IsOptional()
 	watchers: User[];
 }
+
+export class UpdateGameDto extends PartialType(CreateGameDto) {}

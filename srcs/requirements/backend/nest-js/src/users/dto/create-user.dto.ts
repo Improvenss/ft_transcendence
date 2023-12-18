@@ -1,5 +1,8 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
 import { PartialType } from "@nestjs/swagger";
+import { Channel } from "src/chat/entities/chat.entity";
+import { Game } from "src/game/entities/game.entity";
+import { Message } from "src/chat/entities/chat.entity";
 
 export class CreateUserDto {
 	@IsNotEmpty({ message: 'Email cannot be empty' })
@@ -29,7 +32,37 @@ export class CreateUserDto {
 	@IsOptional()
 	@IsString({ message: 'Avatar must be a string' })
 	avatar?: string;
+
+	// Channel
+	@IsOptional()
+	channels?: Channel[];
+
+	@IsOptional()
+	adminChannels?: Channel[];
+
+	// Message
+	@IsOptional()
+	messages?: Message[];
+
+	// Game
+	@IsOptional()
+	@IsNumber()
+	gamesWon?: number;
+
+	@IsOptional()
+	@IsNumber()
+	gamesLost?: number;
+
+	@IsOptional()
+	gameRooms?: Game[];
+
+	@IsOptional()
+	gameRoomsAdmin?: Game[];
+
+	@IsOptional()
+	gameRoomsWatcher?: Game[];
 }
+
 
 /**
  * Burada extends PartialType(CreateUserDto) olarak eklenen kisimda,

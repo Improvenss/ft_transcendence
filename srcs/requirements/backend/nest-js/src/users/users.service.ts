@@ -1,73 +1,129 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as rimraf from 'rimraf';
+
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
-		private readonly	entityManager: EntityManager
+		// private readonly	entityManager: EntityManager,
 	) {}
 
-	/**
-	 * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
-	 * @param createUserDto 
-	 */
-	async	create(createUserDto: CreateUserDto) {
+	async	findUser(
+		user: string | undefined,
+		socket?: Socket,
+		relations?: string[] | 'all' | null,
+	){
+		// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
+		const relationObject = (relations === 'all')
+		? {channels: true, adminChannels: true, messages: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
+		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
+			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
+			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
+				? { [relations]: true } // sadece bunu ata.
+				: null)); // hicbiri degilse null ata.
+		// console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		const tmpUser = (user === undefined)
+			? await this.usersRepository.find({relations: relationObject})
+			: await this.usersRepository.findOne({
+					where: {login: user, socketId: socket?.id},
+					relations: relationObject
+				});
+		return (tmpUser);
+	}
+
+	// /**
+	//  * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
+	//  * @param createUserDto 
+	//  */
+	// async	createUser(createUserDto: CreateUserDto) {
+	// 	const	newUser = new User(createUserDto);
+	// 	await this.entityManager.save(newUser);
+	// 	return (`New user created: id[${newUser.id}]`);
+	// }
+
+	async	createUser(createUserDto: CreateUserDto) {
+		const	tmpUser = await this.findUser(createUserDto.login);
+		if (tmpUser)
+			return (`User: '${createUserDto.login}' already created.`);
 		const	newUser = new User(createUserDto);
-		await this.entityManager.save(newUser);
-		return (`New user created: id[${newUser.id}]`);
+		const	response = await this.usersRepository.save(newUser);
+		console.log(`New User created: #${response.login}:[${response.id}]`);
+		return (`New User created: #${response.login}:[${response.id}]`);
 	}
 
-	/**
-	 * DB'deki butun Users kayitlarini aliyor.
-	 */
-	async	findAll() {
-		const tmpUser = await this.usersRepository.find({relations: {channels: true}});
-		if (!tmpUser)
-			throw (new NotFoundException("user.service.ts: find(): User not found!"));
-		return (tmpUser);
-	}
+	// /**
+	//  * DB'deki butun Users kayitlarini aliyor.
+	//  */
+	// async	findAll() {
+	// 	const tmpUser = await this.usersRepository.find({relations: {channels: true}});
+	// 	if (!tmpUser)
+	// 		throw (new NotFoundException("user.service.ts: find(): User not found!"));
+	// 	return (tmpUser);
+	// }
 
-	/**
-	 * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
-	 * @param id
-	 * @param login
-	 * @returns User.
-	 */
-	async findOne(id?: number, login?: string, relations?: string[]) {
-		if (!id && !login)
-			throw new Error('Must be enter ID or login.');
-		const tmpUser = await this.usersRepository.findOne({
-			where: { id: id, login: login },
-			relations: relations,
-		});
-		return (tmpUser);
-	}
+	// /**
+	//  * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
+	//  * @param id
+	//  * @param login
+	//  * @returns User.
+	//  */
+	// async findOne(id?: number, login?: string, relations?: string[]) {
+	// 	if (!id && !login)
+	// 		throw new Error('Must be enter ID or login.');
+	// 	const tmpUser = await this.usersRepository.findOne({
+	// 		where: { id: id, login: login },
+	// 		relations: relations,
+	// 	});
+	// 	return (tmpUser);
+	// }
 
-	async findOneSocket(socket: Socket): Promise<User | null> {
-		if (!socket)
-			throw new Error('Must be enter Socket.');
-		const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
-		return (tmpUser);
-	}
+	// async findOneSocket(socket: Socket): Promise<User | null> {
+	// 	if (!socket)
+	// 		throw new Error('Must be enter Socket.');
+	// 	const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
+	// 	return (tmpUser);
+	// }
+
+	// async	putFile(
+	// 	file: string | string[] | undefined,
+	// ){
+		
+	// }
 
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.
 	 * Object.assign(); function'unda updateUserDto json bilgilerini
 	 *  tmpUser'e atiyoruz.
-	 * @param id Guncellenecek olan User id'si.
 	 * @param updateUserDto Guncellemek istedigmiz parametre.
 	 * @returns Guncellenen User.
 	 */
-	async	update(id: number, updateUserDto: UpdateUserDto) {
-		const	tmpUser = await this.findOne(id);
-		Object.assign(tmpUser, updateUserDto);
-		return (await this.entityManager.save(tmpUser));
+	async	patchUser(
+		user: string | undefined,
+		body: Partial<UpdateUserDto>,
+	){
+		const	tmpUsers = await this.findUser(user, null, 'all');
+		if (!tmpUsers)
+			return (`User '${user}' not found.`);
+		if (!Array.isArray(tmpUsers))
+		{ // User seklinde gelirse alttaki for()'un kafasi karismasin diye.
+			Object.assign(tmpUsers, body);
+			return (await this.usersRepository.save(tmpUsers));
+		}
+		for (const tmpUser of tmpUsers)
+		{ // User[] seklinde gelirse hepsini tek tek guncellemek icin.
+			Object.assign(tmpUser, body);
+			await this.usersRepository.save(tmpUser);
+		}
+		return (tmpUsers);
 	}
 
 	/**
@@ -76,19 +132,86 @@ export class UsersService {
 	 * @param login 
 	 */
 	async	updateSocketLogin(login: string, socketId: string) {
-		const	tmpUser = await this.findOne(undefined, login);
+		const	tmpUser = await this.findUser(login);
 		if (!tmpUser)
-			throw (new NotFoundException("users.service.ts: updateSocketLogin: User not found"));
+			return (null);
 		Object.assign(tmpUser, {socketId: socketId});
-		return (await this.entityManager.save(tmpUser));
+		return (await this.usersRepository.save(tmpUser as User));
 	}
 
-	/**
-	 * Deleting all User tables.
-	 * @returns 
-	 */
-	async	removeAll() {
-		return (this.usersRepository.delete({}));
+	// /**
+	//  * Deleting all User tables.
+	//  * @returns 
+	//  */
+	// async	removeAll() {
+	// 	return (this.usersRepository.delete({}));
+	// }
+
+	async	deleteUser(
+		user: string | undefined,
+	){
+		const	tmpUser = await this.findUser(user);
+		if (!tmpUser)
+			return (`User: '${user}' not found.`);
+		const	responseUser = await this.usersRepository.remove(tmpUser as User);
+		return (responseUser)
+	}
+
+	async	deleteFolder(filesFolder: string)
+	{
+		const uploadsPath = path.join(process.cwd(), filesFolder ? filesFolder: 'uploads');
+		if (!fs.existsSync(uploadsPath))
+			throw (new NotFoundException(`File path is not exist!: Path: ${uploadsPath}`));
+		const files = fs.readdirSync(uploadsPath);
+		if (files.length === 0)
+		{
+			console.warn(`There is no file for delete!: Folder: ${uploadsPath}`);
+			return (`There is no file for delete!: ${filesFolder}`);
+		}
+		for (const file of files) {
+			const filePath = path.join(uploadsPath, file);
+			fs.unlinkSync(filePath);
+			console.log(`File successfully deleted: ${filePath}`);
+		}
+		// if (!rimraf.sync(uploadsPath)) // Burada dosyanin kendisini sildigimizde; backend yeniden baslatilmazsa herhangi bir PUT islemindeyken hata veriyor. Bu yuzden klasoru silmiyoruz icerisindeki dosyalari siliyoruz.
+		// 	return (null);
+		console.log(`Folder inside successfully deleted! Folder: ${uploadsPath}`);
+		return (`Folder inside succesfully deleted!: ${filesFolder}`);
+	}
+
+	async	deleteFilesFromArray(files: string[])
+	{
+		for (const file of files) {
+			const filePath = path.join(process.cwd(), 'uploads', file);
+			if (!fs.existsSync(filePath))
+			{
+				console.warn(`File not found: ${filePath}`);
+				continue;
+			}
+			fs.unlinkSync(filePath);
+			console.log(`File successfully deleted: ${filePath}`);
+		}
+		return (`OK: ${files}`);
+	}
+
+	async	deleteFile(
+		file: string | string[]| undefined,
+	){
+		// const filePath = path.join(process.cwd(), 'uploads', file);
+		// if (!fs.existsSync(filePath))
+		// 	throw (new Error(`File path is not valid: ${filePath}`));
+		// fs.unlinkSync(`./uploads/${file}`);
+		// console.log(`File successfully deleted. ✅: File Path: ${filePath}`);
+		// return (`File deleted successfully.`);
+
+		const responseDelete = (file === undefined)
+			? await this.deleteFolder('uploads')
+			: (Array.isArray(file) // file array[] ise bu array'deki dosyalar silinecek.
+				? await this.deleteFilesFromArray(file)
+				: (typeof(file) === 'string' // file array degilse sadece 1 tane string ise,
+					? await this.deleteFilesFromArray([`${file}`]) // Burada array[] gibi veriyoruz. Raad sikinti yok.
+					: null)); // Hicbiri de olmazssa artik sikinti var demek.
+		return (`Delete finish: Status: ${responseDelete}`);
 	}
 
 	// async	deleteUser(
@@ -96,21 +219,20 @@ export class UsersService {
 	// ){
 	// 	const	tmpGameRoom = await this.findUser(user);
 	// 	if (!tmpGameRoom)
-	// 		return (`GameRoom: '${user}' not found.`);
-	// 	// await	this.userRepository.delete()
+	// 		return (`GameRoom: '${user}' not found.`); // 	// await	this.userRepository.delete()
 	// 	const	responseGameRoom = await this.gameRepository.remove(tmpGameRoom as User);
 	// 	// const	responseGameRoom = await this.entityManager.delete(user);
 	// 	return (responseGameRoom)
 	// }
 
-	/**
-	 * Sadece verilen id'ye sahip olan User tablosunu siliyor.
-	 * @param id User id.
-	 * @returns 
-	 */
-	async	remove(id: number) {
-		return (this.usersRepository.delete(id));
-	}
+	// /**
+	//  * Sadece verilen id'ye sahip olan User tablosunu siliyor.
+	//  * @param id User id.
+	//  * @returns 
+	//  */
+	// async	remove(id: number) {
+	// 	return (this.usersRepository.delete(id));
+	// }
 }
 
 

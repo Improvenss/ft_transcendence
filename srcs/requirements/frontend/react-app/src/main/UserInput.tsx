@@ -1,4 +1,6 @@
+import Cookies from 'js-cookie';
 import { useState } from 'react';
+import { useUser } from '../hooks/UserHook';
 import './UserInput.css';
 
 interface IUserProps{
@@ -6,6 +8,8 @@ interface IUserProps{
 }
 
 function UserInput({setVisible}: IUserProps) {
+	const user = useUser();
+	const userCookie = Cookies.get('user');
 	const [username, setUsername] = useState('');
 	const [selectedFile, setSelectedFile] = useState(null);
 
@@ -17,11 +21,43 @@ function UserInput({setVisible}: IUserProps) {
 		setSelectedFile(event.target.files[0]);
 	};
 
-	const handleSubmit = (event: any) => {
+	const handleSubmit = async (event: any) => {
 		event.preventDefault();
 		// Burada dosyayı sunucuya yüklemek için bir işlem yapabilirsiniz.
-		console.log('Kullanıcı adı: ', username);
-		console.log('Seçilen dosya: ', selectedFile);
+		console.log('Kullanıcı adı: ', username); // nickname
+		console.log('Seçilen dosya: ', selectedFile); // avatar
+
+		// const	responseUserAvatar = await fetch(
+		// 	process.env.REACT_APP_FETCH
+		// 	+ '/user/upload', {
+		// 		method: 'PUT',
+		// 		headers: {
+		// 			"Content-Type": "application/json",
+		// 			"Authorization": "Bearer " + userCookie as string,
+		// 		},
+		// 		body: selectedFile,
+		// 	},
+		// );
+		// if (!responseUserAvatar.ok)
+		// 	alert("User avatar update error.");
+		// const	responseData = await responseUserAvatar.json();
+		// console.log("responseData yani yukleninlen url", responseData);
+		const	responseUserCustomize = await fetch(
+
+			process.env.REACT_APP_FETCH
+				+ `/users/user?user=${user.userInfo?.login}`, { // Buradaki userInfo? olayi bug yaratabilir gibi. ama yaratmayadabilir.
+			method: 'PATCH',
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": "Bearer " + userCookie as string,
+			},
+			body: JSON.stringify({
+				nickname: username,
+				// avatar: responseData,
+			}),
+		});
+		if (!responseUserCustomize.ok)
+			alert("User Customize screen update error.");
 		localStorage.removeItem('userLoginPage');
 		setVisible(false);
 	};

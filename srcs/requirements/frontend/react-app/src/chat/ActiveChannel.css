@@ -62,39 +62,123 @@
 	transform: scale(1.1); /* veya istediğiniz bir ölçüde büyütme */
 }
 
-/* --------- */
+/* -------Message Container------- */
 
 #message-container {
+	font-size: 15px;
 	flex: 1;
 	overflow: auto;
 	padding: 10px;
-	border-bottom: 1px solid #ccc;
-	/*position: relative;*/
 	content: '';
 	background-color: rgba(30, 97, 45, 0.758);
 	border-radius: 10px;
 	margin: 5px;
+	/* position: relative; */
 }
 
-/* -------------- */
+.sticky {
+	clear: both;
+	text-align: center;
+	font-size: 20px;
+	position: sticky;
+	top: 0;
+	background-color: darkred;
+	border-radius: 5px;
+	width: 100%;
+	z-index: -1;
+	margin-bottom: 5px;
+}
 
-.message {
-	border: 1px solid #ccc;
+/* .message-content.end-message > .my-messages{
+	background-color: red;
+	margin-bottom: 20px;
+} */
+
+/* ---Others Messages--- */
+
+.others-messages {
 	display: flex;
 	overflow: hidden;
-	border-radius: 10px;
 	align-items: center;
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 }
 
-.message img {
+.others-messages > img {
+	margin-top: -3px;
+	align-self: flex-start;
 	height: 50px;
 	width: 50px;
-	margin-right: 10px;
-	margin-left: 10px;
+	margin-right: 5px;
 	border-radius: 30%;
 	transform: scale(0.9);
 	object-fit: cover; /* Resmin orantılı olarak kaplanması */
+}
+
+.others-messages p {
+	margin-top: 0; /* Otomatik üst boşluğu sıfırla */
+	margin-bottom: 0;
+	word-break: break-all;
+	word-wrap: break-word;
+	margin-left: 5px;
+	margin-right: 40px;
+}
+
+.first-message,
+.last-message {
+	border-radius: 0px 5px 5px 5px;
+	display: flex;
+	flex-direction: column; /* Öğeleri dikey (kolon) sırayla düzenle */
+	border: 1px solid #ccc;
+}
+
+.first-message .username {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.last-message {
+	margin-left: 63px;
+}
+
+.others-messages .timestamp {
+	text-align: right; /* İçeriği sağa hizala */
+	margin-right: 5px;
+}
+
+.icon-span {
+	align-self: flex-start;
+	margin-top: -2px;
+}
+
+/* ---My Messages--- */
+
+.my-messages {
+	border-radius: 5px 0px 5px 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border: 1px solid #ccc;
+	max-width: 85%;
+	clear: both; /* Clear the float to start a new line */
+	float: right;
+	margin-bottom: 10px; /* Optional spacing between messages */
+}
+
+.my-messages p {
+	word-break: break-all;
+	word-wrap: break-word;
+    margin: 0; /* Remove default margin for paragraphs inside .my-messages */
+	margin-right: 40px;
+}
+
+.my-messages .timestamp {
+	float: right;
+}
+
+.icon-span-reverse {
+	float: right;
+	transform: scaleX(-1);
+	margin-right: -18px;
+	margin-top: -3px;
 }
 
 /* ----------- */

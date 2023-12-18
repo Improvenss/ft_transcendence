@@ -54,29 +54,37 @@
         }
       }
     },
-    "/users": {
-      "post": {
-        "operationId": "UsersController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserDto"
-              }
+    "/users/user": {
+      "get": {
+        "operationId": "UsersController_getUser",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
       },
-      "get": {
-        "operationId": "UsersController_findAll",
-        "parameters": [],
+      "patch": {
+        "operationId": "UsersController_patchUser",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -84,40 +92,7 @@
         }
       },
       "delete": {
-        "operationId": "UsersController_removeAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/socket": {
-      "post": {
-        "operationId": "UsersController_createSocket",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/cookie": {
-      "get": {
-        "operationId": "UsersController_userCookie",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/user": {
-      "get": {
-        "operationId": "UsersController_createUser",
+        "operationId": "UsersController_deleteUser",
         "parameters": [
           {
             "name": "user",
@@ -135,65 +110,10 @@
         }
       }
     },
-    "/users/{id}": {
+    "/users/cookie": {
       "get": {
-        "operationId": "UsersController_findOneId",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "UsersController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "UsersController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "operationId": "UsersController_userCookie",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -201,47 +121,32 @@
         }
       }
     },
-    "/users/{login}": {
-      "get": {
-        "operationId": "UsersController_findOneLogin",
-        "parameters": [
-          {
-            "name": "login",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+    "/users/socket": {
+      "patch": {
+        "operationId": "UsersController_patchSocket",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         }
-      },
-      "patch": {
-        "operationId": "UsersController_updateSocketLogin",
-        "parameters": [
-          {
-            "name": "login",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
+      }
+    },
+    "/users/user/upload": {
+      "put": {
+        "operationId": "UsersController_putFile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
           }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
+        }
+      }
+    },
+    "/users/file/delete": {
+      "delete": {
+        "operationId": "UsersController_deleteImage",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -312,7 +217,7 @@
         }
       },
       "delete": {
-        "operationId": "ChatController_removeChannel",
+        "operationId": "ChatController_deleteChannel",
         "parameters": [
           {
             "name": "channel",
@@ -406,8 +311,8 @@
           }
         }
       },
-      "delete": {
-        "operationId": "GameController_deleteGameRoom",
+      "patch": {
+        "operationId": "GameController_patchGameRoom",
         "parameters": [
           {
             "name": "room",
@@ -424,8 +329,8 @@
           }
         }
       },
-      "patch": {
-        "operationId": "GameController_patchGameRoom",
+      "delete": {
+        "operationId": "GameController_deleteGameRoom",
         "parameters": [
           {
             "name": "room",
@@ -454,14 +359,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateUserDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateMessageDto": {
         "type": "object",
         "properties": {}

@@ -4,8 +4,6 @@ import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
 import { Colors as C } from '../colors';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { extname } from 'path';
-import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateChannelDto } from './dto/chat-channel.dto';
 import { promisify } from 'util';
@@ -13,46 +11,8 @@ import * as fs from 'fs';
 import { ChatGateway } from './chat.gateway';
 import * as bcrypt from 'bcrypt';
 import { Channel } from './entities/chat.entity';
-
-// Dosya Adı Değiştirme Fonksiyonu
-	const editFileName = (req, file, callback) => {
-		const randomName = Array(15)
-		.fill(null)
-		.map(() => Math.round(Math.random() * 16).toString(16))
-		.join('');
-
-		// Dosya adını sanitize et
-		// const sanitizeFilename = require('sanitize-filename');
-		// const sanitizedFilename = sanitizeFilename(file.originalname);
-		// Eğerki dosya adı My/File:Name.png ise MyFileName.png yapıyor.
-
-		// callback(null, `${randomName}${sanitizedFilename}`);
-		callback(null, `${randomName}${extname(file.originalname)}`);
-  	};
-  
-// Dosya Türü Kontrolü Fonksiyonu
-	const imageFileFilter = (req, file, callback) => {
-		if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/) 
-			|| !file.mimetype.startsWith('image/')) {
-		return callback(new Error('Only image files are allowed!'), false);
-		}
-		callback(null, true);
-  	};
-
-	const MAX_FILE_SIZE = 1024 * 1024 * 3; // 3MB
-
-	const storage = diskStorage({
-		destination: './uploads/',
-		filename: editFileName,
-	});
-
- 	const multerConfig = {
-		storage,
-		limits: {
-			fileSize: MAX_FILE_SIZE,
-		},
-		fileFilter: imageFileFilter,
-	};
+import { User } from 'src/users/entities/user.entity';
+import { multerConfig } from './channel.handler';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -88,8 +48,8 @@ export class ChatController {
 			const	tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(payload.channel, ['members']);
 			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
 				throw (new Error("Password is WRONG!!!"));
-			const tmpUser = await this.usersService.findOne(null, user.login);
-			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser);
+			const tmpUser = await this.usersService.findUser(user.login);
+			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser as User);
 			//await this.chatService.updateChannel(tmpChannel, tmpUser);
 			this.chatGateway.server.emit('channelListener');
 			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
@@ -118,13 +78,16 @@ export class ChatController {
 			// if (findChannel !== null){
 			// 	throw new Error("A channel with the same name already exists.");
 			// }
-			const tmpUser = await this.usersService.findOne(null, user.login);
+			const tmpUser = await this.usersService.findUser(user.login);
 			if (!tmpUser) {
-				throw new NotFoundException(`User not found for channel create: ${user.login}`);
+				throw new NotFoundException(`User not found for channel create: ${user.login as User}`);
 			}
-			if (!image){
+			if (!image)
 				throw new Error('No file uploaded');
-			}
+
+			if (!fs.existsSync(image.path))
+				throw new Error(`File path is not valid: ${image.path}`);
+
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
 			const	createChannelDto: CreateChannelDto = {
 				name: name as string,
@@ -136,8 +99,8 @@ export class ChatController {
 						password,
 						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 				image: imgUrl as string,
-				members: [tmpUser],
-				admins: [tmpUser],
+				members: [tmpUser as User],
+				admins: [tmpUser as User],
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
 			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
@@ -152,8 +115,8 @@ export class ChatController {
 					type: type,
 					description: description,
 					image: imgUrl,
-					members: [tmpUser],
-					admins: [tmpUser],
+					members: [tmpUser as User],
+					admins: [tmpUser as User],
 					messages: [],
 				},
 			});
@@ -191,7 +154,12 @@ export class ChatController {
 		{
 			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 			const	tmpChannel = await this.chatService.findChannel(channel, relations);
-			return (await this.chatService.checkInvolvedUser(tmpChannel, user));
+			// if (!tmpChannel)
+			// 	throw (new NotFoundException(`Channel '${channel}' not found`))
+			const channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
+			if (channelArray && channelArray.members)
+				return (await this.chatService.checkInvolvedUser(tmpChannel, user));
+			return (tmpChannel);
 		}
 		catch (err)
 		{
@@ -222,7 +190,7 @@ export class ChatController {
 
 	// ---------- Delete ---------
 	@Delete('/channel')
-	async removeChannel(
+	async deleteChannel(
 		@Req() {user},
 		@Query('channel') channel: string | undefined,
 	){
@@ -232,9 +200,7 @@ export class ChatController {
 			const tmpChannel = await this.chatService.removeChannel(channel);
 			if (!tmpChannel)
 				throw (new NotFoundException("Channel does not exist!"));
-				// throw (new NotFoundException("name: Channel does not exist!"));
 			this.chatGateway.server.emit('channelListener'); // Kullanicilara channel'in silinme infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
-			console.log("return'dan onceki tmpChannel:", tmpChannel);
 			return (tmpChannel);
 		}
 		catch (err)

@@ -20,7 +20,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			newSocket.on('connect', async () => {
 				console.log('Client connected to Server. ✅');
 				const response = await fetch(process.env.REACT_APP_SOCKET as string, {
-					method: "POST",
+					method: "PATCH",
 					headers: {
 						"Content-Type": "application/json",
 						"Authorization": "Bearer " + userCookie as string,

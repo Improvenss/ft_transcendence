@@ -1,0 +1,80 @@
+/* ---- General Styling ---- */
+
+#create-game {
+	max-width: 400px;
+	margin: 0 auto;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	display: flex;
+  }
+  
+  /* ---- Default Section ---- */
+  
+  .default-section,
+  .detail-section {
+	flex: 1;
+	padding: 20px;
+  }
+  
+  .default-section label,
+  .detail-section label {
+	display: block;
+	margin-bottom: 8px;
+  }
+  
+  .default-section input,
+  .default-section select,
+  .detail-section input,
+  .detail-section select {
+	width: 100%;
+	padding: 8px;
+	margin-bottom: 16px;
+	box-sizing: border-box;
+  }
+  
+  /* ---- Send Button ---- */
+  
+  #create-game button {
+	width: 100%;
+	background-color: #4caf50;
+	color: white;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+  }
+  
+  #create-game button:hover {
+	background-color: #45a049;
+  }
+  
+  /* ---- Options ---- */
+  
+  .default-section select option {
+	background-color: black;
+	color: white;
+  }
+  
+  /* ---- Detail Section ---- */
+  
+  .detail-section {
+	padding: 20px;
+	border-left: 1px solid #ddd;
+  }
+
+  .detail-section:empty {
+	display: none;
+  }
+
+  /* ---- Error Message ---- */
+  
+  #create-game .error-message {
+	color: orange;
+	margin-top: 5px;
+	width: 100%;
+	display: inline-block;
+  }
+  

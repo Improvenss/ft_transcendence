@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateGameDto } from './dto/create-game.dto';
-import { EntityManager, Repository } from 'typeorm';
+import { CreateGameDto, UpdateGameDto } from './dto/create-game.dto';
+import { Repository } from 'typeorm';
 import { Game } from './entities/game.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class GameService {
@@ -49,26 +48,16 @@ export class GameService {
 		return (tmpChannel);
 	}
 
-	async	deleteGameRoom(
-		room: string | undefined,
-	){
-		const	tmpGameRoom = await this.findGameRoom(room);
-		if (!tmpGameRoom)
-			return (`GameRoom: '${room}' not found.`);
-		// await	this.userRepository.delete()
-		const	responseGameRoom = await this.gameRepository.remove(tmpGameRoom as Game);
-		// const	responseGameRoom = await this.entityManager.delete(room);
-		return (responseGameRoom)
-	}
-
 	/**
 	 * PATCH genellikle guncellemek icin kullanilir.
 	 */
 	async	patchGameRoom(
 		room: string | undefined,
-		body: Partial<CreateGameDto>,
+		body: Partial<UpdateGameDto>,
 	){
 		const	tmpGameRooms = await this.findGameRoom(room, 'all');
+		if (!tmpGameRooms)
+			return (`GameRoom '${room}' not found.`);
 		if (!Array.isArray(tmpGameRooms))
 		{ // Game seklinde gelirse alttaki for()'un kafasi karismasin diye.
 			Object.assign(tmpGameRooms, body);
@@ -86,4 +75,16 @@ export class GameService {
 	 * PUT kaynagin tamamini degistirmek icin kullanilir.
 	 */
 	// async	putGameRoom()
+
+	async	deleteGameRoom(
+		room: string | undefined,
+	){
+		const	tmpGameRoom = await this.findGameRoom(room);
+		if (!tmpGameRoom)
+			return (`GameRoom: '${room}' not found.`);
+		// await	this.userRepository.delete()
+		const	responseGameRoom = await this.gameRepository.remove(tmpGameRoom as Game);
+		// const	responseGameRoom = await this.entityManager.delete(room);
+		return (responseGameRoom)
+	}
 }

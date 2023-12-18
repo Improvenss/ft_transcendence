@@ -28,7 +28,7 @@ function ProfilePage() {
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
 	const	[friendList, setFriendList] = useState<IFriend[]>( () => {
-		const fetchFriendList: IFriend[] = [
+	const	fetchFriendList: IFriend[] = [
 			{ name: 'uercan', status: 'offline', image: '/dogSlayer.png' },
 			{ name: 'gsever', status: 'online', image: '/heart.jpg' },
 			{ name: 'Admin', status: 'AFK', image: '/watcher.jpg' }
@@ -47,19 +47,19 @@ function ProfilePage() {
 				});
 				if (response.ok){
 					console.log("---User Profile Backend Connection '✅'---");
-					const data = await response.json();
-					if (data.message === 'USER OK'){
+					const dataUser = await response.json();
+					if (dataUser.message === 'USER OK'){
 						console.log("---User Profile Response '✅'---");
 						setUserPanel({
-							email: data.user.email,
-							login: data.user.login,
-							displayname: data.user.displayname,
-							imageUrl: data.user.imageUrl,
-							socketId: data.user.socketId,
-							nickname: data.user.nickname,
-							avatar: data.user.avatar
+							email: dataUser.email,
+							login: dataUser.login,
+							displayname: dataUser.displayname,
+							imageUrl: dataUser.imageUrl,
+							socketId: dataUser.socketId,
+							nickname: dataUser.nickname,
+							avatar: dataUser.avatar
 						});
-						console.log("userInfo:", data.user);
+						console.log("userInfo:", dataUser);
 					} else {
 						console.log("---User Profile Response '❌'---");
 						setUserPanel(null);

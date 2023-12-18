@@ -6,6 +6,7 @@ import { useChannelContext } from './ChatPage';
 import { IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
+import { ReactComponent as MessageIcon } from './messageIcon.svg';
 
 function ActiveChannel(){
 	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
@@ -24,13 +25,42 @@ function ActiveChannel(){
 		return number < 10 ? `0${number}` : number;
 	}
 
+	const formatDaytamp = (timestamp: number) => {
+		const messageDate = new Date(timestamp);
+		const currentDate = new Date();
+		
+		// Set both dates to midnight to ignore the time component
+		currentDate.setHours(0, 0, 0, 0);
+		messageDate.setHours(0, 0, 0, 0);
+	  
+		const diffInDays = Math.floor((currentDate.getTime() - messageDate.getTime()) / (24 * 60 * 60 * 1000));
+	  
+		const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+	  
+		if (diffInDays === 0) {
+		  return 'Bugün';
+		} else if (diffInDays === 1) {
+		  return 'Dün';
+		} else if (diffInDays >= 2 && diffInDays <= 6) {
+		  return days[messageDate.getDay()];
+		} else {
+		  // For older dates, you can customize the format as needed
+		  return `${messageDate.getDate()}.${messageDate.getMonth() + 1}.${messageDate.getFullYear()}`;
+		}
+	  };
+	  
+	  function isDifferentDay(timestamp1: number, timestamp2: number) {
+		const date1 = new Date(timestamp1);
+		const date2 = new Date(timestamp2);
+		return date1.toDateString() !== date2.toDateString();
+	  }
+
 	function formatTimestamp(timestamp: number) {
 		const date = new Date(timestamp);
 		const hours = date.getHours();
 		const minutes = date.getMinutes();
-		const seconds = date.getSeconds();
 
-		const formattedTime = `${addLeadingZero(hours)}:${addLeadingZero(minutes)}:${addLeadingZero(seconds)}`;
+		const formattedTime = `${addLeadingZero(hours)}:${addLeadingZero(minutes)}`;
 		return formattedTime;
 	}
 
@@ -86,7 +116,10 @@ function ActiveChannel(){
 
 	useEffect(() => {
 		// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		// messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		const messagesContainer = document.getElementById("message-container");
+		if (messagesContainer)
+  			messagesContainer.scrollTop = messagesContainer?.scrollHeight;
 	}, [messages]);
 
 	return (
@@ -107,14 +140,45 @@ function ActiveChannel(){
 							</div>
 						</div>
 						<div id="message-container">
-							{messages.map((message, index) => (
-								<div key={index} className="message">
-									<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
-									<div className="message-content">
-									<strong>{message.sender.login}:</strong> {message.content}
-										<div className="timestamp">{formatTimestamp(message.timestamp)}</div>
-									</div>
+							{messages.map((message, index, array) => (
+								// <div key={index} className={`message-content${index === array.length - 1 ? ' end-message' : ''}`}>
+								<>
+									{index === 0 || isDifferentDay(message.timestamp, messages[index - 1].timestamp) ? (
+										<div className="sticky">
+											<span className="daystamp">{formatDaytamp(message.timestamp)}</span>
+										</div>
+									) : null}
+								<div key={index} className={`message-content`}>
+									{(message.sender.login !== author?.login) ? (
+										<div className='others-messages'>
+											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) ? (
+												<>
+													<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
+													<span className="icon-span"><MessageIcon /></span>
+													<div className='first-message'>
+														<span className='username'>{message.sender.login}</span>
+														<p>{message.content}</p>
+														<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+													</div>
+												</>
+											):(
+												<div className='last-message'>
+													<p>{message.content}</p>
+													<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+												</div>
+											)}
+										</div>
+									) : (
+										<div className='my-messages'>
+											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) && (
+												<span className="icon-span-reverse"><MessageIcon /></span>
+											)}
+											<p>{message.content}</p>
+											<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+										</div>
+									)}
 								</div>
+								</>
 							))}
 							<div ref={messagesEndRef} />
 						</div>
