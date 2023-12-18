@@ -4,8 +4,6 @@ import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
 import { Colors as C } from '../colors';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { extname } from 'path';
-import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateChannelDto } from './dto/chat-channel.dto';
 import { promisify } from 'util';
@@ -14,46 +12,7 @@ import { ChatGateway } from './chat.gateway';
 import * as bcrypt from 'bcrypt';
 import { Channel } from './entities/chat.entity';
 import { User } from 'src/users/entities/user.entity';
-
-// Dosya Adı Değiştirme Fonksiyonu
-	const editFileName = (req, file, callback) => {
-		const randomName = Array(15)
-		.fill(null)
-		.map(() => Math.round(Math.random() * 16).toString(16))
-		.join('');
-
-		// Dosya adını sanitize et
-		// const sanitizeFilename = require('sanitize-filename');
-		// const sanitizedFilename = sanitizeFilename(file.originalname);
-		// Eğerki dosya adı My/File:Name.png ise MyFileName.png yapıyor.
-
-		// callback(null, `${randomName}${sanitizedFilename}`);
-		callback(null, `${randomName}${extname(file.originalname)}`);
-  	};
-  
-// Dosya Türü Kontrolü Fonksiyonu
-	const imageFileFilter = (req, file, callback) => {
-		if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/) 
-			|| !file.mimetype.startsWith('image/')) {
-		return callback(new Error('Only image files are allowed!'), false);
-		}
-		callback(null, true);
-  	};
-
-	const MAX_FILE_SIZE = 1024 * 1024 * 3; // 3MB
-
-	const storage = diskStorage({
-		destination: './uploads/',
-		filename: editFileName,
-	});
-
- 	const multerConfig = {
-		storage,
-		limits: {
-			fileSize: MAX_FILE_SIZE,
-		},
-		fileFilter: imageFileFilter,
-	};
+import { multerConfig } from './channel.handler';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -123,10 +82,17 @@ export class ChatController {
 			if (!tmpUser) {
 				throw new NotFoundException(`User not found for channel create: ${user.login as User}`);
 			}
-			if (!image){
+			if (!image)
 				throw new Error('No file uploaded');
-			}
+
+			console.log("yarrrrrrrrrrrrrrr");
+			if (!fs.existsSync(image.path))
+				throw new Error(`File path is not valid: ${image.path}`);
+
+			console.log("yarrrrrrrrrrrrrrr");
+			console.log("buraya girdi 1");
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
+			console.log("buraya girdi 2");
 			const	createChannelDto: CreateChannelDto = {
 				name: name as string,
 				type: type as string,
@@ -140,11 +106,14 @@ export class ChatController {
 				members: [tmpUser as User],
 				admins: [tmpUser as User],
 			};
+			console.log("buraya girdi 3");
 			const response = await this.chatService.createChannel(createChannelDto);
+			console.log("buraya girdi 4");
 			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
 			// this.chatGateway.server.to(name).emit('channelListener');
 			// this.chatGateway.joinChannel(name); // Kullanıcının kanala katılması gerekiyor //1 kere çalışıyor
 			this.chatGateway.server.emit('channelListener'); // kullancılara yeni channel oluşturuldu infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
+			console.log("buraya girdi 5");
 			return ({
 				message: `${response}`,
 				channel: {
@@ -228,7 +197,7 @@ export class ChatController {
 
 	// ---------- Delete ---------
 	@Delete('/channel')
-	async removeChannel(
+	async deleteChannel(
 		@Req() {user},
 		@Query('channel') channel: string | undefined,
 	){

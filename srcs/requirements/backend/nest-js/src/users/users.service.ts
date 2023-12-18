@@ -4,6 +4,10 @@ import { User } from './entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as rimraf from 'rimraf';
+
 
 @Injectable()
 export class UsersService {
@@ -89,6 +93,12 @@ export class UsersService {
 	// 	return (tmpUser);
 	// }
 
+	// async	putFile(
+	// 	file: string | string[] | undefined,
+	// ){
+		
+	// }
+
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.
 	 * Object.assign(); function'unda updateUserDto json bilgilerini
@@ -145,6 +155,63 @@ export class UsersService {
 			return (`User: '${user}' not found.`);
 		const	responseUser = await this.usersRepository.remove(tmpUser as User);
 		return (responseUser)
+	}
+
+	async	deleteFolder(filesFolder: string)
+	{
+		const uploadsPath = path.join(process.cwd(), filesFolder ? filesFolder: 'uploads');
+		if (!fs.existsSync(uploadsPath))
+			throw (new NotFoundException(`File path is not exist!: Path: ${uploadsPath}`));
+		const files = fs.readdirSync(uploadsPath);
+		if (files.length === 0)
+		{
+			console.warn(`There is no file for delete!: Folder: ${uploadsPath}`);
+			return (`There is no file for delete!: ${filesFolder}`);
+		}
+		for (const file of files) {
+			const filePath = path.join(uploadsPath, file);
+			fs.unlinkSync(filePath);
+			console.log(`File successfully deleted: ${filePath}`);
+		}
+		// if (!rimraf.sync(uploadsPath)) // Burada dosyanin kendisini sildigimizde; backend yeniden baslatilmazsa herhangi bir PUT islemindeyken hata veriyor. Bu yuzden klasoru silmiyoruz icerisindeki dosyalari siliyoruz.
+		// 	return (null);
+		console.log(`Folder inside successfully deleted! Folder: ${uploadsPath}`);
+		return (`Folder inside succesfully deleted!: ${filesFolder}`);
+	}
+
+	async	deleteFilesFromArray(files: string[])
+	{
+		for (const file of files) {
+			const filePath = path.join(process.cwd(), 'uploads', file);
+			if (!fs.existsSync(filePath))
+			{
+				console.warn(`File not found: ${filePath}`);
+				continue;
+			}
+			fs.unlinkSync(filePath);
+			console.log(`File successfully deleted: ${filePath}`);
+		}
+		return (`OK: ${files}`);
+	}
+
+	async	deleteFile(
+		file: string | string[]| undefined,
+	){
+		// const filePath = path.join(process.cwd(), 'uploads', file);
+		// if (!fs.existsSync(filePath))
+		// 	throw (new Error(`File path is not valid: ${filePath}`));
+		// fs.unlinkSync(`./uploads/${file}`);
+		// console.log(`File successfully deleted. ✅: File Path: ${filePath}`);
+		// return (`File deleted successfully.`);
+
+		const responseDelete = (file === undefined)
+			? await this.deleteFolder('uploads')
+			: (Array.isArray(file) // file array[] ise bu array'deki dosyalar silinecek.
+				? await this.deleteFilesFromArray(file)
+				: (typeof(file) === 'string' // file array degilse sadece 1 tane string ise,
+					? await this.deleteFilesFromArray([`${file}`]) // Burada array[] gibi veriyoruz. Raad sikinti yok.
+					: null)); // Hicbiri de olmazssa artik sikinti var demek.
+		return (`Delete finish: Status: ${responseDelete}`);
 	}
 
 	// async	deleteUser(

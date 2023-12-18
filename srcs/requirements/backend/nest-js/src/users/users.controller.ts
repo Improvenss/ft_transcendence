@@ -1,9 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Socket } from 'socket.io';
 import { Colors as C } from 'src/colors';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/chat/channel.handler';
+import { promisify } from 'util';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -97,9 +102,39 @@ export class UsersController {
 	// 	return ({message: "User socket_id updated."});
 	// }
 
+	@Put('/user/upload')
+	@UseInterceptors(FileInterceptor('image', multerConfig))
+	async	putFile(
+		@Req() {user},
+		@UploadedFile() image: any,
+	){
+		try
+		{
+			console.log(`${C.B_BLUE}PUT: /user/upload: @UploadedFile(): ${C.END}`, image);
+			if (!image)
+				throw (new Error(`File not found!: File Name:${image.filename}`));
+			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
+			if (!fs.existsSync(image.path))
+				throw (new Error(`File path is not valid. ${image.path}`));
+			return (imgUrl);
+		}
+		catch (err)
+		{
+			if (image) {
+				try {
+					await promisify(fs.promises.unlink)(image.path);
+					console.log(`File successfully deleted. ✅: image.path: ${image.path}`);
+				} catch (unlinkErr) {
+					console.error('Error occurred while deleting file.:', unlinkErr);
+				}
+			}
+			console.error("@Put('/user/upload'): ", err);
+			return ({ message: "Image can't uploaded.", err});
+		}
+	}
+
 	// OK
 	@Patch('/user')
-	
 	async	patchUser(
 		@Req() {user},
 		@Query('user') findUser: string | undefined,
@@ -108,7 +143,7 @@ export class UsersController {
 		try
 		{
 			// console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${user.login}] @Body(): [${body}]${C.END}`);
-			console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${findUser}] @Body(): [${body}]${C.END}`);
+			console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${findUser}] @Body():${C.END}`, body); // sonra yapilacak
 			// const	responseUser = await this.usersService.patchUser(user.login, body);
 			const	responseUser = await this.usersService.patchUser(findUser, body);
 			return (responseUser);
@@ -134,8 +169,28 @@ export class UsersController {
 		}
 		catch (err)
 		{
-			console.log("@Delete('/user'): ", err);
+			console.error("@Delete('/user'): ", err);
 			return ({err: err});
+		}
+	}
+
+	@Delete('/file/delete')
+	async deleteImage(
+		@Req() {user},
+		@Query('file') file: string | string[] | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_RED}DELETE: /user/delete: @Query('file'): [${file}]${C.END}`);
+			const	responseDeleteFile = await this.usersService.deleteFile(file)
+			if (!responseDeleteFile)
+				throw (new Error('Error deleting file:'));
+			return (responseDeleteFile);
+		}
+		catch (err)
+		{
+			console.error("@Delete('/file/delete'): ", err);
+			return ({message: `Failed to delete file.: Error: ${err}`});
 		}
 	}
 

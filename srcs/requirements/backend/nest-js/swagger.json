@@ -132,6 +132,28 @@
         }
       }
     },
+    "/users/user/upload": {
+      "put": {
+        "operationId": "UsersController_putFile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/file/delete": {
+      "delete": {
+        "operationId": "UsersController_deleteImage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/{message}": {
       "post": {
         "operationId": "ChatController_createMessage",
@@ -195,7 +217,7 @@
         }
       },
       "delete": {
-        "operationId": "ChatController_removeChannel",
+        "operationId": "ChatController_deleteChannel",
         "parameters": [
           {
             "name": "channel",
