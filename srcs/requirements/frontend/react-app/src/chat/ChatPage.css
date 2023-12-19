@@ -17,7 +17,7 @@
 
 @media (max-width: 600px) {
 	#chat-page {
-		width: 90vw; /* Ekran genişliği 600px'den küçükse genişliği azalt */
+		flex-direction: column;
 	}
 }
 

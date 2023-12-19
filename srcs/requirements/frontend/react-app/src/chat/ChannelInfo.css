@@ -8,6 +8,24 @@
 	user-select: none;
 }
 
+.settings {
+	display: flex;
+	flex-direction: column;
+}
+
+.settings > button {
+	background-color: green;
+	color: white;
+	cursor: pointer;
+	border-radius: 5px;
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+.settings > button:hover {
+	background-color: darkred;
+}
+
 /* -------- */
 
 #channelInfoContainer {
@@ -134,6 +152,28 @@
 
 /* ------------ */
 
+#userBanList {
+	position: sticky;
+	bottom: 0;
+	right: 100%;
+	background-color: darkred;
+	color: white;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+#userBanList svg {
+	height: 20px;
+	width: 20px;
+}
+
+#userBanList:hover {
+	background-color: #45a049;
+}
+
+/* ------------ */
+
+
 #leaveButton,
 #deleteButton {
 	background-color: darkred;
@@ -141,7 +181,7 @@
 	cursor: pointer;
 	border-radius: 5px;
 	width: 100%;
-	margin-top: 5px;
+	margin-bottom: 0px;
 }
 
 #leaveButton:hover,
@@ -151,7 +191,8 @@
 
 /* --------- */
 
-#friendSearch {
+#friendSearch,
+#banSearch {
 	margin-bottom: 10px; /* İstenilen boşluk değeri */
 	padding: 6px; /* İstenilen iç boşluk değeri */
 	border: 1px solid #ccc; /* Sınır rengi */
@@ -162,7 +203,8 @@
 
 /* -------- */
 
-#friend-users {
+#friend-users,
+#banned-users {
 	border: 1px solid #ccc;
 	display: flex;
 	flex: 1;
@@ -174,30 +216,26 @@
 	padding-left: 5px;
 }
 
-#friend-users:hover {
+#friend-users:hover,
+#banned-users:hover {
 	background-color: darkred;
 }
 
-#friend-users img {
+#friend-users img,
+#banned-users img {
 	height: 30px;
 	width: 30px;
 	border-radius: 50%;
 }
 
-#friend-users-table{
+#friend-users-table,
+#banned-users-table{
 	display: flex;
 	flex-direction: column;
 	margin-left: 5px;
 }
 
-/* -------- */
-
-#friend-users-table{
-	display: flex;
-	flex-direction: column;
-	margin-left: 5px;
-}
-
+/* ------------- */
 
 
 
