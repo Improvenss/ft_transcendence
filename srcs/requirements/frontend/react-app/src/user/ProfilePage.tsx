@@ -51,13 +51,13 @@ function ProfilePage() {
 					if (dataUser.message === 'USER OK'){
 						console.log("---User Profile Response '✅'---");
 						setUserPanel({
-							email: dataUser.email,
-							login: dataUser.login,
-							displayname: dataUser.displayname,
-							imageUrl: dataUser.imageUrl,
-							socketId: dataUser.socketId,
-							nickname: dataUser.nickname,
-							avatar: dataUser.avatar
+							email: dataUser.user.email,
+							login: dataUser.user.login,
+							displayname: dataUser.user.displayname,
+							imageUrl: dataUser.user.imageUrl,
+							socketId: dataUser.user.socketId,
+							nickname: dataUser.user.nickname,
+							avatar: dataUser.user.avatar
 						});
 						console.log("userInfo:", dataUser);
 					} else {
@@ -80,7 +80,7 @@ function ProfilePage() {
 	if ((userPanel === undefined))
 		return (<LoadingPage />);
 
-		/*
+	/*
 			kullanıcı login - nickname - image - avatar - displayname - email
 			game history - oynanılan oyun sayısı - kazanılan oyun sayısı - kaybedilen oyun sayısı - xp bar
 			achivment bar
@@ -124,29 +124,29 @@ function ProfilePage() {
 				// other properties
 				status: 'online', // or 'offline', 'idle', etc.
 			  };
-
 	return (
 		<>
 		{userPanel && (
 			<div id="profile-page">
 				<div id="user">
-					< div id="image">
+					<div id="user-image">
 						<img id="intraImg" src={userPanel.imageUrl} alt={`${userPanel.displayname}`} />
-						<img id="avatar" src="https://bennettfeely.com/clippy/pics/pittsburgh.jpg" alt={`${userPanel.avatar}`} />
+						<img id="avatarImg" src={userPanel.avatar} alt={`${userPanel.avatar}`} />
 						{/*<p id="userStatus">{userPanel.status}</p>*/}
 						<div className={`status-indicator status-${userPanel2.status.toLowerCase()}`}></div>
-						{/*<img id="avatar" src={userPanel.avatar} alt={`${userPanel.avatar}`} />*/}
 					</div>
-					<p>{userPanel.login} {userPanel.nickname ? "/ " + userPanel.nickname : ""}</p> 
+					<p>Login Name {userPanel.nickname ? "- Nickname:": ":"}</p>
+					<span>{userPanel.login} {userPanel.nickname ? "- " + userPanel.nickname : ""}</span> 
 					<div className="xp-bar">
 						<div className="xp" style={{ width: `${"75"}%` }} />
 						<div className="level" >55</div>
 					</div>
-					<p>{userPanel.displayname}</p>
-					<p>{userPanel.email}</p>
-					<button id="addFriend">Add Friend</button>
-					<button id="sendMessage">Send Message</button>
-					{ userPanel.login === userInfo.login && (
+					<p>Real Name:</p>
+					<span>{userPanel.displayname}</span>
+					<p>Email:</p>
+					<span>{userPanel.email}</span>
+
+					{ userPanel.login === userInfo.login ? (
  							<div id="friends">
  								<input
  									id="friendSearch"
@@ -170,7 +170,12 @@ function ProfilePage() {
  										</div>
  								))}
  							</div>
- 						)}
+ 						) : (
+							<>
+								<button id="addFriend">Add Friend</button>
+								<button id="sendMessage">Send Message</button>
+							</>
+						)}
 				</div>
 				<div id="user-board">
 					<div id="user-info">

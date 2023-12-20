@@ -116,7 +116,7 @@ export class UsersController {
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
 			if (!fs.existsSync(image.path))
 				throw (new Error(`File path is not valid. ${image.path}`));
-			return (imgUrl);
+			return ({imgUrl});
 		}
 		catch (err)
 		{

@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useUser } from '../hooks/UserHook';
 import './UserInput.css';
 
@@ -10,54 +10,46 @@ interface IUserProps{
 function UserInput({setVisible}: IUserProps) {
 	const user = useUser();
 	const userCookie = Cookies.get('user');
-	const [username, setUsername] = useState('');
-	const [selectedFile, setSelectedFile] = useState(null);
-
-	const handleUsernameChange = (event: any) => {
-		setUsername(event.target.value);
-	};
-
-	const handleFileChange = (event: any) => {
-		setSelectedFile(event.target.files[0]);
-	};
+	const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
+	const inputRefNickname = useRef<HTMLInputElement>(null);
+	const inputRefAvatar = useRef<HTMLInputElement>(null);
 
 	const handleSubmit = async (event: any) => {
 		event.preventDefault();
-		// Burada dosyayı sunucuya yüklemek için bir işlem yapabilirsiniz.
-		console.log('Kullanıcı adı: ', username); // nickname
-		console.log('Seçilen dosya: ', selectedFile); // avatar
+		const nickname = inputRefNickname.current?.value;
+		const formData = new FormData();
+		formData.append('image', selectedAvatar as File);
 
-		// const	responseUserAvatar = await fetch(
-		// 	process.env.REACT_APP_FETCH
-		// 	+ '/user/upload', {
-		// 		method: 'PUT',
-		// 		headers: {
-		// 			"Content-Type": "application/json",
-		// 			"Authorization": "Bearer " + userCookie as string,
-		// 		},
-		// 		body: selectedFile,
-		// 	},
-		// );
-		// if (!responseUserAvatar.ok)
-		// 	alert("User avatar update error.");
-		// const	responseData = await responseUserAvatar.json();
-		// console.log("responseData yani yukleninlen url", responseData);
-		const	responseUserCustomize = await fetch(
-
-			process.env.REACT_APP_FETCH
-				+ `/users/user?user=${user.userInfo?.login}`, { // Buradaki userInfo? olayi bug yaratabilir gibi. ama yaratmayadabilir.
-			method: 'PATCH',
+		const responseAvatar = await fetch(
+			process.env.REACT_APP_FETCH + `/users/user/upload`, {
+			method: 'PUT',
 			headers: {
-				"Content-Type": "application/json",
 				"Authorization": "Bearer " + userCookie as string,
 			},
-			body: JSON.stringify({
-				nickname: username,
-				// avatar: responseData,
-			}),
+			body: formData
 		});
-		if (!responseUserCustomize.ok)
-			alert("User Customize screen update error.");
+
+		if (!responseAvatar.ok){
+			console.error("Error: image not uploaded!");
+		} else {
+			const avatarUrl = await responseAvatar.json();
+
+			const	responseUserCustomize = await fetch(
+				process.env.REACT_APP_FETCH + `/users/user?user=${user.userInfo?.login}`, {
+				method: 'PATCH',
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + userCookie as string,
+				},
+				body: JSON.stringify({
+					nickname: nickname,
+					avatar: avatarUrl.imgUrl
+				}),
+			});
+			if (!responseUserCustomize.ok)
+				alert("User Customize screen update error.");
+		}
+
 		localStorage.removeItem('userLoginPage');
 		setVisible(false);
 	};
@@ -67,21 +59,49 @@ function UserInput({setVisible}: IUserProps) {
 		setVisible(false);
 	}
 
+	const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const files = event.target.files;
+
+		if (files && files.length > 0) {
+			const file = files[0];
+	  
+		  	if (!file.type.startsWith('image/')) {
+				console.error('Lütfen bir resim dosyası seçin.');
+				return;
+		  	}
+	  
+			setSelectedAvatar(file);
+		} else {
+			setSelectedAvatar(null);
+		}
+	  };
+
 	return (
 		<div id="user-customize">
 			<form onSubmit={handleSubmit}>
 				<div id="close" onClick={handleClose} title='Close'>X</div>
-				<label>
-					Nickname:
-					<input type="text" value={username} onChange={handleUsernameChange} />
-					<br />
-				</label>
-				<label>
-					Upload image:
-					<input type="file" onChange={handleFileChange} />
-					<br />
-				</label>
-					<button id='save' type="submit" >Save Settings</button>
+				<label htmlFor="Nickname">Set Nickname:</label>
+				<input
+					type="text"
+					ref={inputRefNickname}
+					placeholder="Set Nickname..."
+				/>
+				<label htmlFor="Avatar">Set Avatar:</label>
+				<input
+					ref={inputRefAvatar}
+					name="image"
+					type="file"
+					accept="image/jpg, image/jpeg, image/png, image/gif"
+					onChange={handleAvatarChange}
+				/>
+				{selectedAvatar && (
+					<img 
+						src={URL.createObjectURL(selectedAvatar)}
+						alt={selectedAvatar.name}
+						id="channel-image-output"
+					/>
+				)}
+				<button id='save' type="submit" >Save Settings</button>
 			</form>
 		</div>
 	);

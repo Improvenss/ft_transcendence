@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as rimraf from 'rimraf';
 
 
 @Injectable()

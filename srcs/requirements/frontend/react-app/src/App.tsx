@@ -39,11 +39,12 @@ function App() {
 						<Link to="/chat">Chat</Link>
 						<Link to="/game">Game</Link>
 						<span onClick={logOut}>Logout</span>
-						{/*<Link to="/profile">
-							<img src={userInfo?.imageUrl} alt="Profile" />
-						</Link>*/}
 						<Link to={`/profile/${userInfo?.login}`}>
-							<img src={userInfo?.imageUrl} alt="Profile" />
+							{userInfo?.avatar ? (
+								<img src={userInfo.avatar} alt="Profile" />
+							) : (
+								<img src={userInfo?.imageUrl} alt="Profile" />
+							)}
 						</Link>
 					</ul>
 				) : (

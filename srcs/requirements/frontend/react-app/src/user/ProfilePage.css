@@ -32,7 +32,7 @@
 	border: 1px solid #ccc;
 }
 
-#image {
+#user-image {
 	position: relative;
 	height: 150px;
 	display: flex;
@@ -40,14 +40,13 @@
 	align-items: center;
 }
 
-#image img {
+#user-image > img {
 	border-radius: 50%;
 	position: absolute;
-	width: 150px;
-	height: 150px;
+	width: 125px;
+	height: 125px;
 	object-fit: cover;
 }
-
 
 #userStatus {
 	position: absolute;
@@ -82,10 +81,11 @@
 	background-color: yellow;
 }
 
+#intraImg {
+	pointer-events: none; /* Resmi sürükleyemez veya tıklayamazsınız */
+}
 
-
-
-#avatar:active {
+#avatarImg:active {
 	display: none;
 }
 
@@ -122,13 +122,20 @@
 	background-color: #45a049;
 }
 
+#user > span {
+	display: flex;
+	margin-bottom: 5px;
+    justify-content: center; /* Yatayda merkezleme */
+    align-items: center; /* Dikeyde merkezleme */
+}
+
+
 #friends {
 	margin-top: 10px;
 	overflow-y: auto; /* Dikey kaydırma için */
 	max-height: 25vmax;
 
 }
-
 
 /* ---------------------------- */
 

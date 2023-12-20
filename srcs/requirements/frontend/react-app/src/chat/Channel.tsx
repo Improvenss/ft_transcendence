@@ -32,7 +32,7 @@ function Channel() {
 		try
 		{
 			const response = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/register`, {
-				method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					"Authorization": "Bearer " + userCookie,
@@ -45,7 +45,6 @@ function Channel() {
 			if (!response.ok)
 				throw (new Error("API fetch error."));
 			const data = await response.json();
-			//console.log("-------<",data[0]);
 			setActiveChannel(data[0]);
 			setActiveTab('involved');
 			//if (!data.response)

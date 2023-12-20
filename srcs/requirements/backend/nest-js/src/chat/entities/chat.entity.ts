@@ -37,7 +37,7 @@ export class Channel {
 	@ManyToMany(() => User, user => user.channels, {nullable: true, onDelete: 'CASCADE'})
 	public members: User[]; // Kanalın üyeleri
 
-	@ManyToMany(() => User, user => user.adminChannels, {onDelete: 'CASCADE'})
+	@ManyToMany(() => User, user => user.adminChannels, {nullable: false, onDelete: 'CASCADE'})
 	public admins: User[]; // Kanalın yöneticileri
 
 	//----------------------Message----------------------------//

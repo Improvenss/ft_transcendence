@@ -124,7 +124,7 @@ export class ChatService {
 		return involvedChannelsInfo;
 	}
 	
-	async updateChannel(channel: Channel | Channel[] | any, user: User) {
+	async addChannelUser(channel: Channel | Channel[] | any, user: User) {
 		if (await this.findChannelUser(channel, user))
 			throw (new Error(`${user.login} already in this ${channel.name}.`));
 		channel.members.push(user);

@@ -1,5 +1,8 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import "./JoinGame.css";
+import Cookies from "js-cookie";
+import { useSocket } from "../hooks/SocketHook";
+import { IGame } from "./IGame";
 
 export interface IGameJoinForm {
 	name: string,
@@ -7,66 +10,45 @@ export interface IGameJoinForm {
 	type: 'private' | 'public',
 }
 
-interface IGame {
-	name: string;
-	mode: string;
-	winningScore: number;
-	gameDuration: string;
-  }
-
 function JoinGame(){
 	console.log("---------JOIN-GAME---------");
 	const [searchTerm, setSearchTerm] = useState('');
-	const [publicGames, setPublicGames] = useState<IGame[]>([
-		{
-		  name: "Game-1",
-		  mode: "Classic",
-		  winningScore: 10,
-		  gameDuration: "30 minutes",
-		},
-		{
-		  name: "Game-2",
-		  mode: "Team Battle",
-		  winningScore: 15,
-		  gameDuration: "45 minutes",
-		},
-		{
-			name: "Game-3",
-			mode: "Team Battle",
-			winningScore: 115,
-			gameDuration: "415 minutes",
-		},
-		{
-			name: "Game-4",
-			mode: "Team Battle",
-			winningScore: 35,
-			gameDuration: "15 minutes",
-		},
-		{
-			name: "Game-5",
-			mode: "Team Battle",
-			winningScore: 5,
-			gameDuration: "3 minutes",
-		},
-		{
-			name: "Game-6",
-			mode: "Team Battle",
-			winningScore: 51,
-			gameDuration: "39 minutes",
-		},
-		{
-			name: "Game-6",
-			mode: "Team Battle",
-			winningScore: 25,
-			gameDuration: "23 minutes",
-		},
-		{
-			name: "Game-7",
-			mode: "Team Battle",
-			winningScore: 25,
-			gameDuration: "31 minutes",
-		},
-	]);
+	const socket = useSocket();
+	const userCookie = Cookies.get("user");
+	const [rooms, setRooms] = useState<IGame[]>([]);
+
+	useEffect(() => {
+		const fetchRooms = async () => {
+			try {
+				const response = await fetch(
+					process.env.REACT_APP_FETCH + "/game/room", {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							"Authorization": "Bearer " + userCookie,
+						},
+					});
+				if (!response.ok)
+					throw new Error('API-den veri alınamadı.');
+				const data = await response.json();
+				console.log("Get Channels: ", data);
+				setRooms(data);
+			} catch (error) {
+				console.error('Veri getirme hatası:', error);
+			}
+		};
+	
+		fetchRooms();
+
+		const	roomListener = (room: IGame) => {
+			console.log("Game'nin Room listesi guncelleniyor cunku degisiklik oldu.");
+			fetchRooms();
+		}
+		socket?.on("roomListener", roomListener);
+		return () => {
+			socket?.off("roomListener", roomListener);
+		}
+	}, []);
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
@@ -79,6 +61,20 @@ function JoinGame(){
 		console.log(formObject.name);
 		console.log(formObject.password ? formObject.password : "null");
 		console.log(formObject.type);
+		const response = await fetch(process.env.REACT_APP_FETCH + `/game/room/register`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+			},
+			body: JSON.stringify({
+				room: formObject.name,
+				password: formObject.password ? formObject.password : null,
+			}),
+		});
+		if (!response.ok)
+			throw (new Error("API fetch error."));
+		const data = await response.json();
 		formElement.reset();
 	}
 
@@ -119,24 +115,24 @@ function JoinGame(){
 						<span>Winning Score</span>
 						<span>Game Duration</span>
 					</div>
-					{publicGames
+					{rooms
 					// .filter(game => game.name.toLowerCase().includes(searchTerm.toLowerCase()))
 					.filter((game) => {
 						const searchTermLower = searchTerm.toLowerCase();
 						return (
-						  game.name.toLowerCase().includes(searchTermLower) ||
-						  game.mode.toLowerCase().includes(searchTermLower) ||
-						  game.winningScore.toString().includes(searchTermLower) ||
-						  game.gameDuration.toLowerCase().includes(searchTermLower)
+							game.name.toLowerCase().includes(searchTermLower) ||
+							game.mode.toLowerCase().includes(searchTermLower) ||
+							game.winScore.toString().includes(searchTermLower) ||
+							game.duration.toString().includes(searchTermLower)
 						);
-					  })
+					})
 					.map((game, index) => (
 						<form key={index} onSubmit={handleSubmit}>
 							<button key={index} className="table-row">
 								<span>{game.name}</span>
 								<span>{game.mode}</span>
-								<span>{game.winningScore}</span>
-								<span>{game.gameDuration}</span>
+								<span>{game.winScore}</span>
+								<span>{game.duration}</span>
 								<input type="hidden" name="name" value={game.name} />
 								<input type="hidden" name="password" value="" />
 								<input type="hidden" name="type" value="public" />

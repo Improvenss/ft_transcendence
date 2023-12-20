@@ -8,15 +8,13 @@ import { ConnectedSocket, MessageBody,
 	WebSocketGateway,
 	WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { CreateChannelDto } from './dto/chat-channel.dto';
 import { ChatService } from './chat.service';
 import { Body, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
-import * as bcrypt from 'bcrypt';
-// import { handleCreateChannel } from './channel.handler';
 import { CreateMessageDto } from './dto/chat-message.dto';
+import { GameService } from 'src/game/game.service';
 
 var count: number = 0;
 
@@ -32,9 +30,11 @@ var count: number = 0;
 	},
 	namespace: "/chat" // Buradaki namespace backend'in https://localhost:3000/chat sayfasina geldiginde baglanti kurmus oluyor.
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	constructor(
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+	constructor(
 		private readonly chatService: ChatService,
-		private readonly usersService: UsersService
+		private readonly usersService: UsersService,
+		private readonly gameService: GameService,
 	) {}
 
 	private connectedUsers: Map<string, Socket> = new Map();
@@ -76,27 +76,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 		//Do stuffs
 	}
 
-	// joinChannel(channel: Channel){
-	// joinChannel(name: string){ //1 kere çalışıyor, o da kanal oluşturunca 
-	// 	// Socket.IO'nun sağladığı join fonksiyonunu kullanarak kanala katılma işlemi
-	// 	// this.server.socketsJoin(channel.name);
-	// 	console.log(`Client joined channel: [${name}]`);
-	// 	this.server.socketsJoin(name);
-	// }
-
-	// @SubscribeMessage('joinChannel')
-	// async joinChannel(@Body() channel: {name: string},
-	// 	@ConnectedSocket() socket: Socket)
-	// {
-	// 	const	responseUser: User | null = await this.usersService.findOneSocket(socket);
-	// 	if (responseUser === null)
-	// 		return (new NotFoundException("ERROR: User not found for create game room!"))
-	// 	console.log("Joined new room:",channel);
-	// 	socket.join(channel.name);
-	// 	// this.server.to(channel).emit('channelListener', `Joined ${channel} room`); 
-	// 	// this.server.socketsJoin(channel);
-	// }
-
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
 	 *  ele aliyouz.
@@ -120,17 +99,44 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 	 * @returns 
 	 */
 	@SubscribeMessage('joinGameRoom')
-	async handleJoinGameRoom(@Body() roomData: any,
+	async handleJoinGameRoom(
+		@Body() roomData: {
+			name: string,
+		},
 		@ConnectedSocket() socket: Socket)
 	{
-		const	responseUser = await this.usersService.findUser(null, socket);
-		if (responseUser === null)
-			return (new NotFoundException("ERROR: User not found for create game room!"))
-		socket.join(roomData.name);
-		const userToJoin = Array.isArray(responseUser) ? responseUser[0] : responseUser;
-		console.log(`GAME: Socket joined: ${roomData.name}, ${userToJoin.login}(${socket.id})`);
-		this.server.to(roomData.name).emit("gameRoomJoinListener",
-			`GAME: Socket joined: ${roomData.name}, ${socket.id}`);
+		try
+		{
+			console.log("Socket'in Game Room'a joinlenme kismi - joinRoom -");
+			const responseUser = await this.usersService.findUser(null, socket);
+			if (responseUser === null)
+				throw (new NotFoundException("User not found for join Game Room!"));
+			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
+			const responseRoom = await this.gameService.findGameRoom(roomData.name, ['members']);
+			const singleRoom = Array.isArray(responseRoom) ? responseRoom[0] : responseRoom;
+			if (Array.isArray(responseRoom) ? responseRoom.length === 0 : responseRoom === null)
+				throw (new NotFoundException("Game Room not found!"));
+			const	ifUserInRoom = await this.gameService.findRoomUser(singleRoom, singleUser);
+			if (!ifUserInRoom)
+				throw (new NotFoundException("User is not in Game Room!"));
+			else if (singleRoom !== null
+				&& singleRoom.name === roomData.name)
+			{
+				if (socket.rooms.has(roomData.name))
+					return (console.log(`[${socket.id}] alredy '${roomData.name}' room.! :)`));
+				socket.join(roomData.name);
+				if (singleUser.socketId === socket.id) {
+					console.log(`Room: '${roomData.name}' Joined: [${socket.id}]`);
+					this.server.to(roomData.name).emit('BURAYA ROOMUN MESAJ KISMINA BASTIRACAGIZ', `Room(${roomData.name}): ${socket.id} joined!`);
+				}
+			}
+			else
+				throw (new Error("Socket: 'joinGameRoom': Unexpected error!"));
+		}
+		catch (err)
+		{
+			console.error("@SubscribMessage('joinGameRoom'):", err);
+		}
 	}
 
 	/**
@@ -198,20 +204,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 			this.server.to(channel.name).emit(`listenChannelMessage:${channel.name}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err);
-		}		
+		}
 	}
-	// async handleMessage(
-	// 		@MessageBody() 
-	// 		{ channel, message }:
-	// 			{ channel: string, message: string })
-	// {
-	// 	console.log(`BACKEND: gelen msg[${count++}]:`, message);
-	// 	console.log('MessageBody():', {channel, message});
-	// 	this.server.to(channel).emit("messageToClient", message);
-	// }
 
 	@SubscribeMessage('joinChannel')
-	async handleJoinChannel(@Body() channel: {name: string},
+	async handleJoinChannel(
+		@Body() channel: {
+			name: string
+		},
 		@ConnectedSocket() socket: Socket)
 	{
 		try
@@ -219,7 +219,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 			console.log("Socket'in Channel'a joinlenme kismi - joinChannel -");
 			const responseUser = await this.usersService.findUser(null, socket);
 			if (responseUser === null)
-				throw (new NotFoundException("ERROR: User not found for create Channel!"))
+				throw (new NotFoundException("User not found for join Channel!"))
 			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
 			const responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(channel.name, ['members']);
 			if (responseChannel === null)
@@ -231,10 +231,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {	c
 				&& responseChannel.name === channel.name)
 			{
 				if (socket.rooms.has(channel.name))
-					return (console.log(`${socket.id} zaten ${channel.name} kanalında! :)`));
+					return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
 				socket.join(channel.name);
 				if (singleUser.socketId === socket.id) {
-					console.log(`${channel.name} kanalina katıldı: ${socket.id}`);
+					console.log(`Channel: ${channel.name} Joined: ${socket.id}`);
 					this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
 				}
 			}

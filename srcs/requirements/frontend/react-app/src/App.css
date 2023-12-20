@@ -29,6 +29,7 @@
 	width: 80px;
 	border-radius: 50%;
 	object-fit: cover;
+	pointer-events: none; /* Resmi sürükleyemez veya tıklayamazsınız */
 }
 
 #site-name {

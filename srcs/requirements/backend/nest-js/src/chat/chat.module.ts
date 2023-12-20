@@ -6,14 +6,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Channel, Message } from './entities/chat.entity';
 import { ChatGateway } from './chat.gateway';
 import { User } from 'src/users/entities/user.entity';
+import { Game } from 'src/game/entities/game.entity';
+import { GameService } from 'src/game/game.service';
 
 @Module({
 	imports: [
 		UsersModule,
-		TypeOrmModule.forFeature([User, Channel, Message]),
+		TypeOrmModule.forFeature([User, Channel, Message, Game]),
 	], // Burasi da User CRUD'unu kullanabilmemizi sagliyor.
 	controllers: [ChatController],
-	providers: [ChatService, ChatGateway],
-	exports: [TypeOrmModule, ChatGateway], // <-- TypeOrmModule'ü ihraç edin
+	providers: [ChatService, GameService, ChatGateway],
+	exports: [TypeOrmModule, ChatGateway],
 })
 export class ChatModule {}

@@ -7,10 +7,11 @@ import { IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
 import { ReactComponent as MessageIcon } from './messageIcon.svg';
+import React from 'react';
 
 function ActiveChannel(){
 	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
-	const MAX_CHARACTERS = 100; // İstenilen maksimum karakter sayısı
+	const MAX_CHARACTERS = 1000; // İstenilen maksimum karakter sayısı
 	const [messageInput, setMessageInput] = useState('');
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -64,16 +65,17 @@ function ActiveChannel(){
 		return formattedTime;
 	}
 
-	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		// Kullanıcının daha fazla karakter girmesini engelle
 		if (e.target.value.length <= MAX_CHARACTERS) {
 			setMessageInput(e.target.value);
 		}
 	};
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		// Eğer basılan tuş Enter ise ve karakter sayısı sınırı aşılmamışsa
-		if (e.key === 'Enter') {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
 			handleSendMessage(); // Send butonunu çalıştır
 		}
 	};
@@ -92,6 +94,16 @@ function ActiveChannel(){
 		// Implement logic to send the message
 		// You may want to send the message through the socket or your messaging system
 	};
+
+	function formatMessageContent(content: string) {
+		// Mesaj içeriğindeki '\n' karakterini <br> tag'ine dönüştür
+		return content.split('\n').map((line, index) => (
+		  <React.Fragment key={index}>
+			{line}
+			{index < content.length - 1 && <br />}
+		  </React.Fragment>
+		));
+	  }
 
 	useEffect(() => {
 		if (activeChannel){
@@ -140,51 +152,49 @@ function ActiveChannel(){
 							</div>
 						</div>
 						<div id="message-container">
-							{messages.map((message, index, array) => (
-								// <div key={index} className={`message-content${index === array.length - 1 ? ' end-message' : ''}`}>
-								<>
+							{messages.map((message, index) => (
+								<React.Fragment key={index}>
 									{index === 0 || isDifferentDay(message.timestamp, messages[index - 1].timestamp) ? (
-										<div className="sticky">
+										<div className="day-sticky">
 											<span className="daystamp">{formatDaytamp(message.timestamp)}</span>
 										</div>
 									) : null}
 								<div key={index} className={`message-content`}>
 									{(message.sender.login !== author?.login) ? (
-										<div className='others-messages'>
+										<div className='message taken'>
 											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) ? (
 												<>
 													<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
-													<span className="icon-span"><MessageIcon /></span>
 													<div className='first-message'>
+													<span className="icon-span"><MessageIcon /></span>
 														<span className='username'>{message.sender.login}</span>
-														<p>{message.content}</p>
+														<p>{formatMessageContent(message.content)}</p>
 														<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
 													</div>
 												</>
 											):(
 												<div className='last-message'>
-													<p>{message.content}</p>
+													<p>{formatMessageContent(message.content)}</p>
 													<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
 												</div>
 											)}
 										</div>
 									) : (
-										<div className='my-messages'>
+										<div className='message sent'>
 											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) && (
-												<span className="icon-span-reverse"><MessageIcon /></span>
+												<span className="icon-span"><MessageIcon /></span>
 											)}
-											<p>{message.content}</p>
+											<p>{formatMessageContent(message.content)}</p>
 											<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
 										</div>
 									)}
 								</div>
-								</>
+								</React.Fragment>
 							))}
 							<div ref={messagesEndRef} />
 						</div>
 						<div id="message-input">
-							<input
-								type="text"
+							<textarea
 								value={messageInput}
 								onChange={handleInputChange}
 								onKeyDown={handleKeyDown}

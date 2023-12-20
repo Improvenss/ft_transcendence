@@ -1,6 +1,5 @@
-#user-customize c{
+#user-customize {
 	display: flex;
-	flex-direction: column;
 	height: 30vh;
 	width: 30vw;
 	position: absolute;
@@ -13,17 +12,29 @@
 	justify-content: center;
 	align-items: center;
 	font-size: 20px;
+	max-height: 400px;
+	max-width: 300px;
+	min-width: 300px;
+
 }
 
 #save {
 	background-color: darkred;
 	margin-top: 10%;
-	margin-left: 35%;
 	cursor: pointer;
+	width: 100%;
 }
 
 #save:hover{
 	color: black;
+}
+
+#avatar {
+	margin: auto;
+	max-width: 100px;
+	max-height: 100px;
+	padding: 5px;
+	border-radius: 5px;
 }
 
 #close {
