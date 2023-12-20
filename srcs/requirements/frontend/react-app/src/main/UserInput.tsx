@@ -17,27 +17,39 @@ function UserInput({setVisible}: IUserProps) {
 	const handleSubmit = async (event: any) => {
 		event.preventDefault();
 		const nickname = inputRefNickname.current?.value;
-
 		const formData = new FormData();
 		formData.append('image', selectedAvatar as File);
 
-
-		console.log('Kullanıcı adı: ', nickname); // nickname
-		console.log('Seçilen dosya: ', selectedAvatar); // avatar
-
-		const	responseUserCustomize = await fetch(
-			process.env.REACT_APP_FETCH + `/users/user?user=${user.userInfo?.login}`, {
-			method: 'PATCH',
+		const responseAvatar = await fetch(
+			process.env.REACT_APP_FETCH + `/users/user/upload`, {
+			method: 'PUT',
 			headers: {
-				"Content-Type": "application/json",
 				"Authorization": "Bearer " + userCookie as string,
 			},
-			body: JSON.stringify({
-				nickname: nickname
-			}),
+			body: formData
 		});
-		if (!responseUserCustomize.ok)
-			alert("User Customize screen update error.");
+
+		if (!responseAvatar.ok){
+			console.error("Error: image not uploaded!");
+		} else {
+			const avatarUrl = await responseAvatar.json();
+
+			const	responseUserCustomize = await fetch(
+				process.env.REACT_APP_FETCH + `/users/user?user=${user.userInfo?.login}`, {
+				method: 'PATCH',
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + userCookie as string,
+				},
+				body: JSON.stringify({
+					nickname: nickname,
+					avatar: avatarUrl.imgUrl
+				}),
+			});
+			if (!responseUserCustomize.ok)
+				alert("User Customize screen update error.");
+		}
+
 		localStorage.removeItem('userLoginPage');
 		setVisible(false);
 	};
