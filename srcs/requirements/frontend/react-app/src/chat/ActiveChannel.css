@@ -185,6 +185,7 @@
 	background-color: rgba(30, 97, 45, 0.758);
 	border-radius: 10px;
 	margin: 5px;
+	padding-right: 5px;
 }
 
 #message-input textarea {

@@ -106,27 +106,76 @@
 /* -------- */
 
 #channel-users {
-	border: 1px solid #ccc;
 	display: flex;
 	flex: 1;
 	overflow: hidden;
-	border-radius: 10px;
-	margin-bottom: 10px;
-	cursor: pointer;
-	padding: 15px;
-	padding-left: 5px;
+	flex-direction: column;
 }
 
-#channel-users:hover {
+/* -------- */
+
+#channel-user {
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	padding: 15px;
+	padding-left: 5px;
+	cursor: pointer;
+}
+
+#channel-user:hover {
 	background-color: darkred;
 }
 
-#channel-users img {
+#channel-user img {
 	height: 30px;
 	width: 30px;
 	border-radius: 50%;
 	margin-right: 5px;
 	object-fit: cover; /* Resmin orantılı olarak kaplanması */
+}
+
+#channel-user span {
+	float: right;
+}
+
+#channel-user-info {
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	margin-top: -5px;
+	padding: 10px;
+	padding-left: 5px;
+}
+
+#goProfile,
+#DM,
+#userKick,
+#userBan,
+#setAdmin,
+#removeAdmin {
+	background-color: darkred;
+	cursor: pointer;
+	border-radius: 5px;
+	width: 100%;
+	margin-bottom: 2px;
+}
+
+#goProfile svg,
+#DM svg,
+#userKick svg,
+#userBan svg {
+	height: 20px;
+	width: 20px;
+}
+
+#goProfile:hover,
+#DM:hover,
+#userKick:hover,
+#userBan:hover,
+#setAdmin:hover,
+#removeAdmin:hover {
+	background-color: #45a049;
 }
 
 /* -------- */
@@ -236,20 +285,3 @@
 }
 
 /* ------------- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

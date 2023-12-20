@@ -61,6 +61,20 @@ function JoinGame(){
 		console.log(formObject.name);
 		console.log(formObject.password ? formObject.password : "null");
 		console.log(formObject.type);
+		const response = await fetch(process.env.REACT_APP_FETCH + `/game/room/register`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+			},
+			body: JSON.stringify({
+				room: formObject.name,
+				password: formObject.password ? formObject.password : null,
+			}),
+		});
+		if (!response.ok)
+			throw (new Error("API fetch error."));
+		const data = await response.json();
 		formElement.reset();
 	}
 
@@ -106,12 +120,12 @@ function JoinGame(){
 					.filter((game) => {
 						const searchTermLower = searchTerm.toLowerCase();
 						return (
-						  game.name.toLowerCase().includes(searchTermLower) ||
-						  game.mode.toLowerCase().includes(searchTermLower) ||
-						  game.winScore.toString().includes(searchTermLower) ||
-						  game.duration.toString().includes(searchTermLower)
+							game.name.toLowerCase().includes(searchTermLower) ||
+							game.mode.toLowerCase().includes(searchTermLower) ||
+							game.winScore.toString().includes(searchTermLower) ||
+							game.duration.toString().includes(searchTermLower)
 						);
-					  })
+					})
 					.map((game, index) => (
 						<form key={index} onSubmit={handleSubmit}>
 							<button key={index} className="table-row">

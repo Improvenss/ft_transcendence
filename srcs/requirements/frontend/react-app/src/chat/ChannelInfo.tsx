@@ -1,9 +1,13 @@
 import { useRef, useState } from "react";
-import { IFriend } from "./iChannel";
+import { IFriend, IUser } from "./iChannel";
 import { ReactComponent as IconUsers } from '../assets/chat/iconUsers.svg';
 import { ReactComponent as IconSettings } from '../assets/chat/iconSettings.svg';
 import { ReactComponent as IconAddUser } from '../assets/chat/iconAddUser.svg';
 import { ReactComponent as IconBanList } from '../assets/chat/iconBanList.svg';
+import { ReactComponent as IconProfile } from '../assets/chat/iconProfile.svg';
+import { ReactComponent as IconDM } from '../assets/chat/iconDM.svg';
+import { ReactComponent as IconKick } from '../assets/chat/iconKick.svg';
+import { ReactComponent as IconBan } from '../assets/chat/iconBan.svg';
 import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
 import Cookies from "js-cookie";
@@ -28,6 +32,7 @@ import Cookies from "js-cookie";
 	const inputRefDescription = useRef<HTMLInputElement>(null);
 	const inputRefImage = useRef<HTMLInputElement>(null);
 	const inputRefPassword = useRef<HTMLInputElement>(null);
+	const [showUserInfo, setShowUserInfo] = useState<IUser | null>(null);
 
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
@@ -140,10 +145,29 @@ import Cookies from "js-cookie";
  									<div
  										key={index}
  										id='channel-users'
- 										// onClick={() => goProfile(user)} // profiller oluşturulmadığı için yok.
  									>
- 										<img src={user.imageUrl} alt={user.imageUrl} />
- 										<span>{user.login}</span>
+										<div
+											id="channel-user"
+											onClick={() => setShowUserInfo((prevUser) => (prevUser === user ? null : user))}
+										>
+											<img src={user.imageUrl} alt={user.imageUrl} />
+											<span>{user.login}</span>
+											{/*{
+												kullanıcı statü durumu online-offline-ingame
+												nickname eklenmelidir
+												avatarı varsa avatarı gösterilmelidir.
+											}*/}
+										</div>
+										{(showUserInfo && showUserInfo.login == user.login) && (
+											<div id="channel-user-info">
+												<button id="goProfile"> <IconProfile /> </button>
+												<button id="DM"> <IconDM /> </button>
+												<button id="userKick"> <IconKick /> </button>
+												<button id="userBan"> <IconBan /> </button>
+												<button id="setAdmin">Set Admin</button>
+												<button id="removeAdmin">Remove Admin</button>
+											</div>
+										)}
  									</div>
  								))}
  								<button id="userAdd" onClick={() => setActiveTabInfo('infoFriends')}> <IconAddUser /> </button>

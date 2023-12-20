@@ -49,8 +49,7 @@ export class ChatController {
 			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
 				throw (new Error("Password is WRONG!!!"));
 			const tmpUser = await this.usersService.findUser(user.login);
-			const	responseChannel = await this.chatService.updateChannel(tmpChannel, tmpUser as User);
-			//await this.chatService.updateChannel(tmpChannel, tmpUser);
+			const	responseChannel = await this.chatService.addChannelUser(tmpChannel, tmpUser as User);
 			this.chatGateway.server.emit('channelListener');
 			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
 			return (await this.chatService.checkInvolvedUser(returnChannel, user));

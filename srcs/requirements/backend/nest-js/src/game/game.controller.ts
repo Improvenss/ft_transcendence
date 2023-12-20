@@ -5,6 +5,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Colors as C } from '../colors';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -12,8 +13,10 @@ export class GameController {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly gameService: GameService,
+		private readonly chatGateway: ChatGateway,
 	) {}
 
+	// Get Game Room
 	@Get('/room')
 	async	getGameRoom(
 		@Req() {user},
@@ -36,44 +39,41 @@ export class GameController {
 		}
 	}
 
+	@Post('/room/register')
+	async registerGameRoom(
+		@Req() {user},
+		@Body() body: {room: string, password: string}
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
+			const	responseRoom = await this.gameService.addGameRoomUser(user.login, body);
+			this.chatGateway.server.emit('roomListener');
+			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
+			return (responseRoom);
+			//return ({response: true, message: `${user.login} registered in this ${room}.`});
+		}
+		catch (err)
+		{
+			console.error("@Post('/channel/register'): registerChannel:", err);
+			return ({warning: err});
+		}
+	}
+
+	// Create Game Room
 	@Post('/room')
 	@UsePipes(new ValidationPipe())
 	async	createGameRoom(
 		@Req() {user},
-		// @Body() body: {
-		// 	roomName: string,
-		// 	description?: string,
-		// 	gameMode: string,
-		// 	winScore: number,
-		// 	duration: number,
-		// 	password?: string,
-		// },
 		@Body() body: CreateGameDto,
-		// @Req() {body}: {body: {creator: string, roomName: string}},
-		// @Req() { user, body }: { user: any; body: { creator: string; roomName: string } },
 	){
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room: @Body(): [${body}]${C.END}`);
 			const tmpUser = await this.usersService.findUser(user.login);
-			if (!tmpUser) {
+			if (!tmpUser)
 				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
-			}
-			// const	createGameDto: CreateGameDto = {
-			// 	name: body.roomName,
-			// 	description: body.description,
-			// 	mode: body.gameMode,
-			// 	winScore: body.winScore,
-			// 	duration: body.duration,
-			// 	password: body.password,
-			// 	players: [tmpUser as User],
-			// 	admins: [tmpUser as User],
-			// 	watchers: [],
-			// }
-			// const	newGameRoom = await this.gameService.createGameRoom(createGameDto);
-			console.log("onceki hali", body);
 			Object.assign(body, {players: tmpUser, admins: tmpUser})
-			console.log("sonraki hali", body);
 			const	newGameRoom = await this.gameService.createGameRoom(body);
 			return ({newGameRoom});
 		}
@@ -84,6 +84,7 @@ export class GameController {
 		}
 	}
 
+	// Update Game Room
 	@Patch('/room')
 	async	patchGameRoom(
 		@Req() {user},
@@ -106,6 +107,7 @@ export class GameController {
 	// @Put('/room')
 	// async	putGameRoom()
 
+	// Delete Game Room
 	@Delete('/room')
 	async	deleteGameRoom(
 		@Req() {user},
