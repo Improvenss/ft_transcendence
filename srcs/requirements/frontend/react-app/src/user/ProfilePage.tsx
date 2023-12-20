@@ -51,13 +51,13 @@ function ProfilePage() {
 					if (dataUser.message === 'USER OK'){
 						console.log("---User Profile Response '✅'---");
 						setUserPanel({
-							email: dataUser.email,
-							login: dataUser.login,
-							displayname: dataUser.displayname,
-							imageUrl: dataUser.imageUrl,
-							socketId: dataUser.socketId,
-							nickname: dataUser.nickname,
-							avatar: dataUser.avatar
+							email: dataUser.user.email,
+							login: dataUser.user.login,
+							displayname: dataUser.user.displayname,
+							imageUrl: dataUser.user.imageUrl,
+							socketId: dataUser.user.socketId,
+							nickname: dataUser.user.nickname,
+							avatar: dataUser.user.avatar
 						});
 						console.log("userInfo:", dataUser);
 					} else {

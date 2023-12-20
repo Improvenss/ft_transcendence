@@ -17,15 +17,21 @@ export class GameService {
 		// private readonly	entityManager: EntityManager, // Burasi Repository<Game>'den once olmamali.
 	) {}
 
-	async	createGameRoom(createGameDto: CreateGameDto) {
+	async	createGameRoom(login: string, createGameDto: CreateGameDto) {
+		const	tmpUser = await this.usersService.findUser(login);
+		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+		if (!singleUser)
+			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
 		const	tmpGameRoom = await this.findGameRoom(createGameDto.name);
-		if (tmpGameRoom)
+		const	singleRoom = Array.isArray(tmpGameRoom) ? tmpGameRoom[0] : tmpGameRoom;
+		if (singleRoom)
 			return (`GameRoom: '${createGameDto.name}' already created.`);
-		const	newGame = new Game(createGameDto);
-		// const	response = await this.entityManager.save(newGame);
-		const	response = await this.gameRepository.save(newGame);
-		console.log(`New GameRoom created: #${newGame.name}:[${newGame.id}]`);
-		return (`New GameRoom created: #${newGame.name}:[${newGame.id}]`);
+		const	newRoom = new Game(createGameDto);
+		newRoom.players = [singleUser];
+		newRoom.admins = [singleUser];
+		const	response = await this.gameRepository.save(newRoom);
+		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
+		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 	}
 
 	async findRoomUser(room: Game, user: User) {
@@ -67,9 +73,7 @@ export class GameService {
 	){
 
 		const	tmpRoom = await this.findGameRoom(body.room, ['players']);
-		console.log("tmpRoooooom:", tmpRoom);
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
-		console.log("singleRoom", singleRoom);
 		if (!singleRoom)
 			return (new NotFoundException("'Game Room' not found for register Game Room!"));
 		// if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
@@ -80,9 +84,7 @@ export class GameService {
 		// console.log("singleRoom passs OK");
 
 		const tmpUser = await this.usersService.findUser(user);
-		console.log("tmpUserrr", tmpUser);
 		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		console.log("singleUserr", singleUser);
 		if (!singleUser)
 			return (new NotFoundException("'User' not found for register Game Room!"));
 

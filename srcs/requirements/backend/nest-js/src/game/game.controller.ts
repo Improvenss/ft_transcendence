@@ -29,7 +29,6 @@ export class GameController {
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
 			if (!tmpGameRoom)
 				return (`There is no GameRoom with '${room}' name`);
-			console.log("dondururleecek", tmpGameRoom);
 			return (tmpGameRoom);
 		}
 		catch (err)
@@ -70,12 +69,8 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room: @Body(): [${body}]${C.END}`);
-			const tmpUser = await this.usersService.findUser(user.login);
-			if (!tmpUser)
-				return (new NotFoundException(`User not found for GameRoom create: ${user.login}`));
-			Object.assign(body, {players: tmpUser, admins: tmpUser})
-			const	newGameRoom = await this.gameService.createGameRoom(body);
-			return ({newGameRoom});
+			const	newGameRoom = await this.gameService.createGameRoom(user.login, body);
+			return ({response: newGameRoom});
 		}
 		catch (err)
 		{
