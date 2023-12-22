@@ -2,6 +2,7 @@ import { useState } from 'react';
 import "./CreateGame.css";
 import Cookies from 'js-cookie';
 import { IGameRoom } from './IGame';
+import { useNavigate } from 'react-router-dom';
 
 const configs = {
 	winningScore: {
@@ -25,6 +26,7 @@ function CreateGame() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const userCookie = Cookies.get("user");
 	const [description, setDescription] = useState('');
+	const navigate = useNavigate();
 
 	const handleCreateRoom = async () => {
 		// Oda adı kontrolü
@@ -51,30 +53,28 @@ function CreateGame() {
 		console.log("Game Duration:", gameDuration);
 		console.log("Description:", description);
 
-
-		// const	responseCreateGame = async () => {
-			const	createRoomObject: IGameRoom = {
-				name: roomName,
-				password: password === '' ? null : password,
-				mode: gameMode,
-				winScore: winningScore,
-				duration: gameDuration,
-				description: description,
+		const	createRoomObject: IGameRoom = {
+			name: roomName,
+			password: password === '' ? null : password,
+			mode: gameMode,
+			winScore: winningScore,
+			duration: gameDuration,
+			description: description,
+		}
+		const	response = await fetch(
+			process.env.REACT_APP_FETCH + '/game/room', {
+				method: 'POST',
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + userCookie,
+				},
+				body: JSON.stringify(createRoomObject),
 			}
-			const	response = await fetch(
-				process.env.REACT_APP_FETCH + '/game/room', {
-					method: 'POST',
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie,
-					},
-					body: JSON.stringify(createRoomObject),
-				}
-			);
-			const	data = await response.json();
-			console.log("responses", data);
-		// }
-		// responseCreateGame();
+		);
+		const	data = await response.json();
+		console.log("responses", data);
+
+		navigate(`/game/lobby/${roomName}`);
 
 		// Başarı durumunda hata mesajını sıfırla
 		if (errorMessage != null)

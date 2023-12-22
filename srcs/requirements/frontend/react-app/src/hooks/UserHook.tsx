@@ -11,6 +11,8 @@ interface IUserProps{
 	socketId?: string;
 	nickname?: string;
 	avatar?: string;
+	status: string;
+	friends: IUserProps[];
 }
 
 const UserContext = createContext<{
@@ -30,7 +32,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
 				//const response = await fetch(process.env.REACT_APP_USER as string, {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me`, {
+				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends`, {
 					method: "GET",
 					headers: {
 						"Content-Type": "application/json",
@@ -49,7 +51,9 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 							imageUrl: data.user.imageUrl,
 							socketId: data.user.socketId,
 							nickname: data.user.nickname,
-							avatar: data.user.avatar
+							avatar: data.user.avatar,
+							status: data.user.status,
+							friends: data.user.friends,
 						});
 						console.log("userInfo:", data.user);
 					} else {

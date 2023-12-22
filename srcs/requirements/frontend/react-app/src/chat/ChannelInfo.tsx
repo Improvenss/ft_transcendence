@@ -11,11 +11,13 @@ import { ReactComponent as IconBan } from '../assets/chat/iconBan.svg';
 import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
 import Cookies from "js-cookie";
+import { useUser } from "../hooks/UserHook";
 
  function InfoChannel() {
 	// { selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps
 	const { activeChannel, setActiveChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const userCookie = Cookies.get("user");
+	const my = useUser().userInfo;
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
  	const [friendSearchTerm, setFriendSearchTerm] = useState('');
@@ -232,16 +234,16 @@ import Cookies from "js-cookie";
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{friendList
- 									.filter((user) => user.name.toLowerCase().includes(friendSearchTerm.toLowerCase()))
+ 								{my?.friends
+ 									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
- 											key={user.name}
+ 											key={user.login}
  											id='friend-users'
  										>
- 											<img src={user.image} alt={user.image} />
+ 											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='friend-users-table'>
- 												<span>{user.name}</span>
+ 												<span>{user.login}</span>
  												<span>Status: {user.status}</span>
  											</div>
  										</div>
@@ -258,16 +260,16 @@ import Cookies from "js-cookie";
  									onChange={(e) => setBanSearchTerm(e.target.value)}
  									placeholder="Search banned users..."
  								/>
- 								{friendList
- 									.filter((user) => user.name.toLowerCase().includes(banSearchTerm.toLowerCase()))
+ 								{activeChannel.bannedUsers
+ 									.filter((user) => user.login.toLowerCase().includes(banSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
- 											key={user.name}
+ 											key={user.login}
  											id='banned-users'
  										>
- 											<img src={user.image} alt={user.image} />
+ 											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>
- 												<span>{user.name}</span>
+ 												<span>{user.login}</span>
  												<span>Status: {user.status}</span>
  											</div>
  										</div>

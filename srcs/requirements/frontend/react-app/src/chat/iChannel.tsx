@@ -10,6 +10,7 @@ export interface IUser {
 	imageUrl: string;
 	nickname: string;
 	avatar: string;
+	status: string;
 }
 
 export interface IChannel {
@@ -22,6 +23,7 @@ export interface IChannel {
 	members: IUser[];
 	admins: IUser[];
 	messages: IMessage[];
+	bannedUsers: IUser[];
 }
 
 export interface IChannelCreateForm {

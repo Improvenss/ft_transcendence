@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe, Param } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -120,4 +120,22 @@ export class GameController {
 			return ({err: err});
 		}
 	}
+
+	// @Get('/lobby/:roomName')
+	// async getLobby(
+	// 	@Req() {user},
+	// 	@Param('roomName') roomName: string,
+	// ){
+	// 	try
+	// 	{
+	// 		const	tmpGameRoom = await this.gameService.findGameRoom(roomName, "all");
+	// 		if (!tmpGameRoom)
+	// 			return (`There is no GameRoom with '${roomName}' name`);
+	// 		return (tmpGameRoom);
+	// 		return { success: true, message: `Joined the lobby: ${roomName} successfully.` };
+	// 	} catch (err) {
+	// 		console.log(`@Get('/lobby:${roomName}'): `, err);
+	// 		return ({err: err});
+	// 	}	
+	// }
 }

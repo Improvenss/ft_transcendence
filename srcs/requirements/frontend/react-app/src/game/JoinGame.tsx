@@ -3,6 +3,7 @@ import "./JoinGame.css";
 import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import { IGame } from "./IGame";
+import { useNavigate } from "react-router-dom";
 
 export interface IGameJoinForm {
 	name: string,
@@ -16,6 +17,7 @@ function JoinGame(){
 	const socket = useSocket();
 	const userCookie = Cookies.get("user");
 	const [rooms, setRooms] = useState<IGame[]>([]);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchRooms = async () => {
@@ -75,6 +77,10 @@ function JoinGame(){
 		if (!response.ok)
 			throw (new Error("API fetch error."));
 		const data = await response.json();
+		console.log("Join-game: ", data);
+
+		navigate(`/game/lobby/${formObject.name}`);
+
 		formElement.reset();
 	}
 

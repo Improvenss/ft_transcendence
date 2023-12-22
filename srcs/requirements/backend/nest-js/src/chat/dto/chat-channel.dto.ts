@@ -29,6 +29,7 @@ export class CreateChannelDto {
 	@IsOptional()
 	@IsNotEmpty() // veya @IsDefined()
 	admins: User[];
+
 }
 
 export class UpdateChannelDto extends PartialType(CreateChannelDto) {}

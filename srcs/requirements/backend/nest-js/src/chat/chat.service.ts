@@ -39,7 +39,7 @@ export class ChatService {
 	){
 		// console.log(`ChatService: findChannel(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
-			? {members: true, admins: true, messages: true} // relations all ise hepsini ata.
+			? {members: true, admins: true, messages: true, bannedUsers: true} // relations all ise hepsini ata.
 			: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
 				? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
 				: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
@@ -109,6 +109,7 @@ export class ChatService {
 						content: message.message,
 						timestamp: message.sentAt,
 					})) : null,
+					bannedUsers: channel.bannedUsers
 				};
 			} else if (channel.type === 'public') {
 				return {

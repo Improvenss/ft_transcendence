@@ -12,6 +12,7 @@ import FallingChars from "./utils/FallingChars";
 import { useUser } from "./hooks/UserHook";
 import ProfilePage from "./user/ProfilePage";
 import GamePage from './game/GamePage';
+import GameLobby from './game/GameLobby';
 
 function App() {
 	console.log("---------APP-PAGE---------");
@@ -61,6 +62,7 @@ function App() {
 				<Route path='/profile/:username' element={<ProfilePage />} />
 				<Route path='/chat' element={<ChatPage />} />
 				<Route path='/game' element={<GamePage />} />
+				<Route path='/game/lobby/:roomName' element={<GameLobby />} />
 				<Route path='*' element={<NoMatchPage />} />
 				<Route path='/api' element={<Api />} />
 				<Route path='/login' element={<LoginPage />} />

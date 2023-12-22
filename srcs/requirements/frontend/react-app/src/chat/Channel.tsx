@@ -70,6 +70,7 @@ function Channel() {
 				if (!response.ok)
 					throw (new Error("API fetch error."));
 				const data = await response.json();
+				console.log("->", data);
 				setActiveChannel(data[0]);
 				console.log(`Switched to ${channel.name} channel.`);
 			}

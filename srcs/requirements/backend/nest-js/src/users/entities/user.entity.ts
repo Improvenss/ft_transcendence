@@ -29,6 +29,11 @@ export class User {
 	@Column({ nullable: true })
 	public socketId: string; // Websocket
 
+	//----------------------Status----------------------------//
+
+	@Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
+	public status: 'online' | 'offline' | 'afk' | 'in-game';
+
 	//----------------------Optional----------------------------//
 
 	@Column({ nullable: true })
@@ -36,6 +41,12 @@ export class User {
 
 	@Column({ nullable: true })
 	public avatar: string; // Kullanıcı tarafından eklenen ekstra resim
+
+	//----------------------Friends----------------------------//
+
+	@ManyToMany(() => User, user => user.friends)
+	@JoinTable()
+	public friends: User[];
 
 	//----------------------Channel----------------------------//
 
@@ -47,6 +58,10 @@ export class User {
 	@ManyToMany(() => Channel, channel => channel.admins)
 	@JoinTable()
 	public adminChannels: Channel[]; // Kullanıcının yönetici olduğu kanallar
+
+	@ManyToMany(() => Channel, channel => channel.bannedUsers)
+	@JoinTable()
+	public bannedChannels: Channel[];
 
 	//----------------------Message----------------------------//
 

@@ -3,6 +3,7 @@ import { PartialType } from "@nestjs/swagger";
 import { Channel } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { Message } from "src/chat/entities/chat.entity";
+import { User } from '../entities/user.entity';
 
 export class CreateUserDto {
 	@IsNotEmpty({ message: 'Email cannot be empty' })
@@ -32,6 +33,14 @@ export class CreateUserDto {
 	@IsOptional()
 	@IsString({ message: 'Avatar must be a string' })
 	avatar?: string;
+
+	@IsOptional()
+	@IsString({ message: 'Status must be a string' })
+	status?: 'online' | 'offline' | 'afk' | 'in-game';
+
+	// Friends
+	@IsOptional()
+	friends?: User[];
 
 	// Channel
 	@IsOptional()

@@ -40,6 +40,9 @@ export class Channel {
 	@ManyToMany(() => User, user => user.adminChannels, {nullable: false, onDelete: 'CASCADE'})
 	public admins: User[]; // Kanalın yöneticileri
 
+	@ManyToMany(() => User, user => user.channels, {nullable: false, onDelete: 'CASCADE'})
+	public bannedUsers: User[]; // Kanalın Banlı olduğu kullanıcıları
+
 	//----------------------Message----------------------------//
 
 	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
