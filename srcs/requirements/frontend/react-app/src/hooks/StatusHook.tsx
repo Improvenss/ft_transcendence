@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { useAuth } from './AuthHook';
 import { useSocket } from './SocketHook';
 import { useLocation } from 'react-router-dom';
+import LoadingPage from '../utils/LoadingPage';
 
-type UserStatus = 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk';
+type UserStatus = 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk' | undefined;
 
 const StatusContext = createContext<{
 	status: UserStatus;
@@ -15,7 +16,7 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 	console.log("---------STATUSHOOK-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const socket = useSocket();
-	const [status, setStatus] = useState<UserStatus>('online');
+	const [status, setStatus] = useState<UserStatus>(undefined);
 	const location = useLocation();
 	const statusRef = useRef<UserStatus>('online');
 
@@ -64,7 +65,7 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 	}, []);
 
 	useEffect(() => {
-		if (isAuth) {
+		if (isAuth && status !== undefined) {
 
 			if (status === 'online' && location.pathname.includes('/chat')) {
 				setStatus('in-chat');
@@ -76,7 +77,7 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [status]);
+	}, [status, socket]);
 
 	useEffect(() => {
 		if (isAuth){
@@ -90,6 +91,10 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [location.pathname])
+
+	if (status === undefined){
+		return (<LoadingPage />);
+	}
 
 	return (
 		<StatusContext.Provider value={{status}}> 

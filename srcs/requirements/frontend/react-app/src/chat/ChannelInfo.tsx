@@ -69,19 +69,18 @@ import { useUser } from "../hooks/UserHook";
  		console.log(`Switched to channel ${tabId}`);
  	};
 
-	 const handleUpdate = async (id: number) => {
+	 const handleUpdate = async (fieldName: string) => {
 		// !!channel settings kısmında her ayarın kendisine özel set yapısı olmalıdır.
 		// channal name - channel description - channe image 
 		// channel password ekleme (password varsa private olarak devam edecek, yoksa public olarak setlenecek)
-		const fieldName = ['channelName', 'channelDescription', 'channelImage', 'channelPassword'];
 		const formData = new FormData();
 
-		switch (id) {
-			case 1:
+		switch (fieldName) {
+			case 'channelName':
 				if (inputRefName.current) {
 					const channelName = inputRefName.current.value.trim();
 					if (channelName) {
-						formData.append(fieldName[id - 1], (inputRefName.current?.value) as string );
+						formData.append(fieldName, (inputRefName.current?.value) as string );
 						inputRefName.current.value = ''; // Clear the input field
 					} else {
 						console.error('Channel Name can not be empty!');
@@ -90,17 +89,17 @@ import { useUser } from "../hooks/UserHook";
 					}
 				}
 			break;
-			case 2:
+			case 'channelDescription':
 				if (inputRefDescription.current) {
-					formData.append(fieldName[id - 1], (inputRefDescription.current?.value) as string );
+					formData.append(fieldName, (inputRefDescription.current?.value) as string );
 					inputRefDescription.current.value = '';
 				}
 			break;
-			case 3:
+			case 'channelImage':
 				if (inputRefImage.current?.files){
 					const selectedImage = inputRefImage.current.files[0];
 					if (selectedImage) {
-						formData.append(fieldName[id - 1], selectedImage);
+						formData.append(fieldName, selectedImage);
 						inputRefImage.current.value = '';
 						setSelectedImage(null);
 					} else {
@@ -110,9 +109,9 @@ import { useUser } from "../hooks/UserHook";
 					}
 				}
 			break;
-			case 4:
+			case 'channelPassword':
 				if (inputRefPassword.current) {
-					formData.append(fieldName[id - 1], (inputRefPassword.current?.value) as string );
+					formData.append(fieldName, (inputRefPassword.current?.value) as string );
 					inputRefPassword.current.value = '';
 				}
 			break;
@@ -144,6 +143,32 @@ import { useUser } from "../hooks/UserHook";
 		??Channel, active channel, channel info kısmına girince yapıların divleri genişleyecek ve daralacak şekilde ayarla.
 
 	*/
+
+	const handleInfo = (action: string, userLogin: string) => {
+		switch (action) {
+			case 'goProfile':
+				console.log(action);
+				break;
+			case 'directMessage':
+				console.log(action);
+				break;
+			case 'userKick':
+				console.log(action);
+				break;
+			case 'userBan':
+				console.log(action);
+				break;
+			case 'setAdmin':
+				console.log(action);
+				break;
+			case 'removeAdmin':
+				console.log(action);
+				break;
+			default:
+				break;
+		}
+
+	}
 
  	return (
  		<>
@@ -187,6 +212,7 @@ import { useUser } from "../hooks/UserHook";
 										>
 											<img src={user.imageUrl} alt={user.imageUrl} />
 											<span>{user.login}</span>
+											<span className={`status-indicator status-${user.status.toLowerCase()}`}></span>
 											{/*{
 												kullanıcı statü durumu online-offline-ingame
 												nickname eklenmelidir
@@ -195,12 +221,19 @@ import { useUser } from "../hooks/UserHook";
 										</div>
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
-												<button id="goProfile"> <IconProfile /> </button>
-												<button id="DM"> <IconDM /> </button>
-												<button id="userKick"> <IconKick /> </button>
-												<button id="userBan"> <IconBan /> </button>
-												<button id="setAdmin">Set Admin</button>
-												<button id="removeAdmin">Remove Admin</button>
+												<button onClick={() => handleInfo('goProfile', user.login)}> <IconProfile /> </button>
+												<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
+												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
+													<>
+														<button onClick={() => handleInfo('userKick', user.login)}> <IconKick /> </button>
+														<button onClick={() => handleInfo('userBan', user.login)}> <IconBan /> </button>
+														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
+															<button onClick={() => handleInfo('removeAdmin', user.login)}>Remove Admin</button>
+														) : (
+															<button onClick={() => handleInfo('setAdmin', user.login)}>Set Admin</button>
+														)}
+													</>
+												)}
 											</div>
 										)}
  									</div>
@@ -220,14 +253,14 @@ import { useUser } from "../hooks/UserHook";
 									type="text"
 									placeholder="Change Name..."
  								/>
- 								<button onClick={() => handleUpdate(1)}>Change Name </button>
+ 								<button onClick={() => handleUpdate('channelName')}>Change Name </button>
  								<label htmlFor="channelDescription">Channel Description:</label>
  								<input
 									ref={inputRefDescription}
 									type="text"
 									placeholder="Change Description..."
  								/>
- 								<button onClick={() => handleUpdate(2)}>Change Description </button>
+ 								<button onClick={() => handleUpdate('channelDescription')}>Change Description </button>
  								<label htmlFor="channelImage">Channel Image:</label>
  								<input
 									ref={inputRefImage}
@@ -248,14 +281,14 @@ import { useUser } from "../hooks/UserHook";
 										alt="Selected File"
 									/>
 								)}
- 								<button onClick={() => handleUpdate(3)}>Change Image </button>
+ 								<button onClick={() => handleUpdate('channelImage')}>Change Image </button>
  								<label htmlFor="channelPassword">Channel Password:</label>
  								<input
 									ref={inputRefPassword}
 									type="password"
 									placeholder="Change Password..."
  								/>
- 								<button onClick={() => handleUpdate(4)}>Change Password </button>
+ 								<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
 
 
 

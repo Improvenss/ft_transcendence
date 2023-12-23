@@ -63,7 +63,7 @@
 	font-weight: bold;
 }
 
-.status-indicator {
+#user-image .status-indicator {
 	position: absolute;
 	bottom: 5px;
 	right: 30px;
@@ -81,7 +81,15 @@
 	background-color: gray;
 }
 
-.status-idle {
+.status-in-game {
+	background-color: rgb(255, 145, 0);
+}
+
+.status-in-chat {
+	background-color: rgb(0, 13, 255);
+}
+
+.status-afk {
 	background-color: yellow;
 }
 

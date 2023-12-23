@@ -269,11 +269,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@Body() object: {status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'},
 		@ConnectedSocket() socket: Socket
 	){
-		const responseUser = await this.usersService.findUser(null, socket);
-		if (responseUser === null)
-			throw (new NotFoundException("User not found!"));
-		const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
-		console.log('Received userStatus:', `user[${singleUser.login}]`, `status[${object.status}]`);
-		await this.usersService.patchUser(responseUser[0], object);
+		try {
+
+			const responseUser = await this.usersService.findUser(null, socket);
+			if (responseUser === null){
+				throw (new NotFoundException("User not found!"));
+			}
+			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
+			console.log('Received userStatus:', `user[${singleUser.login}]`, `status[${object.status}]`);
+			await this.usersService.patchUser(responseUser[0], object);
+		} catch (err) {
+			console.error("@SubscribMessage(userStatus):", err);
+		}
 	}
 }
