@@ -73,6 +73,7 @@ function ChatPage () {
 		return () => {
 			socket?.off("channelListener", channelListener);
 		}
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, []);
 
 	useEffect(() => {

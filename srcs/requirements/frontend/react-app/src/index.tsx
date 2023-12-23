@@ -6,6 +6,7 @@ import { AuthProvider } from './hooks/AuthHook';
 import { SocketProvider } from './hooks/SocketHook';
 import { UserProvider } from './hooks/UserHook';
 import { FontLoadedProvider } from './hooks/LoadHook';
+import { StatusProvider } from './hooks/StatusHook';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -34,11 +35,13 @@ root.render(
 		<AuthProvider>
 			<SocketProvider>
 				<UserProvider>
-					{/*<React.StrictMode>*/}
-						<BrowserRouter>
-							<App />
-						</BrowserRouter>
-					{/*</React.StrictMode>*/}
+						{/*<React.StrictMode>*/}
+							<BrowserRouter>
+								<StatusProvider>
+									<App />
+								</StatusProvider>
+							</BrowserRouter>
+						{/*</React.StrictMode>*/}
 				</UserProvider>
 			</SocketProvider>
 		</AuthProvider>

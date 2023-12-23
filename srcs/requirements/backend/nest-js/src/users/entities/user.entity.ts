@@ -32,7 +32,7 @@ export class User {
 	//----------------------Status----------------------------//
 
 	@Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
-	public status: 'online' | 'offline' | 'afk' | 'in-game';
+	public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
 
 	//----------------------Optional----------------------------//
 

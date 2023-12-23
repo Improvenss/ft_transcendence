@@ -14,7 +14,7 @@ import Cookies from "js-cookie";
 import { useUser } from "../hooks/UserHook";
 
  function InfoChannel() {
-	const { activeChannel, setActiveChannel, channelInfo, setChannelInfo } = useChannelContext();
+	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
 	const userCookie = Cookies.get("user");
 	const my = useUser().userInfo;
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
@@ -193,7 +193,7 @@ import { useUser } from "../hooks/UserHook";
 												avatarı varsa avatarı gösterilmelidir.
 											}*/}
 										</div>
-										{(showUserInfo && showUserInfo.login == user.login) && (
+										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
 												<button id="goProfile"> <IconProfile /> </button>
 												<button id="DM"> <IconDM /> </button>

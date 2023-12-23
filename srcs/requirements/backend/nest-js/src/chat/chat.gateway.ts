@@ -74,6 +74,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client disconnected 💔: socket.id[${client.id}]`);
 		this.connectedUsers.delete(client.id); // Bağlantı kesildiğinde soketi listeden kaldır
 		//Do stuffs
+		this.handleUserStatus({status: 'offline'}, client);
 	}
 
 	/**
@@ -247,21 +248,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
-	@SubscribeMessage('leaveChannel')
-	async handleLeaveChannel(@Body() data: any,
-		@ConnectedSocket() socket: Socket)
-	{
-		// users[] kimse kalmamasi lazim cikan cikacak.
-		// admins[] ciksalar bile adminler kalacak.
-		if (socket.rooms.has(data.channel))
-		{
-			this.server.to(data.channel).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${data.channel}): ${socket.id} left the channel!`);
-			socket.leave(data.channel)
-			console.log(`${data.channel} kanalindan cikti: ${socket.id}`);
-		}
-		else
-			console.log(`${socket.id} zaten ${data.channel} kanalinda degil! :D?`);
-	}
+	// @SubscribeMessage('leaveChannel')
+	// async handleLeaveChannel(@Body() data: any,
+	// 	@ConnectedSocket() socket: Socket)
+	// {
+	// 	// users[] kimse kalmamasi lazim cikan cikacak.
+	// 	// admins[] ciksalar bile adminler kalacak.
+	// 	if (socket.rooms.has(data.channel))
+	// 	{
+	// 		this.server.to(data.channel).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${data.channel}): ${socket.id} left the channel!`);
+	// 		socket.leave(data.channel)
+	// 		console.log(`${data.channel} kanalindan cikti: ${socket.id}`);
+	// 	}
+	// 	else
+	// 		console.log(`${socket.id} zaten ${data.channel} kanalinda degil! :D?`);
+	// }
 	
-		// socket.leave(data.channel); -> Bu; katilmis oldugu Channel'lerden ciktiysa(leave) o zaman yapacagiz.
+	@SubscribeMessage('userStatus')
+	async handleUserStatus(
+		@Body() object: {status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'},
+		@ConnectedSocket() socket: Socket
+	){
+		const responseUser = await this.usersService.findUser(null, socket);
+		if (responseUser === null)
+			throw (new NotFoundException("User not found!"));
+		const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
+		console.log('Received userStatus:', `user[${singleUser.login}]`, `status[${object.status}]`);
+		await this.usersService.patchUser(responseUser[0], object);
+	}
 }

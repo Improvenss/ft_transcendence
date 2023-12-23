@@ -36,7 +36,7 @@ export class CreateUserDto {
 
 	@IsOptional()
 	@IsString({ message: 'Status must be a string' })
-	status?: 'online' | 'offline' | 'afk' | 'in-game';
+	status?: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
 
 	// Friends
 	@IsOptional()
