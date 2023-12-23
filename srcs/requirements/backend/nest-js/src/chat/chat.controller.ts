@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile, Patch } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
@@ -231,6 +231,33 @@ export class ChatController {
 		} catch(err){
 			console.error("@Get('/channel/leave'):", err);
 			return ({error: err});
+		}
+	}
+
+	// channel settings kısmında güncelleme yapıyoruz, yaparken tek tek gerçekleştiriyoruz.
+	//	Güncellemediğimiz ayar undefined olarak geliyor.
+	// !!! Servis ayarları eklenmedi eklenecek.
+	// !!! yapı eksik tamamla
+	@Patch('/channel')
+	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
+	async updateChannel(
+		@Req() {user},
+		@UploadedFile() channelImage: Express.Multer.File,
+		@Query ('channel') channel: string,
+		@Body('channelName') name: string,
+		@Body('channelDescription') description: string,
+		@Body('channelPassword') password: string,
+	) {
+		try {
+			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {
+				name,
+				description,
+				password,
+				channelImage
+			});
+		} catch (err) {
+			console.log("@Patch('/channel'): ", err);
+			return ({err: err});
 		}
 	}
 }

@@ -15,11 +15,11 @@
 }
 
 /* #app-header *:hover { */
-#app-header *:not(#site-name):hover {
-	transform: rotateY(20deg) rotateX(10deg);
-	transition: transform 0.5s;
+#app-header *:not(#site-name):not(#notifs-container):not(#notifs-container *):hover {
+	/* transform: rotateY(20deg) rotateX(10deg);
+	transition: transform 0.5s; */
 	color: red;
-	text-shadow: 
+	text-shadow:
 		2px 2px blue,
 		-2px -2px green;
 }
@@ -45,3 +45,36 @@
 	bottom: 20px;
 	width: 3vw;
 }
+
+#notifs-container {
+	position: relative;
+}
+
+#notifs {
+	cursor: pointer;
+	max-width: 40px;
+	max-height: 40px;
+}
+
+.notification-count {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background-color: red;
+	color: white;
+	border-radius: 25%;
+	padding: 5px;
+	font-size: 12px;
+  }
+
+.notifs-content {
+	top: 100px;
+	width: 100px;
+	position: absolute;
+	right: 5px;
+	background-color: gray; /* Arka plan rengi */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Gölge efekti */
+	z-index: 100; /* Diğer öğelerin üstünde görünmesini sağlar */
+	padding: 10px;
+	border-radius: 4px;
+  }

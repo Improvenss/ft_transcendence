@@ -233,6 +233,24 @@
             "description": ""
           }
         }
+      },
+      "patch": {
+        "operationId": "ChatController_updateChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/chat/channel/message": {

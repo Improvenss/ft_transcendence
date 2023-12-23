@@ -15,6 +15,7 @@
 	gap: 5px;
 	border: 1px solid #ccc;
 	margin-top: 4%;
+	max-height: 600px;
 }
 
 #profile-page > div {
@@ -30,6 +31,9 @@
 #user {
 	padding: 20px;
 	border: 1px solid #ccc;
+	border-radius: 10px;
+	margin: 5px;
+	margin-right: 0;
 }
 
 #user-image {
@@ -141,9 +145,10 @@
 
 #user-board {
 	content: '';
-	border-radius: 10px;
 	margin: 5px;
+	margin-left: 0;
 	flex: 1;
+	border-radius: 10px;
 	padding: 10px;
 	border: 1px solid #ccc;
 	position: relative;

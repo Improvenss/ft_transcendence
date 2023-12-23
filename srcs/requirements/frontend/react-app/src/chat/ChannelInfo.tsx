@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { IFriend, IUser } from "./iChannel";
+import { IUser } from "./iChannel";
 import { ReactComponent as IconUsers } from '../assets/chat/iconUsers.svg';
 import { ReactComponent as IconSettings } from '../assets/chat/iconSettings.svg';
 import { ReactComponent as IconAddUser } from '../assets/chat/iconAddUser.svg';
@@ -14,7 +14,6 @@ import Cookies from "js-cookie";
 import { useUser } from "../hooks/UserHook";
 
  function InfoChannel() {
-	// { selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps
 	const { activeChannel, setActiveChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const userCookie = Cookies.get("user");
 	const my = useUser().userInfo;
@@ -22,19 +21,13 @@ import { useUser } from "../hooks/UserHook";
  	const [userSearchTerm, setUserSearchTerm] = useState('');
  	const [friendSearchTerm, setFriendSearchTerm] = useState('');
  	const [banSearchTerm, setBanSearchTerm] = useState('');
- 	const [friendList, setFriendList] = useState<IFriend[]>( () => {
- 		const fetchFriendList: IFriend[] = [
- 			{ name: 'uercan', status: 'offline', image: '/dogSlayer.png' },
- 			{ name: 'gsever', status: 'online', image: '/heart.jpg' },
- 			{ name: 'Admin', status: 'AFK', image: '/watcher.jpg' }
- 		];
- 		return (fetchFriendList);
- 	});
 	const inputRefName = useRef<HTMLInputElement>(null);
 	const inputRefDescription = useRef<HTMLInputElement>(null);
 	const inputRefImage = useRef<HTMLInputElement>(null);
 	const inputRefPassword = useRef<HTMLInputElement>(null);
 	const [showUserInfo, setShowUserInfo] = useState<IUser | null>(null);
+	const [selectedImage, setSelectedImage] = useState<File | null>(null);
+	const [errorMessage, setErrorMessage] = useState('');
 
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
@@ -76,31 +69,71 @@ import { useUser } from "../hooks/UserHook";
  		console.log(`Switched to channel ${tabId}`);
  	};
 
-	 const handleUpdate = (id: number) => {
+	 const handleUpdate = async (id: number) => {
 		// !!channel settings kısmında her ayarın kendisine özel set yapısı olmalıdır.
 		// channal name - channel description - channe image 
 		// channel password ekleme (password varsa private olarak devam edecek, yoksa public olarak setlenecek)
-		let inputValue = null;
+		const fieldName = ['channelName', 'channelDescription', 'channelImage', 'channelPassword'];
+		const formData = new FormData();
 
 		switch (id) {
-		  case 1:
-			inputValue = inputRefName.current?.value;
+			case 1:
+				if (inputRefName.current) {
+					const channelName = inputRefName.current.value.trim();
+					if (channelName) {
+						formData.append(fieldName[id - 1], (inputRefName.current?.value) as string );
+						inputRefName.current.value = ''; // Clear the input field
+					} else {
+						console.error('Channel Name can not be empty!');
+						setErrorMessage('Channel Name can not be empty!');
+						return;
+					}
+				}
 			break;
-		  case 2:
-			inputValue = inputRefDescription.current?.value;
+			case 2:
+				if (inputRefDescription.current) {
+					formData.append(fieldName[id - 1], (inputRefDescription.current?.value) as string );
+					inputRefDescription.current.value = '';
+				}
 			break;
-		  case 3:
-			inputValue = inputRefImage.current?.value;
+			case 3:
+				if (inputRefImage.current?.files){
+					const selectedImage = inputRefImage.current.files[0];
+					if (selectedImage) {
+						formData.append(fieldName[id - 1], selectedImage);
+						inputRefImage.current.value = '';
+						setSelectedImage(null);
+					} else {
+						console.error('Channel Image can not be empty!');
+						setErrorMessage('Channel Image can not be empty!');
+						return;
+					}
+				}
 			break;
-		  case 4:
-			inputValue = inputRefPassword.current?.value;
+			case 4:
+				if (inputRefPassword.current) {
+					formData.append(fieldName[id - 1], (inputRefPassword.current?.value) as string );
+					inputRefPassword.current.value = '';
+				}
 			break;
-		  default:
+		default:
 			break;
 		}
-	
-		console.log(`ID: ${id}, Girilen Değer: ${inputValue}`);
-	  };
+
+		const	responseChannelCustomize = await fetch(
+			process.env.REACT_APP_FETCH + `/chat/channel?channel=${activeChannel?.name}`, {
+			method: 'PATCH',
+			headers: {
+				"Authorization": "Bearer " + userCookie as string,
+			},
+			body: formData,
+		});
+		if (!responseChannelCustomize.ok)
+			console.log("Channel Customize screen update error.");
+
+		if (errorMessage != null)
+			setErrorMessage('');
+	};
 
 	/*
 		channel users'a banlı kullanıcıları gösteren bir sticky ekle, sadece admin görebilsin.
@@ -179,6 +212,8 @@ import { useUser } from "../hooks/UserHook";
 
  						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
+								{/* Hata mesajı gösterimi */}
+								{errorMessage && <p className="error-message">{errorMessage}</p>}
  								<label htmlFor="channelName">Channel Name:</label>
  								<input
 									ref={inputRefName}
@@ -198,7 +233,21 @@ import { useUser } from "../hooks/UserHook";
 									ref={inputRefImage}
 									type="file"
 									accept="image/jpg, image/jpeg, image/png, image/gif"
+									onChange={(e) => {
+										const selectedFile = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+										if (selectedFile && selectedFile.type.startsWith('image/'))
+											setSelectedImage(selectedFile);
+										else if (inputRefImage.current) {
+											inputRefImage.current.value = '';
+										}
+									}}
  								/>
+								{selectedImage && (
+									<img
+										src={URL.createObjectURL(selectedImage)}
+										alt="Selected File"
+									/>
+								)}
  								<button onClick={() => handleUpdate(3)}>Change Image </button>
  								<label htmlFor="channelPassword">Channel Password:</label>
  								<input
