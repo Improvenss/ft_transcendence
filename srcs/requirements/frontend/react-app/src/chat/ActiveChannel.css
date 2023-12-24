@@ -3,7 +3,7 @@
 	border: 1px solid #ccc;
 	border-radius: 10px;
 	flex: 4;
-	overflow: hidden;
+	/* overflow: hidden; */
 	flex-direction: column;
 }
 
@@ -78,14 +78,12 @@
 .day-sticky {
 	clear: both;
 	text-align: center;
-	font-size: 20px;
 	position: sticky;
 	top: 0;
-	background-color: darkred;
 	border-radius: 5px;
 	width: 100%;
-	z-index: -1;
 	margin-bottom: 5px;
+	background-color: darkred;
 }
 
 .message {

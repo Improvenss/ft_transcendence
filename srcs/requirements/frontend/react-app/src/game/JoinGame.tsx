@@ -90,13 +90,16 @@ function JoinGame(){
 				<h3>Join Private Game</h3>
 				<label htmlFor="room-name">Room Name:</label>
 				<input
+					id="room-name"
 					placeholder="Enter name"
 					type="text"
 					name="name"
 					required
+					autoComplete="off" //chrome uyarı veriyor o yüzden ekledim.
 				/>
 				<label htmlFor="room-password">Room Password:</label>
 				<input
+					id="room-password"
 					placeholder="Enter password"
 					type="password"
 					name="password"

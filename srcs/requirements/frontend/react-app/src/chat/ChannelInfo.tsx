@@ -12,6 +12,7 @@ import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
 import Cookies from "js-cookie";
 import { useUser } from "../hooks/UserHook";
+import { useNavigate } from "react-router-dom";
 
  function InfoChannel() {
 	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
@@ -28,6 +29,7 @@ import { useUser } from "../hooks/UserHook";
 	const [showUserInfo, setShowUserInfo] = useState<IUser | null>(null);
 	const [selectedImage, setSelectedImage] = useState<File | null>(null);
 	const [errorMessage, setErrorMessage] = useState('');
+	const navigate = useNavigate();
 
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
@@ -63,6 +65,8 @@ import { useUser } from "../hooks/UserHook";
 	}
 
  	const handleTabInfoClick = (tabId: string) => {
+		if (selectedImage != null)
+			setSelectedImage(null);
  		setActiveTabInfo(tabId);
  		// Implement logic to update content based on the selected tab
  		// For now, let's just log a message to the console
@@ -142,12 +146,15 @@ import { useUser } from "../hooks/UserHook";
 		---------------------
 		??Channel, active channel, channel info kısmına girince yapıların divleri genişleyecek ve daralacak şekilde ayarla.
 
+		------------------------
+		channel settings kısmına kanalın private public olduğunu belirt.
 	*/
 
 	const handleInfo = (action: string, userLogin: string) => {
+		console.log("me:", my?.login, "- channel:", activeChannel?.name);
 		switch (action) {
 			case 'goProfile':
-				console.log(action);
+				navigate('/profile/' + userLogin);
 				break;
 			case 'directMessage':
 				console.log(action);
@@ -249,6 +256,7 @@ import { useUser } from "../hooks/UserHook";
 								{errorMessage && <p className="error-message">{errorMessage}</p>}
  								<label htmlFor="channelName">Channel Name:</label>
  								<input
+									id="channelName"
 									ref={inputRefName}
 									type="text"
 									placeholder="Change Name..."
@@ -256,6 +264,7 @@ import { useUser } from "../hooks/UserHook";
  								<button onClick={() => handleUpdate('channelName')}>Change Name </button>
  								<label htmlFor="channelDescription">Channel Description:</label>
  								<input
+									id="channelDescription"
 									ref={inputRefDescription}
 									type="text"
 									placeholder="Change Description..."
@@ -263,6 +272,7 @@ import { useUser } from "../hooks/UserHook";
  								<button onClick={() => handleUpdate('channelDescription')}>Change Description </button>
  								<label htmlFor="channelImage">Channel Image:</label>
  								<input
+									id="channelImage"
 									ref={inputRefImage}
 									type="file"
 									accept="image/jpg, image/jpeg, image/png, image/gif"
@@ -272,6 +282,7 @@ import { useUser } from "../hooks/UserHook";
 											setSelectedImage(selectedFile);
 										else if (inputRefImage.current) {
 											inputRefImage.current.value = '';
+											setSelectedImage(null);
 										}
 									}}
  								/>
@@ -284,6 +295,7 @@ import { useUser } from "../hooks/UserHook";
  								<button onClick={() => handleUpdate('channelImage')}>Change Image </button>
  								<label htmlFor="channelPassword">Channel Password:</label>
  								<input
+									id="channelPassword"
 									ref={inputRefPassword}
 									type="password"
 									placeholder="Change Password..."

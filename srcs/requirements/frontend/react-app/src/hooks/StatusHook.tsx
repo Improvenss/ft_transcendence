@@ -92,7 +92,7 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [location.pathname])
 
-	if (status === undefined){
+	if (isAuth && status === undefined){
 		return (<LoadingPage />);
 	}
 

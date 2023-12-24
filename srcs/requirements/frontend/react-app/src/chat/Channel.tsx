@@ -137,7 +137,7 @@ function Channel() {
 									}} // Tıklama olayı
 								>
 									<img src={channel.image} alt={channel.image} />
-									<span>{channel.name}</span>
+									<span>{channel.name} {(channel.status === 'involved') ? (' | ' + channel.type) : ''}</span>
 								</div>
 						))}
 						{activeTab === 'involved' &&

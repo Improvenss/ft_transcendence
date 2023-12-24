@@ -82,12 +82,14 @@ function UserInput({setVisible}: IUserProps) {
 				<div id="close" onClick={handleClose} title='Close'>X</div>
 				<label htmlFor="Nickname">Set Nickname:</label>
 				<input
+					id='Nickname'
 					type="text"
 					ref={inputRefNickname}
 					placeholder="Set Nickname..."
 				/>
 				<label htmlFor="Avatar">Set Avatar:</label>
 				<input
+					id='Avatar'
 					ref={inputRefAvatar}
 					name="image"
 					type="file"

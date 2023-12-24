@@ -101,6 +101,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 				name="name"
 				onChange={handleInputChange}
 				required
+				autoComplete="off" //chrome uyarı verdiği için ekledim.
 			/>
 			<label htmlFor="channel-type">Channel Type:</label>
 			<select

@@ -84,22 +84,28 @@ function CreateGame() {
   return (
 	<div id="create-game">
 		<div className="default-section">
-			<label>Room Name:</label>
+			<label htmlFor='room-name'>Room Name:</label>
 			<input
+				id='room-name'
 				type="text"
 				value={roomName}
 				onChange={(e) => setRoomName(e.target.value.trim())}
 				maxLength={15}
 			/>
 
-			<label>Game Mode:</label>
-			<select value={gameMode} onChange={(e) => setGameMode(e.target.value)}>
+			<label htmlFor='game-mode'>Game Mode:</label>
+			<select
+				id='game-mode'
+				value={gameMode} 
+				onChange={(e) => setGameMode(e.target.value)}
+			>
 				<option value="classic">Classic</option>
 				<option value="time_attack">Time Attack</option>
 			</select>
 
-			<label>Winning Score:</label>
+			<label htmlFor='winning-score'>Winning Score:</label>
 			<select
+				id='winning-score'
 				value={winningScore === configs.winningScore.default ? 'default' : 'limited'}
 				onChange={(e) => setWinningScore(e.target.value === 'default' ? configs.winningScore.default : 1)}
 				>
@@ -107,8 +113,9 @@ function CreateGame() {
 				<option value="limited">Limited</option>
 			</select>
 
-			<label>Game Duration:</label>
+			<label htmlFor='game-duration-fixed'>Game Duration:</label>
 			<select
+				id='game-duration-fixed'
 				value={gameDuration === configs.gameDuration.default ? 'default' : 'limited'}
 				onChange={(e) => setGameDuration(e.target.value === 'default' ? configs.gameDuration.default : 30)}
 				>
@@ -116,16 +123,18 @@ function CreateGame() {
 				<option value="limited">Limited</option>
 			</select>
 
-			<label>Description (optional):</label>
+			<label htmlFor='description'>Description (optional):</label>
 			<input
+				id='description'
 				type="text"
 				value={description}
 				onChange={(e) => setDescription(e.target.value.trim())}
 				maxLength={30}
 			/>
 
-			<label>Password (optional):</label>
+			<label htmlFor='password'>Password (optional):</label>
 			<input
+				id='password'
 				type="password"
 				value={password}
 				onChange={(e) => setPassword(e.target.value.trim())}
@@ -140,21 +149,23 @@ function CreateGame() {
 	   <div className="detail-section">
 	   		{winningScore !== configs.winningScore.default && (
 				<>
-					<label>Best of Score :</label>
+					<label htmlFor='best-of-score'>Best of Score :</label>
 					<input
-					type="number"
-					value={winningScore}
-					onChange={(e) => {
-						const inputValue = e.target.value !== '' ? parseInt(e.target.value, 10) : 1;
-						setWinningScore(Math.min(999, Math.max(1, inputValue)));
-					}}
+						id='best-of-score'
+						type="number"
+						value={winningScore}
+						onChange={(e) => {
+							const inputValue = e.target.value !== '' ? parseInt(e.target.value, 10) : 1;
+							setWinningScore(Math.min(999, Math.max(1, inputValue)));
+						}}
 					/>
 				</>
 			)}
 			{gameDuration !== configs.gameDuration.default && (
 				<>
-					<label>Game Duration (seconds):</label>
+					<label htmlFor='game-duration'>Game Duration (seconds):</label>
 					<input
+						id='game-duration'
 						type="number"
 						value={gameDuration}
 						onChange={(e) => {

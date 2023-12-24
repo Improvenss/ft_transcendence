@@ -195,6 +195,7 @@ function ActiveChannel(){
 						</div>
 						<div id="message-input">
 							<textarea
+								id='messageTextarea' //uyarı verdiği için ekledim.
 								value={messageInput}
 								onChange={handleInputChange}
 								onKeyDown={handleKeyDown}
