@@ -2,12 +2,12 @@
 	height: 500px;
 	width: 500px;
 	position: absolute;
-	top: 60%;
+	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	border: 2px solid #ccc;
 	border-radius: 10px;
-	overflow: hidden;
+	/*overflow: hidden;*/
 	justify-content: center;
 	align-items: center;
 	display: flex;
@@ -20,15 +20,31 @@
   }
 
   .players {
-	justify-content: space-between;
 	margin-top: 20px;
+	width: 100%;
   }
-  
-  .leftPlayer,
-  .rightPlayer {
+
+  .players .image {
+	border-radius: 50%;
+	width: 30px;
+	height: 30px;
+	object-fit: cover;
+  }
+
+  .players .leftPlayer,
+  .players .rightPlayer {
+	width: calc(50% - 20px);
 	padding: 8px;
 	background-color: gray;
 	border-radius: 4px;
+  }
+
+  .players .leftPlayer {
+	float: left;
+  }
+  
+  .players .rightPlayer {
+	float: right;
   }
 
   .map {

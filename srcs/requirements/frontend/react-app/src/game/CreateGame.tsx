@@ -149,9 +149,9 @@ function CreateGame() {
 	   <div className="detail-section">
 	   		{winningScore !== configs.winningScore.default && (
 				<>
-					<label htmlFor='best-of-score'>Best of Score :</label>
+					<label htmlFor='wining-score'>Wining Score :</label>
 					<input
-						id='best-of-score'
+						id='wining-score'
 						type="number"
 						value={winningScore}
 						onChange={(e) => {
