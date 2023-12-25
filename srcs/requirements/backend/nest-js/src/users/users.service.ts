@@ -16,6 +16,31 @@ export class UsersService {
 		// private readonly	entityManager: EntityManager,
 	) {}
 
+	async	addFriend(
+		selfUser: User,
+		targetUser: string,
+	){
+		const	tmpSelfUser = await this.findUser(selfUser.login, null, ['friends']);
+		const	singleSelfUser = Array.isArray(tmpSelfUser) ? tmpSelfUser[0] : tmpSelfUser;
+
+		const	tmpUser = await this.findUser(targetUser, null, ['friends']);
+		const	singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+
+		console.log("VAR MIIII", tmpUser);
+		console.log("VAR MIIIb bennn", selfUser);
+		if (!singleUser || !singleUser.friends || !singleSelfUser || !singleSelfUser.friends)
+			throw (new NotFoundException(`users.service.ts: addFriend(): User not found!`));
+
+		const foundUser = singleSelfUser.friends.find(
+			(friendUser) => friendUser.login === singleUser.login);
+		if (foundUser)
+			return (`Already added!`);
+
+			singleSelfUser.friends.push(singleUser);
+		const	responseAddFriend = await this.usersRepository.save(singleSelfUser);
+		return (responseAddFriend);
+	}
+
 	async	findUser(
 		user: string | undefined,
 		socket?: Socket,
@@ -23,7 +48,7 @@ export class UsersService {
 	){
 		// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
-		? {channels: true, adminChannels: true, messages: true, bannedChannels: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
+		? {friends: true, channels: true, adminChannels: true, messages: true, bannedChannels: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
 		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
 			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
 			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,

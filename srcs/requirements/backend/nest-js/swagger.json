@@ -121,6 +121,26 @@
         }
       }
     },
+    "/users/friend/add": {
+      "post": {
+        "operationId": "UsersController_addUser",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/socket": {
       "patch": {
         "operationId": "UsersController_patchSocket",

@@ -52,42 +52,6 @@ import { useNavigate } from "react-router-dom";
 		setActiveChannel(null);
 	}
 
-	const	handleChannelKick = async (channel: string, user: string) => {
-		console.log(`User kicking ${user} channel`);
-		const responseUserKick = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/kick?user=${user}`, {
-			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-				"channel": channel,
-			},
-		});
-		if (!responseUserKick.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await responseUserKick.json();
-		console.log("Kicked Channel:", data);
-		// setActiveChannel(null);
-	}
-
-	const	handleChannelBan = async (channel: string, user: string) => {
-		console.log(`User banning ${user} channel`);
-		const responseUserBan = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/ban?user=${user}`, {
-			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-				"channel": channel,
-			},
-		});
-		if (!responseUserBan.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await responseUserBan.json();
-		console.log("Banned Channel:", data);
-		// setActiveChannel(null);
-	}
-
 	const	handleChannelDelete = async (selectedChannel: string) => {
 		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
 			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
@@ -113,10 +77,7 @@ import { useNavigate } from "react-router-dom";
  		console.log(`Switched to channel ${tabId}`);
  	};
 
-	 const handleUpdate = async (fieldName: string) => {
-		// !!channel settings kısmında her ayarın kendisine özel set yapısı olmalıdır.
-		// channal name - channel description - channe image 
-		// channel password ekleme (password varsa private olarak devam edecek, yoksa public olarak setlenecek)
+	const handleUpdate = async (fieldName: string) => {
 		const formData = new FormData();
 
 		switch (fieldName) {
@@ -179,26 +140,18 @@ import { useNavigate } from "react-router-dom";
 			setErrorMessage('');
 	};
 
-	/*
-		channel users'a banlı kullanıcıları gösteren bir sticky ekle, sadece admin görebilsin.
-		channel users'daki kullancıların üzerinde etkileşim eklenmelidir, bu etkişleşimler: kullanıcıyı kickleme - banlama - admin yapma - adminlikten çıkarma, profiline gitme, özel mesaj yazma olacaktır, kullanıcı status durumu olacaktır.
-			Bu özelliklerden kickleme - banlama - admin set unset yapıları sadece admin tarafından görülecek ve etkileşime girilecektir.
-			Bu etkileşim modal olabilir.
-		---------------------
-		??Channel, active channel, channel info kısmına girince yapıların divleri genişleyecek ve daralacak şekilde ayarla.
-
-		------------------------
-		channel settings kısmına kanalın private public olduğunu belirt.
-	*/
-
-	const handleInfo = (action: string, userLogin: string) => {
-		console.log("me:", my?.login, "- channel:", activeChannel?.name);
+	const handleInfo = async (action: string, targetUser: string) => {
+		if (!activeChannel || !my)
+			return;
+		console.log("me:", my.login, "- channel:", activeChannel.name);
+		let url = '';
 		switch (action) {
 			case 'goProfile':
-				navigate('/profile/' + userLogin);
-				break;
+				navigate('/profile/' + targetUser);
+				return;
 			case 'addFriend':
-				console.log(action);
+				console.log(`User[${my.login}] sending friend request to 'user[${targetUser}]'.`);
+				url = `/users/friend/add?user=${targetUser}`;
 				break;
 			case 'directMessage':
 				console.log(action);
@@ -207,12 +160,16 @@ import { useNavigate } from "react-router-dom";
 				console.log(action);
 				break;
 			case 'userKick':
-				console.log(action);
-				handleChannelKick(activeChannel?.name || "", userLogin);
+				console.log(`User[${targetUser}] kick from channel[${activeChannel.name}]`);
+				url = `/chat/channel/kick?user=${targetUser}`;
 				break;
 			case 'userBan':
-				console.log(action);
-				handleChannelBan(activeChannel?.name || "", userLogin);
+				console.log(`User[${targetUser}] banned from channel[${activeChannel.name}]`);
+				url = `/chat/channel/ban?user=${targetUser}`;
+				break;
+			case 'userUnban':
+				console.log(`User[${targetUser}] was unbanned from channel[${activeChannel.name}]`);
+				url = `/chat/channel/unban?user=${targetUser}`;
 				break;
 			case 'setAdmin':
 				console.log(action);
@@ -224,6 +181,19 @@ import { useNavigate } from "react-router-dom";
 				break;
 		}
 
+		const response = await fetch(process.env.REACT_APP_FETCH + url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+				"channel": activeChannel.name,
+			},
+		});
+		if (!response.ok) {
+			throw new Error('API-den veri alınamadı.');
+		}
+		const data = await response.json();
+		console.log("HandleInfo:", data);
 	}
 
  	return (
@@ -243,7 +213,7 @@ import { useNavigate } from "react-router-dom";
  							{activeTabInfo === 'infoUsers' && <h1>Channel Users</h1>}
  							{activeTabInfo === 'infoChannel' && <h1>Channel Settings</h1>}
  							{activeTabInfo === 'infoFriends' && <h1>Invite Friends</h1>}
- 							{activeTabInfo === 'banList' && <h1>Ban List</h1>}
+ 							{activeTabInfo === 'banList' && <h1>Banned Users</h1>}
  						</div>
 
  						{ activeTabInfo === 'infoUsers' && (
@@ -266,14 +236,9 @@ import { useNavigate } from "react-router-dom";
 											id="channel-user"
 											onClick={() => setShowUserInfo((prevUser) => (prevUser === user ? null : user))}
 										>
-											<img src={user.avatar ? user.avatar : user.imageUrl} />
+											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
 											<span>{user.nickname ? user.nickname : user.login}</span>
 											<span className={`status-indicator status-${user.status.toLowerCase()}`}></span>
-											{/*{
-												kullanıcı statü durumu online-offline-ingame
-												nickname eklenmelidir
-												avatarı varsa avatarı gösterilmelidir.
-											}*/}
 										</div>
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
@@ -403,9 +368,9 @@ import { useNavigate } from "react-router-dom";
  											key={user.login}
  											id='friend-users'
  										>
- 											<img src={user.imageUrl} alt={user.imageUrl} />
+ 											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
  											<div id='friend-users-table'>
- 												<span>{user.login}</span>
+ 												<span>{user.nickname ? user.nickname : user.login}</span>
  												<span>Status: {user.status}</span>
  											</div>
  										</div>
@@ -428,17 +393,17 @@ import { useNavigate } from "react-router-dom";
  										<div
  											key={user.login}
  											id='banned-users'
+											onClick={() => handleInfo('userUnban', user.login)}
  										>
  											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>
  												<span>{user.login}</span>
- 												<span>Status: {user.status}</span>
+ 												<span className={`status-indicator status-${user.status.toLowerCase()}`}></span>
  											</div>
  										</div>
  								))}
  							</div>
  						)}
-
  					</div>
  				</div>
  			)}

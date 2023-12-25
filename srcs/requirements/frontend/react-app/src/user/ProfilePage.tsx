@@ -2,7 +2,6 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
 import { useParams } from "react-router-dom";
-import { IFriend } from "../chat/iChannel";
 import { useAuth } from "../hooks/AuthHook";
 import { useUser } from "../hooks/UserHook";
 import NoMatchPage from "../main/NoMatchPage";
@@ -68,6 +67,7 @@ function ProfilePage() {
 			}
 			checkUser();
 		}
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [username]);
 
 	if (!isAuth || !userInfo) { //!userInfo sadece userInfo'nun varlığını kesinleştiriyor.

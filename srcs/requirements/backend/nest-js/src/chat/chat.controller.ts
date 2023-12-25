@@ -241,7 +241,7 @@ export class ChatController {
 			const	tmpUser = await this.usersService.findUser(userName);
 			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 
-			const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
+			//const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
 			const	responseRemove = await this.chatService.removeUser(channel.name, 'bannedUsers', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
 			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
 			this.chatGateway.server.emit('channelListener');
@@ -342,40 +342,47 @@ export class ChatController {
 	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
 	async patchChannel(
 		@Req() {user},
-		@UploadedFile() channelImage: Express.Multer.File,
+		@UploadedFile() image: Express.Multer.File,
 		@Query ('channel') channel: string,
 		@Body('channelName') name: string,
 		@Body('channelDescription') description: string,
 		@Body('channelPassword') password: string,
 	) {
 		try {
-			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {
-				name,
-				description,
-				password,
-				channelImage
-			});
-			const	createChannelDto: Partial<CreateChannelDto> = {
-				name: name,
-				type: (password === "")
-					? 'public'
-					: 'private',
-				description: description,
-				password: (password === undefined)
-					? undefined
-					: (password === "")
-						? null
-						: bcrypt.hashSync(
-							password,
-							bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
-				image: (channelImage)
-					? process.env.B_IMAGE_REPO + channelImage.filename
-					: undefined,
-				// members: [],
-				// admins: [],
-				// bannedUsers: [],
+			const validArgs = { name, description, password, image };
+			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {validArgs});
+
+			const	updateDto: Partial<CreateChannelDto> = Object.entries(validArgs)
+				.filter(([_, value]) => value !== undefined)
+				.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+			if (updateDto.password !== undefined) {
+				if (updateDto.password !== ''){
+					updateDto.type = 'private';
+					updateDto.password = bcrypt.hashSync(
+						updateDto.password,
+						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)
+						);
+				} else {
+					updateDto.type = 'public';
+				}
 			}
-			const	responseChannel = await this.chatService.patchChannel(channel, createChannelDto);
+
+			if (updateDto.image !== undefined) {
+				updateDto.image = process.env.B_IMAGE_REPO + image.filename;
+			}
+
+			// const	updateDto: Partial<CreateChannelDto> = {
+			// 	name: name,
+			// 	type: (password === undefined ? undefined : (password === '' ? 'public' : 'private')),
+			// 	description: description,
+			// 	password: (password === undefined ? undefined : (password === "" ? null
+			// 			: bcrypt.hashSync(
+			// 				password,
+			// 				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)))),
+			// 	image: (image === undefined ? undefined : process.env.B_IMAGE_REPO + image.filename)
+			// }
+			const	responseChannel = await this.chatService.patchChannel(channel, updateDto);
 			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
 		} catch (err) {
 			console.log("@Patch('/channel'): ", err);

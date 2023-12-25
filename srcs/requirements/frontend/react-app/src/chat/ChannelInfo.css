@@ -270,6 +270,7 @@
 	height: 30px;
 	width: 30px;
 	border-radius: 50%;
+	object-fit: cover;
 }
 
 #friend-users-table,
@@ -281,7 +282,7 @@
 
 /* ------------- */
 
-#channel-user .status-indicator {
+.status-indicator {
 	/* position: absolute; */
 	bottom: 5px;
 	right: 30px;

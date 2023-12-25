@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./JoinGame.css";
 import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
@@ -53,7 +53,8 @@ function JoinGame(){
 		return () => {
 			socket?.off("roomListener", roomListener);
 		}
-	}, []);
+		/* eslint-disable react-hooks/exhaustive-deps */
+	}, [socket]);
 
 	const handleSubmit = async (game: IGame, password: string | null) => {
 		const response = await fetch(process.env.REACT_APP_FETCH + `/game/room/register`, {

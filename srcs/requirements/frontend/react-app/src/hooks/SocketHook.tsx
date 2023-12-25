@@ -43,6 +43,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 				newSocket.close();
 			};
 		}
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [isAuth]); //isAuth'un güncellenmesini bekliyor, eğer güncellenmesse olmassa loadingPage görüntülenir sürekli
 
 	if ((isAuth && socket === undefined) || (!isAuth && socket)) {
