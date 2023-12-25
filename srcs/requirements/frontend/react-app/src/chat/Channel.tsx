@@ -70,6 +70,7 @@ function Channel() {
 				if (!response.ok)
 					throw (new Error("API fetch error."));
 				const data = await response.json();
+				console.log("->", data);
 				setActiveChannel(data[0]);
 				console.log(`Switched to ${channel.name} channel.`);
 			}
@@ -136,7 +137,7 @@ function Channel() {
 									}} // Tıklama olayı
 								>
 									<img src={channel.image} alt={channel.image} />
-									<span>{channel.name}</span>
+									<span>{channel.name} {(channel.status === 'involved') ? (' | ' + channel.type) : ''}</span>
 								</div>
 						))}
 						{activeTab === 'involved' &&

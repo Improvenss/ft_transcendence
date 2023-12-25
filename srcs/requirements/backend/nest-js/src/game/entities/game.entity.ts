@@ -21,6 +21,9 @@ export class Game {
 	@Column({ length: 20, nullable: true })
 	public password: string;
 
+	@Column({ type: 'enum', enum: ['public', 'private']})
+	public type: string;
+
 	@IsEnum(GameMode, { message: 'Invalid game mode' })
 	@Column({ type: 'enum', enum: ['classic', 'teamBattle'], nullable: false })
 	public mode: string;
@@ -40,6 +43,8 @@ export class Game {
 	@IsString()
 	@Column({ length: 30, nullable: true })
 	public description: string;
+
+	//----------------------Game Details----------------------------//
 
 	@IsString()
 	@Column({ nullable: true })

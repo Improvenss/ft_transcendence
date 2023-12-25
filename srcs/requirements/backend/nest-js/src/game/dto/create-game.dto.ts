@@ -16,6 +16,9 @@ export class CreateGameDto {
 	@IsOptional()
 	password?: string;
 
+	@IsEnum(['public', 'private'])
+	type: string;
+
 	// @IsEnum(GameMode, { message: 'Invalid game mode' })
 	mode: string;
 

@@ -40,6 +40,9 @@ export class Channel {
 	@ManyToMany(() => User, user => user.adminChannels, {nullable: false, onDelete: 'CASCADE'})
 	public admins: User[]; // Kanalın yöneticileri
 
+	@ManyToMany(() => User, user => user.channels, {nullable: false, onDelete: 'CASCADE'})
+	public bannedUsers: User[]; // Kanalın Banlı olduğu kullanıcıları
+
 	//----------------------Message----------------------------//
 
 	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
@@ -61,8 +64,7 @@ export class Message {
 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public sentAt: Date; // Mesajın gönderildiği tarih
 
-	@ManyToOne(() => User, { eager: true })
-	// @ManyToOne(() => User, user => user.messages)
+	@ManyToOne(() => User, user => user.messages, { eager: true })
 	public author: User; // Mesajın yazarı
 
 	@ManyToOne(() => Channel, channel => channel.messages, {onDelete: 'CASCADE'}) // Buradaki olay channel silinirken bu mesajlar da silinme durumuna giriyor, bu durumda ne yapacagini soyluyoruz biz { onDelete: 'CASCADE' } diyere. Yani sil diyoruz.

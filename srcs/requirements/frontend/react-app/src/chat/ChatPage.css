@@ -1,16 +1,14 @@
 #chat-page {
 	font-size: 1vw;
 	display: flex;
-	flex-direction: row;
+	/* flex-direction: row; */
 	height: 66vh;
 	width: 77vw;
 	position: absolute;
-	top: 50%;
+	top: 55%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	/* border: 1px solid #ccc; */
-	border-radius: 10px;
-	overflow: hidden;
+	/* overflow: hidden; */
 	align-items: stretch;
 	gap: 5px;
 }

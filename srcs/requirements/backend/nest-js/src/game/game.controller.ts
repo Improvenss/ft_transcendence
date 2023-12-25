@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe, Param } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -6,6 +6,8 @@ import { Colors as C } from '../colors';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
+
+
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -21,7 +23,7 @@ export class GameController {
 	async	getGameRoom(
 		@Req() {user},
 		@Query('room') room: string | undefined,
-		@Query('relations') relations: string[] | null | 'all',
+		@Query('relations') relations: string[] | undefined | 'all',
 	){
 		try
 		{
@@ -29,6 +31,20 @@ export class GameController {
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
 			if (!tmpGameRoom)
 				return (`There is no GameRoom with '${room}' name`);
+
+			if (relations === undefined){
+				if (Array.isArray(tmpGameRoom)) {
+					const extractedData = tmpGameRoom.map((game) => {
+						const { name, mode, type, winScore, duration } = game;
+						return { name, mode, type, winScore, duration };
+					});
+					
+					return extractedData;
+				}
+				
+				const { name, mode, type, winScore, duration } = tmpGameRoom;
+				return { name, mode, type, winScore, duration };
+			}
 			return (tmpGameRoom);
 		}
 		catch (err)
@@ -49,6 +65,7 @@ export class GameController {
 			const	responseRoom = await this.gameService.addGameRoomUser(user.login, body);
 			this.chatGateway.server.emit('roomListener');
 			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
+
 			return (responseRoom);
 			//return ({response: true, message: `${user.login} registered in this ${room}.`});
 		}
@@ -120,4 +137,22 @@ export class GameController {
 			return ({err: err});
 		}
 	}
+
+	// @Get('/lobby/:roomName')
+	// async getLobby(
+	// 	@Req() {user},
+	// 	@Param('roomName') roomName: string,
+	// ){
+	// 	try
+	// 	{
+	// 		const	tmpGameRoom = await this.gameService.findGameRoom(roomName, "all");
+	// 		if (!tmpGameRoom)
+	// 			return (`There is no GameRoom with '${roomName}' name`);
+	// 		return (tmpGameRoom);
+	// 		return { success: true, message: `Joined the lobby: ${roomName} successfully.` };
+	// 	} catch (err) {
+	// 		console.log(`@Get('/lobby:${roomName}'): `, err);
+	// 		return ({err: err});
+	// 	}	
+	// }
 }

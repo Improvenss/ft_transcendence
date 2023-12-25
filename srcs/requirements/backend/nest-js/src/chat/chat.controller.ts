@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile, Patch } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { Channel } from './entities/chat.entity';
 import { User } from 'src/users/entities/user.entity';
 import { multerConfig } from './channel.handler';
+import { ChatAdminGuard } from './admin.guard';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -26,6 +27,64 @@ export class ChatController {
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
 	) {}
+
+		// ---------- Get ------------
+	/**
+	 * @Usage {{baseUrl}}:3000/chat/@all?relations=all
+	 * 
+	 * @Body() relationData: string[],
+	 *  Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
+	 * 
+	 * @Query('relations') relations: string[] | null | 'all', 
+	 *  {{baseUrl}}:3000/chat/channel?relations=users&relations=admins.
+	 * @param channel 
+	 * @param relations 
+	 * @returns 
+	 */
+	// @SetMetadata('login', ['gsever', 'akaraca'])
+	@Get('/channel')
+	async findChannel(
+		@Req() {user},
+		@Query('channel') channel: string | undefined,
+		@Query('relations') relations: string[] | null | 'all',
+	) {
+		try
+		{
+			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
+			const	tmpChannel = await this.chatService.findChannel(channel, relations);
+			// if (!tmpChannel)
+			// 	throw (new NotFoundException(`Channel '${channel}' not found`))
+			const channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
+			if (channelArray && channelArray.members)
+				return (await this.chatService.checkInvolvedUser(tmpChannel, user));
+			return (tmpChannel);
+		}
+		catch (err)
+		{
+			console.log("@Get('/channel'): ", err);
+			return (null)
+		}
+	}
+
+	@Get('/channel/message')
+	async findMessage(
+		@Req() {user},
+		@Query('message') message: string | undefined,
+		@Query('relations') relations: string[] | null | 'all',
+	) {
+		try
+		{
+			console.log(`${C.B_GREEN}GET: Message: [${message}], Relation: [${relations}]${C.END}`);
+			const	tmpMessage = await this.chatService.findMessage(message, relations);
+			console.log("tmpMessage:", tmpMessage);
+			return (tmpMessage);
+		}
+		catch(err)
+		{
+			console.log("@Get('/channel/message'):", err);
+			return (null)
+		}
+	}
 
 	// ---------- Create ---------
 	// @Post(':channel')
@@ -61,6 +120,70 @@ export class ChatController {
 			return ({warning: err});
 		}
 	}
+
+	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
+	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
+	@Post('/channel/leave')
+	// @UseGuards(ChatAdminGuard)
+	async leaveChannel(
+		@Req() {user},
+		@Query ('channel') channel: string,
+		// @Query ('user') name: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /channel/leave: @Req() user: [${user.login}] channel: [${channel}]${C.END}`);
+
+			const	responseRemove = await this.chatService.removeUser(channel, user.login);
+			console.log("responseRemove", responseRemove);
+			console.log(`${C.B_RED}Channel Leave: ${channel} - ${user.login}${C.END}`);
+			this.chatGateway.server.emit('channelListener');
+			return ({message: 'User left the channel successfully!'});
+		}
+		catch(err)
+		{
+			console.error("@Post('/channel/leave'):", err);
+			return ({error: err});
+		}
+	}
+
+	// --------------- ADMIN -------------------------
+	@Post('/channel/kick')
+	@UseGuards(ChatAdminGuard)
+	async kickChannel(
+		@Req() {user},
+		@Req() {channel},
+		// @Query ('channel') channel: string,
+		@Query ('user') userName: string | undefined, // kicklenecek user'in adi.
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /channel/kick: @Req() user: [${userName}] channel: [${channel.name}]${C.END}`);
+			const	tmpUser = await this.usersService.findUser(userName);
+			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+
+			const	responseRemove = await this.chatService.removeUser(channel.name, userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
+			console.log(`${C.B_RED}Channel Kick: ${channel} - ${userName}${C.END}`);
+			this.chatGateway.server.emit('channelListener');
+
+			const userSocket = this.chatGateway.connectedUsers.get(singleUser.socketId);
+			if (userSocket.rooms.has(channel.name))
+			{
+				// this.chatGateway.server.emit(`listenChannelMessage:${channel.name}`, `Admin[${user.login}] kicked ${userName}!`);
+				userSocket.leave(channel.name)
+				console.log(`${channel.name} channel'den socket baglantisi koparildi: ${userSocket.id}`);
+			}
+			else
+				console.log(`${userSocket.id} zaten ${channel.name} channel'de degil! :D?`);
+			return ({message: 'User kicked the channel successfully!'});
+		}
+		catch(err)
+		{
+			console.error("@Post('/channel/kick'):", err);
+			return ({error: err});
+		}
+	}
+	// -----------------------------------------------
 
 	@Post('/channel/create')
 	@UseInterceptors(FileInterceptor('image', multerConfig))
@@ -129,61 +252,31 @@ export class ChatController {
 		}
 	}
 
-	// ---------- Get ------------
-	/**
-	 * @Usage {{baseUrl}}:3000/chat/@all?relations=all
-	 * 
-	 * @Body() relationData: string[],
-	 *  Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
-	 * 
-	 * @Query('relations') relations: string[] | null | 'all', 
-	 *  {{baseUrl}}:3000/chat/channel?relations=users&relations=admins.
-	 * @param channel 
-	 * @param relations 
-	 * @returns 
-	 */
-	// @SetMetadata('login', ['gsever', 'akaraca'])
-	@Get('/channel')
-	async findChannel(
-		@Req() {user},
-		@Query('channel') channel: string | undefined,
-		@Query('relations') relations: string[] | null | 'all',
-	) {
-		try
-		{
-			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
-			const	tmpChannel = await this.chatService.findChannel(channel, relations);
-			// if (!tmpChannel)
-			// 	throw (new NotFoundException(`Channel '${channel}' not found`))
-			const channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
-			if (channelArray && channelArray.members)
-				return (await this.chatService.checkInvolvedUser(tmpChannel, user));
-			return (tmpChannel);
-		}
-		catch (err)
-		{
-			console.log("@Get('/channel'): ", err);
-			return (null)
-		}
-	}
 
-	@Get('/channel/message')
-	async findMessage(
+	// channel settings kısmında güncelleme yapıyoruz, yaparken tek tek gerçekleştiriyoruz.
+	//	Güncellemediğimiz ayar undefined olarak geliyor.
+	// !!! Servis ayarları eklenmedi eklenecek.
+	// !!! yapı eksik tamamla
+	@Patch('/channel')
+	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
+	async updateChannel(
 		@Req() {user},
-		@Query('message') message: string | undefined,
-		@Query('relations') relations: string[] | null | 'all',
+		@UploadedFile() channelImage: Express.Multer.File,
+		@Query ('channel') channel: string,
+		@Body('channelName') name: string,
+		@Body('channelDescription') description: string,
+		@Body('channelPassword') password: string,
 	) {
-		try
-		{
-			console.log(`${C.B_GREEN}GET: Message: [${message}], Relation: [${relations}]${C.END}`);
-			const	tmpMessage = await this.chatService.findMessage(message, relations);
-			console.log("tmpMessage:", tmpMessage);
-			return (tmpMessage);
-		}
-		catch(err)
-		{
-			console.log("@Get('/channel/message'):", err);
-			return (null)
+		try {
+			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {
+				name,
+				description,
+				password,
+				channelImage
+			});
+		} catch (err) {
+			console.log("@Patch('/channel'): ", err);
+			return ({err: err});
 		}
 	}
 
@@ -209,28 +302,5 @@ export class ChatController {
 		}
 	}
 
-	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
-		// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
-	@Get('/channel/leave')
-	async leaveChannel(
-		@Req() {user},
-		@Query ('channel') channel: string,
-		@Query ('user') name: string | undefined,
-	){
-		try{
-			if (name === undefined){ //eğer kullanıcı adı tanımlı değilse kişi leave işlemini gerçekleştiriyor.
-				await this.chatService.removeUser(channel, user.login);
-				console.log(`${C.B_RED}GET: Channel Leave: ${channel} - ${user.login}${C.END}`);
-				//return ({message: 'User left the channel successfully'});
-			}
-			else{ //user'ın bir admin, name'in ise kicklenen kişi olduğu kontrol edilmelidir.
-				console.log(`${C.B_RED}GET: Channel Kick: ${channel} - ${user.login}${C.END}`);
-			}
-			this.chatGateway.server.emit('channelListener');
-			return ({message: 'User left the channel successfully'});
-		} catch(err){
-			console.error("@Get('/channel/leave'):", err);
-			return ({error: err});
-		}
-	}
+
 }

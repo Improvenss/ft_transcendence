@@ -13,7 +13,7 @@
   }
   
   .modal {
-	background: gray;
+	background: rgb(44, 44, 44);
 	padding: 20px;
 	border-radius: 5px;
 	position: relative;

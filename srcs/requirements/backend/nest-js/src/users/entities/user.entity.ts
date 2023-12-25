@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail } from "class-validator";
@@ -29,6 +29,11 @@ export class User {
 	@Column({ nullable: true })
 	public socketId: string; // Websocket
 
+	//----------------------Status----------------------------//
+
+	@Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
+	public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
+
 	//----------------------Optional----------------------------//
 
 	@Column({ nullable: true })
@@ -36,6 +41,12 @@ export class User {
 
 	@Column({ nullable: true })
 	public avatar: string; // Kullanıcı tarafından eklenen ekstra resim
+
+	//----------------------Friends----------------------------//
+
+	@ManyToMany(() => User, user => user.friends)
+	@JoinTable()
+	public friends: User[];
 
 	//----------------------Channel----------------------------//
 
@@ -48,9 +59,13 @@ export class User {
 	@JoinTable()
 	public adminChannels: Channel[]; // Kullanıcının yönetici olduğu kanallar
 
+	@ManyToMany(() => Channel, channel => channel.bannedUsers)
+	@JoinTable()
+	public bannedChannels: Channel[];
+
 	//----------------------Message----------------------------//
 
-	@ManyToMany(() => Message, message => message.author, {nullable: true})
+	@OneToMany(() => Message, message => message.author, {nullable: true})
 	@JoinTable()
 	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
 

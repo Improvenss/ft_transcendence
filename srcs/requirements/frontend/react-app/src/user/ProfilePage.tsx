@@ -17,6 +17,8 @@ interface IUserProps{
 	socketId?: string;
 	nickname?: string;
 	avatar?: string;
+	status: string;
+	friends: IUserProps[];
 }
 
 function ProfilePage() {
@@ -27,18 +29,11 @@ function ProfilePage() {
 	const	userCookie = Cookies.get("user");
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
-	const	[friendList, setFriendList] = useState<IFriend[]>( () => {
-	const	fetchFriendList: IFriend[] = [
-			{ name: 'uercan', status: 'offline', image: '/dogSlayer.png' },
-			{ name: 'gsever', status: 'online', image: '/heart.jpg' },
-			{ name: 'Admin', status: 'AFK', image: '/watcher.jpg' }
-		];
-		return (fetchFriendList);
-	});
+
 	useEffect(() => {
 		if (isAuth){
 			const checkUser = async () => {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=${username}`, {
+				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=${username}&relations=friends`, {
 					method: "GET",
 					headers: {
 						"Content-Type": "application/json",
@@ -57,7 +52,9 @@ function ProfilePage() {
 							imageUrl: dataUser.user.imageUrl,
 							socketId: dataUser.user.socketId,
 							nickname: dataUser.user.nickname,
-							avatar: dataUser.user.avatar
+							avatar: dataUser.user.avatar,
+							status: dataUser.user.status,
+							friends: dataUser.user.friends,
 						});
 						console.log("userInfo:", dataUser);
 					} else {
@@ -120,10 +117,6 @@ function ProfilePage() {
 			{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
 			];
 
-			const userPanel2 = {
-				// other properties
-				status: 'online', // or 'offline', 'idle', etc.
-			  };
 	return (
 		<>
 		{userPanel && (
@@ -132,8 +125,7 @@ function ProfilePage() {
 					<div id="user-image">
 						<img id="intraImg" src={userPanel.imageUrl} alt={`${userPanel.displayname}`} />
 						<img id="avatarImg" src={userPanel.avatar} alt={`${userPanel.avatar}`} />
-						{/*<p id="userStatus">{userPanel.status}</p>*/}
-						<div className={`status-indicator status-${userPanel2.status.toLowerCase()}`}></div>
+						<div className={`status-indicator status-${userPanel.status.toLowerCase()}`}></div>
 					</div>
 					<p>Login Name {userPanel.nickname ? "- Nickname:": ":"}</p>
 					<span>{userPanel.login} {userPanel.nickname ? "- " + userPanel.nickname : ""}</span> 
@@ -155,20 +147,21 @@ function ProfilePage() {
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{friendList
- 									.filter((user) => user.name.toLowerCase().includes(friendSearchTerm.toLowerCase()))
+ 								{userPanel.friends
+ 									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
- 											key={user.name}
+ 											key={user.login}
  											id='friend-users'
  										>
- 											<img src={user.image} alt={user.image} />
+ 											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='friend-users-table'>
- 												<span>{user.name}</span>
+ 												<span>{user.login}</span>
  												<span>Status: {user.status}</span>
  											</div>
  										</div>
- 								))}
+ 									)
+								)}
  							</div>
  						) : (
 							<>

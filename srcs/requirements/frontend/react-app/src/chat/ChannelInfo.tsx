@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { IFriend, IUser } from "./iChannel";
+import { IUser } from "./iChannel";
 import { ReactComponent as IconUsers } from '../assets/chat/iconUsers.svg';
 import { ReactComponent as IconSettings } from '../assets/chat/iconSettings.svg';
 import { ReactComponent as IconAddUser } from '../assets/chat/iconAddUser.svg';
@@ -11,44 +11,61 @@ import { ReactComponent as IconBan } from '../assets/chat/iconBan.svg';
 import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
 import Cookies from "js-cookie";
+import { useUser } from "../hooks/UserHook";
+import { useNavigate } from "react-router-dom";
 
  function InfoChannel() {
-	// { selectedChannel, isInfoChannelActive, setIsInfoChannelActive }: IOnChannelProps
-	const { activeChannel, setActiveChannel, channelInfo, setChannelInfo } = useChannelContext();
+	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
 	const userCookie = Cookies.get("user");
+	const my = useUser().userInfo;
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
  	const [friendSearchTerm, setFriendSearchTerm] = useState('');
  	const [banSearchTerm, setBanSearchTerm] = useState('');
- 	const [friendList, setFriendList] = useState<IFriend[]>( () => {
- 		const fetchFriendList: IFriend[] = [
- 			{ name: 'uercan', status: 'offline', image: '/dogSlayer.png' },
- 			{ name: 'gsever', status: 'online', image: '/heart.jpg' },
- 			{ name: 'Admin', status: 'AFK', image: '/watcher.jpg' }
- 		];
- 		return (fetchFriendList);
- 	});
 	const inputRefName = useRef<HTMLInputElement>(null);
 	const inputRefDescription = useRef<HTMLInputElement>(null);
 	const inputRefImage = useRef<HTMLInputElement>(null);
 	const inputRefPassword = useRef<HTMLInputElement>(null);
 	const [showUserInfo, setShowUserInfo] = useState<IUser | null>(null);
+	const [selectedImage, setSelectedImage] = useState<File | null>(null);
+	const [errorMessage, setErrorMessage] = useState('');
+	const navigate = useNavigate();
 
+	// User kendisi Leave Channel dediginde calisir admin icin kick olarak baska function yapacagiz.
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
-		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
-			method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+		const responseChannelLeave = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
+			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
 			headers: {
 				'Content-Type': 'application/json',
 				"Authorization": "Bearer " + userCookie,
+				"channel": selectedChannel,
 			},
 		});
-		if (!responseChannelDelete.ok) {
+		if (!responseChannelLeave.ok) {
 			throw new Error('API-den veri alınamadı.');
 		}
-		const data = await responseChannelDelete.json();
+		const data = await responseChannelLeave.json();
 		console.log("Leave Channel:", data);
 		setActiveChannel(null);
+	}
+
+	const	handleChannelKick = async (channel: string, user: string) => {
+		console.log(`User kicking ${user} channel`);
+		const responseUserKick = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/kick?user=${user}`, {
+			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+				"channel": channel,
+			},
+		});
+		if (!responseUserKick.ok) {
+			throw new Error('API-den veri alınamadı.');
+		}
+		const data = await responseUserKick.json();
+		console.log("Kicked Channel:", data);
+		// setActiveChannel(null);
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
@@ -68,37 +85,78 @@ import Cookies from "js-cookie";
 	}
 
  	const handleTabInfoClick = (tabId: string) => {
+		if (selectedImage != null)
+			setSelectedImage(null);
  		setActiveTabInfo(tabId);
  		// Implement logic to update content based on the selected tab
  		// For now, let's just log a message to the console
  		console.log(`Switched to channel ${tabId}`);
  	};
 
-	 const handleUpdate = (id: number) => {
+	 const handleUpdate = async (fieldName: string) => {
 		// !!channel settings kısmında her ayarın kendisine özel set yapısı olmalıdır.
 		// channal name - channel description - channe image 
 		// channel password ekleme (password varsa private olarak devam edecek, yoksa public olarak setlenecek)
-		let inputValue = null;
+		const formData = new FormData();
 
-		switch (id) {
-		  case 1:
-			inputValue = inputRefName.current?.value;
+		switch (fieldName) {
+			case 'channelName':
+				if (inputRefName.current) {
+					const channelName = inputRefName.current.value.trim();
+					if (channelName) {
+						formData.append(fieldName, (inputRefName.current?.value) as string );
+						inputRefName.current.value = ''; // Clear the input field
+					} else {
+						console.error('Channel Name can not be empty!');
+						setErrorMessage('Channel Name can not be empty!');
+						return;
+					}
+				}
 			break;
-		  case 2:
-			inputValue = inputRefDescription.current?.value;
+			case 'channelDescription':
+				if (inputRefDescription.current) {
+					formData.append(fieldName, (inputRefDescription.current?.value) as string );
+					inputRefDescription.current.value = '';
+				}
 			break;
-		  case 3:
-			inputValue = inputRefImage.current?.value;
+			case 'channelImage':
+				if (inputRefImage.current?.files){
+					const selectedImage = inputRefImage.current.files[0];
+					if (selectedImage) {
+						formData.append(fieldName, selectedImage);
+						inputRefImage.current.value = '';
+						setSelectedImage(null);
+					} else {
+						console.error('Channel Image can not be empty!');
+						setErrorMessage('Channel Image can not be empty!');
+						return;
+					}
+				}
 			break;
-		  case 4:
-			inputValue = inputRefPassword.current?.value;
+			case 'channelPassword':
+				if (inputRefPassword.current) {
+					formData.append(fieldName, (inputRefPassword.current?.value) as string );
+					inputRefPassword.current.value = '';
+				}
 			break;
-		  default:
+		default:
 			break;
 		}
-	
-		console.log(`ID: ${id}, Girilen Değer: ${inputValue}`);
-	  };
+
+		const	responseChannelCustomize = await fetch(
+			process.env.REACT_APP_FETCH + `/chat/channel?channel=${activeChannel?.name}`, {
+			method: 'PATCH',
+			headers: {
+				"Authorization": "Bearer " + userCookie as string,
+			},
+			body: formData,
+		});
+		if (!responseChannelCustomize.ok)
+			console.log("Channel Customize screen update error.");
+
+		if (errorMessage != null)
+			setErrorMessage('');
+	};
 
 	/*
 		channel users'a banlı kullanıcıları gösteren bir sticky ekle, sadece admin görebilsin.
@@ -108,7 +166,38 @@ import Cookies from "js-cookie";
 		---------------------
 		??Channel, active channel, channel info kısmına girince yapıların divleri genişleyecek ve daralacak şekilde ayarla.
 
+		------------------------
+		channel settings kısmına kanalın private public olduğunu belirt.
 	*/
+
+	const handleInfo = (action: string, userLogin: string) => {
+		console.log("me:", my?.login, "- channel:", activeChannel?.name);
+		switch (action) {
+			case 'goProfile':
+				navigate('/profile/' + userLogin);
+				break;
+			case 'directMessage':
+				console.log(action);
+				break;
+			case 'userKick':
+				console.log(action);
+				console.log("kick'e girdik ustam");
+				handleChannelKick(activeChannel?.name || "", userLogin);
+				break;
+			case 'userBan':
+				console.log(action);
+				break;
+			case 'setAdmin':
+				console.log(action);
+				break;
+			case 'removeAdmin':
+				console.log(action);
+				break;
+			default:
+				break;
+		}
+
+	}
 
  	return (
  		<>
@@ -152,20 +241,28 @@ import Cookies from "js-cookie";
 										>
 											<img src={user.imageUrl} alt={user.imageUrl} />
 											<span>{user.login}</span>
+											<span className={`status-indicator status-${user.status.toLowerCase()}`}></span>
 											{/*{
 												kullanıcı statü durumu online-offline-ingame
 												nickname eklenmelidir
 												avatarı varsa avatarı gösterilmelidir.
 											}*/}
 										</div>
-										{(showUserInfo && showUserInfo.login == user.login) && (
+										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
-												<button id="goProfile"> <IconProfile /> </button>
-												<button id="DM"> <IconDM /> </button>
-												<button id="userKick"> <IconKick /> </button>
-												<button id="userBan"> <IconBan /> </button>
-												<button id="setAdmin">Set Admin</button>
-												<button id="removeAdmin">Remove Admin</button>
+												<button onClick={() => handleInfo('goProfile', user.login)}> <IconProfile /> </button>
+												<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
+												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
+													<>
+														<button onClick={() => handleInfo('userKick', user.login)}> <IconKick /> </button>
+														<button onClick={() => handleInfo('userBan', user.login)}> <IconBan /> </button>
+														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
+															<button onClick={() => handleInfo('removeAdmin', user.login)}>Remove Admin</button>
+														) : (
+															<button onClick={() => handleInfo('setAdmin', user.login)}>Set Admin</button>
+														)}
+													</>
+												)}
 											</div>
 										)}
  									</div>
@@ -177,34 +274,55 @@ import Cookies from "js-cookie";
 
  						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
+								{/* Hata mesajı gösterimi */}
+								{errorMessage && <p className="error-message">{errorMessage}</p>}
  								<label htmlFor="channelName">Channel Name:</label>
  								<input
+									id="channelName"
 									ref={inputRefName}
 									type="text"
 									placeholder="Change Name..."
  								/>
- 								<button onClick={() => handleUpdate(1)}>Change Name </button>
+ 								<button onClick={() => handleUpdate('channelName')}>Change Name </button>
  								<label htmlFor="channelDescription">Channel Description:</label>
  								<input
+									id="channelDescription"
 									ref={inputRefDescription}
 									type="text"
 									placeholder="Change Description..."
  								/>
- 								<button onClick={() => handleUpdate(2)}>Change Description </button>
+ 								<button onClick={() => handleUpdate('channelDescription')}>Change Description </button>
  								<label htmlFor="channelImage">Channel Image:</label>
  								<input
+									id="channelImage"
 									ref={inputRefImage}
 									type="file"
 									accept="image/jpg, image/jpeg, image/png, image/gif"
+									onChange={(e) => {
+										const selectedFile = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+										if (selectedFile && selectedFile.type.startsWith('image/'))
+											setSelectedImage(selectedFile);
+										else if (inputRefImage.current) {
+											inputRefImage.current.value = '';
+											setSelectedImage(null);
+										}
+									}}
  								/>
- 								<button onClick={() => handleUpdate(3)}>Change Image </button>
+								{selectedImage && (
+									<img
+										src={URL.createObjectURL(selectedImage)}
+										alt="Selected File"
+									/>
+								)}
+ 								<button onClick={() => handleUpdate('channelImage')}>Change Image </button>
  								<label htmlFor="channelPassword">Channel Password:</label>
  								<input
+									id="channelPassword"
 									ref={inputRefPassword}
 									type="password"
 									placeholder="Change Password..."
  								/>
- 								<button onClick={() => handleUpdate(4)}>Change Password </button>
+ 								<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
 
 
 
@@ -232,16 +350,16 @@ import Cookies from "js-cookie";
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{friendList
- 									.filter((user) => user.name.toLowerCase().includes(friendSearchTerm.toLowerCase()))
+ 								{my?.friends
+ 									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
- 											key={user.name}
+ 											key={user.login}
  											id='friend-users'
  										>
- 											<img src={user.image} alt={user.image} />
+ 											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='friend-users-table'>
- 												<span>{user.name}</span>
+ 												<span>{user.login}</span>
  												<span>Status: {user.status}</span>
  											</div>
  										</div>
@@ -258,16 +376,16 @@ import Cookies from "js-cookie";
  									onChange={(e) => setBanSearchTerm(e.target.value)}
  									placeholder="Search banned users..."
  								/>
- 								{friendList
- 									.filter((user) => user.name.toLowerCase().includes(banSearchTerm.toLowerCase()))
+ 								{activeChannel.bannedUsers
+ 									.filter((user) => user.login.toLowerCase().includes(banSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
- 											key={user.name}
+ 											key={user.login}
  											id='banned-users'
  										>
- 											<img src={user.image} alt={user.image} />
+ 											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>
- 												<span>{user.name}</span>
+ 												<span>{user.login}</span>
  												<span>Status: {user.status}</span>
  											</div>
  										</div>

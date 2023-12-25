@@ -3,7 +3,7 @@
 	display: flex;
 	flex-direction: column;
 	flex: 1;
-	overflow: hidden;
+	/* overflow: hidden; */
 	border-radius: 10px;
 	user-select: none;
 }
@@ -24,6 +24,14 @@
 
 .settings > button:hover {
 	background-color: darkred;
+}
+
+.settings > img {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	height: 100px;
+	width: 100px;
+	align-self: center;
 }
 
 /* -------- */
@@ -148,12 +156,7 @@
 	padding-left: 5px;
 }
 
-#goProfile,
-#DM,
-#userKick,
-#userBan,
-#setAdmin,
-#removeAdmin {
+#channel-user-info > button {
 	background-color: darkred;
 	cursor: pointer;
 	border-radius: 5px;
@@ -161,20 +164,12 @@
 	margin-bottom: 2px;
 }
 
-#goProfile svg,
-#DM svg,
-#userKick svg,
-#userBan svg {
+#channel-user-info > button > svg {
 	height: 20px;
 	width: 20px;
 }
 
-#goProfile:hover,
-#DM:hover,
-#userKick:hover,
-#userBan:hover,
-#setAdmin:hover,
-#removeAdmin:hover {
+#channel-user-info > button:hover {
 	background-color: #45a049;
 }
 
@@ -285,3 +280,33 @@
 }
 
 /* ------------- */
+
+#channel-user .status-indicator {
+	/* position: absolute; */
+	bottom: 5px;
+	right: 30px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	margin-right: 5px;
+}
+
+.status-online {
+	background-color: green;
+}
+
+.status-offline {
+	background-color: gray;
+}
+
+.status-in-game {
+	background-color: rgb(255, 145, 0);
+}
+
+.status-in-chat {
+	background-color: rgb(0, 13, 255);
+}
+
+.status-afk {
+	background-color: yellow;
+}
