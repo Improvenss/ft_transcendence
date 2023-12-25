@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail } from "class-validator";
@@ -65,7 +65,7 @@ export class User {
 
 	//----------------------Message----------------------------//
 
-	@ManyToMany(() => Message, message => message.author, {nullable: true})
+	@OneToMany(() => Message, message => message.author, {nullable: true})
 	@JoinTable()
 	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
 

@@ -64,8 +64,7 @@ export class Message {
 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public sentAt: Date; // Mesajın gönderildiği tarih
 
-	@ManyToOne(() => User, { eager: true })
-	// @ManyToOne(() => User, user => user.messages)
+	@ManyToOne(() => User, user => user.messages, { eager: true })
 	public author: User; // Mesajın yazarı
 
 	@ManyToOne(() => Channel, channel => channel.messages, {onDelete: 'CASCADE'}) // Buradaki olay channel silinirken bu mesajlar da silinme durumuna giriyor, bu durumda ne yapacagini soyluyoruz biz { onDelete: 'CASCADE' } diyere. Yani sil diyoruz.

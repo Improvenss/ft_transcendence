@@ -31,21 +31,41 @@ import { useNavigate } from "react-router-dom";
 	const [errorMessage, setErrorMessage] = useState('');
 	const navigate = useNavigate();
 
+	// User kendisi Leave Channel dediginde calisir admin icin kick olarak baska function yapacagiz.
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
-		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
-			method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+		const responseChannelLeave = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
+			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
 			headers: {
 				'Content-Type': 'application/json',
 				"Authorization": "Bearer " + userCookie,
+				"channel": selectedChannel,
 			},
 		});
-		if (!responseChannelDelete.ok) {
+		if (!responseChannelLeave.ok) {
 			throw new Error('API-den veri alınamadı.');
 		}
-		const data = await responseChannelDelete.json();
+		const data = await responseChannelLeave.json();
 		console.log("Leave Channel:", data);
 		setActiveChannel(null);
+	}
+
+	const	handleChannelKick = async (channel: string, user: string) => {
+		console.log(`User kicking ${user} channel`);
+		const responseUserKick = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/kick?user=${user}`, {
+			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+				"channel": channel,
+			},
+		});
+		if (!responseUserKick.ok) {
+			throw new Error('API-den veri alınamadı.');
+		}
+		const data = await responseUserKick.json();
+		console.log("Kicked Channel:", data);
+		// setActiveChannel(null);
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
@@ -161,6 +181,8 @@ import { useNavigate } from "react-router-dom";
 				break;
 			case 'userKick':
 				console.log(action);
+				console.log("kick'e girdik ustam");
+				handleChannelKick(activeChannel?.name || "", userLogin);
 				break;
 			case 'userBan':
 				console.log(action);

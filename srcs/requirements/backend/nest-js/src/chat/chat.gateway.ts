@@ -32,12 +32,12 @@ var count: number = 0;
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
-		private readonly chatService: ChatService,
 		private readonly usersService: UsersService,
 		private readonly gameService: GameService,
+		private readonly chatService: ChatService,
 	) {}
 
-	private connectedUsers: Map<string, Socket> = new Map();
+	public connectedUsers: Map<string, Socket> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -181,9 +181,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleMessage(
 		@MessageBody() 
 		{ channel, author, message }:
-			{ channel: Channel, author: User, message: string }
+			{ channel: Channel, author: User, message: string },
+		@ConnectedSocket() socket: Socket
 	){
 		try {
+			// const userSocket = this.chatGateway.server.sockets.sockets[userSocketId];
+			if (!socket.rooms.has(channel.name))
+			{
+				console.log(`Socket[${socket.id}] not in this channel(${channel.name})!`);
+				// socket.emit(`listenChannelMessage:${channel.name}`, `You are not in this channel(${channel.name})!`);
+				return (null);
+			}
 			const tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(channel.name);
 			const tmpUser = await this.usersService.findUser(author.login);
 

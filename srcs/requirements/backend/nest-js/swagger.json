@@ -154,49 +154,6 @@
         }
       }
     },
-    "/chat/{message}": {
-      "post": {
-        "operationId": "ChatController_createMessage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/register": {
-      "post": {
-        "operationId": "ChatController_registerChannel",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/create": {
-      "post": {
-        "operationId": "ChatController_createChannel",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/chat/channel": {
       "get": {
         "operationId": "ChatController_findChannel",
@@ -216,8 +173,8 @@
           }
         }
       },
-      "delete": {
-        "operationId": "ChatController_deleteChannel",
+      "patch": {
+        "operationId": "ChatController_updateChannel",
         "parameters": [
           {
             "name": "channel",
@@ -234,8 +191,8 @@
           }
         }
       },
-      "patch": {
-        "operationId": "ChatController_updateChannel",
+      "delete": {
+        "operationId": "ChatController_deleteChannel",
         "parameters": [
           {
             "name": "channel",
@@ -273,8 +230,40 @@
         }
       }
     },
+    "/chat/{message}": {
+      "post": {
+        "operationId": "ChatController_createMessage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/register": {
+      "post": {
+        "operationId": "ChatController_registerChannel",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/channel/leave": {
-      "get": {
+      "post": {
         "operationId": "ChatController_leaveChannel",
         "parameters": [
           {
@@ -284,7 +273,19 @@
             "schema": {
               "type": "string"
             }
-          },
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/kick": {
+      "post": {
+        "operationId": "ChatController_kickChannel",
+        "parameters": [
           {
             "name": "user",
             "required": true,
@@ -295,7 +296,18 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/create": {
+      "post": {
+        "operationId": "ChatController_createChannel",
+        "parameters": [],
+        "responses": {
+          "201": {
             "description": ""
           }
         }

@@ -177,6 +177,7 @@ export class ChatService {
 			throw new NotFoundException('Channel does not exist!');
 		}
 		const tmpUser = await this.usersService.findUser(user, null, ['channels']);
+
 		if (!tmpUser)
 			throw new NotFoundException('User does not exist!');
 		const singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
