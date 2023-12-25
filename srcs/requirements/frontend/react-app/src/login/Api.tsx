@@ -45,7 +45,9 @@ function Api(){
 				console.log("III: ---API Token Connection '❌'---");
 			setLoading(false);
 		}
-		{ !window.opener && !isAuth && sendCode() }
+		if (!window.opener && !isAuth)
+			sendCode()
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, []);
 
 	if (window.opener){ //popup bir açılır pencere olup olmadığını kontrol ediyor

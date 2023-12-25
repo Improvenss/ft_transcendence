@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ReactComponent as IconCreate } from '../assets/chat/iconCreate.svg';
 import { ReactComponent as IconPublic } from '../assets/chat/iconPublic.svg';
 import { ReactComponent as IconInvolved } from '../assets/chat/iconInvolved.svg';
 import './Channel.css';
-import { IChannel, IMessage } from './iChannel';
-import { useSocket } from '../hooks/SocketHook';
+import { IChannel } from './iChannel';
+// import { useSocket } from '../hooks/SocketHook';
 import ChannelCreate from './ChannelCreate';
 import { useChannelContext } from './ChatPage';
 import ChannelJoin from './ChannelJoin';
@@ -16,7 +16,7 @@ function Channel() {
 	const { channels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
 	const [searchTerm, setSearchTerm] = useState('');
-	const socket = useSocket();
+	// const socket = useSocket();
 	const userCookie = Cookies.get("user");
 	
 	const handleTabClick = (tabId: string) => {

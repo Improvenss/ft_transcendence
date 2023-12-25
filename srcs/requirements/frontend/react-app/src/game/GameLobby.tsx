@@ -62,6 +62,7 @@ const GameLobby = () => {
 		return () => {
 			socket?.off(`lobbyListener:${roomName}`, lobbyListener);
 		}
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [socket]);
 
 	if (lobby === undefined){
@@ -78,13 +79,21 @@ const GameLobby = () => {
 			<div className='players'>
 				{lobby.players[0] ? (
 					<div className='leftPlayer'>
-						<img className='image' src={lobby.players[0].avatar ? lobby.players[0].avatar : lobby.players[0].imageUrl}/>
+						<img
+							className='image'
+							src={lobby.players[0].avatar ? lobby.players[0].avatar : lobby.players[0].imageUrl}
+							alt={lobby.players[0].login}
+						/>
 						<span>{lobby.players[0].nickname ? lobby.players[0].nickname : lobby.players[0].login}</span>
 					</div>
 				) : 'null'}
 				{lobby.players[1] ? (
 					<div className='rightPlayer'>
-						<img className='image' src={lobby.players[1].avatar ? lobby.players[1].avatar : lobby.players[1].imageUrl}/>
+						<img
+							className='image'
+							src={lobby.players[1].avatar ? lobby.players[1].avatar : lobby.players[1].imageUrl}
+							alt={lobby.players[1].login}
+						/>
 						<span>{lobby.players[1].nickname ? lobby.players[1].nickname : lobby.players[1].login}</span>		
 					</div>
 				) : (

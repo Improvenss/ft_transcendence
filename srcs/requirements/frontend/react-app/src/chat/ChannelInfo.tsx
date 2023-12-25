@@ -77,7 +77,7 @@ import { useNavigate } from "react-router-dom";
  		console.log(`Switched to channel ${tabId}`);
  	};
 
-	 const handleUpdate = async (fieldName: string) => {
+	const handleUpdate = async (fieldName: string) => {
 		const formData = new FormData();
 
 		switch (fieldName) {
@@ -141,17 +141,16 @@ import { useNavigate } from "react-router-dom";
 	};
 
 	const handleInfo = async (action: string, targetUser: string) => {
-		if (!activeChannel)
+		if (!activeChannel || !my)
 			return;
-		console.log("me:", my?.login, "- channel:", activeChannel.name);
+		console.log("me:", my.login, "- channel:", activeChannel.name);
 		let url = '';
 		switch (action) {
 			case 'goProfile':
 				navigate('/profile/' + targetUser);
 				return;
 			case 'addFriend':
-				console.log(action);
-				console.log(`User adding '${targetUser}'.`);
+				console.log(`User[${my.login}] sending friend request to 'user[${targetUser}]'.`);
 				url = `/users/friend/add?user=${targetUser}`;
 				break;
 			case 'directMessage':
@@ -161,18 +160,15 @@ import { useNavigate } from "react-router-dom";
 				console.log(action);
 				break;
 			case 'userKick':
-				console.log(action);
-				console.log(`User kicking ${targetUser} channel`);
+				console.log(`User[${targetUser}] kick from channel[${activeChannel.name}]`);
 				url = `/chat/channel/kick?user=${targetUser}`;
 				break;
 			case 'userBan':
-				console.log(action);
-				console.log(`User banning ${targetUser} channel`);
+				console.log(`User[${targetUser}] banned from channel[${activeChannel.name}]`);
 				url = `/chat/channel/ban?user=${targetUser}`;
 				break;
 			case 'userUnban':
-				console.log(action);
-				console.log(`User unbanning ${targetUser} channel`);
+				console.log(`User[${targetUser}] was unbanned from channel[${activeChannel.name}]`);
 				url = `/chat/channel/unban?user=${targetUser}`;
 				break;
 			case 'setAdmin':
@@ -240,7 +236,7 @@ import { useNavigate } from "react-router-dom";
 											id="channel-user"
 											onClick={() => setShowUserInfo((prevUser) => (prevUser === user ? null : user))}
 										>
-											<img src={user.avatar ? user.avatar : user.imageUrl} />
+											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
 											<span>{user.nickname ? user.nickname : user.login}</span>
 											<span className={`status-indicator status-${user.status.toLowerCase()}`}></span>
 										</div>
@@ -372,7 +368,7 @@ import { useNavigate } from "react-router-dom";
  											key={user.login}
  											id='friend-users'
  										>
- 											<img src={user.avatar ? user.avatar : user.imageUrl} />
+ 											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
  											<div id='friend-users-table'>
  												<span>{user.nickname ? user.nickname : user.login}</span>
  												<span>Status: {user.status}</span>

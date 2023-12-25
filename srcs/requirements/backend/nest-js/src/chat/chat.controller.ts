@@ -342,41 +342,25 @@ export class ChatController {
 	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
 	async patchChannel(
 		@Req() {user},
-		@UploadedFile() channelImage: Express.Multer.File,
+		@UploadedFile() image: Express.Multer.File,
 		@Query ('channel') channel: string,
 		@Body('channelName') name: string,
 		@Body('channelDescription') description: string,
 		@Body('channelPassword') password: string,
 	) {
 		try {
-			const validArgs = {
-				name,
-				description,
-				password,
-				channelImage,
-			};
-
-			interface FilteredArgs {
-				name?: string;
-				description?: string;
-				password?: string;
-				channelImage?: Express.Multer.File;
-			}
-
+			const validArgs = { name, description, password, image };
 			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {validArgs});
-			const filteredArgs: FilteredArgs = Object.entries(validArgs)
+
+			const	updateDto: Partial<CreateChannelDto> = Object.entries(validArgs)
 				.filter(([_, value]) => value !== undefined)
 				.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
 
-			const updateDto: Partial<CreateChannelDto> = {
-				...filteredArgs,
-			}
-
-			if (filteredArgs.password !== undefined) {
-				if (filteredArgs.password !== ''){
+			if (updateDto.password !== undefined) {
+				if (updateDto.password !== ''){
 					updateDto.type = 'private';
 					updateDto.password = bcrypt.hashSync(
-						filteredArgs.password,
+						updateDto.password,
 						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)
 						);
 				} else {
@@ -384,23 +368,20 @@ export class ChatController {
 				}
 			}
 
-			console.log("-------->", updateDto);
+			if (updateDto.image !== undefined) {
+				updateDto.image = process.env.B_IMAGE_REPO + image.filename;
+			}
 
-			//const	updateDto: Partial<CreateChannelDto> = {
-			//	name: name,
-			//	type: (password === "") ? 'public' : 'private',
-			//	description: description,
-			//	password: (password === undefined)
-			//		? undefined
-			//		: (password === "")
-			//			? null
-			//			: bcrypt.hashSync(
-			//				password,
-			//				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
-			//	image: (channelImage)
-			//		? process.env.B_IMAGE_REPO + channelImage.filename
-			//		: undefined,
-			//}
+			// const	updateDto: Partial<CreateChannelDto> = {
+			// 	name: name,
+			// 	type: (password === undefined ? undefined : (password === '' ? 'public' : 'private')),
+			// 	description: description,
+			// 	password: (password === undefined ? undefined : (password === "" ? null
+			// 			: bcrypt.hashSync(
+			// 				password,
+			// 				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)))),
+			// 	image: (image === undefined ? undefined : process.env.B_IMAGE_REPO + image.filename)
+			// }
 			const	responseChannel = await this.chatService.patchChannel(channel, updateDto);
 			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
 		} catch (err) {
