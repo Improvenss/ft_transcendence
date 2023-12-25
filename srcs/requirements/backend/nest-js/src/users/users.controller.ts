@@ -9,6 +9,7 @@ import { multerConfig } from 'src/chat/channel.handler';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+import { User } from './entities/user.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -58,6 +59,26 @@ export class UsersController {
 		{
 			console.error("Cookie err:", err);
 			return ({message: "COOKIE NOK"});
+		}
+	}
+
+	@Post('/friend/add')
+	async	addUser(
+		@Req() {user},
+		@Query ('user') targetUser: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /friend/add: @Query('user'): [${targetUser}]${C.END}`);
+			const	responseAddFriend = await this.usersService.addFriend(user, targetUser);
+			if (!responseAddFriend)
+				return ({message: "USER NOK", user: `User '${targetUser}' not found.`});
+			return ({message: responseAddFriend});
+		}
+		catch (err)
+		{
+			console.log("@Post('/friend/add'): ", err);
+			return ({err: err});
 		}
 	}
 

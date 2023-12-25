@@ -241,7 +241,7 @@ export class ChatController {
 			const	tmpUser = await this.usersService.findUser(userName);
 			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 
-			const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
+			//const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
 			const	responseRemove = await this.chatService.removeUser(channel.name, 'bannedUsers', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
 			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
 			this.chatGateway.server.emit('channelListener');
@@ -349,33 +349,59 @@ export class ChatController {
 		@Body('channelPassword') password: string,
 	) {
 		try {
-			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {
+			const validArgs = {
 				name,
 				description,
 				password,
-				channelImage
-			});
-			const	createChannelDto: Partial<CreateChannelDto> = {
-				name: name,
-				type: (password === "")
-					? 'public'
-					: 'private',
-				description: description,
-				password: (password === undefined)
-					? undefined
-					: (password === "")
-						? null
-						: bcrypt.hashSync(
-							password,
-							bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
-				image: (channelImage)
-					? process.env.B_IMAGE_REPO + channelImage.filename
-					: undefined,
-				// members: [],
-				// admins: [],
-				// bannedUsers: [],
+				channelImage,
+			};
+
+			interface FilteredArgs {
+				name?: string;
+				description?: string;
+				password?: string;
+				channelImage?: Express.Multer.File;
 			}
-			const	responseChannel = await this.chatService.patchChannel(channel, createChannelDto);
+
+			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel}] @Body():${C.END}`, {validArgs});
+			const filteredArgs: FilteredArgs = Object.entries(validArgs)
+				.filter(([_, value]) => value !== undefined)
+				.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+			const updateDto: Partial<CreateChannelDto> = {
+				...filteredArgs,
+			}
+
+			if (filteredArgs.password !== undefined) {
+				if (filteredArgs.password !== ''){
+					updateDto.type = 'private';
+					updateDto.password = bcrypt.hashSync(
+						filteredArgs.password,
+						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)
+						);
+				} else {
+					updateDto.type = 'public';
+				}
+			}
+
+			console.log("-------->", updateDto);
+
+			//const	updateDto: Partial<CreateChannelDto> = {
+			//	name: name,
+			//	type: (password === "") ? 'public' : 'private',
+			//	description: description,
+			//	password: (password === undefined)
+			//		? undefined
+			//		: (password === "")
+			//			? null
+			//			: bcrypt.hashSync(
+			//				password,
+			//				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
+			//	image: (channelImage)
+			//		? process.env.B_IMAGE_REPO + channelImage.filename
+			//		: undefined,
+			//}
+			const	responseChannel = await this.chatService.patchChannel(channel, updateDto);
 			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
 		} catch (err) {
 			console.log("@Patch('/channel'): ", err);
