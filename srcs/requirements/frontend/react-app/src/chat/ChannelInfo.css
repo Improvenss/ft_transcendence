@@ -310,3 +310,12 @@
 .status-afk {
 	background-color: yellow;
 }
+
+/*----------*/
+
+.settings .error-message {
+	color: orange;
+	margin-top: 5px;
+	width: 100%;
+	display: inline-block;
+  }

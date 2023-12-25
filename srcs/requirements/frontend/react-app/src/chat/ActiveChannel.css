@@ -149,7 +149,7 @@
 	border-radius: 5px 0px 5px 5px;
 	padding-left: 10px;
 	padding-right: 10px;
-	border: 1px solid #ccc;
+	border: 2px solid #cccccc;
 	float: right;
 	margin-bottom: 10px; /* Optional spacing between messages */
 }

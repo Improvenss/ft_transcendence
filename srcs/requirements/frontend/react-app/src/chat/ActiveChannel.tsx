@@ -6,7 +6,7 @@ import { useChannelContext } from './ChatPage';
 import { IMessage } from './iChannel';
 import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
-import { ReactComponent as MessageIcon } from './messageIcon.svg';
+import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
 import React from 'react';
 
 function ActiveChannel(){
@@ -109,6 +109,10 @@ function ActiveChannel(){
 		if (activeChannel){
 			setMessages(activeChannel.messages);
 		}
+		const messageInput = document.getElementById("messageTextarea");
+		if (messageInput) {
+		  messageInput.focus();
+		}
 	}, [activeChannel]);
 
 	useEffect(() => {
@@ -166,7 +170,7 @@ function ActiveChannel(){
 												<>
 													<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
 													<div className='first-message'>
-													<span className="icon-span"><MessageIcon /></span>
+														<span className="icon-span"><IconMessage /></span>
 														<span className='username'>{message.sender.login}</span>
 														<p>{formatMessageContent(message.content)}</p>
 														<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
@@ -182,7 +186,7 @@ function ActiveChannel(){
 									) : (
 										<div className='message sent'>
 											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) && (
-												<span className="icon-span"><MessageIcon /></span>
+												<span className="icon-span"><IconMessage /></span>
 											)}
 											<p>{formatMessageContent(message.content)}</p>
 											<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
