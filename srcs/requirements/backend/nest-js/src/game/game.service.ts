@@ -45,9 +45,8 @@ export class GameService {
 
 	async	findGameRoom(
 		room: string | undefined,
-		relations?: string[] | 'all' | null
+		relations?: string[] | 'all' | undefined
 	){
-		// console.log(`GameService: findGameRoom(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
 		? {players: true, admins: true, watchers: true} // relations all ise hepsini ata.
 		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.

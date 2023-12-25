@@ -60,6 +60,7 @@ function CreateGame() {
 			winScore: winningScore,
 			duration: gameDuration,
 			description: description,
+			type: password === '' ? 'public' : 'private'
 		}
 		const	response = await fetch(
 			process.env.REACT_APP_FETCH + '/game/room', {

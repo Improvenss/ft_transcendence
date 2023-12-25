@@ -54,6 +54,7 @@ function JoinGame(){
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+
 		const formElement = e.currentTarget as HTMLFormElement;
 		const formObject: IGameJoinForm = {
 			name: (formElement.elements.namedItem('name') as HTMLInputElement).value,
@@ -86,46 +87,23 @@ function JoinGame(){
 
 	return(
 		<div id="join-game">
-			<form id="private-game" onSubmit={handleSubmit}>
-				<h3>Join Private Game</h3>
-				<label htmlFor="room-name">Room Name:</label>
-				<input
-					id="room-name"
-					placeholder="Enter name"
-					type="text"
-					name="name"
-					required
-					autoComplete="off" //chrome uyarı veriyor o yüzden ekledim.
-				/>
-				<label htmlFor="room-password">Room Password:</label>
-				<input
-					id="room-password"
-					placeholder="Enter password"
-					type="password"
-					name="password"
-					required
-				/>
-				<input type="hidden" name="type" value="private" />
-				<button type="submit">Join Game</button>
-     		</form>
-			<div id="public-game">
-				<h3>Join Public Game</h3>
-				<input
-					id="room-search"
-					type="text"
-					value={searchTerm}
-					onChange={(e) => setSearchTerm(e.target.value)}
-					placeholder="Search rooms..."
-				/>
-				<div id="rooms" className="table">
-					<div className="header-row">
-						<span>Room Name</span>
-						<span>Mode</span>
-						<span>Winning Score</span>
-						<span>Game Duration</span>
-					</div>
-					{rooms
-					// .filter(game => game.name.toLowerCase().includes(searchTerm.toLowerCase()))
+			<h3>Join Public - Private Game</h3>
+			<input
+				id="room-search"
+				type="text"
+				value={searchTerm}
+				onChange={(e) => setSearchTerm(e.target.value)}
+				placeholder="Search rooms..."
+			/>
+			<div id="rooms" className="table">
+				<div className="header-row">
+					<span>Room Name</span>
+					<span>Mode</span>
+					<span>Winning Score</span>
+					<span>Game Duration</span>
+					<span>Game Type</span>
+				</div>
+				{rooms
 					.filter((game) => {
 						const searchTermLower = searchTerm.toLowerCase();
 						return (
@@ -137,18 +115,18 @@ function JoinGame(){
 					})
 					.map((game, index) => (
 						<form key={index} onSubmit={handleSubmit}>
-							<button key={index} className="table-row">
+							<button key={index} className="table-row"> 
 								<span>{game.name}</span>
 								<span>{game.mode}</span>
 								<span>{game.winScore}</span>
 								<span>{game.duration}</span>
+								<span>{game.type}</span>
 								<input type="hidden" name="name" value={game.name} />
 								<input type="hidden" name="password" value="" />
-								<input type="hidden" name="type" value="public" />
+								<input type="hidden" name="type" value={game.type} />
 							</button>
 						</form>
 					))}
-				</div>
 			</div>
 		</div>
 	);

@@ -7,6 +7,8 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
 
+
+
 @UseGuards(AuthGuard)
 @Controller('/game')
 export class GameController {
@@ -21,7 +23,7 @@ export class GameController {
 	async	getGameRoom(
 		@Req() {user},
 		@Query('room') room: string | undefined,
-		@Query('relations') relations: string[] | null | 'all',
+		@Query('relations') relations: string[] | undefined | 'all',
 	){
 		try
 		{
@@ -29,6 +31,20 @@ export class GameController {
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
 			if (!tmpGameRoom)
 				return (`There is no GameRoom with '${room}' name`);
+
+			if (relations === undefined){
+				if (Array.isArray(tmpGameRoom)) {
+					const extractedData = tmpGameRoom.map((game) => {
+						const { name, mode, type, winScore, duration } = game;
+						return { name, mode, type, winScore, duration };
+					});
+					
+					return extractedData;
+				}
+				
+				const { name, mode, type, winScore, duration } = tmpGameRoom;
+				return { name, mode, type, winScore, duration };
+			}
 			return (tmpGameRoom);
 		}
 		catch (err)
@@ -49,6 +65,7 @@ export class GameController {
 			const	responseRoom = await this.gameService.addGameRoomUser(user.login, body);
 			this.chatGateway.server.emit('roomListener');
 			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
+
 			return (responseRoom);
 			//return ({response: true, message: `${user.login} registered in this ${room}.`});
 		}
