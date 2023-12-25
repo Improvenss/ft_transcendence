@@ -8,6 +8,8 @@ import { ReactComponent as IconProfile } from '../assets/chat/iconProfile.svg';
 import { ReactComponent as IconDM } from '../assets/chat/iconDM.svg';
 import { ReactComponent as IconKick } from '../assets/chat/iconKick.svg';
 import { ReactComponent as IconBan } from '../assets/chat/iconBan.svg';
+import { ReactComponent as IconAddFriend } from '../assets/chat/iconAddFriend.svg';
+import { ReactComponent as IconInviteGame } from '../assets/chat/iconInviteGame.svg';
 import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
 import Cookies from "js-cookie";
@@ -276,7 +278,13 @@ import { useNavigate } from "react-router-dom";
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
 												<button onClick={() => handleInfo('goProfile', user.login)}> <IconProfile /> </button>
-												<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
+												{user.login !== my?.login && (
+													<>
+														<button onClick={() => handleInfo('addFriend', user.login)}> <IconAddFriend /> </button>
+														<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
+														<button onClick={() => handleInfo('inviteGame', user.login)}> <IconInviteGame /> </button>
+													</>
+												)}
 												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
 													<>
 														{user.login !== my?.login && (
@@ -301,7 +309,7 @@ import { useNavigate } from "react-router-dom";
  							</div>
  						)}
 
-{ activeTabInfo === 'infoChannel' && (
+						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
 								{activeChannel.admins.some((admin) => admin.login === my?.login) ? (
 									<>
