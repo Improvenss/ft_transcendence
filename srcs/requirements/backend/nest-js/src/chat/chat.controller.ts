@@ -104,11 +104,15 @@ export class ChatController {
 	){
 		try
 		{
-			const	tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(payload.channel, ['members']);
+			const	tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(payload.channel, ['members', 'bannedUsers']);
+
+			if (await this.chatService.findChannelUser(tmpChannel, 'bannedUsers', user))
+				throw (new Error(`${user.login} already banned in this Channel: ${payload.channel}.`));
+
 			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
 				throw (new Error("Password is WRONG!!!"));
 			const tmpUser = await this.usersService.findUser(user.login);
-			const	responseChannel = await this.chatService.addChannelUser(tmpChannel, tmpUser as User);
+			const	responseChannel = await this.chatService.addChannelUser(tmpChannel, 'members', tmpUser as User);
 			this.chatGateway.server.emit('channelListener');
 			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
 			return (await this.chatService.checkInvolvedUser(returnChannel, user));
@@ -134,7 +138,7 @@ export class ChatController {
 		{
 			console.log(`${C.B_YELLOW}POST: /channel/leave: @Req() user: [${user.login}] channel: [${channel}]${C.END}`);
 
-			const	responseRemove = await this.chatService.removeUser(channel, user.login);
+			const	responseRemove = await this.chatService.removeUser(channel, 'members', user.login);
 			console.log("responseRemove", responseRemove);
 			console.log(`${C.B_RED}Channel Leave: ${channel} - ${user.login}${C.END}`);
 			this.chatGateway.server.emit('channelListener');
@@ -162,7 +166,7 @@ export class ChatController {
 			const	tmpUser = await this.usersService.findUser(userName);
 			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 
-			const	responseRemove = await this.chatService.removeUser(channel.name, userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
+			const	responseRemove = await this.chatService.removeUser(channel.name, 'members', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
 			console.log(`${C.B_RED}Channel Kick: ${channel} - ${userName}${C.END}`);
 			this.chatGateway.server.emit('channelListener');
 
@@ -180,6 +184,82 @@ export class ChatController {
 		catch(err)
 		{
 			console.error("@Post('/channel/kick'):", err);
+			return ({error: err});
+		}
+	}
+
+	@Post('/channel/ban')
+	@UseGuards(ChatAdminGuard)
+	async banChannel(
+		@Req() {user},
+		@Req() {channel},
+		// @Query ('channel') channel: string,
+		@Query ('user') userName: string | undefined, // kicklenecek user'in adi.
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /channel/ban: @Req() user: [${userName}] channel: [${channel.name}]${C.END}`);
+			const	tmpUser = await this.usersService.findUser(userName);
+			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+
+			const	responseBanUser = await this.chatService.addChannelUser(channel, 'bannedUsers', singleUser);
+			console.log("resopnseGBANUser:", responseBanUser);
+			const	responseRemove = await this.chatService.removeUser(channel.name, 'members', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
+			console.log("responsereREmove:", responseRemove);
+			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
+			this.chatGateway.server.emit('channelListener');
+
+			const userSocket = this.chatGateway.connectedUsers.get(singleUser.socketId);
+			if (userSocket.rooms.has(channel.name))
+			{
+				// this.chatGateway.server.emit(`listenChannelMessage:${channel.name}`, `Admin[${user.login}] kicked ${userName}!`);
+				userSocket.leave(channel.name)
+				console.log(`${channel.name} channel'den socket baglantisi koparildi: ${userSocket.id}`);
+			}
+			else
+				console.log(`${userSocket.id} zaten ${channel.name} channel'de degil! :D?`);
+			return ({message: 'User banned the channel successfully!'});
+		}
+		catch(err)
+		{
+			console.error("@Post('/channel/ban'):", err);
+			return ({error: err});
+		}
+	}
+
+	@Post('/channel/unban')
+	@UseGuards(ChatAdminGuard)
+	async unbanChannel(
+		@Req() {user},
+		@Req() {channel},
+		// @Query ('channel') channel: string,
+		@Query ('user') userName: string | undefined, // kicklenecek user'in adi.
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /channel/unban: @Req() user: [${userName}] channel: [${channel.name}]${C.END}`);
+			const	tmpUser = await this.usersService.findUser(userName);
+			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+
+			const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
+			const	responseRemove = await this.chatService.removeUser(channel.name, 'bannedUsers', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
+			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
+			this.chatGateway.server.emit('channelListener');
+
+			const userSocket = this.chatGateway.connectedUsers.get(singleUser.socketId);
+			if (userSocket.rooms.has(channel.name))
+			{
+				// this.chatGateway.server.emit(`listenChannelMessage:${channel.name}`, `Admin[${user.login}] kicked ${userName}!`);
+				userSocket.leave(channel.name)
+				console.log(`${channel.name} channel'den socket baglantisi koparildi: ${userSocket.id}`);
+			}
+			else
+				console.log(`${userSocket.id} zaten ${channel.name} channel'de degil! :D?`);
+			return ({message: 'User banned the channel successfully!'});
+		}
+		catch(err)
+		{
+			console.error("@Post('/channel/ban'):", err);
 			return ({error: err});
 		}
 	}
@@ -258,8 +338,9 @@ export class ChatController {
 	// !!! Servis ayarları eklenmedi eklenecek.
 	// !!! yapı eksik tamamla
 	@Patch('/channel')
+	@UseGuards(ChatAdminGuard)
 	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
-	async updateChannel(
+	async patchChannel(
 		@Req() {user},
 		@UploadedFile() channelImage: Express.Multer.File,
 		@Query ('channel') channel: string,
@@ -274,6 +355,28 @@ export class ChatController {
 				password,
 				channelImage
 			});
+			const	createChannelDto: Partial<CreateChannelDto> = {
+				name: name,
+				type: (password === "")
+					? 'public'
+					: 'private',
+				description: description,
+				password: (password === undefined)
+					? undefined
+					: (password === "")
+						? null
+						: bcrypt.hashSync(
+							password,
+							bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
+				image: (channelImage)
+					? process.env.B_IMAGE_REPO + channelImage.filename
+					: undefined,
+				// members: [],
+				// admins: [],
+				// bannedUsers: [],
+			}
+			const	responseChannel = await this.chatService.patchChannel(channel, createChannelDto);
+			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
 		} catch (err) {
 			console.log("@Patch('/channel'): ", err);
 			return ({err: err});

@@ -68,6 +68,24 @@ import { useNavigate } from "react-router-dom";
 		// setActiveChannel(null);
 	}
 
+	const	handleChannelBan = async (channel: string, user: string) => {
+		console.log(`User banning ${user} channel`);
+		const responseUserBan = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/ban?user=${user}`, {
+			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			headers: {
+				'Content-Type': 'application/json',
+				"Authorization": "Bearer " + userCookie,
+				"channel": channel,
+			},
+		});
+		if (!responseUserBan.ok) {
+			throw new Error('API-den veri alınamadı.');
+		}
+		const data = await responseUserBan.json();
+		console.log("Banned Channel:", data);
+		// setActiveChannel(null);
+	}
+
 	const	handleChannelDelete = async (selectedChannel: string) => {
 		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
 			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
@@ -148,6 +166,7 @@ import { useNavigate } from "react-router-dom";
 			method: 'PATCH',
 			headers: {
 				"Authorization": "Bearer " + userCookie as string,
+				"channel": activeChannel?.name || "",
 			},
 			body: formData,
 		});
@@ -186,6 +205,8 @@ import { useNavigate } from "react-router-dom";
 				break;
 			case 'userBan':
 				console.log(action);
+				console.log("ban'a girdik ustam");
+				handleChannelBan(activeChannel?.name || "", userLogin);
 				break;
 			case 'setAdmin':
 				console.log(action);

@@ -23,7 +23,7 @@ export class UsersService {
 	){
 		// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
 		const relationObject = (relations === 'all')
-		? {channels: true, adminChannels: true, messages: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
+		? {channels: true, adminChannels: true, messages: true, bannedChannels: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
 		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
 			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
 			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
