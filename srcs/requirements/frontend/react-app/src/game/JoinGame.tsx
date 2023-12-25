@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import "./JoinGame.css";
 import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
@@ -18,6 +18,9 @@ function JoinGame(){
 	const userCookie = Cookies.get("user");
 	const [rooms, setRooms] = useState<IGame[]>([]);
 	const navigate = useNavigate();
+	const password = useRef<HTMLInputElement>(null);
+	const [showGamePassword, setShowGamePassword] = useState<IGame | null>(null);
+	const [errorMessage, setErrorMessage] = useState('');
 
 	useEffect(() => {
 		const fetchRooms = async () => {
@@ -52,18 +55,7 @@ function JoinGame(){
 		}
 	}, []);
 
-	const handleSubmit = async (e: FormEvent) => {
-		e.preventDefault();
-
-		const formElement = e.currentTarget as HTMLFormElement;
-		const formObject: IGameJoinForm = {
-			name: (formElement.elements.namedItem('name') as HTMLInputElement).value,
-			password: (formElement.elements.namedItem('password') as HTMLInputElement).value,
-			type: (formElement.elements.namedItem('type') as HTMLInputElement).value as 'private' | 'public',
-		};
-		console.log(formObject.name);
-		console.log(formObject.password ? formObject.password : "null");
-		console.log(formObject.type);
+	const handleSubmit = async (game: IGame, password: string | null) => {
 		const response = await fetch(process.env.REACT_APP_FETCH + `/game/room/register`, {
 			method: 'POST',
 			headers: {
@@ -71,18 +63,18 @@ function JoinGame(){
 				"Authorization": "Bearer " + userCookie,
 			},
 			body: JSON.stringify({
-				room: formObject.name,
-				password: formObject.password ? formObject.password : null,
+				room: game.name,
+				password: password,
 			}),
 		});
 		if (!response.ok)
 			throw (new Error("API fetch error."));
 		const data = await response.json();
 		console.log("Join-game: ", data);
+		navigate(`/game/lobby/${game.name}`);
 
-		navigate(`/game/lobby/${formObject.name}`);
-
-		formElement.reset();
+		if (errorMessage != null)
+		  setErrorMessage('');
 	}
 
 	return(
@@ -110,22 +102,57 @@ function JoinGame(){
 							game.name.toLowerCase().includes(searchTermLower) ||
 							game.mode.toLowerCase().includes(searchTermLower) ||
 							game.winScore.toString().includes(searchTermLower) ||
-							game.duration.toString().includes(searchTermLower)
+							game.duration.toString().includes(searchTermLower) ||
+							game.type.toLowerCase().includes(searchTermLower) 
 						);
 					})
 					.map((game, index) => (
-						<form key={index} onSubmit={handleSubmit}>
-							<button key={index} className="table-row"> 
+						<div
+							key={index}
+							id='games'
+						>
+							<div
+								id="game"
+								onClick={() => {
+									if (game.type === 'private'){
+										setShowGamePassword((prevGame) => (prevGame === game ? null : game))
+									} else {
+										handleSubmit(game, null);
+									}
+								}}
+							>
 								<span>{game.name}</span>
 								<span>{game.mode}</span>
 								<span>{game.winScore}</span>
 								<span>{game.duration}</span>
 								<span>{game.type}</span>
-								<input type="hidden" name="name" value={game.name} />
-								<input type="hidden" name="password" value="" />
-								<input type="hidden" name="type" value={game.type} />
-							</button>
-						</form>
+							</div>
+							{(showGamePassword && showGamePassword.name === game.name) && (
+								<div id="game-password">
+									<input
+										type="password"
+										name="password"
+										ref={password}
+										placeholder="Enter password"
+									/>
+									{errorMessage && <p className="error-message">{errorMessage}</p>}
+									<button
+										type="submit"
+										onClick={() => {
+											const enteredPassword = password.current?.value;
+											if (!enteredPassword || !enteredPassword.trim()) {
+											  setErrorMessage("Password is required.");
+											} else {
+											  setErrorMessage('');
+											  handleSubmit(game, enteredPassword);
+											}
+										  }}
+									>
+										Join
+									</button>
+								</div>
+							)}
+						</div>
 					))}
 			</div>
 		</div>
