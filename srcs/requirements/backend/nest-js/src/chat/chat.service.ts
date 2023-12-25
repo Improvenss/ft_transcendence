@@ -81,12 +81,31 @@ export class ChatService {
 		return (tmpMessage);
 	}
 
-	async findChannelUser(channel: Channel, user: User) {
+	async findChannelUser(
+		channel: Channel,
+		list: 'members' | 'bannedUsers' | undefined,
+		user: User
+	){
 		if (!channel || !user)
 			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
-		const foundUser = channel.members.find((channelUser) => channelUser.login === user.login);
-		if (!foundUser)
-			return (false);
+		if (list === 'members')
+		{
+			if (!channel.members)
+				return (false)
+			const foundUser = channel.members.find((channelUser) => channelUser.login === user.login);
+			if (!foundUser)
+				return (false);
+		}
+		else if (list === 'bannedUsers')
+		{
+			if (!channel.bannedUsers)
+				return (false)
+			const foundUser = channel.bannedUsers.find((channelUser) => channelUser.login === user.login);
+			if (!foundUser)
+				return (false);
+		}
+		else
+			return (false)
 		return (true);
 	}
 
@@ -125,14 +144,53 @@ export class ChatService {
 		return involvedChannelsInfo;
 	}
 	
-	async addChannelUser(channel: Channel | Channel[] | any, user: User) {
-		if (await this.findChannelUser(channel, user))
+	async addChannelUser(
+		channel: Channel | Channel[] | any,
+		list: 'members' | 'bannedUsers' | undefined,
+		user: User
+	){
+		if (!list)
+			throw (new Error(`Which list do you add this user?`));
+		if (await this.findChannelUser(channel, list, user))
 			throw (new Error(`${user.login} already in this ${channel.name}.`));
-		channel.members.push(user);
+		if (list === 'members')
+			channel.members.push(user);
+		else if (list === 'bannedUsers')
+			channel.bannedUsers.push(user);
+		else
+			throw (new Error(`There is no list for add this user?`));
 		return (this.entityManager.save(channel));
 	}
 
 	async updateMessage(id: number, updateMessageDto: UpdateMessageDto) {
+	}
+
+	/**
+	 * PATCH genellikle guncellemek icin kullanilir.
+	 */
+	async	patchChannel(
+		channel: string | undefined,
+		body: Partial<UpdateChannelDto>,
+		// body: {
+		// 	name: string,
+		// 	description: string,
+		// 	password: string,
+		// }
+	){
+		const	tmpChannels = await this.findChannel(channel, 'all');
+		if (!tmpChannels)
+			return (`Channel'${channel}' not found.`);
+		if (!Array.isArray(tmpChannels))
+		{ // Game seklinde gelirse alttaki for()'un kafasi karismasin diye.
+			Object.assign(tmpChannels, body);
+			return (await this.channelRepository.save(tmpChannels));
+		}
+		for (const channel of tmpChannels)
+		{ // Game[] seklinde gelirse hepsini tek tek guncellemek icin.
+			Object.assign(channel, body);
+			await this.channelRepository.save(channel);
+		}
+		return (tmpChannels);
 	}
 
 	async removeAllChannel() {
@@ -170,9 +228,10 @@ export class ChatService {
 
 	async removeUser(
 		channel: string,
+		list: 'members' | 'bannedUsers' | undefined,
 		user: string
 	){
-		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: ['members']});
+		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: [list]});
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
@@ -181,12 +240,23 @@ export class ChatService {
 		if (!tmpUser)
 			throw new NotFoundException('User does not exist!');
 		const singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		if (!singleUser.channels || !tmpChannel.members)
-			throw new Error('Invalid state: User or Channel data is incomplete');
-		// Kullanıcının channels ilişkisinden kanalı çıkarın
+		if (!singleUser.channels)
+			throw new Error('Invalid state: User data is incomplete.');
 		singleUser.channels = singleUser.channels.filter(c => c.id !== tmpChannel.id);
-		// Kanalın members ilişkisinden kullanıcıyı çıkarın
-		tmpChannel.members = tmpChannel.members.filter(m => m.id !== singleUser.id);
+		if (list === 'members')
+		{
+			if (!tmpChannel.members)
+				throw new Error('Invalid state: Channel members data is incomplete.');
+			tmpChannel.members = tmpChannel.members.filter(m => m.id !== singleUser.id);
+		}
+		else if (list === 'bannedUsers')
+		{
+			if (!tmpChannel.bannedUsers)
+				throw new Error('Invalid state: Channel bannedUsers data is incomplete.');
+			tmpChannel.bannedUsers= tmpChannel.bannedUsers.filter(m => m.id !== singleUser.id);
+		}
+		else
+			throw (new NotFoundException('List not found!'));
 		await this.userRepository.save(singleUser);
 		await this.channelRepository.save(tmpChannel);
 		return ({message: 'User removed from the channel successfully' });

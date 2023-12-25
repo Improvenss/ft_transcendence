@@ -49,6 +49,9 @@ export class CreateUserDto {
 	@IsOptional()
 	adminChannels?: Channel[];
 
+	@IsOptional()
+	bannedChannels?: Channel[];
+
 	// Message
 	@IsOptional()
 	messages?: Message[];

@@ -30,6 +30,9 @@ export class CreateChannelDto {
 	@IsNotEmpty() // veya @IsDefined()
 	admins: User[];
 
+	@IsArray()
+	@IsOptional()
+	bannedUsers?: User[];
 }
 
 export class UpdateChannelDto extends PartialType(CreateChannelDto) {}

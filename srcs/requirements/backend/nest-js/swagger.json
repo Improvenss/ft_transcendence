@@ -174,7 +174,7 @@
         }
       },
       "patch": {
-        "operationId": "ChatController_updateChannel",
+        "operationId": "ChatController_patchChannel",
         "parameters": [
           {
             "name": "channel",
@@ -285,6 +285,46 @@
     "/chat/channel/kick": {
       "post": {
         "operationId": "ChatController_kickChannel",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/ban": {
+      "post": {
+        "operationId": "ChatController_banChannel",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/unban": {
+      "post": {
+        "operationId": "ChatController_unbanChannel",
         "parameters": [
           {
             "name": "user",

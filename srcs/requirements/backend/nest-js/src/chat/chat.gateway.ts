@@ -233,7 +233,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(channel.name, ['members']);
 			if (responseChannel === null)
 				throw (new NotFoundException("Channel not found!"));
-			const ifUserInChannel = await this.chatService.findChannelUser(responseChannel, singleUser);
+			const ifUserInChannel = await this.chatService.findChannelUser(responseChannel, 'members', singleUser);
 			if (!ifUserInChannel)
 				throw (new NotFoundException("User is not in Channel!"));
 			else if (responseChannel !== null
