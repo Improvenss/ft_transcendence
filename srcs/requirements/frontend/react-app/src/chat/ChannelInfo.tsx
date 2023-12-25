@@ -195,17 +195,21 @@ import { useNavigate } from "react-router-dom";
 			case 'goProfile':
 				navigate('/profile/' + userLogin);
 				break;
+			case 'addFriend':
+				console.log(action);
+				break;
 			case 'directMessage':
+				console.log(action);
+				break;
+			case 'inviteGame':
 				console.log(action);
 				break;
 			case 'userKick':
 				console.log(action);
-				console.log("kick'e girdik ustam");
 				handleChannelKick(activeChannel?.name || "", userLogin);
 				break;
 			case 'userBan':
 				console.log(action);
-				console.log("ban'a girdik ustam");
 				handleChannelBan(activeChannel?.name || "", userLogin);
 				break;
 			case 'setAdmin':
@@ -260,8 +264,8 @@ import { useNavigate } from "react-router-dom";
 											id="channel-user"
 											onClick={() => setShowUserInfo((prevUser) => (prevUser === user ? null : user))}
 										>
-											<img src={user.imageUrl} alt={user.imageUrl} />
-											<span>{user.login}</span>
+											<img src={user.avatar ? user.avatar : user.imageUrl} />
+											<span>{user.nickname ? user.nickname : user.login}</span>
 											<span className={`status-indicator status-${user.status.toLowerCase()}`}></span>
 											{/*{
 												kullanıcı statü durumu online-offline-ingame
@@ -275,8 +279,12 @@ import { useNavigate } from "react-router-dom";
 												<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
 												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
 													<>
-														<button onClick={() => handleInfo('userKick', user.login)}> <IconKick /> </button>
-														<button onClick={() => handleInfo('userBan', user.login)}> <IconBan /> </button>
+														{user.login !== my?.login && (
+															<>
+																<button onClick={() => handleInfo('userKick', user.login)}> <IconKick /> </button>
+																<button onClick={() => handleInfo('userBan', user.login)}> <IconBan /> </button>
+															</>
+														)}
 														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
 															<button onClick={() => handleInfo('removeAdmin', user.login)}>Remove Admin</button>
 														) : (
@@ -293,72 +301,81 @@ import { useNavigate } from "react-router-dom";
  							</div>
  						)}
 
- 						{ activeTabInfo === 'infoChannel' && (
+{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
-								{/* Hata mesajı gösterimi */}
-								{errorMessage && <p className="error-message">{errorMessage}</p>}
- 								<label htmlFor="channelName">Channel Name:</label>
- 								<input
-									id="channelName"
-									ref={inputRefName}
-									type="text"
-									placeholder="Change Name..."
- 								/>
- 								<button onClick={() => handleUpdate('channelName')}>Change Name </button>
- 								<label htmlFor="channelDescription">Channel Description:</label>
- 								<input
-									id="channelDescription"
-									ref={inputRefDescription}
-									type="text"
-									placeholder="Change Description..."
- 								/>
- 								<button onClick={() => handleUpdate('channelDescription')}>Change Description </button>
- 								<label htmlFor="channelImage">Channel Image:</label>
- 								<input
-									id="channelImage"
-									ref={inputRefImage}
-									type="file"
-									accept="image/jpg, image/jpeg, image/png, image/gif"
-									onChange={(e) => {
-										const selectedFile = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
-										if (selectedFile && selectedFile.type.startsWith('image/'))
-											setSelectedImage(selectedFile);
-										else if (inputRefImage.current) {
-											inputRefImage.current.value = '';
-											setSelectedImage(null);
-										}
-									}}
- 								/>
-								{selectedImage && (
-									<img
-										src={URL.createObjectURL(selectedImage)}
-										alt="Selected File"
-									/>
+								{activeChannel.admins.some((admin) => admin.login === my?.login) ? (
+									<>
+										{errorMessage && <p className="error-message">{errorMessage}</p>}
+										<label htmlFor="channelName">Channel Name:</label>
+										<input
+											id="channelName"
+											ref={inputRefName}
+											type="text"
+											placeholder="Change Name..."
+										/>
+										<button onClick={() => handleUpdate('channelName')}>Change Name </button>
+										<label htmlFor="channelDescription">Channel Description:</label>
+										<input
+											id="channelDescription"
+											ref={inputRefDescription}
+											type="text"
+											placeholder="Change Description..."
+										/>
+										<button onClick={() => handleUpdate('channelDescription')}>Change Description </button>
+										<label htmlFor="channelImage">Channel Image:</label>
+										<input
+											id="channelImage"
+											ref={inputRefImage}
+											type="file"
+											accept="image/jpg, image/jpeg, image/png, image/gif"
+											onChange={(e) => {
+												const selectedFile = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+												if (selectedFile && selectedFile.type.startsWith('image/'))
+													setSelectedImage(selectedFile);
+												else if (inputRefImage.current) {
+													inputRefImage.current.value = '';
+													setSelectedImage(null);
+												}
+											}}
+										/>
+										{selectedImage && (
+											<img
+												src={URL.createObjectURL(selectedImage)}
+												alt="Selected File"
+											/>
+										)}
+										<button onClick={() => handleUpdate('channelImage')}>Change Image </button>
+										<label htmlFor="channelPassword">Channel Password:</label>
+										<input
+											id="channelPassword"
+											ref={inputRefPassword}
+											type="password"
+											placeholder="Change Password..."
+										/>
+										<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
+
+										<button
+											id='leaveButton'
+											onClick={() => {handleChannelLeave(activeChannel.name)}}
+										>
+											Leave Channel
+										</button>
+
+										<button
+											id='deleteButton'
+											onClick={() => {handleChannelDelete(activeChannel.name)}}
+										>
+											Delete Channel
+										</button>
+									</>
+								) : (
+									<button
+										id='leaveButton'
+										onClick={() => {handleChannelLeave(activeChannel.name)}}
+									>
+										Leave Channel
+									</button>
 								)}
- 								<button onClick={() => handleUpdate('channelImage')}>Change Image </button>
- 								<label htmlFor="channelPassword">Channel Password:</label>
- 								<input
-									id="channelPassword"
-									ref={inputRefPassword}
-									type="password"
-									placeholder="Change Password..."
- 								/>
- 								<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
-
-
-
- 								<button
-									id='leaveButton'
-									onClick={() => {handleChannelLeave(activeChannel.name)}}
-									>
- 									Leave Channel
- 								</button>
- 								<button
-									id='deleteButton'
-									onClick={() => {handleChannelDelete(activeChannel.name)}}
-									>
- 									Delete Channel
- 								</button>
  							</div>
  						)}
 

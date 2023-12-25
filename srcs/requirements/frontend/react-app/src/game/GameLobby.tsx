@@ -5,7 +5,7 @@ import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
 import LoadingPage from '../utils/LoadingPage';
 import "./GameLobby.css";
-import { ReactComponent as Map } from './map1.svg';
+import { ReactComponent as Map } from '../assets/map/iconMap1.svg';
 
 export interface IUser {
 	login: string;
@@ -87,7 +87,9 @@ const GameLobby = () => {
 						<img className='image' src={lobby.players[1].avatar ? lobby.players[1].avatar : lobby.players[1].imageUrl}/>
 						<span>{lobby.players[1].nickname ? lobby.players[1].nickname : lobby.players[1].login}</span>		
 					</div>
-				) : 'null'}
+				) : (
+					<button className='invite'>Invite</button>
+				)}
 			</div>
 			<Map className='map'/>
 			{lobby.admins.some((admin) => admin.login === my?.login) ? ( //admin sayısı teke düşürüldüğünde some methodu kaldırılacak.

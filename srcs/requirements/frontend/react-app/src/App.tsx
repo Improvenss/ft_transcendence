@@ -7,13 +7,13 @@ import LoginPage from "./login/LoginPage";
 import Cookies from 'js-cookie';
 import ChatPage from "./chat/ChatPage";
 import { useAuth } from "./hooks/AuthHook";
-import { ReactComponent as GithubIcon } from './github.svg';
+import { ReactComponent as IconGithub } from './assets/iconGithub.svg';
 import FallingChars from "./utils/FallingChars";
 import { useUser } from "./hooks/UserHook";
 import ProfilePage from "./user/ProfilePage";
 import GamePage from './game/GamePage';
 import GameLobby from './game/GameLobby';
-import { ReactComponent as NotificationIcon } from './iconNotification.svg';
+import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
 import { useEffect, useState } from 'react';
 
 function App() {
@@ -62,7 +62,7 @@ function App() {
 							)}
 						</Link>
 						<div id="notifs-container">
-							<NotificationIcon id='notifs' onClick={() => setNotifs(!notifs)} />
+							<IconNotifs id='notifs' onClick={() => setNotifs(!notifs)} />
 							{unreadNotifications > 0 && (
 								<div className="notification-count">
 									{unreadNotifications}
@@ -80,7 +80,7 @@ function App() {
 				) : (
 					<nav>
 						<a href="https://github.com/Improvenss/ft_transcendence">
-							<GithubIcon id="icon-github" />
+							<IconGithub id="icon-github" />
 						</a>
 					</nav>
 				)}

@@ -6,6 +6,7 @@
 	align-items: center;
 	justify-content: center;
 	height: 50vh;
+	user-select: none;
 }
 
 .game-button {

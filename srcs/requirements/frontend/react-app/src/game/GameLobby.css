@@ -29,6 +29,8 @@
 	width: 30px;
 	height: 30px;
 	object-fit: cover;
+	user-select: none;
+	pointer-events: none;
   }
 
   .players .leftPlayer,
@@ -37,22 +39,34 @@
 	padding: 8px;
 	background-color: gray;
 	border-radius: 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+
+  .players .leftPlayer > span,
+  .players .rightPlayer > span {
+	margin-left: 10px;
   }
 
   .players .leftPlayer {
 	float: left;
+	margin-left: 10px;
   }
   
   .players .rightPlayer {
 	float: right;
+	margin-right: 10px;
   }
 
   .map {
 	width: 200px;
 	height: 200px;
+	user-select: none;
   }
 
   .start {
+	user-select: none;
 	margin-top: 20px;
 	padding: 10px;
 	background-color: #4caf50;
