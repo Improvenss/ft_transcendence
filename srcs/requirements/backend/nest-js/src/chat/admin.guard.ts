@@ -36,7 +36,7 @@ export class ChatAdminGuard implements CanActivate {
 			const	tmpChannel = await this.chatService.findChannel(request.headers.channel, "all")
 			const singleChannel = Array.isArray(tmpChannel) ? tmpChannel[0] : tmpChannel;
 			if (!singleChannel)
-				throw (new UnauthorizedException("Chanenl not found in DB!"));
+				throw (new UnauthorizedException("Channel not found in DB!"));
 			if (!singleChannel.admins || !singleChannel.admins.some(admin => admin.id === singleUser.id))
 				throw new UnauthorizedException("User is not an admin for this channel!");
 			request.user = singleUser;

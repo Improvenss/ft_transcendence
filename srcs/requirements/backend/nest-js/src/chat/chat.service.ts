@@ -265,4 +265,31 @@ export class ChatService {
 	async removeMessage() {
 		return (await this.messageRepository.delete({}));
 	}
+
+	async setPermission(
+		channel: Channel,
+		user: User,
+		action: 'remove' | 'set',
+	){
+		if (action === 'remove')
+		{
+			const index = channel.admins.findIndex(admin => admin.login === user.login);
+			if (index === -1) {
+				throw new Error(`user[${user.login}] does not have permission anyway!`);
+			} else {
+				channel.admins.splice(index, 1);
+				await this.channelRepository.save(channel);
+			}
+		}
+		else if (action === 'set')
+		{
+			if (channel.admins.some(admin => admin.login === user.login)) {
+				throw new Error(`user[${user.login}] already has permission!`);
+			} else {
+				channel.admins.push(user);
+				await this.channelRepository.save(channel);
+			}
+		}
+		return ({admins: channel.admins});
+	}
 }

@@ -263,6 +263,31 @@ export class ChatController {
 			return ({error: err});
 		}
 	}
+
+	@Post('/channel/admin')
+	@UseGuards(ChatAdminGuard)
+	async setChannelPermission(
+		@Req() {user},
+		@Req() {channel},
+		@Query ('action') action: 'remove' | 'set',
+		@Query ('user') targetUser: string,
+	){
+		try
+		{
+			console.log(`${C.B_YELLOW}POST: /channel/admin: @Req() action: [${action}] user: [${targetUser}] channel: [${channel.name}]${C.END}`);
+
+			const	tmpUser = await this.usersService.findUser(targetUser);
+			const	singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+			const response = await this.chatService.setPermission(channel, singleUser, action);
+			console.log(response);
+			return ({message: `User administrator successfully ${action}`});
+		}
+		catch(err)
+		{
+			console.error("@Post('/channel/admin'):", err);
+			return ({error: err});
+		}
+	}
 	// -----------------------------------------------
 
 	@Post('/channel/create')

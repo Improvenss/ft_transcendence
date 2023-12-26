@@ -175,7 +175,8 @@ import { useNavigate } from "react-router-dom";
 				console.log(action);
 				break;
 			case 'removeAdmin':
-				console.log(action);
+				console.log(`Removed User[${targetUser}] administrator permissions from channel[${activeChannel.name}]`);
+				url = `/chat/channel/admin?action=remove&user=${targetUser}`;
 				break;
 			default:
 				break;

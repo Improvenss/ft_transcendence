@@ -362,6 +362,34 @@
         }
       }
     },
+    "/chat/channel/admin": {
+      "post": {
+        "operationId": "ChatController_setChannelPermission",
+        "parameters": [
+          {
+            "name": "action",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/channel/create": {
       "post": {
         "operationId": "ChatController_createChannel",
