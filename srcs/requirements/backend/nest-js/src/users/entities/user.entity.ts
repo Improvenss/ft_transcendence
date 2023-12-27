@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, ManyToOne } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail } from "class-validator";
@@ -48,6 +48,11 @@ export class User {
 	@JoinTable()
 	public friends: User[];
 
+	//----------------------Notfis----------------------------//
+
+	@OneToMany(() => Notifs, notification => notification.user)
+	public notifications: Notifs[];
+
 	//----------------------Channel----------------------------//
 
 	// @ManyToMany(() => Channel, channel => channel.members)
@@ -93,6 +98,28 @@ export class User {
 
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);
+	}
+}
+
+@Entity('notification')
+export class Notifs {
+	@PrimaryGeneratedColumn()
+	public id: number;
+
+	@Column()
+	public text: string; // Bildirim metni
+
+	@Column()
+	public date: Date; // Bildirim tarihi
+
+	@ManyToOne(() => User, user => user.notifications)
+	public user: User; // Kullanıcı ile ilişkilendirme
+
+	@Column({ default: false })
+	public read: boolean; // Okunma durumu
+
+	constructor(notification: Partial<Notifs>) {
+		Object.assign(this, notification);
 	}
 }
 

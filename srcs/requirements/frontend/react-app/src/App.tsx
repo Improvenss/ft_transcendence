@@ -25,6 +25,12 @@ function App() {
 	const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
 
 	useEffect(() => {
+		//user için bildirim yapısı oluşturulacak, okunan ve okunmayan bildirim yapısı olacak.
+		//Kullanıcı bilgilerinin yanında bu bildirim mesajlarıda gelecek ve info'da listelenecek.
+		//Eğer yeni bir bildiri gelirse socket'ten kullanıcı adına notifs:user-name'e mesaj atılacak.
+		//	Frontend'de ise bu dinleme olayı gerçekleşecek.
+
+
 		// bildirim için useEffect kullanılacak, burada socket dinlemesi gerçekleştirilmelidir,
 		//		Kullanıcıya, arkadaşlık isteği, oyun isteği gibi istekleri ve diğer bildirimleri listeleteceğiz.
 		//		Bu yapılar, buton içerikli, text içerikli olacak.

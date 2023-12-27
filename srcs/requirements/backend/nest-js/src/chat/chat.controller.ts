@@ -278,7 +278,7 @@ export class ChatController {
 
 			const	tmpUser = await this.usersService.findUser(targetUser);
 			const	singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-			const response = await this.chatService.setPermission(channel, singleUser, action);
+			const	response = await this.chatService.setPermission(channel, singleUser, action);
 			console.log(response);
 			return ({message: `User administrator successfully ${action}`});
 		}

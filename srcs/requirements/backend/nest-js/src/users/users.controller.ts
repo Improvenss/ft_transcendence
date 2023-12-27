@@ -10,12 +10,15 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 import { User } from './entities/user.entity';
+import { ChatGateway } from 'src/chat/chat.gateway';
+import { ChatService } from 'src/chat/chat.service';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
+		// private readonly chatGateway: ChatGateway,
 	) {}
 
 	@Get('/user')
@@ -62,25 +65,25 @@ export class UsersController {
 		}
 	}
 
-	@Post('/friend/add')
-	async	addUser(
-		@Req() {user},
-		@Query ('user') targetUser: string | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /friend/add: @Query('user'): [${targetUser}]${C.END}`);
-			const	responseAddFriend = await this.usersService.addFriend(user, targetUser);
-			if (!responseAddFriend)
-				return ({message: "USER NOK", user: `User '${targetUser}' not found.`});
-			return ({message: responseAddFriend});
-		}
-		catch (err)
-		{
-			console.log("@Post('/friend/add'): ", err);
-			return ({err: err});
-		}
-	}
+	// @Post('/friend/add')
+	// async	addUser(
+	// 	@Req() {user},
+	// 	@Query ('user') targetUser: string | undefined,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_YELLOW}POST: /friend/add: @Query('user'): [${targetUser}]${C.END}`);
+	// 		const	responseAddFriend = await this.usersService.addFriend(user, targetUser);
+	// 		if (!responseAddFriend)
+	// 			return ({message: "USER NOK", user: `User '${targetUser}' not found.`});
+	// 		return ({message: responseAddFriend});
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.log("@Post('/friend/add'): ", err);
+	// 		return ({err: err});
+	// 	}
+	// }
 
 	// @Post('/create')
 	// async	createUser(
@@ -212,6 +215,30 @@ export class UsersController {
 		{
 			console.error("@Delete('/file/delete'): ", err);
 			return ({message: `Failed to delete file.: Error: ${err}`});
+		}
+	}
+
+	@Post()
+	async action(
+		@Req() {user},
+		@Query('action') action: 'poke' | 'addFriend' | 'unFriend',
+		@Query('target') target: string,
+	){
+		try {
+			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] user: [${target}]${C.END}`);
+
+			if (action === 'addFriend')
+				await this.usersService.addFriend(user, target);
+			else if (action === 'poke')
+				await this.usersService.poke(user, target);
+			else
+				throw new Error('Invalid values!');
+
+			// this.chatGateway.server.emit(`listenUser:${target}`);
+			return ({message: `${action} was successfully performed on user[${target}].`});
+		} catch (err) {
+			console.error("@Post(): ", err);
+			return ({err: err});
 		}
 	}
 

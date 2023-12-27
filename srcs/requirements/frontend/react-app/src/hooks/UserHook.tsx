@@ -2,6 +2,14 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
+import { useSocket } from './SocketHook';
+
+interface INotfis {
+	id: number,
+	text: string,
+	date: Date,
+	read: boolean,
+}
 
 interface IUserProps{
 	email: string;
@@ -13,6 +21,7 @@ interface IUserProps{
 	avatar?: string;
 	status: string;
 	friends: IUserProps[];
+	notifications: INotfis[];
 }
 
 const UserContext = createContext<{
@@ -24,6 +33,7 @@ const UserContext = createContext<{
 export function UserProvider({children}: {children: React.ReactNode}) {
 	console.log("---------USERHOOK-PAGE---------");
 	const isAuth = useAuth().isAuth;
+	const socket = useSocket();
 	const userCookie = Cookies.get("user");
 	const [userInfo, setUserInfo] = useState<IUserProps | undefined>(undefined);
 
@@ -32,7 +42,8 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
 				//const response = await fetch(process.env.REACT_APP_USER as string, {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends`, {
+				// const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends`, {
+				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends&relations=notifications`, {
 					method: "GET",
 					headers: {
 						"Content-Type": "application/json",
@@ -54,8 +65,14 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 							avatar: data.user.avatar,
 							status: data.user.status,
 							friends: data.user.friends,
+							notifications: data.user.notifications,
 						});
 						console.log("userInfo:", data.user);
+
+						socket?.on(`listenUser:${data.user.login}`, checkUser);
+						return () => {
+							socket?.off(`listenUser:${data.user.login}`, checkUser);
+						};
 					} else {
 						console.log("IV: ---User Response '❌'---");
 						Cookies.remove('user');
@@ -66,8 +83,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			}
 			checkUser();
 		} 
-		/* eslint-disable react-hooks/exhaustive-deps */
-	}, []);
+	}, [socket, isAuth]);
 
 	if ((isAuth === true && userInfo === undefined))
 		return (<LoadingPage />);
