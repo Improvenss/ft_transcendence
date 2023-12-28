@@ -18,7 +18,7 @@ export class Game {
 	public name: string; // ok
 
 	@IsString()
-	@Column({ length: 20, nullable: true })
+	@Column({ length: 100, nullable: true })
 	public password: string;
 
 	@Column({ type: 'enum', enum: ['public', 'private']})

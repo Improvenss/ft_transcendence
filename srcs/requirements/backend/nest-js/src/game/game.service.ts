@@ -26,16 +26,23 @@ export class GameService {
 		const	singleRoom = Array.isArray(tmpGameRoom) ? tmpGameRoom[0] : tmpGameRoom;
 		if (singleRoom)
 			return (`GameRoom: '${createGameDto.name}' already created.`);
+		Object.assign(createGameDto, {
+			password: (createGameDto.password === (undefined || null))
+			? null
+			: bcrypt.hashSync(
+				createGameDto.password,
+				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
+		})
+		console.log("olusturulacak olan game sifresi:", createGameDto);
 		const	newRoom = new Game(createGameDto);
 		newRoom.players = [singleUser];
 		newRoom.admins = [singleUser];
-		console.log("--------->", newRoom);
 		const	response = await this.gameRepository.save(newRoom);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 	}
 
-	async findRoomUser(room: Game, user: User) {
+	async isRoomUser(room: Game, user: User) {
 		if (!room || !user)
 			throw (new NotFoundException(`game.service.ts: findRoomUser: room: ${room.name} || user: ${user.login} not found!`));
 		const foundUser = room.players.find((roomUser) => roomUser.login === user.login);
@@ -75,21 +82,22 @@ export class GameService {
 		const	tmpRoom = await this.findGameRoom(body.room, ['players']);
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
-			return (new NotFoundException("'Game Room' not found for register Game Room!"));
-		// if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
-		// {
-		// 	console.log("SIFRE HATALIIIIIII");
-		// 	return (new Error("Password is WRONG!!!"));
-		// }
-		// console.log("singleRoom passs OK");
+			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
 
 		const tmpUser = await this.usersService.findUser(user);
 		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 		if (!singleUser)
-			return (new NotFoundException("'User' not found for register Game Room!"));
+			throw (new NotFoundException("'User' not found for register Game Room!"));
 
-		if (await this.findRoomUser(singleRoom, singleUser))
-			return (new Error(`${singleUser.login} already in this ${singleRoom.name}.`));
+		if (await this.isRoomUser(singleRoom, singleUser))
+			throw (new Error(`${singleUser.login} already in this ${singleRoom.name}.`));
+
+		if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
+		{
+			console.log("SIFRE HATALIIIIIII");
+			throw (new Error("Password is WRONG!!!"));
+		}
+		console.log("singleRoom passs OK");
 		singleRoom.players.push(singleUser);
 		return (this.gameRepository.save(singleRoom));
 	}

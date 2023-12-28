@@ -12,6 +12,8 @@ import { CreateNotifsDto } from './dto/create-notifs.dto';
 @Injectable()
 export class UsersService {
 	constructor(
+		@InjectRepository(Notifs)
+		private readonly	notifsRepository: Repository<Notifs>,
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
 
@@ -87,7 +89,8 @@ export class UsersService {
 		newNotification.read = false;
 
 		targetUser.notifications.push(newNotification);
-		const response = await this.usersRepository.save(targetUser);
+		// const response = await this.usersRepository.save(targetUser);
+		const response = await this.notifsRepository.save(newNotification);
 		console.log(response);
 		return (response);
 	}

@@ -50,7 +50,7 @@ export class User {
 
 	//----------------------Notfis----------------------------//
 
-	@OneToMany(() => Notifs, notification => notification.user)
+	@OneToMany(() => Notifs, notification => notification.user, {cascade: true})
 	public notifications: Notifs[];
 
 	//----------------------Channel----------------------------//

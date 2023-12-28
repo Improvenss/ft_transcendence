@@ -63,7 +63,10 @@ export class GameController {
 		{
 			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
 			const	responseRoom = await this.gameService.addGameRoomUser(user.login, body);
-			this.chatGateway.server.emit('roomListener');
+			if (!responseRoom)
+
+			this.chatGateway.server.emit('roomListener', responseRoom);
+
 			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
 
 			return (responseRoom);
@@ -85,7 +88,7 @@ export class GameController {
 	){
 		try
 		{
-			console.log(`${C.B_YELLOW}POST: /room: @Body(): [${body}]${C.END}`);
+			console.log(`${C.B_YELLOW}POST: /room: @Body(): ${C.END}`, body);
 			const	newGameRoom = await this.gameService.createGameRoom(user.login, body);
 			return ({response: newGameRoom});
 		}
