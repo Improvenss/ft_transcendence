@@ -242,6 +242,23 @@ export class UsersController {
 		}
 	}
 
+	@Get()
+	async getData(
+		@Req() {user},
+		@Query('action') action: string[] | string | undefined,
+	){
+		try {
+			if (action === undefined)
+				throw Error('action is empty!');
+			console.log(`${C.B_YELLOW}GET: /user: @Req() action: [${action}]${C.END}`);
+			return (await this.usersService.getData(user, action));
+		} catch (err) {
+			console.error("@Get(): ", err);
+			return ({err: err.message});
+		}
+	}
+
+
 	// @Delete()
 	// async	removeAll() {
 	// 	return this.usersService.removeAll();

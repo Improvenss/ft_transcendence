@@ -29,6 +29,7 @@ export class GameService {
 		const	newRoom = new Game(createGameDto);
 		newRoom.players = [singleUser];
 		newRoom.admins = [singleUser];
+		console.log("--------->", newRoom);
 		const	response = await this.gameRepository.save(newRoom);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);

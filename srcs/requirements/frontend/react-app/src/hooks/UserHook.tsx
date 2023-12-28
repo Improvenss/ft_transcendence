@@ -69,10 +69,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 						});
 						console.log("userInfo:", data.user);
 
-						socket?.on(`listenUser:${data.user.login}`, checkUser);
-						return () => {
-							socket?.off(`listenUser:${data.user.login}`, checkUser);
-						};
 					} else {
 						console.log("IV: ---User Response '❌'---");
 						Cookies.remove('user');
@@ -87,6 +83,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 
 	if ((isAuth === true && userInfo === undefined))
 		return (<LoadingPage />);
+
 
 	return (
 		<>

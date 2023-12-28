@@ -180,6 +180,15 @@
             "description": ""
           }
         }
+      },
+      "get": {
+        "operationId": "UsersController_getData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/chat/channel": {

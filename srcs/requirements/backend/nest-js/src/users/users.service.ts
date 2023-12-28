@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import * as fs from 'fs';
 import * as path from 'path';
+import { CreateNotifsDto } from './dto/create-notifs.dto';
 
 
 @Injectable()
@@ -13,7 +14,9 @@ export class UsersService {
 	constructor(
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
-		// private readonly	entityManager: EntityManager,
+
+		//@InjectRepository(Notifs)
+		//private readonly	notifsRepository: Repository<Notifs>,
 	) {}
 
 	// async	addFriend(
@@ -57,6 +60,7 @@ export class UsersService {
 		await this.usersRepository.save([requesterUser, targetUser]);
 	}
 
+
 	async poke(
 		requesterUser: User,
 		target: string,
@@ -66,15 +70,44 @@ export class UsersService {
 			throw new NotFoundException('User not found!');
 		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 
-		const newNotification = new Notifs({
+		const me = await this.findUser(target);
+		const	my = Array.isArray(me) ? me[0] : me;
+
+		const createNotfisDto: CreateNotifsDto = {
 			text: `${requesterUser.displayname} poked you!`,
 			date: new Date(),
-			user: targetUser,
+			user:  my,
 			read: false,
-		});
-		
+		};
+
+		const newNotification = new Notifs(createNotfisDto);
+		newNotification.text = "abc";
+		newNotification.date = new Date();
+		newNotification.user = my,
+		newNotification.read = false;
+
 		targetUser.notifications.push(newNotification);
-		await this.usersRepository.save(targetUser);
+		const response = await this.usersRepository.save(targetUser);
+		console.log(response);
+		return (response);
+	}
+
+	async getData(
+		user: User,
+		action: string[] | string,
+	){
+		if (typeof action === 'string') {
+			action = [action];
+		}
+		const data = await this.usersRepository.findOne({where: {login: user.login}, relations: action});
+		
+		const result: Record<string, any> = {};
+		action.forEach(rel => {
+			if (data && data.hasOwnProperty(rel)) {
+			  result[rel] = data[rel];
+			}
+		});
+		return (result);
 	}
 
 	async	findUser(

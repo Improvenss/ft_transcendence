@@ -109,7 +109,7 @@ export class Notifs {
 	@Column()
 	public text: string; // Bildirim metni
 
-	@Column()
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public date: Date; // Bildirim tarihi
 
 	@ManyToOne(() => User, user => user.notifications)

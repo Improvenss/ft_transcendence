@@ -15,10 +15,13 @@ import GamePage from './game/GamePage';
 import GameLobby from './game/GameLobby';
 import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
 import { useEffect, useState } from 'react';
+import { useSocket } from './hooks/SocketHook';
 
 function App() {
 	console.log("---------APP-PAGE---------");
 	const { isAuth, setAuth } = useAuth();
+	const socket = useSocket();
+	const userCookie = Cookies.get("user");
 	const { userInfo } = useUser();
 	const navigate = useNavigate();
 	const [notifs, setNotifs] = useState<boolean>(false);
@@ -34,9 +37,30 @@ function App() {
 		// bildirim için useEffect kullanılacak, burada socket dinlemesi gerçekleştirilmelidir,
 		//		Kullanıcıya, arkadaşlık isteği, oyun isteği gibi istekleri ve diğer bildirimleri listeleteceğiz.
 		//		Bu yapılar, buton içerikli, text içerikli olacak.
-		if (notifs) {
-		  setUnreadNotifications((prevCount) => prevCount + 1);
+
+		const checkNotifs = async () => {
+			const response = await fetch(process.env.REACT_APP_FETCH + `/users?action=notifications`, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + userCookie as string,
+				},
+			});
+			if (response.ok){
+				console.log("Notifs update.");
+				const data = await response.json();
+				console.log("...",data);
+			}
+
+			setUnreadNotifications((prevCount) => prevCount + 1);
 		}
+
+
+		socket?.on(`listenUser:${userInfo?.login}`, checkNotifs);
+		return () => {
+			socket?.off(`listenUser:${userInfo?.login}`, checkNotifs);
+		};
+
 	}, [notifs]);
 
 	function logOut() {
