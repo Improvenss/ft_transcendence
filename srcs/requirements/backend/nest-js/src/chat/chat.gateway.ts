@@ -290,4 +290,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.error("@SubscribMessage(userStatus):", err);
 		}
 	}
+
+	@SubscribeMessage('markAllNotifsAsRead')
+	async handleNotifsStatus(
+		@ConnectedSocket() socket: Socket
+	){
+		try {
+			const responseUser = await this.usersService.findUser(null, socket);
+			if (responseUser === null){
+				throw (new NotFoundException("User not found!"));
+			}
+			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
+
+			await this.usersService.notifsMarkRead(singleUser);
+		} catch (err) {
+			console.error("@SubscribMessage(markAllNotifsAsRead):", err);
+		}
+	}
 }

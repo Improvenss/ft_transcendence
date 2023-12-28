@@ -17,6 +17,14 @@ import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
 import { useEffect, useState } from 'react';
 import { useSocket } from './hooks/SocketHook';
 
+interface INotifs {
+	id: number,
+	type: 'text' | 'sendFriendRequest',
+	text: string,
+	date: Date,
+	read: boolean,
+}
+
 function App() {
 	console.log("---------APP-PAGE---------");
 	const { isAuth, setAuth } = useAuth();
@@ -24,10 +32,58 @@ function App() {
 	const userCookie = Cookies.get("user");
 	const { userInfo } = useUser();
 	const navigate = useNavigate();
-	const [notifs, setNotifs] = useState<boolean>(false);
-	const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+	const [showNotifs, setShowNotifs] = useState<boolean>(false);
+	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
+	const [notifications, setNotifications] = useState<INotifs[]>([]);
 
 	useEffect(() => {
+		if (isAuth){
+			const checkNotifs = async () => {
+				const response = await fetch(process.env.REACT_APP_FETCH + `/users?action=notifications`, {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": "Bearer " + userCookie as string,
+					},
+				});
+				if (response.ok){
+					const data = await response.json();
+					console.log("notification:",data);
+					setNotifications(data.notifications);
+					const unreadCount = data.notifications.filter((notification: INotifs) => !notification.read).length;
+					setUnreadNotifs(unreadCount);
+				}
+			}
+			checkNotifs();
+
+			const handleListenNotifs = (newNotifs: any) => {
+				console.log("Notifs Geldi:", newNotifs);
+				setNotifications(prevNotifs => [
+					...prevNotifs,
+					newNotifs
+				]);
+
+				if (!newNotifs.read) {
+					setUnreadNotifs(prevCount => prevCount + 1);
+				}
+			}
+
+			socket?.on(`userNotifs:${userInfo?.login}`, handleListenNotifs);
+			return () => {
+				socket?.off(`userNotifs:${userInfo?.login}`, handleListenNotifs);
+			};
+		}
+	}, []);
+
+	useEffect(() => {
+		if (isAuth){
+			if (unreadNotifs > 0){
+				socket?.emit('markAllNotifsAsRead');
+				setUnreadNotifs(0);
+			}
+		}
+	}, [showNotifs]);
+
 		//user için bildirim yapısı oluşturulacak, okunan ve okunmayan bildirim yapısı olacak.
 		//Kullanıcı bilgilerinin yanında bu bildirim mesajlarıda gelecek ve info'da listelenecek.
 		//Eğer yeni bir bildiri gelirse socket'ten kullanıcı adına notifs:user-name'e mesaj atılacak.
@@ -37,31 +93,6 @@ function App() {
 		// bildirim için useEffect kullanılacak, burada socket dinlemesi gerçekleştirilmelidir,
 		//		Kullanıcıya, arkadaşlık isteği, oyun isteği gibi istekleri ve diğer bildirimleri listeleteceğiz.
 		//		Bu yapılar, buton içerikli, text içerikli olacak.
-
-		const checkNotifs = async () => {
-			const response = await fetch(process.env.REACT_APP_FETCH + `/users?action=notifications`, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": "Bearer " + userCookie as string,
-				},
-			});
-			if (response.ok){
-				console.log("Notifs update.");
-				const data = await response.json();
-				console.log("...",data);
-			}
-
-			setUnreadNotifications((prevCount) => prevCount + 1);
-		}
-
-
-		socket?.on(`userNotifs:${userInfo?.login}`, checkNotifs);
-		return () => {
-			socket?.off(`userNotifs:${userInfo?.login}`, checkNotifs);
-		};
-
-	}, [notifs]);
 
 	function logOut() {
 		localStorage.clear();
@@ -92,20 +123,38 @@ function App() {
 							)}
 						</Link>
 						<div id="notifs-container">
-							<IconNotifs id='notifs' onClick={() => setNotifs(!notifs)} />
-							{unreadNotifications > 0 && (
+							<IconNotifs id='notifs' onClick={() => setShowNotifs(!showNotifs)} />
+							{unreadNotifs > 0 && (
 								<div className="notification-count">
-									{unreadNotifications}
+									{unreadNotifs}
 								</div>
 							)}
 						</div>
 					</ul>
-						{notifs && (
-							<div className="notifs-content">
-								abcabcabcabcabca
-								abcabcabcabcabca
-							</div>	
-						)}
+					{showNotifs && (
+						<div className="notifs-content">
+							{notifications
+							      .sort((a, b) => b.id - a.id)
+								  .map((notification) => (
+									<div
+										key={notification.id}
+										className={`notification-card ${notification.read ? 'read' : 'unread'}`}
+									>
+										<p>{notification.text}</p>
+										{notification.type === "sendFriendRequest" && (
+											<div>
+												<button onClick={() => console.log("accept")}>
+													Accept
+												</button>
+												<button onClick={() => console.log("decline")}>
+													Decline
+												</button>
+											</div>
+										)}
+									</div>
+								))}
+						</div>
+					)}
 					</>
 				) : (
 					<nav>

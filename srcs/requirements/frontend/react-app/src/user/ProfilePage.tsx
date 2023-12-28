@@ -167,6 +167,7 @@ function ProfilePage() {
 					<span>{userPanel.email}</span>
 					{/* <button id="addFriend" onClick={() => handleInfo('addFriend', userPanel.login)}>Add Friend</button> */}
 					<button id="poke" onClick={() => handleInfo('poke', userPanel.login)}>Poke</button>
+					<button id="addFriend" onClick={() => handleInfo('addFriend', userPanel.login)}>addFriend</button>
 					{ userPanel.login === userInfo.login ? (
  							<div id="friends">
  								<input

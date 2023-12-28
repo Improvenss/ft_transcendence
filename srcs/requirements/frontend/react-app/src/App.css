@@ -77,6 +77,16 @@
 	z-index: 100; /* Diğer öğelerin üstünde görünmesini sağlar */
 	padding: 10px;
 	border-radius: 4px;
+	max-height: 80%;
+	overflow-y: auto;
+  }
+
+  .notification-card.read {
+	background-color: orange;
+  }
+  
+  .notification-card.unread {
+	background-color: darkred;
   }
 
   *:focus {

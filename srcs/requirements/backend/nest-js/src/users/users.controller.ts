@@ -228,17 +228,18 @@ export class UsersController {
 			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] user: [${target}]${C.END}`);
 			if (action === undefined || target === undefined)
 				throw Error(`Query is empty!`);
+			let result : any;
 
 			if (action === 'sendFriendRequest')
-				await this.usersService.friendRequest(action, user, target);
+				result = await this.usersService.friendRequest(action, user, target);
 			else if (action === 'acceptFriendRequest')
-				await this.usersService.friendRequest(action, user, target);
+				result = await this.usersService.friendRequest(action, user, target);
 			else if (action === 'poke')
-				await this.usersService.notifs(target, 'text', `${user.displayname} poked you!`);
+				result = await this.usersService.notifs(target, 'text', `${user.displayname} poked you!`);
 			else
 				throw new Error('Invalid action values!');
 
-			this.chatGateway.server.emit(`userNotifs:${target}`);
+			this.chatGateway.server.emit(`userNotifs:${target}`, result);
 			return ({message: `${action} was successfully performed on user[${target}].`});
 		} catch (err) {
 			console.error("@Post(): ", err);
@@ -255,6 +256,7 @@ export class UsersController {
 			console.log(`${C.B_YELLOW}GET: /user: @Req() action: [${action}]${C.END}`);
 			if (action === undefined)
 				throw Error('Query is empty!');
+
 			return (await this.usersService.getData(user, action));
 		} catch (err) {
 			console.error("@Get(): ", err);

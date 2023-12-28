@@ -11,6 +11,7 @@ import { CreateNotifsDto } from './dto/create-notifs.dto';
 
 @Injectable()
 export class UsersService {
+	chatGateway: any;
 	constructor(
 		@InjectRepository(Notifs)
 		private readonly	notifsRepository: Repository<Notifs>,
@@ -58,27 +59,64 @@ export class UsersService {
 			throw new Error('Users are already friends.');
 
 		if (type === 'sendFriendRequest')
-		{
-			this.notifs(target, 'sendFriendRequest', `${requesterUser.displayname} send friend request!`);
-		}
-		else if (type === 'acceptFriendRequest')
+			return (this.notifs(target, 'sendFriendRequest', `${requesterUser.displayname} send friend request!`));
+
+		if (type === 'acceptFriendRequest')
 		{
 			requesterUser.friends = [...requesterUser.friends, targetUser];
 			targetUser.friends = [...targetUser.friends, requesterUser];
 	
 			await this.usersRepository.save([requesterUser, targetUser]);
-			this.notifs(target, 'text', `${requesterUser.displayname} accept your friend invite!`);
+			return (this.notifs(target, 'text', `${requesterUser.displayname} accept your friend invite!`));
 		}
 	}
+
+	async notifsMarkRead(
+		user: User,
+	){
+		const tmpUser = await this.findUser(user.login, null, ['notifications']);
+		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+  
+		if (!tmpUser) {
+		  throw new NotFoundException('User not found!');
+		}
+	  
+		// İlgili bildirimlerin read değerini true olarak güncelle.
+		targetUser.notifications.forEach(notif => notif.read = true);
+	  
+		// Veritabanına kaydet.
+		await this.usersRepository.save(targetUser);
+
+		// const notifs = await this.getData(user, 'notifications');
+		// notifs.notifications.forEach((notif: CreateNotifsDto) => (
+		// 	notif.read = true
+		// ));
+		// await this.notifsRepository.save(notifs);
+
+
+		// const data = await this.usersRepository.findOne({where: {login: user.login}, relations: ['notifications']});
+
+		// data.notifications.forEach(notif => (notif.read = true));
+		
+		// console.log("--->", data);
+		// // await this.notifsRepository.save(data);
+		// await this.usersRepository.save(data);
+	}
+
 	async notifs(
 		target: string,
 		type: string,
 		text: string,
 	){
-		const	tmpUser = await this.findUser(target, null, ['notifications']);
+		// const	tmpUser = await this.findUser(target, null, ['notifications']);
+		// if (!tmpUser)
+		// 	throw new NotFoundException('User not found!');
+		// const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+		const	tmpUser = await this.findUser(target);
 		if (!tmpUser)
 			throw new NotFoundException('User not found!');
 		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
+		const	notifs = await this.getData(targetUser, 'notifications');
 	
 		const createNotfisDto: CreateNotifsDto = {
 			type: type,
@@ -90,8 +128,9 @@ export class UsersService {
 
 		const newNotification = new Notifs(createNotfisDto);
 
-		targetUser.notifications.push(newNotification);
+		await notifs.notifications.push(newNotification);
 		await this.notifsRepository.save(newNotification);
+		return (newNotification);
 	}
 
 	async getData(
