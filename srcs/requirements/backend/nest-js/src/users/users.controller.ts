@@ -18,7 +18,7 @@ import { ChatService } from 'src/chat/chat.service';
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
-		// private readonly chatGateway: ChatGateway,
+		private readonly chatGateway: ChatGateway,
 	) {}
 
 	@Get('/user')
@@ -234,7 +234,7 @@ export class UsersController {
 			else
 				throw new Error('Invalid values!');
 
-			// this.chatGateway.server.emit(`listenUser:${target}`);
+			this.chatGateway.server.emit(`listenUser:${target}`);
 			return ({message: `${action} was successfully performed on user[${target}].`});
 		} catch (err) {
 			console.error("@Post(): ", err);

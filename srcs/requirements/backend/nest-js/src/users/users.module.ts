@@ -3,9 +3,12 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { ChatGateway } from 'src/chat/chat.gateway';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
 	imports: [
+		ChatModule,
 		TypeOrmModule.forFeature([User]),
 	], // Burasi da User CRUD'unu kullanabilmemizi sagliyor.
 	controllers: [UsersController],

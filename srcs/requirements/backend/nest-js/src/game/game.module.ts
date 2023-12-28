@@ -7,12 +7,13 @@ import { UsersModule } from 'src/users/users.module';
 import { User } from 'src/users/entities/user.entity';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatModule } from 'src/chat/chat.module';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Module({
 	imports: [
-		UsersModule,
-		ChatModule,
-		GameModule,
+		// UsersModule,
+		// ChatModule,
+		// GameModule,
 		TypeOrmModule.forFeature([Game, User]),
 	],
 	controllers: [GameController],
