@@ -8,16 +8,18 @@ import { User } from 'src/users/entities/user.entity';
 import { ChatService } from 'src/chat/chat.service';
 import { ChatModule } from 'src/chat/chat.module';
 import { ChatGateway } from 'src/chat/chat.gateway';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
 	imports: [
-		// UsersModule,
+		 UsersModule,
+		 ChatModule,
 		// ChatModule,
 		// GameModule,
 		TypeOrmModule.forFeature([Game, User]),
 	],
 	controllers: [GameController],
-	providers: [ChatService, GameService],
-	exports: [TypeOrmModule],
+	providers: [GameService, UsersService, ChatService],
+	exports: [GameService],
 })
 export class GameModule {}

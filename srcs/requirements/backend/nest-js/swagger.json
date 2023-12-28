@@ -408,6 +408,92 @@
           }
         }
       }
+    },
+    "/game/room": {
+      "get": {
+        "operationId": "GameController_getGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "GameController_createGameRoom",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "GameController_patchGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GameController_deleteGameRoom",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/game/room/register": {
+      "post": {
+        "operationId": "GameController_registerGameRoom",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -421,6 +507,10 @@
   "components": {
     "schemas": {
       "CreateMessageDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateGameDto": {
         "type": "object",
         "properties": {}
       }

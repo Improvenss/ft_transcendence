@@ -12,6 +12,7 @@ import { ChatService } from './chat/chat.service';
 import { JwtModule } from '@nestjs/jwt';
 import { GameModule } from './game/game.module';
 import { UsersService } from './users/users.service';
+import { GameService } from './game/game.service';
 
 @Module({
 	imports: [
@@ -35,12 +36,12 @@ import { UsersService } from './users/users.service';
 			synchronize: true,
 		}),
 		ApiModule,
-		// UsersModule,
+		UsersModule,
 		ChatModule,
-		// GameModule,
+		GameModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, ChatService, UsersService], // Buraya da nest g gateway chat kodunu calistirinca geldi.
+	providers: [AppService], // Buraya da nest g gateway chat kodunu calistirinca geldi.
 	// providers: [AppService, ChatGateway, ChatService],
 })
 export class AppModule {}

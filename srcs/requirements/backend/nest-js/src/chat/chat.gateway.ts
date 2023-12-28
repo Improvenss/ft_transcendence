@@ -33,7 +33,7 @@ var count: number = 0;
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly usersService: UsersService,
-		private readonly gameService: GameService,
+		//private readonly gameService: GameService,
 		private readonly chatService: ChatService,
 	) {}
 
@@ -99,46 +99,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	 * @param socket 
 	 * @returns 
 	 */
-	@SubscribeMessage('joinGameRoom')
-	async handleJoinGameRoom(
-		@Body() roomData: {
-			name: string,
-		},
-		@ConnectedSocket() socket: Socket)
-	{
-		try
-		{
-			console.log("Socket'in Game Room'a joinlenme kismi - joinRoom -");
-			const responseUser = await this.usersService.findUser(null, socket);
-			if (responseUser === null)
-				throw (new NotFoundException("User not found for join Game Room!"));
-			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
-			const responseRoom = await this.gameService.findGameRoom(roomData.name, ['members']);
-			const singleRoom = Array.isArray(responseRoom) ? responseRoom[0] : responseRoom;
-			if (Array.isArray(responseRoom) ? responseRoom.length === 0 : responseRoom === null)
-				throw (new NotFoundException("Game Room not found!"));
-			const	ifUserInRoom = await this.gameService.findRoomUser(singleRoom, singleUser);
-			if (!ifUserInRoom)
-				throw (new NotFoundException("User is not in Game Room!"));
-			else if (singleRoom !== null
-				&& singleRoom.name === roomData.name)
-			{
-				if (socket.rooms.has(roomData.name))
-					return (console.log(`[${socket.id}] alredy '${roomData.name}' room.! :)`));
-				socket.join(roomData.name);
-				if (singleUser.socketId === socket.id) {
-					console.log(`Room: '${roomData.name}' Joined: [${socket.id}]`);
-					this.server.to(roomData.name).emit('BURAYA ROOMUN MESAJ KISMINA BASTIRACAGIZ', `Room(${roomData.name}): ${socket.id} joined!`);
-				}
-			}
-			else
-				throw (new Error("Socket: 'joinGameRoom': Unexpected error!"));
-		}
-		catch (err)
-		{
-			console.error("@SubscribMessage('joinGameRoom'):", err);
-		}
-	}
+	//@SubscribeMessage('joinGameRoom')
+	//async handleJoinGameRoom(
+	//	@Body() roomData: {
+	//		name: string,
+	//	},
+	//	@ConnectedSocket() socket: Socket)
+	//{
+	//	try
+	//	{
+	//		console.log("Socket'in Game Room'a joinlenme kismi - joinRoom -");
+	//		const responseUser = await this.usersService.findUser(null, socket);
+	//		if (responseUser === null)
+	//			throw (new NotFoundException("User not found for join Game Room!"));
+	//		const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
+	//		const responseRoom = await this.gameService.findGameRoom(roomData.name, ['members']);
+	//		const singleRoom = Array.isArray(responseRoom) ? responseRoom[0] : responseRoom;
+	//		if (Array.isArray(responseRoom) ? responseRoom.length === 0 : responseRoom === null)
+	//			throw (new NotFoundException("Game Room not found!"));
+	//		const	ifUserInRoom = await this.gameService.findRoomUser(singleRoom, singleUser);
+	//		if (!ifUserInRoom)
+	//			throw (new NotFoundException("User is not in Game Room!"));
+	//		else if (singleRoom !== null
+	//			&& singleRoom.name === roomData.name)
+	//		{
+	//			if (socket.rooms.has(roomData.name))
+	//				return (console.log(`[${socket.id}] alredy '${roomData.name}' room.! :)`));
+	//			socket.join(roomData.name);
+	//			if (singleUser.socketId === socket.id) {
+	//				console.log(`Room: '${roomData.name}' Joined: [${socket.id}]`);
+	//				this.server.to(roomData.name).emit('BURAYA ROOMUN MESAJ KISMINA BASTIRACAGIZ', `Room(${roomData.name}): ${socket.id} joined!`);
+	//			}
+	//		}
+	//		else
+	//			throw (new Error("Socket: 'joinGameRoom': Unexpected error!"));
+	//	}
+	//	catch (err)
+	//	{
+	//		console.error("@SubscribMessage('joinGameRoom'):", err);
+	//	}
+	//}
 
 	/**
 	 * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
