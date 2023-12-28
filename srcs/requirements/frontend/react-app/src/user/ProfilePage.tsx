@@ -122,7 +122,7 @@ function ProfilePage() {
 		let url = '';
 		switch (action){
 			case 'addFriend':
-				url = `/users?action=addFriend&target=${targetUser}`;
+				url = `/users?action=sendFriendRequest&target=${targetUser}`;
 				break;
 			case 'poke':
 				url = `/users?action=poke&target=${targetUser}`;

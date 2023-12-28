@@ -106,6 +106,9 @@ export class Notifs {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
+	@Column({ type: 'enum', enum: ['text', 'sendFriendRequest']})
+	public type: string; // Bildiri tipi
+
 	@Column()
 	public text: string; // Bildirim metni
 

@@ -156,7 +156,7 @@
     },
     "/users": {
       "post": {
-        "operationId": "UsersController_action",
+        "operationId": "UsersController_request",
         "parameters": [
           {
             "name": "action",

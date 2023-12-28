@@ -44,7 +44,8 @@ export class UsersService {
 	// 	return (responseAddFriend);
 	// }
 
-	async addFriend(
+	async friendRequest(
+		type: 'sendFriendRequest' | 'acceptFriendRequest',
 		requesterUser: User,
 		target: string,
 	){
@@ -56,43 +57,41 @@ export class UsersService {
 		if (targetUser.friends.some(friend => friend.id === requesterUser.id))
 			throw new Error('Users are already friends.');
 
-		requesterUser.friends = [...requesterUser.friends, targetUser];
-		targetUser.friends = [...targetUser.friends, requesterUser];
-
-		await this.usersRepository.save([requesterUser, targetUser]);
+		if (type === 'sendFriendRequest')
+		{
+			this.notifs(target, 'sendFriendRequest', `${requesterUser.displayname} send friend request!`);
+		}
+		else if (type === 'acceptFriendRequest')
+		{
+			requesterUser.friends = [...requesterUser.friends, targetUser];
+			targetUser.friends = [...targetUser.friends, requesterUser];
+	
+			await this.usersRepository.save([requesterUser, targetUser]);
+			this.notifs(target, 'text', `${requesterUser.displayname} accept your friend invite!`);
+		}
 	}
-
-
-	async poke(
-		requesterUser: User,
+	async notifs(
 		target: string,
+		type: string,
+		text: string,
 	){
 		const	tmpUser = await this.findUser(target, null, ['notifications']);
 		if (!tmpUser)
 			throw new NotFoundException('User not found!');
 		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-
-		const me = await this.findUser(target);
-		const	my = Array.isArray(me) ? me[0] : me;
-
+	
 		const createNotfisDto: CreateNotifsDto = {
-			text: `${requesterUser.displayname} poked you!`,
+			type: type,
+			text: text,
 			date: new Date(),
-			user:  my,
+			user: targetUser,
 			read: false,
 		};
 
 		const newNotification = new Notifs(createNotfisDto);
-		newNotification.text = "abc";
-		newNotification.date = new Date();
-		newNotification.user = my,
-		newNotification.read = false;
 
 		targetUser.notifications.push(newNotification);
-		// const response = await this.usersRepository.save(targetUser);
-		const response = await this.notifsRepository.save(newNotification);
-		console.log(response);
-		return (response);
+		await this.notifsRepository.save(newNotification);
 	}
 
 	async getData(

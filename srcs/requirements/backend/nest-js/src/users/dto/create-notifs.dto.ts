@@ -1,8 +1,11 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsString, IsDate, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsDate, IsBoolean, IsOptional, IsEnum } from 'class-validator';
 import { User } from '../entities/user.entity';
 
 export class CreateNotifsDto {
+	@IsEnum(['text', 'sendFriendRequest'])
+	type: string;
+
 	@IsString()
 	@IsOptional()
 	text: string;

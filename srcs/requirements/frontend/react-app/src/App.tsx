@@ -56,9 +56,9 @@ function App() {
 		}
 
 
-		socket?.on(`listenUser:${userInfo?.login}`, checkNotifs);
+		socket?.on(`userNotifs:${userInfo?.login}`, checkNotifs);
 		return () => {
-			socket?.off(`listenUser:${userInfo?.login}`, checkNotifs);
+			socket?.off(`userNotifs:${userInfo?.login}`, checkNotifs);
 		};
 
 	}, [notifs]);
