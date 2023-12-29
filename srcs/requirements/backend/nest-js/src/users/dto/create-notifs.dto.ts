@@ -3,7 +3,7 @@ import { IsString, IsDate, IsBoolean, IsOptional, IsEnum } from 'class-validator
 import { User } from '../entities/user.entity';
 
 export class CreateNotifsDto {
-	@IsEnum(['text', 'sendFriendRequest'])
+	@IsEnum(['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest'])
 	type: string;
 
 	@IsString()

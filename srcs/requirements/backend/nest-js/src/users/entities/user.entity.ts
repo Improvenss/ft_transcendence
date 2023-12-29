@@ -106,7 +106,7 @@ export class Notifs {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column({ type: 'enum', enum: ['text', 'sendFriendRequest']})
+	@Column({ type: 'enum', enum: ['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest']})
 	public type: string; // Bildiri tipi
 
 	@Column()

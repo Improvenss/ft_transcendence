@@ -22,31 +22,8 @@ export class UsersService {
 		//private readonly	notifsRepository: Repository<Notifs>,
 	) {}
 
-	// async	addFriend(
-	// 	selfUser: User,
-	// 	targetUser: string,
-	// ){
-	// 	const	tmpSelfUser = await this.findUser(selfUser.login, null, ['friends']);
-	// 	const	singleSelfUser = Array.isArray(tmpSelfUser) ? tmpSelfUser[0] : tmpSelfUser;
-
-	// 	const	tmpUser = await this.findUser(targetUser, null, ['friends']);
-	// 	const	singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-
-	// 	if (!singleUser || !singleUser.friends || !singleSelfUser || !singleSelfUser.friends)
-	// 		throw (new NotFoundException(`users.service.ts: addFriend(): User not found!`));
-
-	// 	const foundUser = singleSelfUser.friends.find(
-	// 		(friendUser) => friendUser.login === singleUser.login);
-	// 	if (foundUser)
-	// 		return (`Already added!`);
-
-	// 		singleSelfUser.friends.push(singleUser);
-	// 	const	responseAddFriend = await this.usersRepository.save(singleSelfUser);
-	// 	return (responseAddFriend);
-	// }
-
 	async friendRequest(
-		type: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
+		action: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
 		requesterUser: User,
 		target: string,
 	){
@@ -60,22 +37,22 @@ export class UsersService {
 
 		let message = '';
 
-		switch (type){
+		switch (action){
 			case 'sendFriendRequest':
 				message =  `${requesterUser.displayname} send friend request!`;
 				break;
-			case 'acceptFriendRequest':{
-				//singleSelfUser.friends.push(singleUser);
-				//await this.usersRepository.save(singleSelfUser);
-			
-				targetUser.friends.push(requesterUser);
-				await this.usersRepository.save(targetUser);
-				//requesterUser.friends = [...requesterUser.friends, targetUser];
-				//targetUser.friends = [...targetUser.friends, requesterUser];
-				//await this.usersRepository.save([requesterUser, targetUser]);
-				message = `${requesterUser.displayname} accept your friend invite!`;
+			case 'acceptFriendRequest':
+				const	requesterArray = await this.findUser(requesterUser.login, null, ['friends']);
+				const	requester = Array.isArray(requesterArray) ? requesterArray[0] : requesterArray;
+
+				requester.friends = [...requester.friends, targetUser];
+				targetUser.friends = [...targetUser.friends, requester];
+
+				//requester.friends.push(targetUser);
+				//targetUser.friends.push(requester);
+				await this.usersRepository.save([requester, targetUser]);
+				message = `${requester.displayname} accept your friend invite!`;
 				break;
-			}
 			case 'declineFriendRequest':
 				message = `${requesterUser.displayname} decline your friend invite!`;
 				break;
@@ -83,10 +60,10 @@ export class UsersService {
 				break;
 		}
 
-		return (await this.notifs(requesterUser.login, target, type, message));
+		return (await this.notifs(requesterUser.login, target, action, message));
 	}
 
-	async notifsMarkRead(
+	async notifsMarkRead( //stabil değil tekrar bak.!!
 		user: User,
 	){
 		const tmpUser = await this.findUser(user.login, null, ['notifications']);
@@ -116,7 +93,7 @@ export class UsersService {
 	async notifs(
 		requesterUser: string,
 		target: string,
-		type: string,
+		action: string,
 		text: string,
 	){
 		// const	tmpUser = await this.findUser(target, null, ['notifications']);
@@ -130,7 +107,7 @@ export class UsersService {
 		const	notifs = await this.getData(targetUser, 'notifications');
 	
 		const createNotfisDto: CreateNotifsDto = {
-			type: type,
+			type: action,
 			text: text,
 			date: new Date(),
 			user: targetUser,
@@ -139,7 +116,6 @@ export class UsersService {
 		};
 
 		const newNotification = new Notifs(createNotfisDto);
-
 		await notifs.notifications.push(newNotification);
 		await this.notifsRepository.save(newNotification);
 		return (newNotification);
