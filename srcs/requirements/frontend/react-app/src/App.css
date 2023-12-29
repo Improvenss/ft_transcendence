@@ -2,11 +2,9 @@
 	display: flex;
 	gap: 10px;
 	justify-content: flex-end;
-	/* background-color: red; */
 	font-size: 3vw;
 	padding-right: 5%;
 	user-select: none;
-
 	align-items: center;
 }
 
@@ -15,7 +13,7 @@
 }
 
 /* #app-header *:hover { */
-#app-header *:not(#site-name):not(#notifs-container):not(#notifs-container *):hover {
+#app-header *:not(#site-name):not(.notifs-container):not(.notifs-container *):hover {
 	/* transform: rotateY(20deg) rotateX(10deg);
 	transition: transform 0.5s; */
 	color: red;
@@ -46,47 +44,76 @@
 	width: 3vw;
 }
 
-#notifs-container {
-	position: relative;
+/* -- Notifs -- */
+
+.notifs-container {
+	display: flex;
+	border-radius: 5px;
+	cursor: pointer;
 }
 
-#notifs {
-	cursor: pointer;
+.notifs-container.open {
+	background-color: #45a049;
+}
+
+#icon-notifs {
 	max-width: 40px;
 	max-height: 40px;
 }
 
-.notification-count {
-	position: absolute;
-	top: -5px;
-	right: -5px;
+.notifs-count{
+	position: fixed;
 	background-color: red;
-	color: white;
 	border-radius: 25%;
 	padding: 5px;
 	font-size: 12px;
-  }
+	text-align: center;
+}
 
-.notifs-content {
-	top: 100px;
-	width: 100px;
+#notifs-content {
+	top: 120px;
+	width: 150px;
 	position: absolute;
 	right: 5px;
-	background-color: gray; /* Arka plan rengi */
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Gölge efekti */
+	background-color: rgb(128, 128, 128, 0.5);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 	z-index: 100; /* Diğer öğelerin üstünde görünmesini sağlar */
 	padding: 10px;
 	border-radius: 4px;
-	max-height: 80%;
+	max-height: 40%;
 	overflow-y: auto;
   }
 
-  .notification-card.read {
-	background-color: orange;
+  .notification-card {
+	border-radius: 5%;
+	text-align: center;
+	padding: 5px;
+	margin-bottom: 5px;
   }
+
+  .notification-card > * > button {
+	border-radius: 5px;
+	margin-bottom: 5px;
+  }
+
+  .notification-card > p {
+	color: whitesmoke;
+
+  }
+
+  .notification-card > * > button:hover{
+	background-color: #45a049;
+
+  }
+
+  .notification-card.read {
+	background-color: rgb(0, 0, 0, 0.8);
+	
+  } 
   
   .notification-card.unread {
-	background-color: darkred;
+	border: 1px solid rgb(137, 47, 47);
+	background-color: rgb(139, 0, 0, 0.6);
   }
 
   *:focus {

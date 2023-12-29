@@ -7,6 +7,7 @@ import { useUser } from "../hooks/UserHook";
 import NoMatchPage from "../main/NoMatchPage";
 import LoadingPage from "../utils/LoadingPage";
 import "./ProfilePage.css";
+import handleRequest from '../utils/handleRequest'
 
 interface IUserProps{
 	email: string;
@@ -117,33 +118,35 @@ function ProfilePage() {
 			{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
 			];
 
-	const handleInfo = async (action: string, targetUser: string) => {
-		console.log(action);
-		let url = '';
-		switch (action){
-			case 'addFriend':
-				url = `/users?action=sendFriendRequest&target=${targetUser}`;
-				break;
-			case 'poke':
-				url = `/users?action=poke&target=${targetUser}`;
-				break;
-			default:
-				break;
-		}
+	//const handleRequest = async (action: string, targetUser: string) => {
+	//	console.log(action);
+	//	let url = '';
+	//	switch (action){
+	//		case 'addFriend':
+	//			url = `/users?action=sendFriendRequest&target=${targetUser}`;
+	//			break;
+	//		case 'poke':
+	//			url = `/users?action=poke&target=${targetUser}`;
+	//			break;
+	//		default:
+	//			break;
+	//	}
 
-		const response = await fetch(process.env.REACT_APP_FETCH + url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-			},
-		});
-		if (!response.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await response.json();
-		console.log("HandleInfo:", data);
-	}
+	//	if (url){
+	//		const response = await fetch(process.env.REACT_APP_FETCH + url, {
+	//			method: 'POST',
+	//			headers: {
+	//				'Content-Type': 'application/json',
+	//				"Authorization": "Bearer " + userCookie,
+	//			},
+	//		});
+	//		if (!response.ok) {
+	//			throw new Error('API-den veri alınamadı.');
+	//		}
+	//		const data = await response.json();
+	//		console.log("handleRequest:", data);
+	//	}
+	//}
 
 	return (
 		<>
@@ -165,9 +168,7 @@ function ProfilePage() {
 					<span>{userPanel.displayname}</span>
 					<p>Email:</p>
 					<span>{userPanel.email}</span>
-					{/* <button id="addFriend" onClick={() => handleInfo('addFriend', userPanel.login)}>Add Friend</button> */}
-					<button id="poke" onClick={() => handleInfo('poke', userPanel.login)}>Poke</button>
-					<button id="addFriend" onClick={() => handleInfo('addFriend', userPanel.login)}>addFriend</button>
+					<button id="poke" onClick={() => handleRequest('poke', userPanel.login)}>Poke</button>
 					{ userPanel.login === userInfo.login ? (
  							<div id="friends">
  								<input
@@ -195,7 +196,7 @@ function ProfilePage() {
  							</div>
  						) : (
 							<>
-								<button id="addFriend">Add Friend</button>
+								<button id="addFriend" onClick={() => handleRequest('addFriend', userPanel.login)}>Add Friend</button>
 								<button id="sendMessage">Send Message</button>
 							</>
 						)}

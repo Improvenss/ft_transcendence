@@ -7,20 +7,19 @@ export class CreateNotifsDto {
 	type: string;
 
 	@IsString()
-	@IsOptional()
 	text: string;
 
 	@IsDate()
-	@IsOptional()
 	date: Date;
 
-	@IsString()
 	@IsOptional()
 	user: User; 
 
 	@IsBoolean()
-	@IsOptional()
 	read: boolean;
+
+	@IsString()
+	from: string;
 
 	constructor(notifsDto: Partial<CreateNotifsDto>) {
 	Object.assign(this, notifsDto);

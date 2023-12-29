@@ -59,7 +59,7 @@ export class UsersService {
 			throw new Error('Users are already friends.');
 
 		if (type === 'sendFriendRequest')
-			return (this.notifs(target, 'sendFriendRequest', `${requesterUser.displayname} send friend request!`));
+			return (this.notifs(requesterUser.login, target, 'sendFriendRequest', `${requesterUser.displayname} send friend request!`));
 
 		if (type === 'acceptFriendRequest')
 		{
@@ -67,7 +67,7 @@ export class UsersService {
 			targetUser.friends = [...targetUser.friends, requesterUser];
 	
 			await this.usersRepository.save([requesterUser, targetUser]);
-			return (this.notifs(target, 'text', `${requesterUser.displayname} accept your friend invite!`));
+			return (this.notifs(requesterUser.login, target, 'text', `${requesterUser.displayname} accept your friend invite!`));
 		}
 	}
 
@@ -104,6 +104,7 @@ export class UsersService {
 	}
 
 	async notifs(
+		requesterUser: string,
 		target: string,
 		type: string,
 		text: string,
@@ -124,6 +125,7 @@ export class UsersService {
 			date: new Date(),
 			user: targetUser,
 			read: false,
+			from: requesterUser,
 		};
 
 		const newNotification = new Notifs(createNotfisDto);

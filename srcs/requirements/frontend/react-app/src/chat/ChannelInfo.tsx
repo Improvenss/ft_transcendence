@@ -15,6 +15,9 @@ import { useChannelContext } from "./ChatPage";
 import Cookies from "js-cookie";
 import { useUser } from "../hooks/UserHook";
 import { useNavigate } from "react-router-dom";
+import handleChannelRequest from '../utils/handleChannelRequest';
+import handleRequest from '../utils/handleRequest';
+
 
  function InfoChannel() {
 	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
@@ -140,62 +143,62 @@ import { useNavigate } from "react-router-dom";
 			setErrorMessage('');
 	};
 
-	const handleInfo = async (action: string, targetUser: string) => {
-		if (!activeChannel || !my)
-			return;
-		console.log("me:", my.login, "- channel:", activeChannel.name);
-		let url = '';
-		switch (action) {
-			case 'goProfile':
-				navigate('/profile/' + targetUser);
-				return;
-			case 'addFriend':
-				console.log(`User[${my.login}] sending friend request to 'user[${targetUser}]'.`);
-				url = `/users/friend/add?user=${targetUser}`;
-				break;
-			case 'directMessage':
-				console.log(action);
-				break;
-			case 'inviteGame':
-				console.log(action);
-				break;
-			case 'userKick':
-				console.log(`User[${targetUser}] kick from channel[${activeChannel.name}]`);
-				url = `/chat/channel/kick?user=${targetUser}`;
-				break;
-			case 'userBan':
-				console.log(`User[${targetUser}] banned from channel[${activeChannel.name}]`);
-				url = `/chat/channel/ban?user=${targetUser}`;
-				break;
-			case 'userUnban':
-				console.log(`User[${targetUser}] was unbanned from channel[${activeChannel.name}]`);
-				url = `/chat/channel/unban?user=${targetUser}`;
-				break;
-			case 'setAdmin':
-				console.log(action);
-				break;
-			case 'removeAdmin':
-				console.log(`Removed User[${targetUser}] administrator permissions from channel[${activeChannel.name}]`);
-				url = `/chat/channel/admin?action=remove&user=${targetUser}`;
-				break;
-			default:
-				break;
-		}
+	//const handleInfo = async (action: string, targetUser: string) => {
+	//	if (!activeChannel || !my)
+	//		return;
+	//	console.log("me:", my.login, "- channel:", activeChannel.name);
+	//	let url = '';
+	//	switch (action) {
+	//		case 'goProfile':
+	//			navigate('/profile/' + targetUser);
+	//			return;
+	//		case 'addFriend':
+	//			console.log(`User[${my.login}] sending friend request to 'user[${targetUser}]'.`);
+	//			url = `/users/friend/add?user=${targetUser}`;
+	//			break;
+	//		case 'directMessage':
+	//			console.log(action);
+	//			break;
+	//		case 'inviteGame':
+	//			console.log(action);
+	//			break;
+	//		case 'userKick':
+	//			console.log(`User[${targetUser}] kick from channel[${activeChannel.name}]`);
+	//			url = `/chat/channel/kick?user=${targetUser}`;
+	//			break;
+	//		case 'userBan':
+	//			console.log(`User[${targetUser}] banned from channel[${activeChannel.name}]`);
+	//			url = `/chat/channel/ban?user=${targetUser}`;
+	//			break;
+	//		case 'userUnban':
+	//			console.log(`User[${targetUser}] was unbanned from channel[${activeChannel.name}]`);
+	//			url = `/chat/channel/unban?user=${targetUser}`;
+	//			break;
+	//		case 'setAdmin':
+	//			console.log(action);
+	//			break;
+	//		case 'removeAdmin':
+	//			console.log(`Removed User[${targetUser}] administrator permissions from channel[${activeChannel.name}]`);
+	//			url = `/chat/channel/admin?action=remove&user=${targetUser}`;
+	//			break;
+	//		default:
+	//			break;
+	//	}
 
-		const response = await fetch(process.env.REACT_APP_FETCH + url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-				"channel": activeChannel.name,
-			},
-		});
-		if (!response.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await response.json();
-		console.log("HandleInfo:", data);
-	}
+	//	const response = await fetch(process.env.REACT_APP_FETCH + url, {
+	//		method: 'POST',
+	//		headers: {
+	//			'Content-Type': 'application/json',
+	//			"Authorization": "Bearer " + userCookie,
+	//			"channel": activeChannel.name,
+	//		},
+	//	});
+	//	if (!response.ok) {
+	//		throw new Error('API-den veri alınamadı.');
+	//	}
+	//	const data = await response.json();
+	//	console.log("HandleInfo:", data);
+	//}
 
  	return (
  		<>
@@ -243,26 +246,26 @@ import { useNavigate } from "react-router-dom";
 										</div>
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
-												<button onClick={() => handleInfo('goProfile', user.login)}> <IconProfile /> </button>
+												<button onClick={() => navigate('/profile/' + my?.login)}> <IconProfile /> </button>
 												{user.login !== my?.login && (
 													<>
-														<button onClick={() => handleInfo('addFriend', user.login)}> <IconAddFriend /> </button>
-														<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
-														<button onClick={() => handleInfo('inviteGame', user.login)}> <IconInviteGame /> </button>
+														<button onClick={() => handleRequest('addFriend', user.login)}> <IconAddFriend /> </button>
+														<button onClick={() => handleChannelRequest('directMessage', user.login, activeChannel.name)}> <IconDM /> </button>
+														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
 												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
 													<>
 														{user.login !== my?.login && (
 															<>
-																<button onClick={() => handleInfo('userKick', user.login)}> <IconKick /> </button>
-																<button onClick={() => handleInfo('userBan', user.login)}> <IconBan /> </button>
+																<button onClick={() => handleChannelRequest('userKick', user.login, activeChannel.name)}> <IconKick /> </button>
+																<button onClick={() => handleChannelRequest('userBan', user.login, activeChannel.name)}> <IconBan /> </button>
 															</>
 														)}
 														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
-															<button onClick={() => handleInfo('removeAdmin', user.login)}>Remove Admin</button>
+															<button onClick={() => handleChannelRequest('removeAdmin', user.login, activeChannel.name)}>Remove Admin</button>
 														) : (
-															<button onClick={() => handleInfo('setAdmin', user.login)}>Set Admin</button>
+															<button onClick={() => handleChannelRequest('setAdmin', user.login, activeChannel.name)}>Set Admin</button>
 														)}
 													</>
 												)}
@@ -394,7 +397,7 @@ import { useNavigate } from "react-router-dom";
  										<div
  											key={user.login}
  											id='banned-users'
-											onClick={() => handleInfo('userUnban', user.login)}
+											onClick={() => handleChannelRequest('userUnban', user.login, activeChannel.name)}
  										>
  											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>

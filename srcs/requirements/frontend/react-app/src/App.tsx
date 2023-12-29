@@ -16,13 +16,15 @@ import GameLobby from './game/GameLobby';
 import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
 import { useEffect, useState } from 'react';
 import { useSocket } from './hooks/SocketHook';
+import handleRequest from './utils/handleRequest'
 
 interface INotifs {
 	id: number,
 	type: 'text' | 'sendFriendRequest',
 	text: string,
-	date: Date,
+	date: string,
 	read: boolean,
+	from: string,
 }
 
 function App() {
@@ -66,6 +68,11 @@ function App() {
 				if (!newNotifs.read) {
 					setUnreadNotifs(prevCount => prevCount + 1);
 				}
+
+				const notifsContainer = document.getElementById("notifs-content");
+				if (notifsContainer){
+					notifsContainer.scrollTop = 0;
+				}
 			}
 
 			socket?.on(`userNotifs:${userInfo?.login}`, handleListenNotifs);
@@ -84,15 +91,29 @@ function App() {
 		}
 	}, [showNotifs]);
 
-		//user için bildirim yapısı oluşturulacak, okunan ve okunmayan bildirim yapısı olacak.
-		//Kullanıcı bilgilerinin yanında bu bildirim mesajlarıda gelecek ve info'da listelenecek.
-		//Eğer yeni bir bildiri gelirse socket'ten kullanıcı adına notifs:user-name'e mesaj atılacak.
-		//	Frontend'de ise bu dinleme olayı gerçekleşecek.
+	const formatTimeAgo = (dateString: string) => {
+		const	now = new Date();
+		const	date = new Date(dateString);
+		const	seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
+		const intervals = [
+			{ label: 'year', seconds: 31536000 },
+			{ label: 'month', seconds: 2592000 },
+			{ label: 'day', seconds: 86400 },
+			{ label: 'hour', seconds: 3600 },
+			{ label: 'minute', seconds: 60 },
+			{ label: 'second', seconds: 1 },
+		];
 
-		// bildirim için useEffect kullanılacak, burada socket dinlemesi gerçekleştirilmelidir,
-		//		Kullanıcıya, arkadaşlık isteği, oyun isteği gibi istekleri ve diğer bildirimleri listeleteceğiz.
-		//		Bu yapılar, buton içerikli, text içerikli olacak.
+		for (const { label, seconds: intervalSeconds } of intervals) {
+			const interval = Math.floor(seconds / intervalSeconds);
+			if (interval > 0) {
+				return `${interval} ${label} ago`;
+			}
+		}
+	
+		return ('now');
+	}
 
 	function logOut() {
 		localStorage.clear();
@@ -122,17 +143,17 @@ function App() {
 								<img src={userInfo?.imageUrl} alt="Profile" />
 							)}
 						</Link>
-						<div id="notifs-container">
-							<IconNotifs id='notifs' onClick={() => setShowNotifs(!showNotifs)} />
+						<div className={`notifs-container ${showNotifs ? 'open' : null}`} onClick={() => setShowNotifs(!showNotifs)}>
+							<IconNotifs id='icon-notifs'/>
 							{unreadNotifs > 0 && (
-								<div className="notification-count">
+								<div className="notifs-count">
 									{unreadNotifs}
 								</div>
 							)}
 						</div>
 					</ul>
 					{showNotifs && (
-						<div className="notifs-content">
+						<div id="notifs-content">
 							{notifications
 							      .sort((a, b) => b.id - a.id)
 								  .map((notification) => (
@@ -143,14 +164,17 @@ function App() {
 										<p>{notification.text}</p>
 										{notification.type === "sendFriendRequest" && (
 											<div>
-												<button onClick={() => console.log("accept")}>
+												<button onClick={() => handleRequest('acceptFriendRequest', notification.from)}>
 													Accept
 												</button>
-												<button onClick={() => console.log("decline")}>
+												<button onClick={() => handleRequest('declineFriendRequest', notification.from)}>
 													Decline
 												</button>
 											</div>
 										)}
+										<p className="notification-date">
+											{formatTimeAgo(notification.date)}
+										</p>
 									</div>
 								))}
 						</div>

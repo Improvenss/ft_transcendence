@@ -235,7 +235,7 @@ export class UsersController {
 			else if (action === 'acceptFriendRequest')
 				result = await this.usersService.friendRequest(action, user, target);
 			else if (action === 'poke')
-				result = await this.usersService.notifs(target, 'text', `${user.displayname} poked you!`);
+				result = await this.usersService.notifs(user.login, target, 'text', `${user.displayname} poked you!`);
 			else
 				throw new Error('Invalid action values!');
 
