@@ -1,23 +1,26 @@
 import Cookies from "js-cookie";
 
 const handleRequest = async (action: string, targetUser: string) => {
-	console.log(action);
+	console.log(action,targetUser);
 	const	userCookie = Cookies.get("user");
 	let url = '';
 	switch (action){
-		case 'addFriend':
-			url = `/users?action=sendFriendRequest&target=${targetUser}`;
-			break;
 		case 'poke':
-			url = `/users?action=poke&target=${targetUser}`;
+			url = `/users?action=${action}&target=${targetUser}`;
+			break;
+		case 'sendFriendRequest':
+			url = `/users?action=${action}&target=${targetUser}`;
 			break;
 		case 'acceptFriendRequest':
+			url = `/users?action=${action}&target=${targetUser}`;
 			break;
 		case 'declineFriendRequest':
+			url = `/users?action=${action}&target=${targetUser}`;
 			break;
 		case 'inviteGame':
 			break;
 		default:
+			console.error("Invalid action:", action);
 			break;
 	}
 

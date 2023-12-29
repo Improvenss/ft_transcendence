@@ -18,8 +18,7 @@ import { useNavigate } from "react-router-dom";
 import handleChannelRequest from '../utils/handleChannelRequest';
 import handleRequest from '../utils/handleRequest';
 
-
- function InfoChannel() {
+function InfoChannel() {
 	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
 	const userCookie = Cookies.get("user");
 	const my = useUser().userInfo;
@@ -143,63 +142,6 @@ import handleRequest from '../utils/handleRequest';
 			setErrorMessage('');
 	};
 
-	//const handleInfo = async (action: string, targetUser: string) => {
-	//	if (!activeChannel || !my)
-	//		return;
-	//	console.log("me:", my.login, "- channel:", activeChannel.name);
-	//	let url = '';
-	//	switch (action) {
-	//		case 'goProfile':
-	//			navigate('/profile/' + targetUser);
-	//			return;
-	//		case 'addFriend':
-	//			console.log(`User[${my.login}] sending friend request to 'user[${targetUser}]'.`);
-	//			url = `/users/friend/add?user=${targetUser}`;
-	//			break;
-	//		case 'directMessage':
-	//			console.log(action);
-	//			break;
-	//		case 'inviteGame':
-	//			console.log(action);
-	//			break;
-	//		case 'userKick':
-	//			console.log(`User[${targetUser}] kick from channel[${activeChannel.name}]`);
-	//			url = `/chat/channel/kick?user=${targetUser}`;
-	//			break;
-	//		case 'userBan':
-	//			console.log(`User[${targetUser}] banned from channel[${activeChannel.name}]`);
-	//			url = `/chat/channel/ban?user=${targetUser}`;
-	//			break;
-	//		case 'userUnban':
-	//			console.log(`User[${targetUser}] was unbanned from channel[${activeChannel.name}]`);
-	//			url = `/chat/channel/unban?user=${targetUser}`;
-	//			break;
-	//		case 'setAdmin':
-	//			console.log(action);
-	//			break;
-	//		case 'removeAdmin':
-	//			console.log(`Removed User[${targetUser}] administrator permissions from channel[${activeChannel.name}]`);
-	//			url = `/chat/channel/admin?action=remove&user=${targetUser}`;
-	//			break;
-	//		default:
-	//			break;
-	//	}
-
-	//	const response = await fetch(process.env.REACT_APP_FETCH + url, {
-	//		method: 'POST',
-	//		headers: {
-	//			'Content-Type': 'application/json',
-	//			"Authorization": "Bearer " + userCookie,
-	//			"channel": activeChannel.name,
-	//		},
-	//	});
-	//	if (!response.ok) {
-	//		throw new Error('API-den veri alınamadı.');
-	//	}
-	//	const data = await response.json();
-	//	console.log("HandleInfo:", data);
-	//}
-
  	return (
  		<>
  			{activeChannel && (
@@ -249,7 +191,7 @@ import handleRequest from '../utils/handleRequest';
 												<button onClick={() => navigate('/profile/' + my?.login)}> <IconProfile /> </button>
 												{user.login !== my?.login && (
 													<>
-														<button onClick={() => handleRequest('addFriend', user.login)}> <IconAddFriend /> </button>
+														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
 														<button onClick={() => handleChannelRequest('directMessage', user.login, activeChannel.name)}> <IconDM /> </button>
 														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>

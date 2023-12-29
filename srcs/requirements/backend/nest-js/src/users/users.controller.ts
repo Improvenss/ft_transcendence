@@ -221,21 +221,23 @@ export class UsersController {
 	@Post()
 	async request(
 		@Req() {user},
-		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'unFriend',
+		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
 		@Query('target') target: string | undefined,
 	){
 		try {
-			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] user: [${target}]${C.END}`);
+			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}]${C.END}`);
 			if (action === undefined || target === undefined)
 				throw Error(`Query is empty!`);
 			let result : any;
 
-			if (action === 'sendFriendRequest')
+			if (action === 'poke')
+				result = await this.usersService.notifs(user.login, target, 'text', `${user.displayname} poked you!`);
+			else if (action === 'sendFriendRequest')
 				result = await this.usersService.friendRequest(action, user, target);
 			else if (action === 'acceptFriendRequest')
 				result = await this.usersService.friendRequest(action, user, target);
-			else if (action === 'poke')
-				result = await this.usersService.notifs(user.login, target, 'text', `${user.displayname} poked you!`);
+			else if (action === 'declineFriendRequest')
+				result = await this.usersService.friendRequest(action, user, target);
 			else
 				throw new Error('Invalid action values!');
 

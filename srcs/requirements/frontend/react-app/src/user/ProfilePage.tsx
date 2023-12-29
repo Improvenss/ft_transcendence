@@ -118,36 +118,6 @@ function ProfilePage() {
 			{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
 			];
 
-	//const handleRequest = async (action: string, targetUser: string) => {
-	//	console.log(action);
-	//	let url = '';
-	//	switch (action){
-	//		case 'addFriend':
-	//			url = `/users?action=sendFriendRequest&target=${targetUser}`;
-	//			break;
-	//		case 'poke':
-	//			url = `/users?action=poke&target=${targetUser}`;
-	//			break;
-	//		default:
-	//			break;
-	//	}
-
-	//	if (url){
-	//		const response = await fetch(process.env.REACT_APP_FETCH + url, {
-	//			method: 'POST',
-	//			headers: {
-	//				'Content-Type': 'application/json',
-	//				"Authorization": "Bearer " + userCookie,
-	//			},
-	//		});
-	//		if (!response.ok) {
-	//			throw new Error('API-den veri alınamadı.');
-	//		}
-	//		const data = await response.json();
-	//		console.log("handleRequest:", data);
-	//	}
-	//}
-
 	return (
 		<>
 		{userPanel && (
@@ -196,7 +166,7 @@ function ProfilePage() {
  							</div>
  						) : (
 							<>
-								<button id="addFriend" onClick={() => handleRequest('addFriend', userPanel.login)}>Add Friend</button>
+								<button id="addFriend" onClick={() => handleRequest('sendFriendRequest', userPanel.login)}>Add Friend</button>
 								<button id="sendMessage">Send Message</button>
 							</>
 						)}

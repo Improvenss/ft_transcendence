@@ -121,6 +121,9 @@ export class Notifs {
 	@Column({ default: false })
 	public read: boolean; // Okunma durumu
 
+	@Column()
+	public from: string; // Gönderen kişinin logini
+
 	constructor(notification: Partial<Notifs>) {
 		Object.assign(this, notification);
 	}

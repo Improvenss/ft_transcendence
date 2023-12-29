@@ -46,7 +46,7 @@ export class UsersService {
 	// }
 
 	async friendRequest(
-		type: 'sendFriendRequest' | 'acceptFriendRequest',
+		type: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
 		requesterUser: User,
 		target: string,
 	){
@@ -58,17 +58,32 @@ export class UsersService {
 		if (targetUser.friends.some(friend => friend.id === requesterUser.id))
 			throw new Error('Users are already friends.');
 
-		if (type === 'sendFriendRequest')
-			return (this.notifs(requesterUser.login, target, 'sendFriendRequest', `${requesterUser.displayname} send friend request!`));
+		let message = '';
 
-		if (type === 'acceptFriendRequest')
-		{
-			requesterUser.friends = [...requesterUser.friends, targetUser];
-			targetUser.friends = [...targetUser.friends, requesterUser];
-	
-			await this.usersRepository.save([requesterUser, targetUser]);
-			return (this.notifs(requesterUser.login, target, 'text', `${requesterUser.displayname} accept your friend invite!`));
+		switch (type){
+			case 'sendFriendRequest':
+				message =  `${requesterUser.displayname} send friend request!`;
+				break;
+			case 'acceptFriendRequest':{
+				//singleSelfUser.friends.push(singleUser);
+				//await this.usersRepository.save(singleSelfUser);
+			
+				targetUser.friends.push(requesterUser);
+				await this.usersRepository.save(targetUser);
+				//requesterUser.friends = [...requesterUser.friends, targetUser];
+				//targetUser.friends = [...targetUser.friends, requesterUser];
+				//await this.usersRepository.save([requesterUser, targetUser]);
+				message = `${requesterUser.displayname} accept your friend invite!`;
+				break;
+			}
+			case 'declineFriendRequest':
+				message = `${requesterUser.displayname} decline your friend invite!`;
+				break;
+			default:
+				break;
 		}
+
+		return (await this.notifs(requesterUser.login, target, type, message));
 	}
 
 	async notifsMarkRead(
@@ -81,10 +96,8 @@ export class UsersService {
 		  throw new NotFoundException('User not found!');
 		}
 	  
-		// İlgili bildirimlerin read değerini true olarak güncelle.
 		targetUser.notifications.forEach(notif => notif.read = true);
 	  
-		// Veritabanına kaydet.
 		await this.usersRepository.save(targetUser);
 
 		// const notifs = await this.getData(user, 'notifications');
@@ -95,10 +108,7 @@ export class UsersService {
 
 
 		// const data = await this.usersRepository.findOne({where: {login: user.login}, relations: ['notifications']});
-
 		// data.notifications.forEach(notif => (notif.read = true));
-		
-		// console.log("--->", data);
 		// // await this.notifsRepository.save(data);
 		// await this.usersRepository.save(data);
 	}
