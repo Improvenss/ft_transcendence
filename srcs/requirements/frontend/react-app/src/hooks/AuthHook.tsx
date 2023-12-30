@@ -22,7 +22,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			console.log("I: ---Cookie Checking---");
 			const userCookie = Cookies.get("user");
 			// const userLStore = localStorage.getItem("user");
-			// 'https://localhost/backend/api/cookie' veya /backend/api/cookie
 			if (userCookie === undefined)
 			{
 				console.log("I: ---Cookie Not Found '❌'---");
@@ -36,17 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					"Authorization": "Bearer " + userCookie as string,
 				},
 			});
-			if (response.ok)
-			{
+			if (response.ok) {
 				console.log("I: ---Cookie Backend Connection '✅'---");
 				const data = await response.json();
-				if (data.message === "COOKIE OK") {
-					console.log("I: ---Cookie Response '✅'---");
-					setAuth(true);
-				} else {
-					console.log("I: ---Cookie Response '❌'---");
-					setAuth(false);
-				}
+				console.log(data);
+				setAuth((!data.err));
 			} else {
 				console.log("I: ---Cookie Backend Connection '❌'---");
 				setAuth(false);

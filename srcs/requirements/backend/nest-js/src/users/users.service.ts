@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { Notif, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -23,7 +23,7 @@ export class UsersService {
 		requesterUser: User,
 		target: string,
 	){
-		const	targetUser = await this.getData(target, 'friends');
+		const	targetUser = await this.getData(target, 'friends', 'true');
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
 
@@ -37,7 +37,7 @@ export class UsersService {
 				message =  `${requesterUser.displayname}(${requesterUser.login}) send friend request!`;
 				break;
 			case 'acceptFriendRequest':
-				const	requester = await this.getData(requesterUser.login, 'friends');
+				const	requester = await this.getData(requesterUser.login, 'friends', 'true');
 				if (!requester)
 					throw new NotFoundException('User not found!');
 
@@ -58,25 +58,11 @@ export class UsersService {
 	}
 
 	async notifsMarkRead(
-		user: User,
+		userLogin: string,
 	){
-		// const tmpUser = await this.getData(user.login, 'notifications');
-		// if (!tmpUser) {
-		//   throw new NotFoundException('User not found!');
-		// }
-	  
-		// await tmpUser.notifications.forEach(notif => notif.read = true);
-	  
-		// // await this.usersRepository.save(tmpUser);
-		// await this.notifRepository.save(tmpUser.notifications);
-
-
-		const userNotifs = await this.getRelationData(user.login, 'notifications');
-		console.log("->",userNotifs.notifications);
-
-		userNotifs.notifications.forEach(notif => notif.read = true);
-
-		await this.notifRepository.save(userNotifs);
+		const userData = await this.getData(userLogin, 'notifications');
+		userData.notifications.forEach(notif => notif.read = true);
+		await this.notifRepository.save(userData.notifications);
 	}
 
 	async createNotif(
@@ -106,51 +92,43 @@ export class UsersService {
 	}
 
 	async deleteNotif(
+		userId: number,
 		notifId: number,
 	){
-		const notification = await this.notifRepository.delete(notifId);
-		if (!notification.affected){
+		const notification = await this.notifRepository.findOne({where: {id: notifId} , relations: ['user']});
+		if (!notification) {
 			throw new NotFoundException('Notification not found!');
 		}
+		if (notification.user.id !== userId) {
+			throw new ForbiddenException('You are not allowed to delete this notification!');
+		}
+		await this.notifRepository.delete(notifId);
 	}
 
-	/*
-		getData(), default kullanıcı verilerini veya default kullanıcı verileri ile relations verilerini döndürür.
-	*/
 	async getData(
 		userLogin: string,
 		relation?: string[] | string,
+		primary?: 'true'
 	){
 		if (relation === undefined){
-			return (await this.usersRepository.findOne({where: {login: userLogin}}))
+			return (await this.usersRepository.findOne({where: {login: userLogin}}));
 		}
 
-		if (typeof relation === 'string') {
-			relation = [relation];
-		}
-
-		return (await this.usersRepository.findOne({where: {login: userLogin}, relations: relation}));
-	}
-
-	/*
-		getRelationData(), sadece kullanıcıya ait ilişki verilerini döndürür.
-	*/
-	async getRelationData(
-		userLogin: string,
-		relation: string[] | string,
-	){
 		if (typeof relation === 'string') {
 			relation = [relation];
 		}
 		const data = await this.usersRepository.findOne({where: {login: userLogin}, relations: relation});
 
+		if (primary === 'true')
+			return (data);
+
 		const result: Partial<User> = {};
 		relation.forEach(rel => {
 			if (data && data.hasOwnProperty(rel)) {
-			  result[rel] = data[rel];
+				result[rel] = data[rel];
 			}
 		});
-		return (result);
+		return (result as User);
 	}
 
 	async	findUser(

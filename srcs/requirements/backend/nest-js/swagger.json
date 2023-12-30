@@ -193,7 +193,7 @@
         "operationId": "UsersController_getData",
         "parameters": [
           {
-            "name": "user",
+            "name": "primary",
             "required": true,
             "in": "query",
             "schema": {

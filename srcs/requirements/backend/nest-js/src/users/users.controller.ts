@@ -56,12 +56,12 @@ export class UsersController {
 		{
 			if (!user)
 				throw (new Error("Cookie not provided"));
-			return ({message: "COOKIE OK"});
+			return ({message: `user[${user.login}] cookie is ✅`});
 		}
 		catch(err)
 		{
 			console.error("Cookie err:", err);
-			return ({message: "COOKIE NOK"});
+			return ({message: `user[${user.login}] cookie is ❌`, err: err.message});
 		}
 	}
 
@@ -230,7 +230,7 @@ export class UsersController {
 			if (action === undefined || target === undefined)
 				throw Error(`Query is empty!`);
 			if (requestId)
-				await this.usersService.deleteNotif(requestId);
+				await this.usersService.deleteNotif(user.id, requestId);
 
 			let result : any;
 
@@ -262,16 +262,11 @@ export class UsersController {
 	async getData(
 		@Req() {user},
 		@Query('relation') relation: string[] | string | undefined,
-		@Query('user') userData: 'true' | undefined,
+		@Query('primary') primary: 'true' | undefined,
 	){
 		try {
-			console.log(`${C.B_YELLOW}GET: /user: @Req() relation: [${relation}] userData: [${userData}]${C.END}`);
-			if (relation === undefined)
-				return (await this.usersService.getData(user.login));
-			if (relation && userData === 'true')
-				return (await this.usersService.getData(user.login, relation));
-
-			return (await this.usersService.getRelationData(user.login, relation));
+			console.log(`${C.B_YELLOW}GET: /user: @Req() relation: [${relation}] userData: [${primary}]${C.END}`);
+			return (await this.usersService.getData(user.login, relation, primary));
 		} catch (err) {
 			console.error("@Get(): ", err);
 			return ({err: err.message});

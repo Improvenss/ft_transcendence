@@ -17,46 +17,22 @@ import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
 import { useEffect, useState } from 'react';
 import { useSocket } from './hooks/SocketHook';
 import handleRequest from './utils/handleRequest'
-
-interface INotif {
-	id: number,
-	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
-	text: string,
-	date: string,
-	read: boolean,
-	from: string,
-}
+import {INotif} from '../src/hooks/UserHook';
 
 function App() {
 	console.log("---------APP-PAGE---------");
 	const { isAuth, setAuth } = useAuth();
 	const socket = useSocket();
-	const userCookie = Cookies.get("user");
 	const { userInfo } = useUser();
 	const navigate = useNavigate();
 	const [showNotifs, setShowNotifs] = useState<boolean>(false);
 	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
-	const [notifications, setNotifications] = useState<INotif[]>([]);
+	const [notifications, setNotifications] = useState<INotif[]>(userInfo?.notifications || []);
 
 	useEffect(() => {
-		if (isAuth){
-			const checkNotifs = async () => {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users?relation=notifications`, {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie as string,
-					},
-				});
-				if (response.ok){
-					const data = await response.json();
-					console.log("notifications:",data);
-					setNotifications(data.notifications);
-					const unreadCount = data.notifications.filter((notif: INotif) => !notif.read).length;
-					setUnreadNotifs(unreadCount);
-				}
-			}
-			checkNotifs();
+		if (isAuth && userInfo && socket){
+			// const unreadCount = userInfo.notifications.filter((notif: INotif) => !notif.read).length;
+			// setUnreadNotifs(unreadCount);
 
 			const handleListenNotifs = (newNotif: INotif) => {
 				console.log("Notif Geldi:", newNotif);
@@ -75,9 +51,9 @@ function App() {
 				}
 			}
 
-			socket?.on(`notif:${userInfo?.login}`, handleListenNotifs);
+			socket.on(`notif:${userInfo.login}`, handleListenNotifs);
 			return () => {
-				socket?.off(`notif:${userInfo?.login}`, handleListenNotifs);
+				socket.off(`notif:${userInfo.login}`, handleListenNotifs);
 			};
 		}
 	}, []);

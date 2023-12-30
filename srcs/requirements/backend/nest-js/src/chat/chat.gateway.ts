@@ -302,7 +302,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
 
-			await this.usersService.notifsMarkRead(singleUser);
+			await this.usersService.notifsMarkRead(singleUser.login);
 		} catch (err) {
 			console.error("@SubscribMessage(markAllNotifsAsRead):", err);
 		}
