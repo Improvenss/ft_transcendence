@@ -50,8 +50,8 @@ export class User {
 
 	//----------------------Notfis----------------------------//
 
-	@OneToMany(() => Notifs, notification => notification.user, {cascade: true})
-	public notifications: Notifs[];
+	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
+	public notifications: Notif[];
 
 	//----------------------Channel----------------------------//
 
@@ -102,7 +102,7 @@ export class User {
 }
 
 @Entity('notification')
-export class Notifs {
+export class Notif {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
@@ -124,7 +124,7 @@ export class Notifs {
 	@Column()
 	public from: string; // Gönderen kişinin logini
 
-	constructor(notification: Partial<Notifs>) {
+	constructor(notification: Partial<Notif>) {
 		Object.assign(this, notification);
 	}
 }

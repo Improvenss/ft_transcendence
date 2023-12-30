@@ -18,9 +18,9 @@ import { useEffect, useState } from 'react';
 import { useSocket } from './hooks/SocketHook';
 import handleRequest from './utils/handleRequest'
 
-interface INotifs {
+interface INotif {
 	id: number,
-	type: 'text' | 'sendFriendRequest',
+	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
 	text: string,
 	date: string,
 	read: boolean,
@@ -36,7 +36,7 @@ function App() {
 	const navigate = useNavigate();
 	const [showNotifs, setShowNotifs] = useState<boolean>(false);
 	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
-	const [notifications, setNotifications] = useState<INotifs[]>([]);
+	const [notifications, setNotifications] = useState<INotif[]>([]);
 
 	useEffect(() => {
 		if (isAuth){
@@ -50,22 +50,22 @@ function App() {
 				});
 				if (response.ok){
 					const data = await response.json();
-					console.log("notification:",data);
+					console.log("notifications:",data);
 					setNotifications(data.notifications);
-					const unreadCount = data.notifications.filter((notification: INotifs) => !notification.read).length;
+					const unreadCount = data.notifications.filter((notif: INotif) => !notif.read).length;
 					setUnreadNotifs(unreadCount);
 				}
 			}
 			checkNotifs();
 
-			const handleListenNotifs = (newNotifs: any) => {
-				console.log("Notifs Geldi:", newNotifs);
+			const handleListenNotifs = (newNotif: INotif) => {
+				console.log("Notif Geldi:", newNotif);
 				setNotifications(prevNotifs => [
 					...prevNotifs,
-					newNotifs
+					newNotif
 				]);
 
-				if (!newNotifs.read) {
+				if (!newNotif.read) {
 					setUnreadNotifs(prevCount => prevCount + 1);
 				}
 
@@ -75,9 +75,9 @@ function App() {
 				}
 			}
 
-			socket?.on(`userNotifs:${userInfo?.login}`, handleListenNotifs);
+			socket?.on(`notif:${userInfo?.login}`, handleListenNotifs);
 			return () => {
-				socket?.off(`userNotifs:${userInfo?.login}`, handleListenNotifs);
+				socket?.off(`notif:${userInfo?.login}`, handleListenNotifs);
 			};
 		}
 	}, []);
@@ -164,10 +164,10 @@ function App() {
 										<p>{notification.text}</p>
 										{notification.type === "sendFriendRequest" && (
 											<div>
-												<button onClick={() => handleRequest('acceptFriendRequest', notification.from)}>
+												<button onClick={() => handleRequest('acceptFriendRequest', notification.from, notification.id)}>
 													Accept
 												</button>
-												<button onClick={() => handleRequest('declineFriendRequest', notification.from)}>
+												<button onClick={() => handleRequest('declineFriendRequest', notification.from, notification.id)}>
 													Decline
 												</button>
 											</div>

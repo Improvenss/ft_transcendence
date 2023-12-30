@@ -223,15 +223,19 @@ export class UsersController {
 		@Req() {user},
 		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
 		@Query('target') target: string | undefined,
+		@Query('id') requestId?: number,
 	){
 		try {
-			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}]${C.END}`);
+			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${requestId}]${C.END}`);
 			if (action === undefined || target === undefined)
 				throw Error(`Query is empty!`);
+			if (requestId)
+				await this.usersService.deleteNotif(requestId);
+
 			let result : any;
 
 			if (action === 'poke')
-				result = await this.usersService.notifs(user.login, target, 'text', `${user.displayname} poked you!`);
+				result = await this.usersService.createaNotif(user.login, target, 'text', `${user.displayname} poked you!`);
 			else if (action === 'sendFriendRequest')
 				result = await this.usersService.friendRequest(action, user, target);
 			else if (action === 'acceptFriendRequest')
@@ -241,7 +245,7 @@ export class UsersController {
 			else
 				throw new Error('Invalid action values!');
 
-			this.chatGateway.server.emit(`userNotifs:${target}`, result);
+			this.chatGateway.server.emit(`notif:${target}`, result);
 			return ({message: `${action} was successfully performed on user[${target}].`});
 		} catch (err) {
 			console.error("@Post(): ", err);

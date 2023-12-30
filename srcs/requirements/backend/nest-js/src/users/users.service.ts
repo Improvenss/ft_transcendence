@@ -1,25 +1,21 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
-import { Notifs, User } from './entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { Notif, User } from './entities/user.entity';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CreateNotifsDto } from './dto/create-notifs.dto';
-
+import { CreateNotifDto } from './dto/create-notifs.dto';
 
 @Injectable()
 export class UsersService {
-	chatGateway: any;
 	constructor(
-		@InjectRepository(Notifs)
-		private readonly	notifsRepository: Repository<Notifs>,
+		@InjectRepository(Notif)
+		private readonly	notifRepository: Repository<Notif>,
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
 
-		//@InjectRepository(Notifs)
-		//private readonly	notifsRepository: Repository<Notifs>,
 	) {}
 
 	async friendRequest(
@@ -39,7 +35,7 @@ export class UsersService {
 
 		switch (action){
 			case 'sendFriendRequest':
-				message =  `${requesterUser.displayname} send friend request!`;
+				message =  `${requesterUser.displayname}(${requesterUser.login}) send friend request!`;
 				break;
 			case 'acceptFriendRequest':
 				const	requesterArray = await this.findUser(requesterUser.login, null, ['friends']);
@@ -51,16 +47,25 @@ export class UsersService {
 				//requester.friends.push(targetUser);
 				//targetUser.friends.push(requester);
 				await this.usersRepository.save([requester, targetUser]);
-				message = `${requester.displayname} accept your friend invite!`;
+				message = `${requester.displayname}(${requesterUser.login}) accepted the friend request.`;
 				break;
 			case 'declineFriendRequest':
-				message = `${requesterUser.displayname} decline your friend invite!`;
+				message = `${requesterUser.displayname}(${requesterUser.login}) rejected the friend request!`;
 				break;
 			default:
 				break;
 		}
 
-		return (await this.notifs(requesterUser.login, target, action, message));
+		return (await this.createaNotif(requesterUser.login, target, action, message));
+	}
+
+	async deleteNotif(
+		notifId: number,
+	){
+		const notification = await this.notifRepository.delete(notifId);
+		if (!notification.affected){
+			throw new NotFoundException('Notification not found!');
+		}
 	}
 
 	async notifsMarkRead( //stabil değil tekrar bak.!!
@@ -90,7 +95,7 @@ export class UsersService {
 		// await this.usersRepository.save(data);
 	}
 
-	async notifs(
+	async createaNotif(
 		requesterUser: string,
 		target: string,
 		action: string,
@@ -106,7 +111,7 @@ export class UsersService {
 		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 		const	notifs = await this.getData(targetUser, 'notifications');
 	
-		const createNotfisDto: CreateNotifsDto = {
+		const createNotfiDto: CreateNotifDto = {
 			type: action,
 			text: text,
 			date: new Date(),
@@ -115,10 +120,10 @@ export class UsersService {
 			from: requesterUser,
 		};
 
-		const newNotification = new Notifs(createNotfisDto);
-		await notifs.notifications.push(newNotification);
-		await this.notifsRepository.save(newNotification);
-		return (newNotification);
+		const newNotif = new Notif(createNotfiDto);
+		await notifs.notifications.push(newNotif);
+		await this.notifRepository.save(newNotif);
+		return (newNotif);
 	}
 
 	async getData(

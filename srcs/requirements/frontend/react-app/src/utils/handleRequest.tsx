@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 
-const handleRequest = async (action: string, targetUser: string) => {
+const handleRequest = async (action: string, targetUser: string, notifId?: number) => {
 	console.log(action,targetUser);
 	const	userCookie = Cookies.get("user");
 	let url = '';
@@ -12,10 +12,10 @@ const handleRequest = async (action: string, targetUser: string) => {
 			url = `/users?action=${action}&target=${targetUser}`;
 			break;
 		case 'acceptFriendRequest':
-			url = `/users?action=${action}&target=${targetUser}`;
+			url = `/users?action=${action}&target=${targetUser}&id=${notifId}`;
 			break;
 		case 'declineFriendRequest':
-			url = `/users?action=${action}&target=${targetUser}`;
+			url = `/users?action=${action}&target=${targetUser}&id=${notifId}`;
 			break;
 		case 'inviteGame':
 			break;

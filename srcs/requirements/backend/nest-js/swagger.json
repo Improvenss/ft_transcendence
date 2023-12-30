@@ -173,6 +173,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {

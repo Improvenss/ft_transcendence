@@ -2,7 +2,7 @@ import { PartialType } from '@nestjs/swagger';
 import { IsString, IsDate, IsBoolean, IsOptional, IsEnum } from 'class-validator';
 import { User } from '../entities/user.entity';
 
-export class CreateNotifsDto {
+export class CreateNotifDto {
 	@IsEnum(['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest'])
 	type: string;
 
@@ -21,9 +21,9 @@ export class CreateNotifsDto {
 	@IsString()
 	from: string;
 
-	constructor(notifsDto: Partial<CreateNotifsDto>) {
-	Object.assign(this, notifsDto);
+	constructor(notifDto: Partial<CreateNotifDto>) {
+	Object.assign(this, notifDto);
 	}
 }
 
-export class UpdateNotifsDto extends PartialType(CreateNotifsDto) {}
+export class UpdateNotifsDto extends PartialType(CreateNotifDto) {}
