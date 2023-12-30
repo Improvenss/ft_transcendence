@@ -4,24 +4,16 @@ import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
 import { useSocket } from './SocketHook';
 
-interface INotfis {
-	id: number,
-	text: string,
-	date: Date,
-	read: boolean,
-}
-
 interface IUserProps{
 	email: string;
 	login: string;
 	displayname: string;
 	imageUrl: string;
-	socketId?: string;
+	socketId: string;
+	status: string;
 	nickname?: string;
 	avatar?: string;
-	status: string;
 	friends: IUserProps[];
-	notifications: INotfis[];
 }
 
 const UserContext = createContext<{
@@ -41,8 +33,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 		if (isAuth === true){
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
-				//const response = await fetch(process.env.REACT_APP_USER as string, {
-				// const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends`, {
 				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends`, {
 					method: "GET",
 					headers: {
@@ -65,7 +55,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 							avatar: data.user.avatar,
 							status: data.user.status,
 							friends: data.user.friends,
-							notifications: data.user.notifications,
 						});
 						console.log("userInfo:", data.user);
 
@@ -83,7 +72,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 
 	if ((isAuth === true && userInfo === undefined))
 		return (<LoadingPage />);
-
 
 	return (
 		<>

@@ -191,7 +191,16 @@
       },
       "get": {
         "operationId": "UsersController_getData",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""

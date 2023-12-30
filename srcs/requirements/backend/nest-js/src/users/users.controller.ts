@@ -235,7 +235,7 @@ export class UsersController {
 			let result : any;
 
 			if (action === 'poke')
-				result = await this.usersService.createaNotif(user.login, target, 'text', `${user.displayname} poked you!`);
+				result = await this.usersService.createNotif(user.login, target, 'text', `${user.displayname} poked you!`);
 			else if (action === 'sendFriendRequest')
 				result = await this.usersService.friendRequest(action, user, target);
 			else if (action === 'acceptFriendRequest')
@@ -253,17 +253,25 @@ export class UsersController {
 		}
 	}
 
+	/*
+		process.env.REACT_APP_FETCH + `/users` ise istek atan kullanıcıya ait default veriler dönecektir.
+		process.env.REACT_APP_FETCH + `/users?relation=notifications` ise kullanıcıya ait sadece notif verileri dönecektir.
+		process.env.REACT_APP_FETCH + `/users?relation=notifications&user=true` ise kullanıcıyı ait bilgilerle notif dönecektir
+	*/
 	@Get()
 	async getData(
 		@Req() {user},
-		@Query('action') action: string[] | string | undefined,
+		@Query('relation') relation: string[] | string | undefined,
+		@Query('user') userData: 'true' | undefined,
 	){
 		try {
-			console.log(`${C.B_YELLOW}GET: /user: @Req() action: [${action}]${C.END}`);
-			if (action === undefined)
-				throw Error('Query is empty!');
+			console.log(`${C.B_YELLOW}GET: /user: @Req() relation: [${relation}] userData: [${userData}]${C.END}`);
+			if (relation === undefined)
+				return (await this.usersService.getData(user.login));
+			if (relation && userData === 'true')
+				return (await this.usersService.getData(user.login, relation));
 
-			return (await this.usersService.getData(user, action));
+			return (await this.usersService.getRelationData(user.login, relation));
 		} catch (err) {
 			console.error("@Get(): ", err);
 			return ({err: err.message});

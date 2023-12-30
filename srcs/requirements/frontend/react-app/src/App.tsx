@@ -41,7 +41,7 @@ function App() {
 	useEffect(() => {
 		if (isAuth){
 			const checkNotifs = async () => {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users?action=notifications`, {
+				const response = await fetch(process.env.REACT_APP_FETCH + `/users?relation=notifications`, {
 					method: "GET",
 					headers: {
 						"Content-Type": "application/json",
@@ -85,8 +85,8 @@ function App() {
 	useEffect(() => {
 		if (isAuth){
 			if (unreadNotifs > 0){
-				socket?.emit('markAllNotifsAsRead');
 				setUnreadNotifs(0);
+				socket?.emit('markAllNotifsAsRead');
 			}
 		}
 	}, [showNotifs]);

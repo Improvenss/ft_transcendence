@@ -23,10 +23,9 @@ export class UsersService {
 		requesterUser: User,
 		target: string,
 	){
-		const	tmpUser = await this.findUser(target, null, ['friends']);
-		if (!tmpUser)
+		const	targetUser = await this.getData(target, 'friends');
+		if (!targetUser)
 			throw new NotFoundException('User not found!');
-		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 
 		if (targetUser.friends.some(friend => friend.id === requesterUser.id))
 			throw new Error('Users are already friends.');
@@ -38,14 +37,13 @@ export class UsersService {
 				message =  `${requesterUser.displayname}(${requesterUser.login}) send friend request!`;
 				break;
 			case 'acceptFriendRequest':
-				const	requesterArray = await this.findUser(requesterUser.login, null, ['friends']);
-				const	requester = Array.isArray(requesterArray) ? requesterArray[0] : requesterArray;
+				const	requester = await this.getData(requesterUser.login, 'friends');
+				if (!requester)
+					throw new NotFoundException('User not found!');
 
 				requester.friends = [...requester.friends, targetUser];
 				targetUser.friends = [...targetUser.friends, requester];
 
-				//requester.friends.push(targetUser);
-				//targetUser.friends.push(requester);
 				await this.usersRepository.save([requester, targetUser]);
 				message = `${requester.displayname}(${requesterUser.login}) accepted the friend request.`;
 				break;
@@ -56,60 +54,41 @@ export class UsersService {
 				break;
 		}
 
-		return (await this.createaNotif(requesterUser.login, target, action, message));
+		return (await this.createNotif(requesterUser.login, target, action, message));
 	}
 
-	async deleteNotif(
-		notifId: number,
-	){
-		const notification = await this.notifRepository.delete(notifId);
-		if (!notification.affected){
-			throw new NotFoundException('Notification not found!');
-		}
-	}
-
-	async notifsMarkRead( //stabil değil tekrar bak.!!
+	async notifsMarkRead(
 		user: User,
 	){
-		const tmpUser = await this.findUser(user.login, null, ['notifications']);
-		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-  
-		if (!tmpUser) {
-		  throw new NotFoundException('User not found!');
-		}
+		// const tmpUser = await this.getData(user.login, 'notifications');
+		// if (!tmpUser) {
+		//   throw new NotFoundException('User not found!');
+		// }
 	  
-		targetUser.notifications.forEach(notif => notif.read = true);
+		// await tmpUser.notifications.forEach(notif => notif.read = true);
 	  
-		await this.usersRepository.save(targetUser);
-
-		// const notifs = await this.getData(user, 'notifications');
-		// notifs.notifications.forEach((notif: CreateNotifsDto) => (
-		// 	notif.read = true
-		// ));
-		// await this.notifsRepository.save(notifs);
+		// // await this.usersRepository.save(tmpUser);
+		// await this.notifRepository.save(tmpUser.notifications);
 
 
-		// const data = await this.usersRepository.findOne({where: {login: user.login}, relations: ['notifications']});
-		// data.notifications.forEach(notif => (notif.read = true));
-		// // await this.notifsRepository.save(data);
-		// await this.usersRepository.save(data);
+		const userNotifs = await this.getRelationData(user.login, 'notifications');
+		console.log("->",userNotifs.notifications);
+
+		userNotifs.notifications.forEach(notif => notif.read = true);
+
+		await this.notifRepository.save(userNotifs);
 	}
 
-	async createaNotif(
+	async createNotif(
 		requesterUser: string,
 		target: string,
 		action: string,
 		text: string,
 	){
-		// const	tmpUser = await this.findUser(target, null, ['notifications']);
-		// if (!tmpUser)
-		// 	throw new NotFoundException('User not found!');
-		// const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		const	tmpUser = await this.findUser(target);
-		if (!tmpUser)
+		const	targetUser = await this.getData(target);
+		if (!targetUser)
 			throw new NotFoundException('User not found!');
-		const	targetUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		const	notifs = await this.getData(targetUser, 'notifications');
+		const	notifs = await this.getData(target, 'notifications');
 	
 		const createNotfiDto: CreateNotifDto = {
 			type: action,
@@ -121,22 +100,52 @@ export class UsersService {
 		};
 
 		const newNotif = new Notif(createNotfiDto);
-		await notifs.notifications.push(newNotif);
+		notifs.notifications.push(newNotif);
 		await this.notifRepository.save(newNotif);
 		return (newNotif);
 	}
 
-	async getData(
-		user: User,
-		action: string[] | string,
+	async deleteNotif(
+		notifId: number,
 	){
-		if (typeof action === 'string') {
-			action = [action];
+		const notification = await this.notifRepository.delete(notifId);
+		if (!notification.affected){
+			throw new NotFoundException('Notification not found!');
 		}
-		const data = await this.usersRepository.findOne({where: {login: user.login}, relations: action});
-		
-		const result: Record<string, any> = {};
-		action.forEach(rel => {
+	}
+
+	/*
+		getData(), default kullanıcı verilerini veya default kullanıcı verileri ile relations verilerini döndürür.
+	*/
+	async getData(
+		userLogin: string,
+		relation?: string[] | string,
+	){
+		if (relation === undefined){
+			return (await this.usersRepository.findOne({where: {login: userLogin}}))
+		}
+
+		if (typeof relation === 'string') {
+			relation = [relation];
+		}
+
+		return (await this.usersRepository.findOne({where: {login: userLogin}, relations: relation}));
+	}
+
+	/*
+		getRelationData(), sadece kullanıcıya ait ilişki verilerini döndürür.
+	*/
+	async getRelationData(
+		userLogin: string,
+		relation: string[] | string,
+	){
+		if (typeof relation === 'string') {
+			relation = [relation];
+		}
+		const data = await this.usersRepository.findOne({where: {login: userLogin}, relations: relation});
+
+		const result: Partial<User> = {};
+		relation.forEach(rel => {
 			if (data && data.hasOwnProperty(rel)) {
 			  result[rel] = data[rel];
 			}
