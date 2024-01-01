@@ -13,7 +13,8 @@
 }
 
 /* #app-header *:hover { */
-#app-header *:not(#site-name):not(.notifs-container):not(.notifs-container *):hover {
+#app-header
+	*:not(#site-name):not(#notification):not(#notification *):hover {
 	/* transform: rotateY(20deg) rotateX(10deg);
 	transition: transform 0.5s; */
 	color: red;
@@ -43,78 +44,6 @@
 	bottom: 20px;
 	width: 3vw;
 }
-
-/* -- Notifs -- */
-
-.notifs-container {
-	display: flex;
-	border-radius: 5px;
-	cursor: pointer;
-}
-
-.notifs-container.open {
-	background-color: #45a049;
-}
-
-#icon-notifs {
-	max-width: 40px;
-	max-height: 40px;
-}
-
-.notifs-count{
-	position: fixed;
-	background-color: red;
-	border-radius: 25%;
-	padding: 5px;
-	font-size: 12px;
-	text-align: center;
-}
-
-#notifs-content {
-	top: 120px;
-	width: 150px;
-	position: absolute;
-	right: 5px;
-	background-color: rgb(128, 128, 128, 0.5);
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-	z-index: 100; /* Diğer öğelerin üstünde görünmesini sağlar */
-	padding: 10px;
-	border-radius: 4px;
-	max-height: 40%;
-	overflow-y: auto;
-  }
-
-  .notification-card {
-	border-radius: 5%;
-	text-align: center;
-	padding: 5px;
-	margin-bottom: 5px;
-  }
-
-  .notification-card > * > button {
-	border-radius: 5px;
-	margin-bottom: 5px;
-  }
-
-  .notification-card > p {
-	color: whitesmoke;
-
-  }
-
-  .notification-card > * > button:hover{
-	background-color: #45a049;
-
-  }
-
-  .notification-card.read {
-	background-color: rgb(0, 0, 0, 0.8);
-	
-  } 
-  
-  .notification-card.unread {
-	border: 1px solid rgb(137, 47, 47);
-	background-color: rgb(139, 0, 0, 0.6);
-  }
 
   *:focus {
 	outline: none;

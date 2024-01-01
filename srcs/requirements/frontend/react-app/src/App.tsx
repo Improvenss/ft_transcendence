@@ -13,83 +13,13 @@ import { useUser } from "./hooks/UserHook";
 import ProfilePage from "./user/ProfilePage";
 import GamePage from './game/GamePage';
 import GameLobby from './game/GameLobby';
-import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
-import { useEffect, useState } from 'react';
-import { useSocket } from './hooks/SocketHook';
-import handleRequest from './utils/handleRequest'
-import {INotif} from '../src/hooks/UserHook';
+import Notification from './Notification';
 
 function App() {
 	console.log("---------APP-PAGE---------");
 	const { isAuth, setAuth } = useAuth();
-	const socket = useSocket();
 	const { userInfo } = useUser();
 	const navigate = useNavigate();
-	const [showNotifs, setShowNotifs] = useState<boolean>(false);
-	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
-	const [notifications, setNotifications] = useState<INotif[]>(userInfo?.notifications || []);
-
-	useEffect(() => {
-		if (isAuth && userInfo && socket){
-			// const unreadCount = userInfo.notifications.filter((notif: INotif) => !notif.read).length;
-			// setUnreadNotifs(unreadCount);
-
-			const handleListenNotifs = (newNotif: INotif) => {
-				console.log("Notif Geldi:", newNotif);
-				setNotifications(prevNotifs => [
-					...prevNotifs,
-					newNotif
-				]);
-
-				if (!newNotif.read) {
-					setUnreadNotifs(prevCount => prevCount + 1);
-				}
-
-				const notifsContainer = document.getElementById("notifs-content");
-				if (notifsContainer){
-					notifsContainer.scrollTop = 0;
-				}
-			}
-
-			socket.on(`notif:${userInfo.login}`, handleListenNotifs);
-			return () => {
-				socket.off(`notif:${userInfo.login}`, handleListenNotifs);
-			};
-		}
-	}, []);
-
-	useEffect(() => {
-		if (isAuth){
-			if (unreadNotifs > 0){
-				setUnreadNotifs(0);
-				socket?.emit('markAllNotifsAsRead');
-			}
-		}
-	}, [showNotifs]);
-
-	const formatTimeAgo = (dateString: string) => {
-		const	now = new Date();
-		const	date = new Date(dateString);
-		const	seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-		const intervals = [
-			{ label: 'year', seconds: 31536000 },
-			{ label: 'month', seconds: 2592000 },
-			{ label: 'day', seconds: 86400 },
-			{ label: 'hour', seconds: 3600 },
-			{ label: 'minute', seconds: 60 },
-			{ label: 'second', seconds: 1 },
-		];
-
-		for (const { label, seconds: intervalSeconds } of intervals) {
-			const interval = Math.floor(seconds / intervalSeconds);
-			if (interval > 0) {
-				return `${interval} ${label} ago`;
-			}
-		}
-	
-		return ('now');
-	}
 
 	function logOut() {
 		localStorage.clear();
@@ -119,42 +49,8 @@ function App() {
 								<img src={userInfo?.imageUrl} alt="Profile" />
 							)}
 						</Link>
-						<div className={`notifs-container ${showNotifs ? 'open' : null}`} onClick={() => setShowNotifs(!showNotifs)}>
-							<IconNotifs id='icon-notifs'/>
-							{unreadNotifs > 0 && (
-								<div className="notifs-count">
-									{unreadNotifs}
-								</div>
-							)}
-						</div>
+						<Notification />
 					</ul>
-					{showNotifs && (
-						<div id="notifs-content">
-							{notifications
-							      .sort((a, b) => b.id - a.id)
-								  .map((notification) => (
-									<div
-										key={notification.id}
-										className={`notification-card ${notification.read ? 'read' : 'unread'}`}
-									>
-										<p>{notification.text}</p>
-										{notification.type === "sendFriendRequest" && (
-											<div>
-												<button onClick={() => handleRequest('acceptFriendRequest', notification.from, notification.id)}>
-													Accept
-												</button>
-												<button onClick={() => handleRequest('declineFriendRequest', notification.from, notification.id)}>
-													Decline
-												</button>
-											</div>
-										)}
-										<p className="notification-date">
-											{formatTimeAgo(notification.date)}
-										</p>
-									</div>
-								))}
-						</div>
-					)}
 					</>
 				) : (
 					<nav>

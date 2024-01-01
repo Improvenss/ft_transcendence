@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, NotFoundException, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Socket } from 'socket.io';
 import { Colors as C } from 'src/colors';
@@ -8,10 +8,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/chat/channel.handler';
 import { promisify } from 'util';
 import * as fs from 'fs';
-import * as path from 'path';
-import { User } from './entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
-import { ChatService } from 'src/chat/chat.service';
+import { Notif } from './entities/user.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -64,26 +62,6 @@ export class UsersController {
 			return ({message: `user[${user.login}] cookie is ❌`, err: err.message});
 		}
 	}
-
-	// @Post('/friend/add')
-	// async	addUser(
-	// 	@Req() {user},
-	// 	@Query ('user') targetUser: string | undefined,
-	// ){
-	// 	try
-	// 	{
-	// 		console.log(`${C.B_YELLOW}POST: /friend/add: @Query('user'): [${targetUser}]${C.END}`);
-	// 		const	responseAddFriend = await this.usersService.addFriend(user, targetUser);
-	// 		if (!responseAddFriend)
-	// 			return ({message: "USER NOK", user: `User '${targetUser}' not found.`});
-	// 		return ({message: responseAddFriend});
-	// 	}
-	// 	catch (err)
-	// 	{
-	// 		console.log("@Post('/friend/add'): ", err);
-	// 		return ({err: err});
-	// 	}
-	// }
 
 	// @Post('/create')
 	// async	createUser(
@@ -232,15 +210,13 @@ export class UsersController {
 			if (requestId)
 				await this.usersService.deleteNotif(user.id, requestId);
 
-			let result : any;
+			let result : Notif;
 
 			if (action === 'poke')
 				result = await this.usersService.createNotif(user.login, target, 'text', `${user.displayname} poked you!`);
-			else if (action === 'sendFriendRequest')
-				result = await this.usersService.friendRequest(action, user, target);
-			else if (action === 'acceptFriendRequest')
-				result = await this.usersService.friendRequest(action, user, target);
-			else if (action === 'declineFriendRequest')
+			else if (action === 'sendFriendRequest' ||
+					action === 'acceptFriendRequest' ||
+					action === 'declineFriendRequest')
 				result = await this.usersService.friendRequest(action, user, target);
 			else
 				throw new Error('Invalid action values!');
@@ -266,7 +242,7 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_YELLOW}GET: /user: @Req() relation: [${relation}] userData: [${primary}]${C.END}`);
-			return (await this.usersService.getData(user.login, relation, primary));
+			return (await this.usersService.getData({userLogin: user.login}, relation, primary));
 		} catch (err) {
 			console.error("@Get(): ", err);
 			return ({err: err.message});

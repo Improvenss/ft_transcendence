@@ -23,7 +23,7 @@ export class UsersService {
 		requesterUser: User,
 		target: string,
 	){
-		const	targetUser = await this.getData(target, 'friends', 'true');
+		const	targetUser = await this.getData({userLogin: target}, 'friends', 'true');
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
 
@@ -37,7 +37,7 @@ export class UsersService {
 				message =  `${requesterUser.displayname}(${requesterUser.login}) send friend request!`;
 				break;
 			case 'acceptFriendRequest':
-				const	requester = await this.getData(requesterUser.login, 'friends', 'true');
+				const	requester = await this.getData({userLogin: requesterUser.login}, 'friends', 'true');
 				if (!requester)
 					throw new NotFoundException('User not found!');
 
@@ -60,7 +60,7 @@ export class UsersService {
 	async notifsMarkRead(
 		userLogin: string,
 	){
-		const userData = await this.getData(userLogin, 'notifications');
+		const userData = await this.getData({userLogin: userLogin}, 'notifications');
 		userData.notifications.forEach(notif => notif.read = true);
 		await this.notifRepository.save(userData.notifications);
 	}
@@ -71,11 +71,11 @@ export class UsersService {
 		action: string,
 		text: string,
 	){
-		const	targetUser = await this.getData(target);
+		const	targetUser = await this.getData({userLogin: target});
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
-		const	notifs = await this.getData(target, 'notifications');
-	
+		const	notifs = await this.getData({userLogin: target}, 'notifications');
+
 		const createNotfiDto: CreateNotifDto = {
 			type: action,
 			text: text,
@@ -106,18 +106,27 @@ export class UsersService {
 	}
 
 	async getData(
-		userLogin: string,
+		who: {userLogin?: string, socketId?: string},
 		relation?: string[] | string,
-		primary?: 'true'
+		primary?: 'true',
 	){
+		if (!who.userLogin && !who.socketId) {
+			throw new Error('Either login or socketId must be provided.');
+		}
+
+		if (who.userLogin && who.socketId) {
+			throw new Error('Provide only one of userLogin or socketId, not both.');
+		}
+
+		const whereClause = who.userLogin ? { login: who.userLogin } : { socketId: who.socketId };
 		if (relation === undefined){
-			return (await this.usersRepository.findOne({where: {login: userLogin}}));
+			return (await this.usersRepository.findOne({where: whereClause}));
 		}
 
 		if (typeof relation === 'string') {
 			relation = [relation];
 		}
-		const data = await this.usersRepository.findOne({where: {login: userLogin}, relations: relation});
+		const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
 
 		if (primary === 'true')
 			return (data);

@@ -14,7 +14,6 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import { CreateMessageDto } from './dto/chat-message.dto';
-import { GameService } from 'src/game/game.service';
 
 var count: number = 0;
 
@@ -33,7 +32,6 @@ var count: number = 0;
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly usersService: UsersService,
-		//private readonly gameService: GameService,
 		private readonly chatService: ChatService,
 	) {}
 
@@ -279,15 +277,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		try {
 
-			const responseUser = await this.usersService.findUser(null, socket);
+			const responseUser = await this.usersService.getData({socketId: socket.id})
 			if (responseUser === null){
 				throw (new NotFoundException("User not found!"));
 			}
-			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
-			console.log('Received userStatus:', `user[${singleUser.login}]`, `status[${object.status}]`);
-			await this.usersService.patchUser(responseUser[0], object);
+			console.log('Received userStatus:', `user[${responseUser.login}]`, `status[${object.status}]`);
+			await this.usersService.patchUser(responseUser.login, object);
 		} catch (err) {
-			console.error("@SubscribMessage(userStatus):", err);
+			console.error("@SubscribMessage(userStatus):", err.message);
 		}
 	}
 
@@ -296,13 +293,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket
 	){
 		try {
-			const responseUser = await this.usersService.findUser(null, socket);
+			const responseUser = await this.usersService.getData({socketId: socket.id})
 			if (responseUser === null){
 				throw (new NotFoundException("User not found!"));
 			}
-			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
 
-			await this.usersService.notifsMarkRead(singleUser.login);
+			await this.usersService.notifsMarkRead(responseUser.login);
 		} catch (err) {
 			console.error("@SubscribMessage(markAllNotifsAsRead):", err);
 		}
