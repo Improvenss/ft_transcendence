@@ -3,98 +3,57 @@ import { ReactComponent as IconCreate } from '../assets/chat/iconCreate.svg';
 import { ReactComponent as IconPublic } from '../assets/chat/iconPublic.svg';
 import { ReactComponent as IconInvolved } from '../assets/chat/iconInvolved.svg';
 import './Channel.css';
-import { IChannel } from './iChannel';
-// import { useSocket } from '../hooks/SocketHook';
 import ChannelCreate from './ChannelCreate';
 import { useChannelContext } from './ChatPage';
 import ChannelJoin from './ChannelJoin';
-import Cookies from 'js-cookie';
+import fetchRequest from '../utils/fetchRequest';
 
-// function Channel({ setSelectedChannel, channels }: IChannelProps) {
 function Channel() {
 	console.log("---------CHAT-CHANNELS---------");
 	const { channels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
 	const [searchTerm, setSearchTerm] = useState('');
-	// const socket = useSocket();
-	const userCookie = Cookies.get("user");
 	
 	const handleTabClick = (tabId: string) => {
 		if (activeTab !== tabId){
 			setActiveTab(tabId);
-			// Implement logic to update content based on the selected tab
-			// For now, let's just log a message to the console
-			console.log(`Switched to ${tabId} tab`);
 		}
 	};
 
-	const handleRegisterChannel = async (channel: string, password: string | null) => {
-		try
-		{
-			const response = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/register`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					"Authorization": "Bearer " + userCookie,
-				},
-				body: JSON.stringify({
-					channel: channel,
-					password: password,
-				}),
-			});
-			if (!response.ok)
-				throw (new Error("API fetch error."));
-			const data = await response.json();
-			setActiveChannel(data[0]);
-			setActiveTab('involved');
-			//if (!data.response)
-				//throw (new Error("user can't registered!"));
+	const handleChannelAction = async (channelName: string, action: 'login' | 'register', password?: string ) => {
+		if (activeChannel?.name === channelName){
+			setActiveChannel(null);
+			return;
 		}
-		catch (err)
-		{
-			console.error("ERROR: Channel.tsx: handleRegisterChannel():", err);
-		}
-	}
 
-	const handleChannelClick = async (channel: IChannel) => {
-		try
-		{
-			if (activeChannel?.name !== channel.name){
-				const response = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${channel.name}&relations=all`, {
-					method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-					headers: {
-						'Content-Type': 'application/json',
-						"Authorization": "Bearer " + userCookie,
-					},
-				});
-				if (!response.ok)
-					throw (new Error("API fetch error."));
-				const data = await response.json();
-				console.log("->", data);
-				setActiveChannel(data[0]);
-				console.log(`Switched to ${channel.name} channel.`);
-			}
-			else {
-				setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.
-			}
+		const requestBody = {
+			channel: channelName,
+			password: password === undefined ? null : password,
 		}
-		catch (err)
-		{
-			console.error("ERROR: handleChannelClick():", err);
-			setActiveChannel(null); //Aynı kanalın üstüne tıklayınca activeChannel kapanıyor.  }
-		};
+		const response = await fetchRequest({
+			method: (action === 'login' ? 'GET' : 'POST'),
+			body: (action === 'register' ? JSON.stringify(requestBody) : undefined),
+			url: (action === 'register' ? `/chat/channel/register`
+				: `/chat/channel?channel=${channelName}&relations=all`),
+		})
+		if (!response.ok)
+			throw (new Error("API fetch error."));
+		const data = await response.json();
+		setActiveChannel(data[0]);
+		if (action === 'register')
+			setActiveTab('involved');
 	}
 
 	return (
 		<div id="channel">
 			<div id="container">
-				<div className={`channel ${activeTab === 'create' ? 'active' : ''} tab`} onClick={() => handleTabClick('create')}>
+				<div className={`tab ${activeTab === 'create' ? 'active' : ''}`} onClick={() => handleTabClick('create')}>
 					<IconCreate />
 				</div>
-				<div className={`channel ${activeTab === 'public' ? 'active' : ''} tab`} onClick={() => handleTabClick('public')}>
+				<div className={`tab ${activeTab === 'public' ? 'active' : ''}`} onClick={() => handleTabClick('public')}>
 					<IconPublic />
 				</div>
-				<div className={`channel ${activeTab === 'involved' ? 'active' : ''} tab`} onClick={() => handleTabClick('involved')}>
+				<div className={`tab ${activeTab === 'involved' ? 'active' : ''}`} onClick={() => handleTabClick('involved')}>
 					<IconInvolved />
 				</div>
 			</div>
@@ -109,7 +68,7 @@ function Channel() {
 						<ChannelCreate onSuccess={handleTabClick}/>
 					)}
 					{activeTab === 'join' && (
-						<ChannelJoin onSuccess={handleTabClick} handleRegisterChannel={handleRegisterChannel} />
+						<ChannelJoin handleChannelAction={handleChannelAction} />
 					)}
 					{(activeTab === 'public' || activeTab === 'involved') && (
 						<div>
@@ -128,13 +87,8 @@ function Channel() {
 									className={activeChannel && activeChannel.name === channel.name ? 'active' : 'inactive'}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
 									onClick={() => {
-										if (activeTab === 'public'){
-											handleRegisterChannel(channel.name, null);
-										}
-										else
-											handleChannelClick(channel)
-									
-									}} // Tıklama olayı
+										handleChannelAction(channel.name, (activeTab === 'public' ? 'register' : 'login'));
+									}}
 								>
 									<img src={channel.image} alt={channel.image} />
 									<span>{channel.name} {(channel.status === 'involved') ? (' | ' + channel.type) : ''}</span>

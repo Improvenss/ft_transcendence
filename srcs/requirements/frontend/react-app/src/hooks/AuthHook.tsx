@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import LoadingPage from '../utils/LoadingPage';
+import fetchRequest from '../utils/fetchRequest';
 
 // Create an AuthContext
 const AuthContext = createContext<{
@@ -28,12 +29,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setAuth(false);
 				return ;
 			}
-			const response = await fetch(process.env.REACT_APP_USER_COOKIE as string, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": "Bearer " + userCookie as string,
-				},
+			const response = await fetchRequest({
+				method: 'GET',
+				url: '/users/cookie',
 			});
 			if (response.ok) {
 				console.log("I: ---Cookie Backend Connection '✅'---");
@@ -42,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setAuth((!data.err));
 			} else {
 				console.log("I: ---Cookie Backend Connection '❌'---");
+				Cookies.remove('user');
 				setAuth(false);
 			}
 		};
@@ -54,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	return (
 		<>
 			<AuthContext.Provider value={{ isAuth, setAuth }}>
-			{children}
+				{children}
 			</AuthContext.Provider>
 		</>
 	);

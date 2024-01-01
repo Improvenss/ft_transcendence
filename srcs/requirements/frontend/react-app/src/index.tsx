@@ -18,14 +18,10 @@ import { StatusProvider } from './hooks/StatusHook';
  *   Arasina yazmamiz gerekiyor her seyi.
  *  </BrowserRouter>
  * 
- * TODO: Kullanici adlarini koy.
- * TODO: User list yap.
- * TODO: Channel list yap.
- * TODO: Channel olustururken; ChatPage.tsx'te olacak ama function
- *  implementation'larini(definition) ayri bir 'Channel.tsx' dosyasinda yaz.
- * TODO: Sol & Sag mesajlari genisligini sinirla.
- * TODO: Mesajlari 'await' ile synchronize hale getir.
- * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.
+ * TODO: notification'da tüm bildirileri sil butonu ekle
+ * TODO: profilePage'de friends bölümüne arkadaşlıktan çıkar ekle, başka birinin profiline gidincede buton olarak ekle
+ * TODO: backend'den çoğu yapıyı tek formatta çek yani ne gerekiyorsa onu al
+ * TODO: frontend'de notif'ler okunduğu zaman bazen okundu olarak işaretlemiyor bugta kalıyor
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

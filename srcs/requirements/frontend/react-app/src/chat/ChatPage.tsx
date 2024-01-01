@@ -7,11 +7,33 @@ import { useAuth } from "../hooks/AuthHook";
 import Channel from "./Channel";
 import ActiveChannel from "./ActiveChannel";
 import { createContext, useContext, useEffect, useState } from "react";
-import { IChannel, IChannelContext } from './iChannel';
 import ChannelInfo from "./ChannelInfo";
-import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
+import { IMessage, IUser } from "./iChannel";
+import fetchRequest from "../utils/fetchRequest";
+
+export interface IChannel {
+	id: number,
+	name: string,
+	description: string,
+	type: 'public' | 'private',
+	status: 'involved' | 'public'//'not-involved',
+	image: string,
+
+	members: IUser[],
+	admins: IUser[],
+	messages: IMessage[],
+	bannedUsers: IUser[],
+}
+
+interface IChannelContext {
+	channels: IChannel[] | undefined;
+	activeChannel: IChannel | null;
+	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
+	channelInfo: boolean;
+	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 export const ChannelContext = createContext<IChannelContext>({
 	channels: undefined,
@@ -29,33 +51,22 @@ function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const socket = useSocket();
-	const userCookie = Cookies.get("user");
 
-	const [channelInfo, setChannelInfo] = useState(false);
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
-	const [activeChannel, setActiveChannel] = useState<IChannel | null>(() => {
-		const globalChannel = channels?.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
-		if (globalChannel === undefined) //Henüz global channel olmadığı için null dönüyor, ama boş channel oluşturup seçilirse pencere açılır.
-			return (null);
-		return (globalChannel);
-	});
+	const [activeChannel, setActiveChannel] = useState<IChannel | null>(null);
+	const [channelInfo, setChannelInfo] = useState(false);
 
 	useEffect(() => {
 		const fetchChannels = async () => {
-		  try {
-			//  const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?channel=abc&relations=all", {
-				const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?relations=members", {
-					method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-					headers: {
-						'Content-Type': 'application/json',
-						"Authorization": "Bearer " + userCookie,
-					},
+			try {
+				const response = await fetchRequest({
+					method: 'GET',
+					url: "/chat/channels",
 				});
-	
-				if (!responseAllChannels.ok) {
+				if (!response.ok) {
 					throw new Error('API-den veri alınamadı.');
 				}
-				const data = await responseAllChannels.json();
+				const data = await response.json();
 				console.log("Get Channels: ", data);
 				setChannels(data);
 			} catch (error) {

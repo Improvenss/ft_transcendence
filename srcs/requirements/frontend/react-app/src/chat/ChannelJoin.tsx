@@ -2,9 +2,8 @@ import { FormEvent } from 'react';
 import { IChannelJoinForm } from './iChannel';
 import './ChannelJoin.css';
 
-function ChannelJoin({ onSuccess, handleRegisterChannel}: { 
-		onSuccess: (tabId: string) => void,
-		handleRegisterChannel: (channel: string, password: string | null) => void
+function ChannelJoin({ handleChannelAction}: { 
+		handleChannelAction:  (channelName: string, action: 'login' | 'register', password?: string) => Promise<void>
 	}){
 		console.log("---------CHANNEL-JOIN----------");
 
@@ -18,7 +17,7 @@ function ChannelJoin({ onSuccess, handleRegisterChannel}: {
 			};
 			console.log(formObject.name);
 			console.log(formObject.password);
-			handleRegisterChannel(formObject.name, formObject.password);
+			handleChannelAction(formObject.name, 'register',formObject.password);
 			formElement.reset();
 		}
 

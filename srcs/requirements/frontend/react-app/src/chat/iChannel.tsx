@@ -40,14 +40,6 @@ export interface IChannelJoinForm {
 	type: 'private',
 }
 
-export interface IChannelContext {
-	channels: IChannel[] | undefined;
-	activeChannel: IChannel | null;
-	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
-	channelInfo: boolean;
-	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
 // Backend DTO
 export interface CreateChannelDto {
 	status: 'public' | 'involved';

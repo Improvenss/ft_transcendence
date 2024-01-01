@@ -54,25 +54,40 @@
         }
       }
     },
-    "/users/user": {
+    "/users/cookie": {
       "get": {
-        "operationId": "UsersController_getUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "operationId": "UsersController_userCookie",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         }
-      },
+      }
+    },
+    "/users/socket": {
+      "patch": {
+        "operationId": "UsersController_patchSocket",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/user/upload": {
+      "put": {
+        "operationId": "UsersController_putFile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/user": {
       "patch": {
         "operationId": "UsersController_patchUser",
         "parameters": [
@@ -108,34 +123,19 @@
             "description": ""
           }
         }
-      }
-    },
-    "/users/cookie": {
+      },
       "get": {
-        "operationId": "UsersController_userCookie",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
+        "operationId": "UsersController_getUser",
+        "parameters": [
+          {
+            "name": "who",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
-        }
-      }
-    },
-    "/users/socket": {
-      "patch": {
-        "operationId": "UsersController_patchSocket",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/user/upload": {
-      "put": {
-        "operationId": "UsersController_putFile",
-        "parameters": [],
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -257,6 +257,17 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channels": {
+      "get": {
+        "operationId": "ChatController_getChannels",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""

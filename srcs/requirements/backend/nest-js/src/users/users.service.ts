@@ -118,18 +118,18 @@ export class UsersService {
 			throw new Error('Provide only one of userLogin or socketId, not both.');
 		}
 
-		const whereClause = who.userLogin ? { login: who.userLogin } : { socketId: who.socketId };
-		if (relation === undefined){
-			return (await this.usersRepository.findOne({where: whereClause}));
-		}
-
 		if (typeof relation === 'string') {
 			relation = [relation];
 		}
-		const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
 
-		if (primary === 'true')
+		const whereClause = who.userLogin ? { login: who.userLogin } : { socketId: who.socketId };
+		const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
+		if (!data)
+			throw new NotFoundException('User not found!');
+
+		if (relation === undefined || primary === 'true'){
 			return (data);
+		}
 
 		const result: Partial<User> = {};
 		relation.forEach(rel => {

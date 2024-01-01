@@ -50,11 +50,9 @@ export class ChatController {
 	) {
 		try
 		{
-			console.log(`${C.B_GREEN}GET: Channel: [${channel}], Relation: [${relations}]${C.END}`);
+			console.log(`${C.B_GREEN}GET: /channel: Channel: [${channel}], Relation: [${relations}]${C.END}`);
 			const	tmpChannel = await this.chatService.findChannel(channel, relations);
-			// if (!tmpChannel)
-			// 	throw (new NotFoundException(`Channel '${channel}' not found`))
-			const channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
+			const	channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
 			if (channelArray && channelArray.members)
 				return (await this.chatService.checkInvolvedUser(tmpChannel, user));
 			return (tmpChannel);
@@ -65,6 +63,20 @@ export class ChatController {
 			return (null)
 		}
 	}
+
+	@Get('/channels')
+	async getChannels(
+		@Req() {user},
+	){
+		try {
+			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
+			return (await this.chatService.getChannels(user.login));
+		} catch (err){
+			console.error("@Get('/channels'): ", err);
+			return ({err: err.message});
+		}
+	}
+
 
 	@Get('/channel/message')
 	async findMessage(
@@ -294,7 +306,7 @@ export class ChatController {
 	@UseInterceptors(FileInterceptor('image', multerConfig))
 	async createChannel(
 		@Req() {user},
-		@UploadedFile() image: any,
+		@UploadedFile() image: Express.Multer.File,
 		@Body('name') name: string,
 		@Body('type') type: string,
 		@Body('password') password: string | undefined,

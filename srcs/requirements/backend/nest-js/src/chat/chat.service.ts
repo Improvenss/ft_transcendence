@@ -33,6 +33,50 @@ export class ChatService {
 		return (`New Message created: id:[${newMessage.id}]`);
 	}
 
+	async getChannels(
+		userLogin: string,
+	) {
+		const { channels: involvedChannels } = await this.usersService.getData({ userLogin }, 'channels');
+		if (!involvedChannels){
+			throw new Error('User not found!');
+		}
+		const publicChannels = await this.channelRepository.find({ where: { type: 'public' } });
+	  
+		const involvedChannelIds = new Set(involvedChannels.map(channel => channel.id));
+		const uniquePublicChannels = publicChannels.filter(publicChannel => !involvedChannelIds.has(publicChannel.id));
+	  
+		const mergedChannels = [
+		  ...uniquePublicChannels.map(publicChannel => ({
+				...publicChannel, status: involvedChannelIds.has(publicChannel.id) ? 'involved' : 'public'//'not-involved'
+			})),
+		  ...involvedChannels.map(involvedChannel => ({
+				...involvedChannel, status: 'involved'
+			})),
+		];
+	  
+		const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
+		return mergedChannelsWithoutPassword;
+
+		// const involvedChannels = await this.usersService.getData({userLogin: userLogin}, 'channels');
+		// const publicChannels = await this.channelRepository.find({ where: { type: 'public' } });
+
+		// const involvedChannelIds = new Set(involvedChannels.channels.map(channel => channel.id));
+		// const uniquePublicChannels = publicChannels.filter(publicChannel => !involvedChannelIds.has(publicChannel.id));
+
+		// const mergedChannels = uniquePublicChannels.map(publicChannel => {
+		// 	const isInvolved = involvedChannels.channels.some(involvedChannel => involvedChannel.id === publicChannel.id);
+		// 	return {
+		// 	  ...publicChannel,
+		// 	  status: isInvolved ? 'involved' : 'not-involved',
+		// 	};
+		//   }).concat(involvedChannels.channels.map(involvedChannel => ({
+		// 		...involvedChannel,
+		// 		status: 'involved',
+		//   })));
+		// const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
+		// return (mergedChannelsWithoutPassword);
+	}
+
 	async findChannel(
 		channel: string | undefined,
 		relations?: string[] | 'all' | null

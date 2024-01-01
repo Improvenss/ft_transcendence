@@ -25,11 +25,11 @@
 	position: relative;
 }
 
-#container .channel.active {
+#container .tab.active {
 	background-color: #7a0e0e;
 }
 
-.channel {
+.tab {
 	border-radius: 10px;
 	font-size: 10px;
 	flex: 1;
@@ -39,7 +39,7 @@
 	text-align: center;
   }
 
-.channel svg {
+.tab svg {
 	width: 20px;
 	height: 20px;
   }

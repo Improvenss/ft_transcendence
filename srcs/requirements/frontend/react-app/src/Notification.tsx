@@ -78,6 +78,13 @@ function Notification() {
 		return ('now');
 	}
 
+	const removeNotif = (id: number) => {
+		setNotifications((prevNotifs) =>
+			prevNotifs.filter((notif) => notif.id !== id)
+		);
+		return (id);
+	}
+
 	return (
 		<div id="notification">
 			
@@ -109,10 +116,10 @@ function Notification() {
 							<p>{notification.text}</p>
 							{notification.type === "sendFriendRequest" && (
 								<div>
-									<button onClick={() => handleRequest('acceptFriendRequest', notification.from, notification.id)}>
+									<button onClick={() => handleRequest('acceptFriendRequest', notification.from, removeNotif(notification.id))}>
 										Accept
 									</button>
-									<button onClick={() => handleRequest('declineFriendRequest', notification.from, notification.id)}>
+									<button onClick={() => handleRequest('declineFriendRequest', notification.from, removeNotif(notification.id))}>
 										Decline
 									</button>
 								</div>

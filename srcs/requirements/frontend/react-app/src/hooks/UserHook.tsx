@@ -15,7 +15,7 @@ export interface INotif {
 	from: string,
 }
 
-interface IUserProps{
+export interface IUserProps{
 	email: string,
 	login: string,
 	displayname: string,

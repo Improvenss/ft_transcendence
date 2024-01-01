@@ -3,6 +3,7 @@ import { IChannelCreateForm } from "./iChannel";
 import './ChannelCreate.css';
 import Cookies from "js-cookie";
 import { useChannelContext } from "./ChatPage";
+import fetchRequest from "../utils/fetchRequest";
 
 const defaultForm: IChannelCreateForm = {
 	name: '',
@@ -68,24 +69,25 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 		formData.append('description', channelData.description);
 		formData.append('image', channelData.image as File);
 
-		try {
-			const createChannelResponse = await fetch(process.env.REACT_APP_CHANNEL_CREATE as string, {
-				method: 'POST',
-				headers: {
-					"Authorization": "Bearer " + userCookie,
-				},
-				body: formData,
-			});
-			if (!createChannelResponse.ok) {
-				throw new Error('Kanal oluşturulurken bir hata oluştu.');
+		const response = await fetchRequest({
+			method: 'POST',
+			body: formData,
+			url: '/chat/channel/create',
+		})
+		if (response.ok){
+			const data = await response.json();
+			console.log("ChannelCreate:", data);
+			if (!data.err){
+				console.log("---Channel created '✅'---");
+				const data = await response.json();
+				console.log(data.channel);
+				setActiveChannel(data.channel);
+				onSuccess('involved');
+			} else {
+
 			}
-			console.log('Kanal başarıyla oluşturuldu!');
-			const data = await createChannelResponse.json();
-			console.log(data.channel);
-			setActiveChannel(data.channel);
-			onSuccess('involved');
-		} catch (error) {
-			console.error(error);
+		} else {
+			console.log("---Backend Connection '❌'---");
 		}
 		setChannelData(defaultForm);
 		formElement.reset();

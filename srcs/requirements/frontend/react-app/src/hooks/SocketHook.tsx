@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthHook';
-import Cookies from 'js-cookie';
 import LoadingPage from '../utils/LoadingPage';
+import fetchRequest from '../utils/fetchRequest';
 
 // SocketContext'i oluştur
 const SocketContext = createContext<Socket | undefined>(undefined);
@@ -11,7 +11,6 @@ const SocketContext = createContext<Socket | undefined>(undefined);
 export function SocketProvider({ children }: { children: React.ReactNode }) {
 	console.log("---------SOCKETHOOK-PAGE---------");
 	const isAuth = useAuth().isAuth;
-	const userCookie = Cookies.get("user");
 	const [socket, setSocket] = useState<Socket | undefined>(undefined);
 
 	useEffect(() => {
@@ -19,15 +18,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
 			newSocket.on('connect', async () => {
 				console.log('Client connected to Server. ✅');
-				const response = await fetch(process.env.REACT_APP_SOCKET as string, {
-					method: "PATCH",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie as string,
-					},
-					body: JSON.stringify({
-						socketId: newSocket.id as string,
-					})
+				const response = await fetchRequest({
+					method: 'PATCH',
+					body: JSON.stringify({ socketId: newSocket.id }),
+					url: '/users/socket',
 				})
 				if (response.ok)
 				{

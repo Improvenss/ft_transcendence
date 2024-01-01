@@ -19,31 +19,31 @@ export class UsersController {
 		private readonly chatGateway: ChatGateway,
 	) {}
 
-	@Get('/user')
-	async getUser(
-		@Req() {user},
-		@Query ('user') findUser: string | 'me' | undefined,
-		@Query ('socket') findSocket?: Socket | undefined,
-		@Query('relations') relations?: string[] | null | 'all',
-	){
-		try
-		{
-			console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('socket'): [${findSocket}], @Query('relations'): [${relations}]${C.END}`);
-			const	tmpUser = await this.usersService.findUser(
-				(findUser === 'me') ? user.login : findUser,
-				findSocket,
-				relations
-			);
-			if (!tmpUser)
-				return ({message: "USER NOK", user: `User '${findUser}' not found.`});
-			return ({message: "USER OK", user: tmpUser});
-		}
-		catch (err)
-		{
-			console.log("@Get('/user'): ", err);
-			return ({err: err});
-		}
-	}
+	// @Get('/user')
+	// async getUser(
+	// 	@Req() {user},
+	// 	@Query ('user') findUser: string | 'me' | undefined,
+	// 	@Query ('socket') findSocket?: Socket | undefined,
+	// 	@Query('relations') relations?: string[] | null | 'all',
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('socket'): [${findSocket}], @Query('relations'): [${relations}]${C.END}`);
+	// 		const	tmpUser = await this.usersService.findUser(
+	// 			(findUser === 'me') ? user.login : findUser,
+	// 			findSocket,
+	// 			relations
+	// 		);
+	// 		if (!tmpUser)
+	// 			return ({message: "USER NOK", user: `User '${findUser}' not found.`});
+	// 		return ({message: "USER OK", user: tmpUser});
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.log("@Get('/user'): ", err);
+	// 		return ({err: err});
+	// 	}
+	// }
 
 	// OK
 	@Get('/cookie')
@@ -230,9 +230,9 @@ export class UsersController {
 	}
 
 	/*
-		process.env.REACT_APP_FETCH + `/users` ise istek atan kullanıcıya ait default veriler dönecektir.
-		process.env.REACT_APP_FETCH + `/users?relation=notifications` ise kullanıcıya ait sadece notif verileri dönecektir.
-		process.env.REACT_APP_FETCH + `/users?relation=notifications&user=true` ise kullanıcıyı ait bilgilerle notif dönecektir
+		default yapı için 	->	`/users`
+		sadece notif 		-> 	`/users?relation=notifications`
+		default + notif 	->	`/users?relation=notifications&primary=true`
 	*/
 	@Get()
 	async getData(
@@ -241,7 +241,7 @@ export class UsersController {
 		@Query('primary') primary: 'true' | undefined,
 	){
 		try {
-			console.log(`${C.B_YELLOW}GET: /user: @Req() relation: [${relation}] userData: [${primary}]${C.END}`);
+			console.log(`${C.B_YELLOW}GET: /user: relation: [${relation}] userData: [${primary}]${C.END}`);
 			return (await this.usersService.getData({userLogin: user.login}, relation, primary));
 		} catch (err) {
 			console.error("@Get(): ", err);
@@ -249,6 +249,21 @@ export class UsersController {
 		}
 	}
 
+	@Get('/user')
+	async getUser(
+		@Req() {user},
+		@Query ('who') who: string,
+	){
+		try {
+			console.log(`${C.B_GREEN}GET: /user: who: [${who}]${C.END}`);
+			const data = await this.usersService.getData({userLogin: who}, (user.login === who ? 'friends': []), 'true');
+			delete data.socketId;
+			return (data);
+		} catch (err) {
+			console.log("@Get('/user'): ", err);
+			return ({err: err.message});
+		}
+	}
 
 	// @Delete()
 	// async	removeAll() {

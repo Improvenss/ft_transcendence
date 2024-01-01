@@ -12,15 +12,13 @@
 	cursor: pointer;
 }
 
-/* #app-header *:hover { */
 #app-header
 	*:not(#site-name):not(#notification):not(#notification *):hover {
-	/* transform: rotateY(20deg) rotateX(10deg);
-	transition: transform 0.5s; */
 	color: red;
-	text-shadow:
+	text-shadow: darkred;
+	/* text-shadow:
 		2px 2px blue,
-		-2px -2px green;
+		-2px -2px green; */
 }
 
 #app-header img {
