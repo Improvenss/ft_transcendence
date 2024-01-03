@@ -264,23 +264,20 @@
         }
       }
     },
-    "/chat/channels": {
+    "/chat": {
       "get": {
-        "operationId": "ChatController_getChannels",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/message": {
-      "get": {
-        "operationId": "ChatController_findMessage",
+        "operationId": "ChatController_getChannel",
         "parameters": [
           {
-            "name": "message",
+            "name": "channel",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "primary",
             "required": true,
             "in": "query",
             "schema": {
@@ -288,6 +285,17 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channels": {
+      "get": {
+        "operationId": "ChatController_getChannels",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""

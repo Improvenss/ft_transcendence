@@ -58,51 +58,28 @@ export class UsersController {
 		}
 		catch(err)
 		{
-			console.error("Cookie err:", err);
+			console.error("Cookie err:", err.message);
 			return ({message: `user[${user.login}] cookie is ❌`, err: err.message});
 		}
 	}
-
-	// @Post('/create')
-	// async	createUser(
-	// 	@Body() createUserDto: CreateUserDto,
-	// ){
-	// 	const	newUser = await this.usersService.createUser(createUserDto);
-	// 	if (!newUser)
-	// 		throw (new HttpException("@Post(): create(): User could not be created!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	return (newUser);
-	// }
 
 	// OK
 	@Patch('/socket')
 	async	patchSocket(
 		@Req() {user},
-		@Body() status: {socketId: string}
+		@Body() body: {socketId: string}
 	){
 		try
 		{
-			const	tmpUser = await this.usersService.updateSocketLogin(user.login, status.socketId);
+			const	tmpUser = await this.usersService.updateSocketLogin(user.login, body.socketId);
 			if (!tmpUser)
 				throw (new NotFoundException(`User ${user.login} not found.`));
 			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
-			console.error("@Patch('/socket'): ", err);
-			return ({message: "Socket not updated."});
+			console.error("@Patch('/socket'): ", err.message);
+			return ({message: "Socket not updated.", err: err.message});
 		}
 	}
-
-	// @Patch('/:login')
-	// async	patchSocketLogin(
-	// 	@Param('login') login: string,
-	// 	@Body() socketData: string
-	// ){
-	// 	const	tmpUser = await this.usersService.updateSocketLogin(login, socketData);
-	// 	if (!tmpUser)
-	// 		throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	return ({message: "User socket_id updated."});
-	// }
 
 	@Put('/user/upload')
 	@UseInterceptors(FileInterceptor('image', multerConfig))
@@ -130,8 +107,8 @@ export class UsersController {
 					console.error('Error occurred while deleting file.:', unlinkErr);
 				}
 			}
-			console.error("@Put('/user/upload'): ", err);
-			return ({ message: "Image can't uploaded.", err});
+			console.error("@Put('/user/upload'): ", err.message);
+			return ({ message: "Image can't uploaded.", err: err.message});
 		}
 	}
 
@@ -152,8 +129,8 @@ export class UsersController {
 		}
 		catch (err)
 		{
-			console.log("@Patch('/user'): ", err);
-			return ({err: err});
+			console.log("@Patch('/user'): ", err.message);
+			return ({err: err.message});
 		}
 	}
 
@@ -171,8 +148,8 @@ export class UsersController {
 		}
 		catch (err)
 		{
-			console.error("@Delete('/user'): ", err);
-			return ({err: err});
+			console.error("@Delete('/user'): ", err.message);
+			return ({err: err.message});
 		}
 	}
 
@@ -191,8 +168,8 @@ export class UsersController {
 		}
 		catch (err)
 		{
-			console.error("@Delete('/file/delete'): ", err);
-			return ({message: `Failed to delete file.: Error: ${err}`});
+			console.error("@Delete('/file/delete'): ", err.message);
+			return ({message: `Failed to delete file.: Error: ${err.message}`});
 		}
 	}
 
@@ -224,7 +201,7 @@ export class UsersController {
 			this.chatGateway.server.emit(`notif:${target}`, result);
 			return ({message: `${action} was successfully performed on user[${target}].`});
 		} catch (err) {
-			console.error("@Post(): ", err);
+			console.error("@Post(): ", err.message);
 			return ({err: err.message});
 		}
 	}
@@ -241,10 +218,10 @@ export class UsersController {
 		@Query('primary') primary: 'true' | undefined,
 	){
 		try {
-			console.log(`${C.B_YELLOW}GET: /user: relation: [${relation}] userData: [${primary}]${C.END}`);
+			console.log(`${C.B_YELLOW}GET: relation: [${relation}] userData: [${primary}]${C.END}`);
 			return (await this.usersService.getData({userLogin: user.login}, relation, primary));
 		} catch (err) {
-			console.error("@Get(): ", err);
+			console.error("@Get(): ", err.message);
 			return ({err: err.message});
 		}
 	}
@@ -260,7 +237,7 @@ export class UsersController {
 			delete data.socketId;
 			return (data);
 		} catch (err) {
-			console.log("@Get('/user'): ", err);
+			console.log("@Get('/user'): ", err.message);
 			return ({err: err.message});
 		}
 	}

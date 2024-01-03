@@ -10,6 +10,8 @@ RUN mkdir -p /etc/nginx/ssl
 
 EXPOSE 443
 
+COPY ./502.html /usr/share/nginx/html
+
 RUN mkdir -p /run/nginx
 
 CMD [ "nginx", "-g", "daemon off;" ]

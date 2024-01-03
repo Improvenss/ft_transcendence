@@ -10,7 +10,6 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import { ChatGateway } from './chat.gateway';
 import * as bcrypt from 'bcrypt';
-import { Channel } from './entities/chat.entity';
 import { User } from 'src/users/entities/user.entity';
 import { multerConfig } from './channel.handler';
 import { ChatAdminGuard } from './admin.guard';
@@ -28,20 +27,6 @@ export class ChatController {
 		private readonly chatGateway: ChatGateway,
 	) {}
 
-		// ---------- Get ------------
-	/**
-	 * @Usage {{baseUrl}}:3000/chat/@all?relations=all
-	 * 
-	 * @Body() relationData: string[],
-	 *  Bu da fetch istegi atarken body kismina yazdigimiz bilgiler.
-	 * 
-	 * @Query('relations') relations: string[] | null | 'all', 
-	 *  {{baseUrl}}:3000/chat/channel?relations=users&relations=admins.
-	 * @param channel 
-	 * @param relations 
-	 * @returns 
-	 */
-	// @SetMetadata('login', ['gsever', 'akaraca'])
 	@Get('/channel')
 	async findChannel(
 		@Req() {user},
@@ -59,50 +44,61 @@ export class ChatController {
 		}
 		catch (err)
 		{
-			console.log("@Get('/channel'): ", err);
-			return (null)
+			console.log("@Get('/channel'): ", err.message);
+			return ({err: err.message});
 		}
 	}
 
+	/* Belirlenen kanala ait default + relation bilgilerini çekiyor */
+	@Get()
+	async getChannel(
+		@Req() {user},
+		@Query('channel') name: string | undefined,
+		@Query('relation') relation: string[] | string | undefined,
+		@Query('primary') primary: 'true' | undefined,
+	){
+		try {
+			console.log(`${C.B_GREEN}GET: Channel: [${name}], Relation: [${relation}] Primary: [${primary}]${C.END}`);
+			const data = await this.chatService.getChannel({name, relation, primary});
+			if (!data)
+				throw new Error('Channel not found!');
+			delete data.password;
+			// if (data.admins) data.admins.forEach(admin => delete admin.socketId);
+			// if (data.members) data.members.forEach(member => delete member.socketId);
+			// if (data.bannedUsers) data.bannedUsers.forEach(member => delete member.socketId);
+			// if (data.messages) data.messages.forEach(message => delete message.author.socketId);
+			return (data);
+		} catch (err) {
+			console.log("@Get(): ", err.message);
+			return ({err: err.message});
+		}
+	}
+
+	/*
+		Kullanıcının kayıt olduğu ve public olan kanalları çekiyor.
+		Burada sadece default bilgiler çekilmektedir.
+	*/
 	@Get('/channels')
 	async getChannels(
 		@Req() {user},
 	){
 		try {
+			const userSocket = this.chatGateway.getConnection(user.socketId);
+			if (!userSocket)
+				throw new NotFoundException('User socket not found!');
 			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
-			return (await this.chatService.getChannels(user.login));
+			const	channels = await this.chatService.getChannels(user.login);
+			channels.filter((channel) => channel.status === 'involved')
+			.forEach((channel) => {
+				userSocket.join(channel.name);
+				console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
+			});
+			return (channels);
 		} catch (err){
-			console.error("@Get('/channels'): ", err);
+			console.error("@Get('/channels'): ", err.message);
 			return ({err: err.message});
 		}
 	}
-
-
-	@Get('/channel/message')
-	async findMessage(
-		@Req() {user},
-		@Query('message') message: string | undefined,
-		@Query('relations') relations: string[] | null | 'all',
-	) {
-		try
-		{
-			console.log(`${C.B_GREEN}GET: Message: [${message}], Relation: [${relations}]${C.END}`);
-			const	tmpMessage = await this.chatService.findMessage(message, relations);
-			console.log("tmpMessage:", tmpMessage);
-			return (tmpMessage);
-		}
-		catch(err)
-		{
-			console.log("@Get('/channel/message'):", err);
-			return (null)
-		}
-	}
-
-	// ---------- Create ---------
-	// @Post(':channel')
-	// async createChannel(@Body() createChannelDto: CreateChannelDto) {
-	// 	return await this.chatService.createChannel(createChannelDto);
-	// }
 
 	@Post(':message')
 	createMessage(@Body() createMessageDto: CreateMessageDto) {
@@ -116,50 +112,75 @@ export class ChatController {
 	){
 		try
 		{
-			const	tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(payload.channel, ['members', 'bannedUsers']);
+			console.log(`${C.B_YELLOW}POST: /channel/register: user: [${user.login}] channel: [${payload.channel}]${C.END}`);
+			const userSocket = this.chatGateway.getConnection(user.socketId);
+			if (!userSocket)
+				throw new NotFoundException('User socket not found!');
+			const tmpChannel = await this.chatService.getChannel({name: payload.channel, primary: 'true'});
+			if (!tmpChannel)
+				throw new NotFoundException('Channel not found!');
 
 			if (await this.chatService.findChannelUser(tmpChannel, 'bannedUsers', user))
-				throw (new Error(`${user.login} already banned in this Channel: ${payload.channel}.`));
+				throw (new Error(`${user.login} banned in this Channel: ${payload.channel}.`));
 
 			if (tmpChannel.password && !bcrypt.compareSync(payload.password, tmpChannel.password))
-				throw (new Error("Password is WRONG!!!"));
-			const tmpUser = await this.usersService.findUser(user.login);
-			const	responseChannel = await this.chatService.addChannelUser(tmpChannel, 'members', tmpUser as User);
-			this.chatGateway.server.emit('channelListener');
-			const	returnChannel = await this.chatService.findChannel(responseChannel.name, 'all');
-			return (await this.chatService.checkInvolvedUser(returnChannel, user));
-			//return ({response: true, message: `${user.login} registered in this ${channel}.`});
+				throw (new Error(`Channel: [${payload.channel}] password is wrong!`));
+			
+			const	responseChannel = await this.chatService.addChannelUser(tmpChannel, user as User, 'members');
+			userSocket.join(responseChannel.name);
+			console.log(`Channel: [${responseChannel.name}] Joined: [${user.socketId}]`);
+			this.chatGateway.server.emit(`userChannelListener:${user.login}`, {
+				action: 'register',
+				newChannel: {
+					id: responseChannel.id,
+					type: responseChannel.type,
+					name: responseChannel.name,
+					description: responseChannel.description,
+					image: responseChannel.image,
+					status: 'involved'
+				}
+			});
+			delete responseChannel.password;
+			tmpChannel['status'] = 'involved';
+			return (tmpChannel);
 		}
 		catch (err)
 		{
-			console.error("@Post('/channel/register'): registerChannel:", err);
-			return ({warning: err});
+			console.error("@Post('/channel/register'): registerChannel:", err.message);
+			return (err.message);
 		}
 	}
 
 	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
 	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
 	@Post('/channel/leave')
-	// @UseGuards(ChatAdminGuard)
 	async leaveChannel(
 		@Req() {user},
 		@Query ('channel') channel: string,
-		// @Query ('user') name: string | undefined,
 	){
 		try
 		{
-			console.log(`${C.B_YELLOW}POST: /channel/leave: @Req() user: [${user.login}] channel: [${channel}]${C.END}`);
-
-			const	responseRemove = await this.chatService.removeUser(channel, 'members', user.login);
-			console.log("responseRemove", responseRemove);
+			const userSocket = this.chatGateway.getConnection(user.socketId);
+			if (!userSocket)
+				throw new NotFoundException('User socket not found!');
+			if (userSocket.rooms.has(channel)){
+				userSocket.leave(channel);
+				console.log(`Channel: [${channel}] Leaved: [${user.socketId}]`);
+			}
+			console.log(`${C.B_YELLOW}POST: /channel/leave: user: [${user.login}] channel: [${channel}]${C.END}`);
+			await this.chatService.removeUser(channel, 'members', user.login);
 			console.log(`${C.B_RED}Channel Leave: ${channel} - ${user.login}${C.END}`);
-			this.chatGateway.server.emit('channelListener');
+			this.chatGateway.server.emit(`userChannelListener:${user.login}`, {
+				action: 'leave',
+				data: channel,
+			});
+
 			return ({message: 'User left the channel successfully!'});
 		}
 		catch(err)
 		{
-			console.error("@Post('/channel/leave'):", err);
-			return ({error: err});
+			console.error("@Post('/channel/leave'):", err.message);
+			return (err.message);
 		}
 	}
 
@@ -180,7 +201,7 @@ export class ChatController {
 
 			const	responseRemove = await this.chatService.removeUser(channel.name, 'members', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
 			console.log(`${C.B_RED}Channel Kick: ${channel} - ${userName}${C.END}`);
-			this.chatGateway.server.emit('channelListener');
+			this.chatGateway.server.emit('channelGlobalListener');
 
 			const userSocket = this.chatGateway.connectedUsers.get(singleUser.socketId);
 			if (userSocket.rooms.has(channel.name))
@@ -214,12 +235,12 @@ export class ChatController {
 			const	tmpUser = await this.usersService.findUser(userName);
 			const	singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
 
-			const	responseBanUser = await this.chatService.addChannelUser(channel, 'bannedUsers', singleUser);
+			const	responseBanUser = await this.chatService.addChannelUser(channel, singleUser, 'bannedUsers');
 			console.log("resopnseGBANUser:", responseBanUser);
 			const	responseRemove = await this.chatService.removeUser(channel.name, 'members', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
 			console.log("responsereREmove:", responseRemove);
 			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
-			this.chatGateway.server.emit('channelListener');
+			this.chatGateway.server.emit('channelGlobalListener');
 
 			const userSocket = this.chatGateway.connectedUsers.get(singleUser.socketId);
 			if (userSocket.rooms.has(channel.name))
@@ -256,7 +277,7 @@ export class ChatController {
 			//const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
 			const	responseRemove = await this.chatService.removeUser(channel.name, 'bannedUsers', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
 			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
-			this.chatGateway.server.emit('channelListener');
+			this.chatGateway.server.emit('channelGlobalListener');
 
 			const userSocket = this.chatGateway.connectedUsers.get(singleUser.socketId);
 			if (userSocket.rooms.has(channel.name))
@@ -313,59 +334,67 @@ export class ChatController {
 		@Body('description') description: string,
 	  ) {
 		try {
-			// const findChannel: Channel | Channel[] | any = await this.chatService.findChannel(name);
-			// if (findChannel !== null){
-			// 	throw new Error("A channel with the same name already exists.");
-			// }
-			const tmpUser = await this.usersService.findUser(user.login);
-			if (!tmpUser) {
-				throw new NotFoundException(`User not found for channel create: ${user.login as User}`);
-			}
 			if (!image)
 				throw new Error('No file uploaded');
-
 			if (!fs.existsSync(image.path))
 				throw new Error(`File path is not valid: ${image.path}`);
 
+			const userSocket = this.chatGateway.getConnection(user.socketId);
+			if (!userSocket)
+				throw new NotFoundException('User socket not found!');
+			const channel = await this.chatService.getChannel({name: name});
+			if (channel)
+				throw new Error("A channel with the same name already exists.");
+			const tmpUser = await this.usersService.getData({userLogin: user.login});
+
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
 			const	createChannelDto: CreateChannelDto = {
-				name: name as string,
-				type: type as string,
-				description: description as string,
+				name: name,
+				type: type,
+				description: description,
 				password: (password === undefined)
 					? null
 					: bcrypt.hashSync(
 						password,
 						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
-				image: imgUrl as string,
+				image: imgUrl,
 				members: [tmpUser as User],
 				admins: [tmpUser as User],
 			};
 			const response = await this.chatService.createChannel(createChannelDto);
-			// Kanal oluşturulduktan sonra, ilgili soket odasına katılın
-			// this.chatGateway.server.to(name).emit('channelListener');
-			// this.chatGateway.joinChannel(name); // Kullanıcının kanala katılması gerekiyor //1 kere çalışıyor
-			this.chatGateway.server.emit('channelListener'); // kullancılara yeni channel oluşturuldu infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
-			return ({
-				message: `${response}`,
-				channel: {
-					status: 'involved',
-					name: name,
-					type: type,
-					description: description,
-					image: imgUrl,
-					members: [tmpUser as User],
-					admins: [tmpUser as User],
-					messages: [],
-				},
-			});
+			userSocket.join(response.name);
+			console.log(`Channel: [${response.name}] Joined: [${user.socketId}]`);
+			const allUserLogin = await this.usersService.getAllData({select: {login: true}, relations: {}});
+			delete response.password;
+			let socketArg = {
+				action: 'create',
+				newChannel: {
+					id: response.id,
+					type: response.type,
+					name: response.name,
+					description: response.description,
+					image: response.image,
+				}
+			}
+			if (response.type === 'public'){
+				socketArg.newChannel['status'] = 'public';
+				for (const targetUser of allUserLogin) {
+					if (targetUser.login != user.login)
+						this.chatGateway.server.emit(`userChannelListener:${targetUser.login}`, socketArg);
+				}
+			}
+			socketArg.newChannel['status'] = 'involved';
+			this.chatGateway.server.emit(`userChannelListener:${user.login}`, socketArg);
+			response['messages'] = [];
+			response['bannedUsers'] = [];
+			return (response);
 		} catch (err) {
 			if (image) {
 				await promisify(fs.promises.unlink)(image.path);
 				console.log('Image remove successfully.');
 			}
-			console.error("@Post('/channel/create'): ", err);
-			return ({ message: "Channel not created." });
+			console.error("@Post('/channel/create'): ", err.message);
+			return ({ message: "Channel not created.", err: err.message});
 		}
 	}
 
@@ -409,16 +438,6 @@ export class ChatController {
 				updateDto.image = process.env.B_IMAGE_REPO + image.filename;
 			}
 
-			// const	updateDto: Partial<CreateChannelDto> = {
-			// 	name: name,
-			// 	type: (password === undefined ? undefined : (password === '' ? 'public' : 'private')),
-			// 	description: description,
-			// 	password: (password === undefined ? undefined : (password === "" ? null
-			// 			: bcrypt.hashSync(
-			// 				password,
-			// 				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)))),
-			// 	image: (image === undefined ? undefined : process.env.B_IMAGE_REPO + image.filename)
-			// }
 			const	responseChannel = await this.chatService.patchChannel(channel, updateDto);
 			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
 		} catch (err) {
@@ -439,7 +458,7 @@ export class ChatController {
 			const tmpChannel = await this.chatService.removeChannel(channel);
 			if (!tmpChannel)
 				throw (new NotFoundException("Channel does not exist!"));
-			this.chatGateway.server.emit('channelListener'); // Kullanicilara channel'in silinme infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
+			this.chatGateway.server.emit('channelGlobalListener'); // Kullanicilara channel'in silinme infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
 			return (tmpChannel);
 		}
 		catch (err)

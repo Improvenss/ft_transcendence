@@ -75,6 +75,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.handleUserStatus({status: 'offline'}, client);
 	}
 
+	getConnection(userId: string): Socket | undefined {
+		return this.connectedUsers.get(userId);
+	}
+
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
 	 *  ele aliyouz.
@@ -178,8 +182,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('createMessage')
 	async handleMessage(
 		@MessageBody() 
-		{ channel, author, message }:
-			{ channel: Channel, author: User, message: string },
+		{ channel, author, content }:
+			{ channel: Channel, author: User, content: string },
 		@ConnectedSocket() socket: Socket
 	){
 		try {
@@ -194,23 +198,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const tmpUser = await this.usersService.findUser(author.login);
 
 			const createMessageDto: CreateMessageDto = {
-				message: message,
+				content: content,
 				sentAt: new Date(),
 				author: tmpUser as User,
 				channel: tmpChannel,
 			};
-			// console.log("createMessageDto:", createMessageDto);
 			const response = await this.chatService.createMessage(createMessageDto);
 
 			const returnMessage = {
-				sender: createMessageDto.author,
-				content: createMessageDto.message,
-				timestamp: createMessageDto.sentAt,
+				author: createMessageDto.author,
+				content: createMessageDto.content,
+				sentAt: createMessageDto.sentAt,
 			}
 			console.log(`Message save ${response}: [${returnMessage.content}]`);
 			this.server.to(channel.name).emit(`listenChannelMessage:${channel.name}`, returnMessage);
 		} catch (err){
-			console.log("CreateMessage Err: ", err);
+			console.log("CreateMessage Err: ", err.message);
+			const notif = await this.usersService.createNotif(author.login, author.login, 'text', err.message);
+			this.server.emit(`notif:${author.login}`, notif);
+		}
+	}
+
+	@SubscribeMessage('leaveChannel')
+	async handleLeaveChannel(
+		@Body() channel: {
+			name: string
+		},
+		@ConnectedSocket() socket: Socket)
+	{
+		try {
+			const user = await this.usersService.getData({socketId: socket.id});
+			if (socket.rooms.has(channel.name)){
+				socket.leave(channel.name);
+				console.log(`Channel: [${channel.name}] Leaved: [${socket.id}]`);
+			}
+		} catch (err) {
+			console.error("@SubscribMessage('leaveChannel'):", err.message);
 		}
 	}
 
@@ -223,52 +246,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	{
 		try
 		{
-			console.log("Socket'in Channel'a joinlenme kismi - joinChannel -");
-			const responseUser = await this.usersService.findUser(null, socket);
-			if (responseUser === null)
-				throw (new NotFoundException("User not found for join Channel!"))
-			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
-			const responseChannel: Channel | Channel[] | any = await this.chatService.findChannel(channel.name, ['members']);
-			if (responseChannel === null)
+			const user = await this.usersService.getData({socketId: socket.id});
+			const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
+			if (!tmpChannel)
 				throw (new NotFoundException("Channel not found!"));
-			const ifUserInChannel = await this.chatService.findChannelUser(responseChannel, 'members', singleUser);
-			if (!ifUserInChannel)
+
+			const userExists = await this.chatService.findChannelUser(tmpChannel, 'members', user);
+			if (!userExists)
 				throw (new NotFoundException("User is not in Channel!"));
-			else if (responseChannel !== null
-				&& responseChannel.name === channel.name)
-			{
-				if (socket.rooms.has(channel.name))
-					return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
-				socket.join(channel.name);
-				if (singleUser.socketId === socket.id) {
-					console.log(`Channel: ${channel.name} Joined: ${socket.id}`);
-					this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
-				}
+			if (socket.rooms.has(channel.name))
+				return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
+			socket.join(channel.name);
+			if (user.socketId === socket.id) {
+				console.log(`Channel: [${channel.name}] Joined: [${socket.id}]`);
+				// this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
 			}
-			else
-				throw (new Error("Socket: 'joinChannel': Unexpected error!"));
 		}
 		catch (err)
 		{
-			console.error("@SubscribMessage('joinChannel'):", err);
+			console.error("@SubscribMessage('joinChannel'):", err.message);
 		}
 	}
-
-	// @SubscribeMessage('leaveChannel')
-	// async handleLeaveChannel(@Body() data: any,
-	// 	@ConnectedSocket() socket: Socket)
-	// {
-	// 	// users[] kimse kalmamasi lazim cikan cikacak.
-	// 	// admins[] ciksalar bile adminler kalacak.
-	// 	if (socket.rooms.has(data.channel))
-	// 	{
-	// 		this.server.to(data.channel).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${data.channel}): ${socket.id} left the channel!`);
-	// 		socket.leave(data.channel)
-	// 		console.log(`${data.channel} kanalindan cikti: ${socket.id}`);
-	// 	}
-	// 	else
-	// 		console.log(`${socket.id} zaten ${data.channel} kanalinda degil! :D?`);
-	// }
 	
 	@SubscribeMessage('userStatus')
 	async handleUserStatus(

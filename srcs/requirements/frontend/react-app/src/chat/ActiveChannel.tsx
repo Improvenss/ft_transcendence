@@ -86,7 +86,7 @@ function ActiveChannel(){
 			socket?.emit("createMessage", {
 				channel: activeChannel,
 				author: author,
-				message: messageInput
+				content: messageInput
 			});
 			console.log(`Message sent: ${messageInput}`);
 			setMessageInput('');
@@ -117,7 +117,7 @@ function ActiveChannel(){
 
 	useEffect(() => {
 		const handleListenMessage = (newMessage: IMessage) => {
-			console.log("MEssage Geldi:", newMessage);
+			console.log("Message Recived:", newMessage);
 			setMessages(prevMessages => [
 				...prevMessages,
 				newMessage
@@ -158,38 +158,38 @@ function ActiveChannel(){
 						<div id="message-container">
 							{messages.map((message, index) => (
 								<React.Fragment key={index}>
-									{index === 0 || isDifferentDay(message.timestamp, messages[index - 1].timestamp) ? (
+									{index === 0 || isDifferentDay(message.sentAt, messages[index - 1].sentAt) ? (
 										<div className="day-sticky">
-											<span className="daystamp">{formatDaytamp(message.timestamp)}</span>
+											<span className="daystamp">{formatDaytamp(message.sentAt)}</span>
 										</div>
 									) : null}
 								<div key={index} className={`message-content`}>
-									{(message.sender.login !== author?.login) ? (
+									{(message.author.login !== author?.login) ? (
 										<div className='message taken'>
-											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) ? (
+											{(index === 0 || message.author.login !== messages[index - 1].author.login) ? (
 												<>
-													<img src={message.sender.imageUrl} alt={message.sender.imageUrl} className="user-image" />
+													<img src={message.author.imageUrl} alt={message.author.imageUrl} className="user-image" />
 													<div className='first-message'>
 														<span className="icon-span"><IconMessage /></span>
-														<span className='username'>{message.sender.login}</span>
+														<span className='username'>{message.author.login}</span>
 														<p>{formatMessageContent(message.content)}</p>
-														<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+														<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
 													</div>
 												</>
 											):(
 												<div className='last-message'>
 													<p>{formatMessageContent(message.content)}</p>
-													<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+													<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
 												</div>
 											)}
 										</div>
 									) : (
 										<div className='message sent'>
-											{(index === 0 || message.sender.login !== messages[index - 1].sender.login) && (
+											{(index === 0 || message.author.login !== messages[index - 1].author.login) && (
 												<span className="icon-span"><IconMessage /></span>
 											)}
 											<p>{formatMessageContent(message.content)}</p>
-											<span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+											<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
 										</div>
 									)}
 								</div>

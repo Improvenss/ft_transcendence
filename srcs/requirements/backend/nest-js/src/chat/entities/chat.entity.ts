@@ -59,7 +59,7 @@ export class Message {
 	public id: number;
 
 	@Column({type: 'varchar', length: 2048})
-	public message: string; // Mesaj içeriği
+	public content: string; // Mesaj içeriği
 
 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public sentAt: Date; // Mesajın gönderildiği tarih

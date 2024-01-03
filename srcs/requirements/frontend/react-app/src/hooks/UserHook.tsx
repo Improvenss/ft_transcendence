@@ -3,6 +3,7 @@ import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
 import { useSocket } from './SocketHook';
+import fetchRequest from '../utils/fetchRequest';
 
 export interface INotif {
 	id: number,
@@ -38,19 +39,15 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 	console.log("---------USERHOOK-PAGE---------");
 	const {isAuth, setAuth} = useAuth();
 	const socket = useSocket();
-	const userCookie = Cookies.get("user");
 	const [userInfo, setUserInfo] = useState<IUserProps | undefined>(undefined);
 
 	useEffect(() => {
 		if (isAuth === true){
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users?relation=friends&relation=notifications&primary=true`, {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie as string,
-					},
+				const response = await fetchRequest({
+					method: 'GET',
+					url: `/users?relation=notifications&primary=true`,
 				});
 				if (response.ok){
 					console.log("IV: ---User Backend Connection '✅'---");

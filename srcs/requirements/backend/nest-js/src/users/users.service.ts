@@ -7,6 +7,7 @@ import { Socket } from 'socket.io';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CreateNotifDto } from './dto/create-notifs.dto';
+import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -103,6 +104,24 @@ export class UsersService {
 			throw new ForbiddenException('You are not allowed to delete this notification!');
 		}
 		await this.notifRepository.delete(notifId);
+	}
+
+	// user'a ait tüm bilgilere ihtiyacım olmadığından dolayı gerek yok ama kalsın
+	async getRelationNames(): Promise<string[]> {
+		const metadata = this.usersRepository.metadata;
+		const relationNames = metadata.relations.map((relation) => relation.propertyName);
+		return relationNames;
+	}
+
+	/* 
+		Kullanımı: getAllData({select: {login: true}, relations: {}})
+		Tüm kullanıcılara ait belirlenen verileri çekebilirsin.
+	 */
+	async getAllData({select, relations}:{
+		select: FindOptionsSelect<User>,
+		relations: FindOptionsRelations<User>,
+	}){
+		return (await this.usersRepository.find({select, relations}));
 	}
 
 	async getData(

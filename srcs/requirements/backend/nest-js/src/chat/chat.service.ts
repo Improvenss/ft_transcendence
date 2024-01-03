@@ -21,10 +21,9 @@ export class ChatService {
 	) {}
 
 	async createChannel(createChannelDto: CreateChannelDto) {
-		console.log("createChannel", createChannelDto);
 		const	newChannel = new Channel(createChannelDto);
-		await this.entityManager.save(newChannel);
-		return (`New Channel created: #${newChannel.name}:[${newChannel.id}]`);
+		console.log(`New Channel created: #${newChannel.name}`);
+		return (await this.entityManager.save(newChannel));
 	}
 
 	async createMessage(createMessageDto: CreateMessageDto) {
@@ -32,11 +31,59 @@ export class ChatService {
 		await this.entityManager.save(newMessage);
 		return (`New Message created: id:[${newMessage.id}]`);
 	}
+	
+	/* channel relationslarını döndürür, prefix var ise channels. şeklinde döndürür. */
+	async getRelationNames(prefix: boolean = false): Promise<string[]> {
+		const pre = prefix ? 'channels.' : '';
+		const metadata = this.channelRepository.metadata;
+		const relationNames = metadata.relations.map((relation) => (pre + relation.propertyName));
+		if (prefix)
+			relationNames.push('channels');
+		return relationNames;
+	}
 
+	/*
+		only channel name -> default 
+		channel name + relation -> relation
+		channel name + relation + primary -> default + relation
+		channel name + primary -> default + all
+	*/
+	async getChannel({name, relation, primary}: {
+		name: string,
+		relation?: string[] | string,
+		primary?: 'true',
+	}){
+
+		if (typeof relation === 'string') {
+			relation = [relation];
+		}
+
+		if (relation === undefined && primary === 'true') // for default + all relations
+			relation = await this.getRelationNames();
+
+		const data = await this.channelRepository.findOne({where: {name: name}, relations: relation});
+		if (!data)
+			return (null);
+
+		if (relation === undefined || primary === 'true'){ // default or default + all relations or default + relation
+			return (data);
+		}
+
+		const result: Partial<Channel> = {};
+		relation.forEach(rel => {
+			if (data && data.hasOwnProperty(rel)) {
+				result[rel] = data[rel];
+			}
+		});
+		return (result as Channel); // only relation
+	}
+
+	/* Kullanıcının kayıt olduğu tüm channelları döndürür(relationlarla) + public channeları döndürür */
 	async getChannels(
 		userLogin: string,
 	) {
-		const { channels: involvedChannels } = await this.usersService.getData({ userLogin }, 'channels');
+		const relations = await this.getRelationNames(true);
+		const { channels: involvedChannels } = await this.usersService.getData({ userLogin: userLogin }, relations);
 		if (!involvedChannels){
 			throw new Error('User not found!');
 		}
@@ -56,25 +103,6 @@ export class ChatService {
 	  
 		const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
 		return mergedChannelsWithoutPassword;
-
-		// const involvedChannels = await this.usersService.getData({userLogin: userLogin}, 'channels');
-		// const publicChannels = await this.channelRepository.find({ where: { type: 'public' } });
-
-		// const involvedChannelIds = new Set(involvedChannels.channels.map(channel => channel.id));
-		// const uniquePublicChannels = publicChannels.filter(publicChannel => !involvedChannelIds.has(publicChannel.id));
-
-		// const mergedChannels = uniquePublicChannels.map(publicChannel => {
-		// 	const isInvolved = involvedChannels.channels.some(involvedChannel => involvedChannel.id === publicChannel.id);
-		// 	return {
-		// 	  ...publicChannel,
-		// 	  status: isInvolved ? 'involved' : 'not-involved',
-		// 	};
-		//   }).concat(involvedChannels.channels.map(involvedChannel => ({
-		// 		...involvedChannel,
-		// 		status: 'involved',
-		//   })));
-		// const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
-		// return (mergedChannelsWithoutPassword);
 	}
 
 	async findChannel(
@@ -101,56 +129,17 @@ export class ChatService {
 		return (tmpChannel);
 	}
 
-	async findMessage(
-		message: string | undefined,
-		relations?: string[] | 'all' | null
-	){
-		console.log(`Service Chat: findMessage() 📩 : relations(${typeof(relations)}): [${relations}]`);
-		const relationObject = (relations === 'all')
-			? {author: true, channel: true} // relations all ise hepsini ata.
-			: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
-				? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
-				: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
-					? { [relations]: true } // sadece bunu ata.
-					: null)); // hicbiri degilse null ata.
-		console.log(`Service Chat: findChannel() 📩 : relationsObject(${typeof(relationObject)}):`, relationObject);
-		const tmpMessage = (message === undefined)
-			? await this.messageRepository.find({relations: relationObject})
-			: await this.messageRepository.findOne({
-					where: {message: message},
-					relations: relationObject
-				});
-		if (!tmpMessage)
-			throw (new NotFoundException("chat.service.ts: findMessage(): Message not found!"));
-		return (tmpMessage);
-	}
-
 	async findChannelUser(
 		channel: Channel,
-		list: 'members' | 'bannedUsers' | undefined,
+		relation: 'members' | 'bannedUsers',
 		user: User
 	){
 		if (!channel || !user)
 			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
-		if (list === 'members')
-		{
-			if (!channel.members)
-				return (false)
-			const foundUser = channel.members.find((channelUser) => channelUser.login === user.login);
-			if (!foundUser)
-				return (false);
+		if (relation === 'members' || relation === 'bannedUsers') {
+			return (channel[relation].some((channelUser) => channelUser.login === user.login));
 		}
-		else if (list === 'bannedUsers')
-		{
-			if (!channel.bannedUsers)
-				return (false)
-			const foundUser = channel.bannedUsers.find((channelUser) => channelUser.login === user.login);
-			if (!foundUser)
-				return (false);
-		}
-		else
-			return (false)
-		return (true);
+		return (false)
 	}
 
 	async checkInvolvedUser(channels: Channel | Channel[], user: User) {
@@ -169,7 +158,7 @@ export class ChatService {
 					messages: channel.messages ? channel.messages.map((message) => ({
 						id: message.id,
 						sender: message.author,
-						content: message.message,
+						content: message.content,
 						timestamp: message.sentAt,
 					})) : null,
 					bannedUsers: channel.bannedUsers
@@ -189,20 +178,20 @@ export class ChatService {
 	}
 	
 	async addChannelUser(
-		channel: Channel | Channel[] | any,
-		list: 'members' | 'bannedUsers' | undefined,
-		user: User
+		channel: Channel,
+		user: User,
+		relation: 'members' | 'bannedUsers',
 	){
-		if (!list)
-			throw (new Error(`Which list do you add this user?`));
-		if (await this.findChannelUser(channel, list, user))
+		if (!relation)
+			throw (new Error(`Which relation do you add this user?`));
+		if (await this.findChannelUser(channel, relation, user))
 			throw (new Error(`${user.login} already in this ${channel.name}.`));
-		if (list === 'members')
+		if (relation === 'members')
 			channel.members.push(user);
-		else if (list === 'bannedUsers')
+		else if (relation === 'bannedUsers')
 			channel.bannedUsers.push(user);
 		else
-			throw (new Error(`There is no list for add this user?`));
+			throw (new Error(`There is no relation for add this user?`));
 		return (this.entityManager.save(channel));
 	}
 
@@ -272,36 +261,27 @@ export class ChatService {
 
 	async removeUser(
 		channel: string,
-		list: 'members' | 'bannedUsers' | undefined,
+		relation: 'members' | 'bannedUsers',
 		user: string
 	){
-		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: [list]});
+		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: [relation]});
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
-		const tmpUser = await this.usersService.findUser(user, null, ['channels']);
-
-		if (!tmpUser)
+		const tmpUser = await this.usersService.getData({userLogin: user}, 'channels', 'true');
+		if (!tmpUser){
 			throw new NotFoundException('User does not exist!');
-		const singleUser= Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		if (!singleUser.channels)
-			throw new Error('Invalid state: User data is incomplete.');
-		singleUser.channels = singleUser.channels.filter(c => c.id !== tmpChannel.id);
-		if (list === 'members')
-		{
-			if (!tmpChannel.members)
-				throw new Error('Invalid state: Channel members data is incomplete.');
-			tmpChannel.members = tmpChannel.members.filter(m => m.id !== singleUser.id);
 		}
-		else if (list === 'bannedUsers')
-		{
-			if (!tmpChannel.bannedUsers)
-				throw new Error('Invalid state: Channel bannedUsers data is incomplete.');
-			tmpChannel.bannedUsers= tmpChannel.bannedUsers.filter(m => m.id !== singleUser.id);
-		}
+		tmpUser.channels = tmpUser.channels.filter(c => c.id !== tmpChannel.id);
+
+		if (relation === 'members')
+			tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser.id);
+		else if (relation === 'bannedUsers')
+			tmpChannel.bannedUsers = tmpChannel.bannedUsers.filter(m => m.id !== tmpUser.id);
 		else
-			throw (new NotFoundException('List not found!'));
-		await this.userRepository.save(singleUser);
+			throw (new NotFoundException('Relation not found!'));
+
+		await this.userRepository.save(tmpUser);
 		await this.channelRepository.save(tmpChannel);
 		return ({message: 'User removed from the channel successfully' });
 	}

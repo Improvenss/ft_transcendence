@@ -20,7 +20,7 @@ function Channel() {
 		}
 	};
 
-	const handleChannelAction = async (channelName: string, action: 'login' | 'register', password?: string ) => {
+	const handleChannelAction = async (channelName: string, password?: string ) => {
 		if (activeChannel?.name === channelName){
 			setActiveChannel(null);
 			return;
@@ -28,20 +28,25 @@ function Channel() {
 
 		const requestBody = {
 			channel: channelName,
-			password: password === undefined ? null : password,
+			password: (password === undefined ? null : password),
 		}
 		const response = await fetchRequest({
-			method: (action === 'login' ? 'GET' : 'POST'),
-			body: (action === 'register' ? JSON.stringify(requestBody) : undefined),
-			url: (action === 'register' ? `/chat/channel/register`
-				: `/chat/channel?channel=${channelName}&relations=all`),
+			method: 'POST',
+			body: JSON.stringify(requestBody),
+			url: `/chat/channel/register`,
 		})
-		if (!response.ok)
-			throw (new Error("API fetch error."));
-		const data = await response.json();
-		setActiveChannel(data[0]);
-		if (action === 'register')
-			setActiveTab('involved');
+		if (response.ok){
+			const data = await response.json();
+			console.log(`regiter channel: [${channelName}]`,data);
+			if (!data.err){
+				setActiveChannel(data);
+				setActiveTab('involved');
+			} else {
+				console.log("handleChannelAction err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
 
 	return (
@@ -87,7 +92,10 @@ function Channel() {
 									className={activeChannel && activeChannel.name === channel.name ? 'active' : 'inactive'}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
 									onClick={() => {
-										handleChannelAction(channel.name, (activeTab === 'public' ? 'register' : 'login'));
+										if (activeTab === 'public')
+											handleChannelAction(channel.name);
+										else
+											setActiveChannel(channel);
 									}}
 								>
 									<img src={channel.image} alt={channel.image} />

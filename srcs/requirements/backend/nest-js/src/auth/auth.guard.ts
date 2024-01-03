@@ -29,6 +29,7 @@ export class AuthGuard implements CanActivate {
 			if (!tmpUser)
 				throw (new UnauthorizedException("User not found in DB!"));
 			request.user = tmpUser;
+			return (request);
 		}
 		catch (err)
 		{
@@ -36,6 +37,6 @@ export class AuthGuard implements CanActivate {
 			throw (new UnauthorizedException());
 		}
 		// throw (new UnauthorizedException("AuthGuard: You can't acces.")); // Bu 401(Unauthorized) error'u dondurur.
-		return true; // Bu false olursa 403(Forbidden) error'u dondurur.
+		// return true; // Bu false olursa 403(Forbidden) error'u dondurur.
 	}
 }

@@ -22,7 +22,7 @@ function Notification() {
 			setUnreadNotifs(userInfo.notifications.filter((notif: INotif) => !notif.read).length);
 
 			const handleListenNotifs = (newNotif: INotif) => {
-				console.log("Notif Geldi:", newNotif);
+				console.log("Notif Recived:", newNotif);
 				setNotifications(prevNotifs => [
 					...prevNotifs,
 					newNotif

@@ -12,6 +12,7 @@ import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
 import { IMessage, IUser } from "./iChannel";
 import fetchRequest from "../utils/fetchRequest";
+import { useUser } from "../hooks/UserHook";
 
 export interface IChannel {
 	id: number,
@@ -20,7 +21,6 @@ export interface IChannel {
 	type: 'public' | 'private',
 	status: 'involved' | 'public'//'not-involved',
 	image: string,
-
 	members: IUser[],
 	admins: IUser[],
 	messages: IMessage[],
@@ -51,6 +51,7 @@ function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const socket = useSocket();
+	const { userInfo } = useUser();
 
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
 	const [activeChannel, setActiveChannel] = useState<IChannel | null>(null);
@@ -58,44 +59,82 @@ function ChatPage () {
 
 	useEffect(() => {
 		const fetchChannels = async () => {
-			try {
-				const response = await fetchRequest({
-					method: 'GET',
-					url: "/chat/channels",
-				});
-				if (!response.ok) {
-					throw new Error('API-den veri alınamadı.');
-				}
+			const response = await fetchRequest({
+				method: 'GET',
+				url: "/chat/channels",
+			});
+			if (response.ok){
 				const data = await response.json();
-				console.log("Get Channels: ", data);
-				setChannels(data);
-			} catch (error) {
-				console.error('Veri getirme hatası:', error);
+				console.log("fetchChannels:", data);
+				if (!data.err){
+					// const args: IChannel[] = data;
+					setChannels(data);
+					// args
+					// .filter((channel) => channel.status === 'involved')
+					// .forEach((channel) => {
+					// 	socket?.emit('joinChannel', { name: channel.name });
+					// });
+				} else {
+					console.log("fetchChannels error:", data.err);
+				}
+			} else {
+				console.log("---Backend Connection '❌'---");
 			}
 		};
 	
 		fetchChannels();
+	
+		// handleListenChannel public bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
+		const	handleListenChannel = ({action, data, newChannel}: {
+			action: string,
+			data?: any,
+			newChannel?: IChannel
+		}) => {
+			console.log(`handleListenChannel: action: [${action}], data: [${data}]`);
+			if (newChannel !== undefined) {
+				console.log("Channel Recived:", newChannel);
+				setChannels(prevChannels => {
+					if (!prevChannels) return prevChannels;
+					const existingChannelIndex = prevChannels.findIndex(channel => channel.name === newChannel.name) ;
+			
+					if (existingChannelIndex !== -1) {
+						const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
+						updatedChannels[existingChannelIndex] = newChannel;
+						return updatedChannels;
+					} else {
+						return [...prevChannels, newChannel]; // Kanal yok, ekleyerek güncelle
+					}
+				});
+			
+				// if (newChannel.status === 'involved')
+				// 	socket?.emit('joinChannel', { name: newChannel.name });
+			  }
 
-		const	channelListener = (channel: IChannel) => {
-			console.log("Channel listesi guncelleniyor cunku degisiklik oldu.");
-			fetchChannels(); // channel list update için
+			if (action === 'leave') {
+				setChannels((prevChannels) => {
+					return prevChannels?.map((channel) => {
+						if (channel.name === data) {
+							return channel.type === 'public' ? { ...channel, status: 'public' } : null;
+						}
+						return channel;
+					}).filter(Boolean) as IChannel[];
+				});
+				// socket?.emit('leaveChannel', { name: data });
+			}
+			// fetchChannels(); // channel list update için
 		}
-		socket?.on("channelListener", channelListener);
+		 // global bir dinleme için -> public bir channel oluşumunda / siliminde işe yarayacak., 
+		// socket?.on(`channelGlobalListener`, handleListenChannel);
+
+		// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
+			// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
+		socket?.on(`userChannelListener:${userInfo?.login}`, handleListenChannel);
 		return () => {
-			socket?.off("channelListener", channelListener);
+			// socket?.off(`channelGlobalListener`, handleListenChannel);
+			socket?.off(`userChannelListener:${userInfo?.login}`, handleListenChannel);
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, []);
-
-	useEffect(() => {
-		if (isAuth && channels){
-			channels
-			.filter((channel) => channel.status === 'involved')
-			.forEach((channel) => {
-				socket?.emit('joinChannel', { name: channel.name });
-			});
-		}
-	}, [channels, socket]);
+	}, [socket]);
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);

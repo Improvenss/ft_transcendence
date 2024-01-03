@@ -1,8 +1,8 @@
 export interface IMessage {
 	id: number;
-	sender: IUser;
+	author: IUser;
 	content: string;
-	timestamp: number;
+	sentAt: number;
 }
 
 export interface IUser {
@@ -48,14 +48,6 @@ export interface CreateChannelDto {
 	password?: string;
 	image: string;
 }
-
-// export interface IChannelProps{
-// 	// setActiveChannel:  React.Dispatch<React.SetStateAction<IChannel | null>>;
-// 	channelsData: {
-// 		channels: IChannel[];
-// 		activeChannel: IChannel;
-// 	}
-// }
 
 export interface IOnChannelProps {
 	activeChannel: IChannel | null;

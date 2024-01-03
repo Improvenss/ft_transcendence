@@ -79,12 +79,10 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 			console.log("ChannelCreate:", data);
 			if (!data.err){
 				console.log("---Channel created '✅'---");
-				const data = await response.json();
-				console.log(data.channel);
-				setActiveChannel(data.channel);
+				setActiveChannel(data);
 				onSuccess('involved');
 			} else {
-
+				console.log("ChannelCreate err:", data.err);
 			}
 		} else {
 			console.log("---Backend Connection '❌'---");
