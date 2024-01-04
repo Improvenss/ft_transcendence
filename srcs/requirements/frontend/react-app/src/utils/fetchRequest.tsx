@@ -21,7 +21,7 @@ async function fetchRequest(request: {
 	if (cookie === true){
 		headers['Authorization'] = 'Bearer ' + userCookie;
 	}
-
+	
 	const response = await fetch(process.env.REACT_APP_FETCH + request.url, {
 		method: request.method,
 		headers: (request.headers ? request.headers : headers),

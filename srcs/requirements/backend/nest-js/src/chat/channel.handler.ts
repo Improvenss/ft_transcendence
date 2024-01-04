@@ -26,12 +26,12 @@ const imageFileFilter = (req, file, callback) => {
 	// 	return callback(new Error('Yetkisiz'), false);
 	// }
 
-	if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/) 
-		|| !file.mimetype.startsWith('image/')) {
-		return callback(new Error('Only image files are allowed!'), false);
+	if (!file.mimetype.startsWith('image/') || !file.originalname.match(/\.(jpg|jpeg|png|gif)$/)){
+		const errorMessage = "Only image files (jpg, jpeg, png, gif) are allowed!";
+		callback(errorMessage, false);
+	} else {
+		callback(null, true);
 	}
-
-	callback(null, true);
 };
 
 export const multerConfig = {

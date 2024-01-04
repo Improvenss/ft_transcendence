@@ -4,10 +4,8 @@ import './Countdown.css'
 function Countdown() {
 	const [time, setTime] = useState(Date.now());
 
-	useEffect(() =>
-	{
-		const interval = setInterval(() =>
-		{
+	useEffect(() => {
+		const interval = setInterval(() => {
 			setTime(Date.now());
 		}, 1000);
 

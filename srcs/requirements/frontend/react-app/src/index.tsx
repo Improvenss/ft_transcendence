@@ -22,6 +22,8 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: profilePage'de friends bölümüne arkadaşlıktan çıkar ekle, başka birinin profiline gidincede buton olarak ekle
  * TODO: backend'den çoğu yapıyı tek formatta çek yani ne gerekiyorsa onu al
  * TODO: frontend'de notif'ler okunduğu zaman bazen okundu olarak işaretlemiyor bugta kalıyor
+ * TODO: chat kanal üstüne tıklayınca kapanmıyor.
+ * TODO: database'ye birşeyleri kayıt ederken boş mu değil mi kontrol et. (Derleme aşamasında birşeyler kaydedince etksik kayıt oluyor.)
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

@@ -22,14 +22,18 @@ export class ChatService {
 
 	async createChannel(createChannelDto: CreateChannelDto) {
 		const	newChannel = new Channel(createChannelDto);
+		if (newChannel === null)
+			throw new Error('createChannel err: Required arguments are missing.');
 		console.log(`New Channel created: #${newChannel.name}`);
 		return (await this.entityManager.save(newChannel));
 	}
 
 	async createMessage(createMessageDto: CreateMessageDto) {
 		const	newMessage = new Message(createMessageDto);
-		await this.entityManager.save(newMessage);
-		return (`New Message created: id:[${newMessage.id}]`);
+		if (newMessage === null)
+			throw new Error('createMessage err: Required arguments are missing.');
+		console.log(`New Message created: #${newMessage.content}`);
+		return (await this.entityManager.save(newMessage));
 	}
 	
 	/* channel relationslarını döndürür, prefix var ise channels. şeklinde döndürür. */

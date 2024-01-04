@@ -39,7 +39,7 @@ function InfoChannel() {
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		console.log(`User leave ${selectedChannel} channel`);
 		const responseChannelLeave = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
-			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			method: 'POST', 
 			headers: {
 				'Content-Type': 'application/json',
 				"Authorization": "Bearer " + userCookie,
@@ -56,7 +56,7 @@ function InfoChannel() {
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
 		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
-			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
+			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
 				"Authorization": "Bearer " + userCookie,

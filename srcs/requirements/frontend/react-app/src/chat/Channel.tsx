@@ -96,6 +96,7 @@ function Channel() {
 											handleChannelAction(channel.name);
 										else
 											setActiveChannel(channel);
+											// activeChannel?.name === channel.name ? setActiveChannel(null) : setActiveChannel(channel);
 									}}
 								>
 									<img src={channel.image} alt={channel.image} />

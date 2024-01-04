@@ -24,6 +24,9 @@ export class UsersService {
 		requesterUser: User,
 		target: string,
 	){
+		if (requesterUser.login === target)
+			throw new Error("You can't perform friend actions on yourself.");
+
 		const	targetUser = await this.getData({userLogin: target}, 'friends', 'true');
 		if (!targetUser)
 			throw new NotFoundException('User not found!');

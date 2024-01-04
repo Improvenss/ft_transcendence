@@ -183,19 +183,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleMessage(
 		@MessageBody() 
 		{ channel, author, content }:
-			{ channel: Channel, author: User, content: string },
-		@ConnectedSocket() socket: Socket
+			{ channel: string, author: string, content: string },
+		@ConnectedSocket() socket: Socket,
 	){
 		try {
-			// const userSocket = this.chatGateway.server.sockets.sockets[userSocketId];
-			if (!socket.rooms.has(channel.name))
+			if (!socket.rooms.has(channel))
 			{
-				console.log(`Socket[${socket.id}] not in this channel(${channel.name})!`);
-				// socket.emit(`listenChannelMessage:${channel.name}`, `You are not in this channel(${channel.name})!`);
-				return (null);
+				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
+				throw new Error(`user[${author}] not in this channel(${channel})!`);
 			}
-			const tmpChannel: Channel | Channel[] | any = await this.chatService.findChannel(channel.name);
-			const tmpUser = await this.usersService.findUser(author.login);
+			const tmpChannel = await this.chatService.getChannel({name: channel});
+			if (!tmpChannel)
+				throw new NotFoundException('Channel not found!');
+			const tmpUser = await this.usersService.getData({userLogin: author});
 
 			const createMessageDto: CreateMessageDto = {
 				content: content,
@@ -203,19 +203,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				author: tmpUser as User,
 				channel: tmpChannel,
 			};
-			const response = await this.chatService.createMessage(createMessageDto);
-
-			const returnMessage = {
-				author: createMessageDto.author,
-				content: createMessageDto.content,
-				sentAt: createMessageDto.sentAt,
-			}
-			console.log(`Message save ${response}: [${returnMessage.content}]`);
-			this.server.to(channel.name).emit(`listenChannelMessage:${channel.name}`, returnMessage);
+			const returnMessage = await this.chatService.createMessage(createMessageDto);
+			delete returnMessage.channel;
+			console.log(`Message recived: channel[${channel}] user[${author}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
+			this.server.to(channel).emit(`listenChannelMessage:${channel}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err.message);
-			const notif = await this.usersService.createNotif(author.login, author.login, 'text', err.message);
-			this.server.emit(`notif:${author.login}`, notif);
+			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
+			this.server.emit(`notif:${author}`, notif);
 		}
 	}
 
@@ -274,7 +269,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket
 	){
 		try {
-
 			const responseUser = await this.usersService.getData({socketId: socket.id})
 			if (responseUser === null){
 				throw (new NotFoundException("User not found!"));

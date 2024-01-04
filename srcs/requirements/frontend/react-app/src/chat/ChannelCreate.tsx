@@ -1,9 +1,9 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { IChannelCreateForm } from "./iChannel";
 import './ChannelCreate.css';
-import Cookies from "js-cookie";
 import { useChannelContext } from "./ChatPage";
 import fetchRequest from "../utils/fetchRequest";
+import { isValidImage } from "../utils/fileValidation";
 
 const defaultForm: IChannelCreateForm = {
 	name: '',
@@ -15,45 +15,27 @@ const defaultForm: IChannelCreateForm = {
 
 function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 	console.log("---------CHANNEL-CREATE----------");
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const { setActiveChannel,  } = useChannelContext();
-	const userCookie = Cookies.get("user");
 	const [channelData, setChannelData] = useState<IChannelCreateForm>(defaultForm);
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value } = e.currentTarget;
-		const files = e.target instanceof HTMLInputElement && 'files' in e.target ? e.target.files : null;
-
-//-------------------image kontrolü eklenebilir----------------------//
-
-	// 	if (file) {
-	// 		const maxSize = 5 * 1024 * 1024; // 5 MB
-	// 		if (file.size > maxSize){
-	// 			alert('Image size exceeds the limit (5 MB max). Please choose a smaller image.');	
-	// 			event.target.value = '';
-	// 			return ;
-	// 		}
-
-	// 		const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-	// 		if (!allowedExtensions.exec(file.name)) {
-	// 			alert('Invalid file type. Please choose a valid image file (jpg, jpeg, png, gif).');
-	// 			event.target.value = '';
-	// 			return ;
-	// 		}
-	//	}
-//-------------------------------------------------------------------//
-
-		if (name === 'image' && files && !files[0]?.type.startsWith('image/')){
-			setChannelData((prevData) => ({
-				...prevData,
-				image: null,
-			}));
-			console.error('Lütfen bir resim dosyası seçin.');
+		const file = (e.target instanceof HTMLInputElement && e.target.files) ? e.target.files[0] : null;
+	
+		if (name === 'image' && file) {
+			const validResult = isValidImage(file);
+			if (validResult.status === false){
+				e.target.value = ''; // Hatalı resim seçildiğinde dosyanın adını temizle
+				setErrorMessage(validResult.err);
+				setChannelData(prevData => ({ ...prevData, image: null }));
+			} else {
+				setChannelData(prevData => ({ ...prevData, image: file }));
+				setErrorMessage(null);
+			}
 		} else {
-			setChannelData({
-				...channelData,
-				[name]: name === 'image' ? (files ? files[0] : null) : value,
-			});
+			setChannelData(prevData => ({ ...prevData, [name]: value }));
 		}
-	  };
+	};
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
@@ -93,6 +75,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 
 	return (
 		<form onSubmit={handleSubmit}>
+			{errorMessage && <p className="error-message">{errorMessage}</p>}
 			<label htmlFor="channel-name">Channel Name: <span className="required">*</span></label>
 			<input
 				id="channel-name"

@@ -1,7 +1,7 @@
-import Cookies from 'js-cookie';
 import { useRef, useState } from 'react';
 import { useUser } from '../hooks/UserHook';
 import './UserInput.css';
+import fetchRequest from '../utils/fetchRequest';
 
 interface IUserProps{
 	setVisible: (value: boolean) => void,
@@ -9,7 +9,6 @@ interface IUserProps{
 
 function UserInput({setVisible}: IUserProps) {
 	const user = useUser();
-	const userCookie = Cookies.get('user');
 	const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
 	const inputRefNickname = useRef<HTMLInputElement>(null);
 	const inputRefAvatar = useRef<HTMLInputElement>(null);
@@ -20,31 +19,20 @@ function UserInput({setVisible}: IUserProps) {
 		const formData = new FormData();
 		formData.append('image', selectedAvatar as File);
 
-		const responseAvatar = await fetch(
-			process.env.REACT_APP_FETCH + `/users/user/upload`, {
+		const responseAvatar = await fetchRequest({
 			method: 'PUT',
-			headers: {
-				"Authorization": "Bearer " + userCookie as string,
-			},
-			body: formData
+			body: formData,
+			url: `/users/user/upload`
 		});
-
 		if (!responseAvatar.ok){
 			console.error("Error: image not uploaded!");
 		} else {
 			const avatarUrl = await responseAvatar.json();
 
-			const	responseUserCustomize = await fetch(
-				process.env.REACT_APP_FETCH + `/users/user?user=${user.userInfo?.login}`, {
+			const responseUserCustomize = await fetchRequest({
 				method: 'PATCH',
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": "Bearer " + userCookie as string,
-				},
-				body: JSON.stringify({
-					nickname: nickname,
-					avatar: avatarUrl.imgUrl
-				}),
+				body: JSON.stringify({ nickname: nickname, avatar: avatarUrl.imgUrl }),
+				url: `/users/user?user=${user.userInfo?.login}`
 			});
 			if (!responseUserCustomize.ok)
 				alert("User Customize screen update error.");
