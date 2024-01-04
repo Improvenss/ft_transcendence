@@ -32,7 +32,7 @@ function App() {
 
 	return (
 		<div id="app">
-			{isAuth && <FallingChars />}
+			{/* {isAuth && <FallingChars />} */}
 			<header>
 				{isAuth ? (
 					<>

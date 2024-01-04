@@ -1,8 +1,8 @@
 export interface IMessage {
 	id: number;
-	author: IUser;
 	content: string;
 	sentAt: number;
+	author: IUser;
 }
 
 export interface IUser {
@@ -14,16 +14,24 @@ export interface IUser {
 }
 
 export interface IChannel {
-	status: 'public' | 'involved';
-	name: string;
-	description: string;
-	type: 'public' | 'involved';
-	password?: string;
-	image: string;
-	members: IUser[];
-	admins: IUser[];
-	messages: IMessage[];
-	bannedUsers: IUser[];
+	id: number,
+	name: string,
+	description: string,
+	type: 'public' | 'private',
+	image: string,
+	members: IUser[],
+	admins: IUser[],
+	bannedUsers: IUser[],
+	messages: IMessage[],
+	status: 'involved' | 'public'//'not-involved',
+}
+
+export interface IChannelContext {
+	channels: IChannel[] | undefined;
+	activeChannel: IChannel | null;
+	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
+	channelInfo: boolean;
+	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface IChannelCreateForm {
@@ -33,6 +41,11 @@ export interface IChannelCreateForm {
 	image: File | null;
 	description: string;
 }
+
+/* -------- yukarı ok --------- */
+
+
+
 
 export interface IChannelJoinForm {
 	name: string,

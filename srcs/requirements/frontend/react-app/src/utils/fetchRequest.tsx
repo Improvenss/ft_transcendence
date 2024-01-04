@@ -24,9 +24,14 @@ async function fetchRequest(request: {
 	
 	const response = await fetch(process.env.REACT_APP_FETCH + request.url, {
 		method: request.method,
-		headers: (request.headers ? request.headers : headers),
-		body: request.body,
+		headers: headers,
+		body: (request.body ? request.body : undefined),
 	});
+	// console.log({
+	// 	method: request.method,
+	// 	headers: headers,
+	// 	body: (request.body ? request.body : undefined),	
+	// })
 	return (response);
 }
 

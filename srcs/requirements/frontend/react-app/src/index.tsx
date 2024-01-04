@@ -24,6 +24,8 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: frontend'de notif'ler okunduğu zaman bazen okundu olarak işaretlemiyor bugta kalıyor
  * TODO: chat kanal üstüne tıklayınca kapanmıyor.
  * TODO: database'ye birşeyleri kayıt ederken boş mu değil mi kontrol et. (Derleme aşamasında birşeyler kaydedince etksik kayıt oluyor.)
+ * TODO: mesaj gönderirken bazen author boş oluyor, neden nasıl idk.
+ * TODO: channel'dan levae yapıp, login yaptıktan hemen sonra channel'ün tıklayıp kapatıp açınca hata veriyor (güncelleme yaparken yavaş kaldığı için olduğunu düşünüyorum.)
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

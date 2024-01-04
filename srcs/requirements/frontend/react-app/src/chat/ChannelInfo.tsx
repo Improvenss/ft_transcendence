@@ -12,16 +12,15 @@ import { ReactComponent as IconAddFriend } from '../assets/chat/iconAddFriend.sv
 import { ReactComponent as IconInviteGame } from '../assets/chat/iconInviteGame.svg';
 import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
-import Cookies from "js-cookie";
 import { useUser } from "../hooks/UserHook";
 import { useNavigate } from "react-router-dom";
 import handleChannelRequest from '../utils/handleChannelRequest';
 import handleRequest from '../utils/handleRequest';
+import fetchRequest from "../utils/fetchRequest";
 
 function InfoChannel() {
 	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
-	const userCookie = Cookies.get("user");
-	const my = useUser().userInfo;
+	const { userInfo } = useUser();
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
  	const [friendSearchTerm, setFriendSearchTerm] = useState('');
@@ -37,49 +36,56 @@ function InfoChannel() {
 
 	// User kendisi Leave Channel dediginde calisir admin icin kick olarak baska function yapacagiz.
 	const	handleChannelLeave = async (selectedChannel: string) => {
-		console.log(`User leave ${selectedChannel} channel`);
-		const responseChannelLeave = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
-			method: 'POST', 
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-				"channel": selectedChannel,
-			},
-		});
-		if (!responseChannelLeave.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await responseChannelLeave.json();
-		console.log("Leave Channel:", data);
 		setActiveChannel(null);
+		const response = await fetchRequest({
+			method: 'DELETE', //post'tan delete yap backend
+			headers: {
+				'channel': selectedChannel,
+			},
+			url: `/chat/channel/leave?channel=${selectedChannel}`
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log(`Leave channel: [${selectedChannel}]`,data);
+			if (!data.err){
+				///boş
+			} else {
+				console.log("handleChannelLeave err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
-		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
-			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-			},
-		});
-		if (!responseChannelDelete.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await responseChannelDelete.json();
-		console.log("DELETE Channel:", data);
 		setActiveChannel(null);
+		const response = await fetchRequest({
+			method: 'DELETE',
+			url: `/chat/channel?channel=${selectedChannel}`,
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log(`Delete channel: [${selectedChannel}]`,data);
+			if (!data.err){
+				///boş
+			} else {
+				console.log("handleChannelDelete err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
 
  	const handleTabInfoClick = (tabId: string) => {
 		if (selectedImage != null)
 			setSelectedImage(null);
  		setActiveTabInfo(tabId);
- 		// Implement logic to update content based on the selected tab
- 		// For now, let's just log a message to the console
  		console.log(`Switched to channel ${tabId}`);
  	};
 
 	const handleUpdate = async (fieldName: string) => {
+		if (!activeChannel)
+			return ;
 		const formData = new FormData();
 
 		switch (fieldName) {
@@ -126,17 +132,25 @@ function InfoChannel() {
 			break;
 		}
 
-		const	responseChannelCustomize = await fetch(
-			process.env.REACT_APP_FETCH + `/chat/channel?channel=${activeChannel?.name}`, {
-			method: 'PATCH',
+		const response = await fetchRequest({
+			method: 'PATCH', //backend'den update oluştur bunun için
 			headers: {
-				"Authorization": "Bearer " + userCookie as string,
-				"channel": activeChannel?.name || "",
+				"channel": activeChannel.name ,
 			},
 			body: formData,
+			url: `/chat/channel?channel=${activeChannel.name}`
 		});
-		if (!responseChannelCustomize.ok)
-			console.log("Channel Customize screen update error.");
+		if (response.ok){
+			const data = await response.json();
+			console.log(`Update channel: [${activeChannel.name}]`,data);
+			if (!data.err){
+				///boş
+			} else {
+				console.log("handleUpdate err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 
 		if (errorMessage != null)
 			setErrorMessage('');
@@ -188,17 +202,17 @@ function InfoChannel() {
 										</div>
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
-												<button onClick={() => navigate('/profile/' + my?.login)}> <IconProfile /> </button>
-												{user.login !== my?.login && (
+												<button onClick={() => navigate('/profile/' + userInfo?.login)}> <IconProfile /> </button>
+												{user.login !== userInfo?.login && (
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
 														<button onClick={() => handleChannelRequest('directMessage', user.login, activeChannel.name)}> <IconDM /> </button>
 														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
-												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
+												{activeChannel.admins.some((admin) => admin.login === userInfo?.login) && (
 													<>
-														{user.login !== my?.login && (
+														{user.login !== userInfo?.login && (
 															<>
 																<button onClick={() => handleChannelRequest('userKick', user.login, activeChannel.name)}> <IconKick /> </button>
 																<button onClick={() => handleChannelRequest('userBan', user.login, activeChannel.name)}> <IconBan /> </button>
@@ -222,7 +236,7 @@ function InfoChannel() {
 
 						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
-								{activeChannel.admins.some((admin) => admin.login === my?.login) ? (
+								{activeChannel.admins.some((admin) => admin.login === userInfo?.login) ? (
 									<>
 										{errorMessage && <p className="error-message">{errorMessage}</p>}
 										<label htmlFor="channelName">Channel Name:</label>
@@ -307,7 +321,7 @@ function InfoChannel() {
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{my?.friends
+ 								{userInfo?.friends
  									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div

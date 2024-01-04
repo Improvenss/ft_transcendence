@@ -10,30 +10,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 import ChannelInfo from "./ChannelInfo";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
-import { IMessage, IUser } from "./iChannel";
+import { IChannel, IChannelContext } from "./iChannel";
 import fetchRequest from "../utils/fetchRequest";
 import { useUser } from "../hooks/UserHook";
-
-export interface IChannel {
-	id: number,
-	name: string,
-	description: string,
-	type: 'public' | 'private',
-	status: 'involved' | 'public'//'not-involved',
-	image: string,
-	members: IUser[],
-	admins: IUser[],
-	messages: IMessage[],
-	bannedUsers: IUser[],
-}
-
-interface IChannelContext {
-	channels: IChannel[] | undefined;
-	activeChannel: IChannel | null;
-	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
-	channelInfo: boolean;
-	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>;
-}
 
 export const ChannelContext = createContext<IChannelContext>({
 	channels: undefined,
@@ -67,13 +46,7 @@ function ChatPage () {
 				const data = await response.json();
 				console.log("fetchChannels:", data);
 				if (!data.err){
-					// const args: IChannel[] = data;
 					setChannels(data);
-					// args
-					// .filter((channel) => channel.status === 'involved')
-					// .forEach((channel) => {
-					// 	socket?.emit('joinChannel', { name: channel.name });
-					// });
 				} else {
 					console.log("fetchChannels error:", data.err);
 				}
@@ -105,9 +78,6 @@ function ChatPage () {
 						return [...prevChannels, newChannel]; // Kanal yok, ekleyerek güncelle
 					}
 				});
-			
-				// if (newChannel.status === 'involved')
-				// 	socket?.emit('joinChannel', { name: newChannel.name });
 			  }
 
 			if (action === 'leave') {
@@ -119,18 +89,13 @@ function ChatPage () {
 						return channel;
 					}).filter(Boolean) as IChannel[];
 				});
-				// socket?.emit('leaveChannel', { name: data });
 			}
-			// fetchChannels(); // channel list update için
 		}
-		 // global bir dinleme için -> public bir channel oluşumunda / siliminde işe yarayacak., 
-		// socket?.on(`channelGlobalListener`, handleListenChannel);
 
 		// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
 			// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
 		socket?.on(`userChannelListener:${userInfo?.login}`, handleListenChannel);
 		return () => {
-			// socket?.off(`channelGlobalListener`, handleListenChannel);
 			socket?.off(`userChannelListener:${userInfo?.login}`, handleListenChannel);
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */

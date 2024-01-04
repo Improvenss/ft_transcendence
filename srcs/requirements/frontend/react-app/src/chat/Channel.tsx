@@ -92,11 +92,13 @@ function Channel() {
 									className={activeChannel && activeChannel.name === channel.name ? 'active' : 'inactive'}
 									id={activeTab === 'public' ? 'public-channel' : 'involved-channel'}
 									onClick={() => {
-										if (activeTab === 'public')
+										if (activeTab === 'public'){
 											handleChannelAction(channel.name);
-										else
+										} else if (activeChannel?.name === channel.name){
+											setActiveChannel(null)
+										} else {
 											setActiveChannel(channel);
-											// activeChannel?.name === channel.name ? setActiveChannel(null) : setActiveChannel(channel);
+										}
 									}}
 								>
 									<img src={channel.image} alt={channel.image} />
