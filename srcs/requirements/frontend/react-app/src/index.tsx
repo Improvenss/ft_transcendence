@@ -27,6 +27,8 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: mesaj gönderirken bazen author boş oluyor, neden nasıl idk.
  * TODO: channel'dan levae yapıp, login yaptıktan hemen sonra channel'ün tıklayıp kapatıp açınca hata veriyor (güncelleme yaparken yavaş kaldığı için olduğunu düşünüyorum.)
  * TODO: channelar silinince resimlerinide sil
+ * TODO: arada bir user socketini bulamıyor neden idk
+ * TODO: channel info'daki güncellemeler düzeltilmedi
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

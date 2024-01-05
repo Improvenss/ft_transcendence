@@ -91,8 +91,7 @@ export class ChatController {
 				throw new NotFoundException('User socket not found!');
 			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
 			const	channels = await this.chatService.getChannels(user.login);
-
-			channels.filter((channel) => channel.status === 'involved')
+			channels.filter((channel) =>  channel.status === 'involved')
 			.forEach((channel) => {
 				userSocket.join(channel.name);
 				console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
@@ -126,6 +125,7 @@ export class ChatController {
 			});
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
+			console.log("-->", tmpChannel);
 
 			if (await this.chatService.findChannelUser(tmpChannel, 'bannedUsers', user))
 				throw (new Error(`${user.login} banned in this Channel: ${payload.channel}.`));
@@ -157,7 +157,9 @@ export class ChatController {
 		catch (err)
 		{
 			console.error("@Post('/channel/register'): registerChannel:", err.message);
-			return (err.message);
+			const notif = await this.usersService.createNotif(user.login, user.login, 'text', err.message);
+			this.chatGateway.server.emit(`notif:${user.login}`, notif);
+			return ({err: err.message});
 		}
 	}
 
@@ -234,7 +236,7 @@ export class ChatController {
 		catch (err)
 		{
 			console.error("@Delete('/channel'): deleteChannel():", err.message);
-			return (err.message);
+			return ({err: err.message});
 		}
 	}
 
@@ -257,11 +259,12 @@ export class ChatController {
 			const userSocket = this.chatGateway.getUserSocketConnection(user.socketId);
 			if (!userSocket)
 				throw new NotFoundException('User socket not found!');
-			// const channel = await this.chatService.getChannel({name: name});
 			const channel = await this.chatService.getChannelPrimary(name);
-			if (channel)
+			console.log("->", channel);
+			if (channel){
+				console.log("--->...");
 				throw new Error("A channel with the same name already exists.");
-			// const tmpUser = await this.usersService.getData({userLogin: user.login});
+			}
 			const tmpUser = await this.usersService.getUserPrimay({login: user.login});
 
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
@@ -306,10 +309,12 @@ export class ChatController {
 			response['bannedUsers'] = [];
 			return (response);
 		} catch (err) {
-			if (image) {
-				await promisify(fs.promises.unlink)(image.path);
-				console.log('Image remove successfully.');
+			if (image.path && fs.existsSync(image.path)) {
+				promisify(fs.promises.unlink)(image.path);
+				console.log('Image removed successfully.');
 			}
+			const notif = await this.usersService.createNotif(user.login, user.login, 'text', err.message);
+			this.chatGateway.server.emit(`notif:${user.login}`, notif);
 			console.error("@Post('/channel/create'): ", err.message);
 			return ({ message: "Channel not created.", err: err.message});
 		}
@@ -347,8 +352,8 @@ export class ChatController {
 		}
 		catch(err)
 		{
-			console.error("@Post('/channel/kick'):", err);
-			return ({error: err});
+			console.error("@Post('/channel/kick'):", err.message);
+			return ({err: err.message});
 		}
 	}
 
@@ -386,8 +391,8 @@ export class ChatController {
 		}
 		catch(err)
 		{
-			console.error("@Post('/channel/ban'):", err);
-			return ({error: err});
+			console.error("@Post('/channel/ban'):", err.message);
+			return ({err: err.message});
 		}
 	}
 
@@ -423,8 +428,8 @@ export class ChatController {
 		}
 		catch(err)
 		{
-			console.error("@Post('/channel/ban'):", err);
-			return ({error: err});
+			console.error("@Post('/channel/ban'):", err.message);
+			return ({err: err.message});
 		}
 	}
 
@@ -448,8 +453,8 @@ export class ChatController {
 		}
 		catch(err)
 		{
-			console.error("@Post('/channel/admin'):", err);
-			return ({error: err});
+			console.error("@Post('/channel/admin'):", err.message);
+			return ({err: err.message});
 		}
 	}
 	// -----------------------------------------------
@@ -496,9 +501,8 @@ export class ChatController {
 			const	responseChannel = await this.chatService.patchChannel(channel, updateDto);
 			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
 		} catch (err) {
-			console.log("@Patch('/channel'): ", err);
-			return ({err: err});
+			console.log("@Patch('/channel'): ", err.message);
+			return ({err: err.message});
 		}
 	}
-
 }

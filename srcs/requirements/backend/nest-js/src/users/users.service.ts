@@ -160,20 +160,35 @@ export class UsersService {
 		return usersInRelation.map(result => result.selectedField);
 	}
 
-	async getUserRelationDetails({ login, relation }: { login: string, relation: string }): Promise<any> {
-		const userRelationDetails = await this.usersRepository
-			.createQueryBuilder('user')
-			.innerJoinAndSelect(`user.${relation}`, 'relation')
-			.leftJoinAndSelect('relation.members', 'members')
-			.where('user.login = :login', { login })
-			.getOne();
-		
-		if (!userRelationDetails) {
-			throw new NotFoundException(`User with login ${login} not found.`);
-		}
-		
-		return userRelationDetails as User;
+	async getUserChannelRelationDetails(
+		login: string,
+		nestedRelations: string[],
+	){
+		const data = await this.usersRepository.findOne({
+			where: {login: login},
+			relations: nestedRelations,
+		});
+		return (data['channels']);
 	}
+
+	// async getUserChannelRelationDetails(login: string, additionalRelations: string[] = []){
+	// 	const userRelationDetails = this.usersRepository
+	// 		.createQueryBuilder('user')
+	// 		.innerJoinAndSelect(`user.channels`, 'relation')
+
+	// 	additionalRelations.forEach((rel) => {
+	// 		userRelationDetails.leftJoinAndSelect(`relation.${rel}`, rel);
+	// 	});
+
+	// 	userRelationDetails.where('user.login = :login', { login });
+	// 	const result = await userRelationDetails.getOne();
+
+	// 	if (!result) {
+	// 		throw new NotFoundException(`User with login ${login} not found.`);
+	// 	}
+			
+	// 	return result['channels'];
+	// }
 
 	parsedRelation(relation: string[] | string): FindOptionsRelations<User> {
 		if (Array.isArray(relation)) {
@@ -229,7 +244,7 @@ export class UsersService {
 			throw new Error('Provide exactly one of id, login, or socketId.');
 		}
 	
-		if (!relation){
+		if (Object.keys(relation).length === 0){
 			const allChannelRelation = await this.getRelationNames();
 			relation = allChannelRelation.reduce((acc, rel) => {
 				acc[rel] = true;

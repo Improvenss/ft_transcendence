@@ -108,7 +108,7 @@ export class UsersController {
 				}
 			}
 			console.error("@Put('/user/upload'): ", err.message);
-			return ({ message: "Image can't uploaded.", err: err.message});
+			return ({err: err.message});
 		}
 	}
 
@@ -169,7 +169,7 @@ export class UsersController {
 		catch (err)
 		{
 			console.error("@Delete('/file/delete'): ", err.message);
-			return ({message: `Failed to delete file.: Error: ${err.message}`});
+			return ({err: err.message});
 		}
 	}
 

@@ -22,18 +22,19 @@ export class ChatService {
 
 	async createChannel(createChannelDto: CreateChannelDto) {
 		const	newChannel = new Channel(createChannelDto);
-		if (newChannel === null)
-			throw new Error('createChannel err: Required arguments are missing.');
 		console.log(`New Channel created: #${newChannel.name}`);
 		return (await this.entityManager.save(newChannel));
 	}
 
 	async createMessage(createMessageDto: CreateMessageDto) {
+		if (!createMessageDto.author) {
+			throw new Error('Author is required for creating a message.');
+		}
 		const	newMessage = new Message(createMessageDto);
-		if (newMessage === null)
-			throw new Error('createMessage err: Required arguments are missing.');
 		console.log(`New Message created: #${newMessage.content}`);
-		return (await this.entityManager.save(newMessage));
+		const saveMessage = await this.entityManager.save(newMessage);
+		console.log("-->", saveMessage);
+		return (saveMessage);
 	}
 	
 	parsedRelation(relation: string[] | string): FindOptionsRelations<Channel> {
@@ -78,8 +79,8 @@ export class ChatService {
 		relation: FindOptionsRelations<Channel>,
 		primary: boolean,
 	}){
-		if (!relation){
-			const allChannelRelation = await this.getRelationNames(false);
+		if (Object.keys(relation).length === 0){
+			const allChannelRelation = await this.getRelationNames();
 			relation = allChannelRelation.reduce((acc, rel) => {
 				acc[rel] = true;
 				return acc;
@@ -107,37 +108,57 @@ export class ChatService {
 	async getChannels(
 		userLogin: string,
 	) {
-		// const relations = await this.getRelationNames(true);//?????????????????????????????????
-		// const { channels: involvedChannels } = await this.usersService.getData({ userLogin: userLogin }, relations);
-		// const { channels: involvedChannels } = await this.usersService.getUserRelation({
-		// 	user: { login: userLogin },
-		// 	relation: { channels: true }, //detayda döndürmemiz gerek sadece channels yetmiyor.
-		// 	primary: false,
-		// })
-		const { channels: involvedChannels } = await this.usersService.getUserRelationDetails({
-			login: userLogin,
-			relation: 'channels',
-		});
-		console.log("---->", involvedChannels);
+		const involvedChannels = await this.usersService.getUserChannelRelationDetails( userLogin, await this.getRelationNames(true) );
 		if (!involvedChannels){
 			throw new Error('User not found!');
 		}
-		const publicChannels = await this.channelRepository.find({ where: { type: 'public' } });
+		// console.log("involved:",involvedChannels);
+		const publicChannels = await this.channelRepository.find({where: {type: 'public' }});
+		// console.log("public:", publicChannels);
+
+		for (const involvedChannel of involvedChannels) {
+			// Aynı ID'ye sahip "public" türündeki kanalı bul
+			const matchingPublicChannelIndex = publicChannels.findIndex(publicChannel => publicChannel.id === involvedChannel.id);
+		
+			if (matchingPublicChannelIndex !== -1) {
+				publicChannels.splice(matchingPublicChannelIndex, 1);
+				// console.log(`Kanal siliniyor: ${involvedChannel.id}`);
+			}
+			involvedChannel['status'] = 'involved';
+			delete involvedChannel.password;
+		}
+
+		for (const publicChannel of publicChannels) {
+			publicChannel['status'] = 'public';
+			// console.log(`Kanal güncelleniyor: ${publicChannel.id}`);
+		}
+
+		// console.log("involved:",involvedChannels);
+		// console.log("public:", publicChannels);
+		const mergedChannels = [...involvedChannels, ...publicChannels];
+		return (mergedChannels);
+
+
+		// const involvedChannels = await this.usersService.getUserChannelRelationDetails(userLogin, await this.getRelationNames());
+		// if (!involvedChannels){
+		// 	throw new Error('User not found!');
+		// }
+		// const publicChannels = await this.channelRepository.find({ where: { type: 'public' } });
 	  
-		const involvedChannelIds = new Set(involvedChannels.map(channel => channel.id));
-		const uniquePublicChannels = publicChannels.filter(publicChannel => !involvedChannelIds.has(publicChannel.id));
+		// const involvedChannelIds = new Set(involvedChannels.map(channel => channel.id));
+		// const uniquePublicChannels = publicChannels.filter(publicChannel => !involvedChannelIds.has(publicChannel.id));
 	  
-		const mergedChannels = [
-		  ...uniquePublicChannels.map(publicChannel => ({
-				...publicChannel, status: involvedChannelIds.has(publicChannel.id) ? 'involved' : 'public'//'not-involved'
-			})),
-		  ...involvedChannels.map(involvedChannel => ({
-				...involvedChannel, status: 'involved'
-			})),
-		];
+		// const mergedChannels = [
+		//   ...uniquePublicChannels.map(publicChannel => ({
+		// 		...publicChannel, status: involvedChannelIds.has(publicChannel.id) ? 'involved' : 'public'//'not-involved'
+		// 	})),
+		//   ...involvedChannels.map(involvedChannel => ({
+		// 		...involvedChannel, status: 'involved'
+		// 	})),
+		// ];
 	  
-		const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
-		return mergedChannelsWithoutPassword;
+		// const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
+		// return mergedChannelsWithoutPassword;
 	}
 
 	async findChannel(

@@ -17,7 +17,7 @@ function ChannelJoin({ handleChannelAction}: {
 			};
 			console.log(formObject.name);
 			console.log(formObject.password);
-			handleChannelAction(formObject.name, 'register',formObject.password);
+			handleChannelAction(formObject.name, 'register', formObject.password);
 			formElement.reset();
 		}
 

@@ -44,10 +44,19 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 		console.log(channelData);
 
 		const formData = new FormData();
+		if (channelData.password != null) {
+			if (/\s/.test(channelData.password)) {
+				setErrorMessage('Your password must not contain any space characters.');
+				return;
+			} else {
+				formData.append('password', channelData.password);
+			}
+		} else {
+			setErrorMessage('Your password is null!');
+			return;
+		}
 		formData.append('name', channelData.name);
 		formData.append('type', channelData.type);
-		if (channelData.password != null)
-			formData.append('password', channelData.password);
 		formData.append('description', channelData.description);
 		formData.append('image', channelData.image as File);
 

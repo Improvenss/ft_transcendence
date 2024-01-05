@@ -37,7 +37,7 @@ function Channel() {
 		})
 		if (response.ok){
 			const data = await response.json();
-			console.log(`regiter channel: [${channelName}]`,data);
+			console.log(`regiter channel: [${channelName}]`, data);
 			if (!data.err){
 				setActiveChannel(data);
 				setActiveTab('involved');

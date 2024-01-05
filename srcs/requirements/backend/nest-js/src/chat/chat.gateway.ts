@@ -227,16 +227,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
 				throw new Error(`user[${author}] not in this channel(${channel})!`);
 			}
-			// const tmpChannel = await this.chatService.getChannel({name: channel});
 			const tmpChannel = await this.chatService.getChannelPrimary(channel);
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
-			// const tmpUser = await this.usersService.getData({userLogin: author});
 			const tmpUser = await this.usersService.getUserPrimay({login: author});
 			const createMessageDto: CreateMessageDto = {
 				content: content,
 				sentAt: new Date(),
-				author: tmpUser as User,
+				author: tmpUser,
 				channel: tmpChannel,
 			};
 			const returnMessage = await this.chatService.createMessage(createMessageDto);

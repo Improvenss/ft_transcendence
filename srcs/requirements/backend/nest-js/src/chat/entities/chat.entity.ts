@@ -5,7 +5,7 @@ import { Entity,
 	ManyToMany,
 	OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 @Entity('channel')
 export class Channel {
@@ -47,6 +47,9 @@ export class Channel {
 
 	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
 	public messages: Message[]; // Kanalın mesajları
+
+	@IsOptional()
+	public status: string;
 }
 
 @Entity('message')
