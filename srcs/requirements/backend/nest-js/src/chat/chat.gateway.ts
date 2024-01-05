@@ -205,7 +205,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
 			const tmpUser = await this.usersService.getData({userLogin: author});
-
 			const createMessageDto: CreateMessageDto = {
 				content: content,
 				sentAt: new Date(),

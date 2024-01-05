@@ -92,6 +92,7 @@ function ChatPage () {
 			}
 
 			if (action === 'delete'){
+				console.log("...");
 				setChannels((prevChannels) => prevChannels?.filter((channel) => channel.name !== data));
 			}
 		}

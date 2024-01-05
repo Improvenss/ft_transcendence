@@ -64,7 +64,6 @@ function InfoChannel() {
 				'channel': selectedChannel,
 			},
 			url: `/chat/channel`,
-			// url: `/chat/channel?channel=${selectedChannel}`,
 		});
 		if (response.ok){
 			const data = await response.json();

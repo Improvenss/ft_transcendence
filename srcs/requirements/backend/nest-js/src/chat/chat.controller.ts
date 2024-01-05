@@ -88,6 +88,17 @@ export class ChatController {
 				throw new NotFoundException('User socket not found!');
 			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
 			const	channels = await this.chatService.getChannels(user.login);
+
+			// channels.forEach(channel => {
+			// 	if (channel.name === 'xXx'){
+
+			// 		console.log(`Messages for channel ${channel.name}:`);
+			// 		channel.messages.forEach((message, index) => {
+			// 			console.log(`Message ${index + 1}:`, message);
+			// 		});
+			// 	}
+			//   });
+
 			channels.filter((channel) => channel.status === 'involved')
 			.forEach((channel) => {
 				userSocket.join(channel.name);
@@ -191,7 +202,6 @@ export class ChatController {
 	async deleteChannel(
 		@Req() {user},
 		@Req() {channel},
-		// @Query('channel') channelName: string | undefined,
 	){
 		try
 		{
@@ -201,7 +211,7 @@ export class ChatController {
 			for (const targetUser of allUserLogin) {
 				this.chatGateway.server.emit(`userChannelListener:${targetUser.login}`, {
 					action: 'delete',
-					data: channel,
+					data: channel.name,
 				});
 			}
 			const tmpChannel = await this.chatService.removeChannel(channel.name);
@@ -215,6 +225,7 @@ export class ChatController {
 			return (err.message);
 		}
 	}
+
 	// --------------- ADMIN -------------------------
 	@Post('/channel/kick')
 	@UseGuards(ChatAdminGuard)
