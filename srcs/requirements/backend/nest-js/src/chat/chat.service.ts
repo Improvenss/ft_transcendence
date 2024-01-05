@@ -27,14 +27,9 @@ export class ChatService {
 	}
 
 	async createMessage(createMessageDto: CreateMessageDto) {
-		if (!createMessageDto.author) {
-			throw new Error('Author is required for creating a message.');
-		}
 		const	newMessage = new Message(createMessageDto);
 		console.log(`New Message created: #${newMessage.content}`);
-		const saveMessage = await this.entityManager.save(newMessage);
-		console.log("-->", saveMessage);
-		return (saveMessage);
+		return (await this.entityManager.save(newMessage));
 	}
 	
 	parsedRelation(relation: string[] | string): FindOptionsRelations<Channel> {

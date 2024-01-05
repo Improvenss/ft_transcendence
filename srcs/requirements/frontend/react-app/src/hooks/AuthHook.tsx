@@ -20,27 +20,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const checkAuth = async () => {
-			console.log("I: ---Cookie Checking---");
-			const userCookie = Cookies.get("user");
-			// const userLStore = localStorage.getItem("user");
-			if (userCookie === undefined)
-			{
-				console.log("I: ---Cookie Not Found '❌'---");
-				setAuth(false);
-				return ;
-			}
-			const response = await fetchRequest({
-				method: 'GET',
-				url: '/users/cookie',
-			});
-			if (response.ok) {
-				console.log("I: ---Cookie Backend Connection '✅'---");
-				const data = await response.json();
-				console.log(data);
-				setAuth((!data.err));
-			} else {
-				console.log("I: ---Cookie Backend Connection '❌'---");
-				Cookies.remove('user');
+			try {
+				console.log("I: ---Cookie Checking---");
+				const userCookie = Cookies.get("user");
+				// const userLStore = localStorage.getItem("user");
+				if (userCookie === undefined)
+				{
+					console.log("I: ---Cookie Not Found '❌'---");
+					setAuth(false);
+					return ;
+				}
+				const response = await fetchRequest({
+					method: 'GET',
+					url: '/users/cookie',
+				});
+				if (response.ok) {
+					console.log("I: ---Cookie Backend Connection '✅'---");
+					const data = await response.json();
+					console.log("AuthHook:", data);
+					setAuth((!data.err));
+				} else {
+					console.log("I: ---Cookie Backend Connection '❌'---");
+					Cookies.remove('user');
+					setAuth(false);
+				}
+			} catch (err) {
+				console.log("AuthHook err:", err);
 				setAuth(false);
 			}
 		};
