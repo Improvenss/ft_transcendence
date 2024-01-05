@@ -30,6 +30,7 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: arada bir user socketini bulamıyor neden idk
  * TODO: channel info'daki güncellemeler düzeltilmedi
  * TODO: channel joinleme olayını frontend'e aktarılabilir idk
+ * TODO: userinput'un güncelle - tek method haline getir
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

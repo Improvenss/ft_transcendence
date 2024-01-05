@@ -28,7 +28,7 @@ export const useChannelContext = () => {
 
 function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
-	const isAuth = useAuth().isAuth;
+	const {isAuth} = useAuth();
 	const socket = useSocket();
 	const { userInfo } = useUser();
 
@@ -37,77 +37,82 @@ function ChatPage () {
 	const [channelInfo, setChannelInfo] = useState(false);
 
 	useEffect(() => {
-		const fetchChannels = async () => {
-			const response = await fetchRequest({
-				method: 'GET',
-				url: "/chat/channels",
-			});
-			if (response.ok){
-				const data = await response.json();
-				console.log("fetchChannels:", data);
-				if (!data.err){
-					setChannels(data);
-				} else {
-					console.log("fetchChannels error:", data.err);
-				}
-			} else {
-				console.log("---Backend Connection '❌'---");
-			}
-		};
-	
-		fetchChannels();
-	
-		// handleListenChannel public/private bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
-		//Düzenlenecek!!!!
-		const	handleListenChannel = ({status, action, data, newChannel}: {
-			status: 'global' | 'private'
-			action: string,
-			data?: any,
-			newChannel?: IChannel
-		}) => {
-			console.log(`handleListenChannel: status: [${status}] action: [${action}], data: [${data}]`);
-			if (newChannel !== undefined) {
-				console.log("Channel Recived:", newChannel);
-				setChannels(prevChannels => {
-					if (!prevChannels) return prevChannels;
-					const existingChannelIndex = prevChannels.findIndex(channel => channel.name === newChannel.name) ;
-
-					if (existingChannelIndex !== -1) {
-						const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
-						updatedChannels[existingChannelIndex] = newChannel;
-						return updatedChannels;
+		if (isAuth){
+			const fetchChannels = async () => {
+				const response = await fetchRequest({
+					method: 'GET',
+					url: "/chat/channels",
+				});
+				if (response.ok){
+					const data = await response.json();
+					console.log("fetchChannels:", data);
+					if (!data.err){
+						setChannels(data);
 					} else {
-						return [...prevChannels, newChannel]; // Kanal yok, ekleyerek güncelle
+						console.log("fetchChannels error:", data.err);
 					}
-				});
-			  }
-
-			if (action === 'leave') {
-				setChannels((prevChannels) => {
-					return prevChannels?.map((channel) => {
-						if (channel.name === data) {
-							return channel.type === 'public' ? { ...channel, status: 'public' } : null;
-						}
-						return channel;
-					}).filter(Boolean) as IChannel[];
-				});
-			}
-
-			if (action === 'delete'){
-				setChannels((prevChannels) => prevChannels?.filter((channel) => channel.name !== data));
-			}
+				} else {
+					console.log("---Backend Connection '❌'---");
+				}
+			};
+			fetchChannels();
 		}
+	}, [isAuth]);
 
-		socket?.on(`globalChannelListener`, handleListenChannel); //public bir değişim söz konusu olursa bu dinleme kullanılıyor.
-		// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
-			// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
-		socket?.on(`userChannelListener:${userInfo?.login}`, handleListenChannel);
-		return () => {
-			socket?.off(`globalChannelListener`, handleListenChannel);
-			socket?.off(`userChannelListener:${userInfo?.login}`, handleListenChannel);
+	useEffect(() => {
+		if (isAuth && socket){
+			// handleListenChannel public/private bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
+			//Düzenlenecek!!!!
+			const	handleListenChannel = ({status, action, data, newChannel}: {
+				status: 'global' | 'private'
+				action: string,
+				data?: any,
+				newChannel?: IChannel
+			}) => {
+				console.log(`handleListenChannel: status: [${status}] action: [${action}], data: [${data}]`);
+				if (newChannel !== undefined) {
+					console.log("Channel Recived:", newChannel);
+					setChannels(prevChannels => {
+						if (!prevChannels) return prevChannels;
+						const existingChannelIndex = prevChannels.findIndex(channel => channel.name === newChannel.name) ;
+
+						if (existingChannelIndex !== -1) {
+							const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
+							updatedChannels[existingChannelIndex] = newChannel;
+							return updatedChannels;
+						} else {
+							return [...prevChannels, newChannel]; // Kanal yok, ekleyerek güncelle
+						}
+					});
+				}
+
+				if (action === 'leave') {
+					setChannels((prevChannels) => {
+						return prevChannels?.map((channel) => {
+							if (channel.name === data) {
+								return channel.type === 'public' ? { ...channel, status: 'public' } : null;
+							}
+							return channel;
+						}).filter(Boolean) as IChannel[];
+					});
+				}
+
+				if (action === 'delete'){
+					setChannels((prevChannels) => prevChannels?.filter((channel) => channel.name !== data));
+				}
+			}
+
+			socket?.on(`globalChannelListener`, handleListenChannel); //public bir değişim söz konusu olursa bu dinleme kullanılıyor.
+			// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
+				// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
+			socket?.on(`userChannelListener:${userInfo?.login}`, handleListenChannel);
+			return () => {
+				socket?.off(`globalChannelListener`, handleListenChannel);
+				socket?.off(`userChannelListener:${userInfo?.login}`, handleListenChannel);
+			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [socket]);
+	}, [isAuth, socket]);
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);

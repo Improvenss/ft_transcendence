@@ -10,7 +10,7 @@ import fetchRequest from './utils/fetchRequest';
 
 function Notification() {
 	console.log("---------NOTIFICATION---------");
-	const { isAuth, setAuth } = useAuth();
+	const { isAuth } = useAuth();
 	const socket = useSocket();
 	const { userInfo } = useUser();
 	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
@@ -44,7 +44,7 @@ function Notification() {
 				socket.off(`notif:${userInfo.login}`, handleListenNotifs);
 			};
 		}
-	}, []);
+	}, [isAuth, userInfo, socket]);
 
 	useEffect(() => {
 		if (isAuth){
@@ -57,6 +57,7 @@ function Notification() {
 				// socket?.emit('markAllNotifsAsRead');
 			}
 		}
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [isModalOpen]);
 
 	const formatTimeAgo = (dateString: string) => {

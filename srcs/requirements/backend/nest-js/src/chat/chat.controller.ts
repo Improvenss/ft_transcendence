@@ -181,7 +181,6 @@ export class ChatController {
 				action: 'leave',
 				data: channel,
 			});
-
 			return ({message: 'User left the channel successfully!'});
 		}
 		catch(err)

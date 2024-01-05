@@ -24,18 +24,19 @@ function UserInput({setVisible}: IUserProps) {
 			body: formData,
 			url: `/users/user/upload`
 		});
-		if (!responseAvatar.ok){
-			console.error("Error: image not uploaded!");
-		} else {
+		if (responseAvatar.ok){
 			const avatarUrl = await responseAvatar.json();
-
-			const responseUserCustomize = await fetchRequest({
-				method: 'PATCH',
-				body: JSON.stringify({ nickname: nickname, avatar: avatarUrl.imgUrl }),
-				url: `/users/user?user=${user.userInfo?.login}`
-			});
-			if (!responseUserCustomize.ok)
-				alert("User Customize screen update error.");
+			if (!avatarUrl.err){
+				const responseUserCustomize = await fetchRequest({
+					method: 'PATCH',
+					body: JSON.stringify({ nickname: nickname, avatar: avatarUrl.imgUrl }),
+					url: `/users/user?user=${user.userInfo?.login}`
+				});
+				if (!responseUserCustomize.ok)
+					alert("User Customize screen update error.");
+			}
+		} else {
+			console.error("Error: image not uploaded!");
 		}
 
 		localStorage.removeItem('userLoginPage');
@@ -62,7 +63,7 @@ function UserInput({setVisible}: IUserProps) {
 		} else {
 			setSelectedAvatar(null);
 		}
-	  };
+	};
 
 	return (
 		<div id="user-customize">

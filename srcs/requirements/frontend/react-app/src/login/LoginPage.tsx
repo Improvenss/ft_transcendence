@@ -19,24 +19,28 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 			body: JSON.stringify({ requestLogin: 'LOGIN' }),
 			url: '/api/login',
 		}, false);
-		if (!response.ok){
-			console.log("II: ---API Login Connection '❌'---");
-			setClicked(false); // Bu da butonun tekrar tiklanabilir olmamasini sagliyor.
-		} else {
+		if (response.ok){
 			console.log("II: ---API Login Connection '✅'---");
 			const data = await response.json();
-			const messageHandler = function(event: MessageEvent<any>) {
-				if (event.origin === process.env.REACT_APP_IP) {
-					const data = event.data;
-					if (data.message === 'popupRedirect'){
-						navigate('/api?code=' + data.additionalData, { replace: true });
-						window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
+			if (!data.err){
+				const messageHandler = function(event: MessageEvent<any>) {
+					if (event.origin === process.env.REACT_APP_IP) {
+						const data = event.data;
+						if (data.message === 'popupRedirect'){
+							navigate('/api?code=' + data.additionalData, { replace: true });
+							window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
+						}
 					}
 				}
+				window.addEventListener('message', messageHandler);
+				console.log(data.requestLogin);
+				window.open(data.requestLogin, "intraPopup", "width=500,height=300");
+			} else {
+
 			}
-			window.addEventListener('message', messageHandler);
-			console.log(data.requestLogin);
-			window.open(data.requestLogin, "intraPopup", "width=500,height=300");
+		} else {
+			console.log("II: ---API Login Connection '❌'---");
+			setClicked(false); // Bu da butonun tekrar tiklanabilir olmamasini sagliyor.
 		}
 	} catch (err){
 		console.log("LoginPage err:", err);

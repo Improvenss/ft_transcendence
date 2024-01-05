@@ -21,25 +21,22 @@ function Api(){
 				body: JSON.stringify({ code: uriCode as string}),
 				url: '/api/token',
 			}, false);
-			if (response.ok)
-			{
+			if (response.ok) {
 				console.log("III: ---API Token Connection '✅'---");
 				const data = await response.json();
-				if (data.message === 'BACKEND OK')
-				{
+				if (!data.err){
 					console.log("III: ---API Token Backend Response '✅'---");
 					localStorage.setItem("user", data.cookie);
 					Cookies.set("user", data.cookie);
 					localStorage.setItem("userLoginPage", "true");
 					setAuth(true);
 					navigate('/', {replace: true});
-				}
-				else{
+				} else {
 					console.log("III: ---API Token Backend Response '❌'---");
 				}
-			}
-			else
+			} else {
 				console.log("III: ---API Token Connection '❌'---");
+			}
 			setLoading(false);
 		}
 		if (!window.opener && !isAuth)
@@ -61,7 +58,7 @@ function Api(){
 		<>
 			{ isLoading ? <LoadingPage /> : <Navigate to='/login' replace/>}
 		</>
-		);
+	);
 };
 
 export default Api;
