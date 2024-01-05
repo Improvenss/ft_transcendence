@@ -27,7 +27,12 @@ export class UsersService {
 		if (requesterUser.login === target)
 			throw new Error("You can't perform friend actions on yourself.");
 
-		const	targetUser = await this.getData({userLogin: target}, 'friends', 'true');
+		// const	targetUser = await this.getData({userLogin: target}, 'friends', 'true');
+		const targetUser = await this.getUserRelation({
+			user: { login: target },
+			relation: { friends: true },
+			primary: true,
+		})
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
 
@@ -41,7 +46,12 @@ export class UsersService {
 				message =  `${requesterUser.displayname}(${requesterUser.login}) send friend request!`;
 				break;
 			case 'acceptFriendRequest':
-				const	requester = await this.getData({userLogin: requesterUser.login}, 'friends', 'true');
+				// const	requester = await this.getData({userLogin: requesterUser.login}, 'friends', 'true');
+				const requester = await this.getUserRelation({
+					user: { login: requesterUser.login },
+					relation: { friends: true },
+					primary: true,
+				})
 				if (!requester)
 					throw new NotFoundException('User not found!');
 
@@ -64,9 +74,14 @@ export class UsersService {
 	async notifsMarkRead(
 		userLogin: string,
 	){
-		const userData = await this.getData({userLogin: userLogin}, 'notifications');
-		userData.notifications.forEach(notif => notif.read = true);
-		await this.notifRepository.save(userData.notifications);
+		// const userData = await this.getData({userLogin: userLogin}, 'notifications');
+		const notifs = await this.getUserRelation({
+			user: { login: userLogin },
+			relation: { notifications: true },
+			primary: false,
+		});
+		notifs.notifications.forEach(notif => notif.read = true);
+		await this.notifRepository.save(notifs.notifications);
 	}
 
 	async createNotif(
@@ -75,10 +90,16 @@ export class UsersService {
 		action: string,
 		text: string,
 	){
-		const	targetUser = await this.getData({userLogin: target});
+		// const	targetUser = await this.getData({userLogin: target});
+		const targetUser = await this.getUserPrimay({login: target});
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
-		const	notifs = await this.getData({userLogin: target}, 'notifications');
+		// const	notifs = await this.getData({userLogin: target}, 'notifications');
+		const notifs = await this.getUserRelation({
+			user: { login: target },
+			relation: { notifications: true },
+			primary: false,
+		});
 
 		const createNotfiDto: CreateNotifDto = {
 			type: action,
@@ -139,41 +160,141 @@ export class UsersService {
 		return usersInRelation.map(result => result.selectedField);
 	}
 
+	async getUserRelationDetails({ login, relation }: { login: string, relation: string }): Promise<any> {
+		const userRelationDetails = await this.usersRepository
+			.createQueryBuilder('user')
+			.innerJoinAndSelect(`user.${relation}`, 'relation')
+			.leftJoinAndSelect('relation.members', 'members')
+			.where('user.login = :login', { login })
+			.getOne();
+		
+		if (!userRelationDetails) {
+			throw new NotFoundException(`User with login ${login} not found.`);
+		}
+		
+		return userRelationDetails as User;
+	}
 
-	async getData(
-		who: {userLogin?: string, socketId?: string},
-		relation?: string[] | string,
-		primary?: 'true',
-	){
-		if (!who.userLogin && !who.socketId) {
-			throw new Error('Either login or socketId must be provided.');
+	parsedRelation(relation: string[] | string): FindOptionsRelations<User> {
+		if (Array.isArray(relation)) {
+			const parsedRelation: FindOptionsRelations<User> = {};
+			relation.forEach(rel => {
+				parsedRelation[rel] = true;
+			});
+			return parsedRelation;
+		} else if (typeof relation === 'string') {
+			const parsedRelation: FindOptionsRelations<User> = {};
+			parsedRelation[relation] = true;
+			return parsedRelation;
+		} else {
+			throw new Error('Invalid relation format');
+		}
+	}
+
+	/* burdaki alınan değerler select'te olabilir lakin güvenlikli mi bilgim yok.
+		Belirlenen kullanıcı verisine göre kullanıcın default yapılarını döndürüyor.
+	*/
+	async getUserPrimay({id, login, socketId}: {
+		id?: number,
+		login?: string,
+		socketId?: string,
+	}){
+		const inputSize = [id, login, socketId].filter(Boolean).length;
+		if (inputSize !== 1){
+			throw new Error('Provide exactly one of id, login, or socketId.');
 		}
 
-		if (who.userLogin && who.socketId) {
-			throw new Error('Provide only one of userLogin or socketId, not both.');
+		const whereClause: Record<string, any> = {
+			id: id,
+			login: login,
+			socketId: socketId,
+		};
+		
+		return (await this.usersRepository.findOne({where: whereClause}));
+	}
+
+	/* user'ın default ve relation verilerini döndürür, 
+		user name + relation(full) + primary(false) -> relation
+		user name + relation(full) + primary(true) -> default + relation
+		user name + relation(empty) + primary(false) -> relation all 
+		user name + relation(empty) + primary(true) -> default + relation all 
+	*/
+	async getUserRelation({user, relation, primary}:{
+		user: {id?: number, login?: string, socketId?: string},
+		relation: FindOptionsRelations<User>,
+		primary: boolean,
+	}){
+		const inputSize = [user.id, user.login, user.socketId].filter(Boolean).length;
+		if (inputSize !== 1){
+			throw new Error('Provide exactly one of id, login, or socketId.');
+		}
+	
+		if (!relation){
+			const allChannelRelation = await this.getRelationNames();
+			relation = allChannelRelation.reduce((acc, rel) => {
+				acc[rel] = true;
+				return acc;
+			}, {} as FindOptionsRelations<User>);
 		}
 
-		if (typeof relation === 'string') {
-			relation = [relation];
-		}
+		const whereClause: Record<string, any> = {
+			id: user.id,
+			login: user.login,
+			socketId: user.socketId,
+		};
 
-		const whereClause = who.userLogin ? { login: who.userLogin } : { socketId: who.socketId };
 		const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
-		if (!data)
+		if (!data){
 			throw new NotFoundException('User not found!');
+		}
 
-		if (relation === undefined || primary === 'true'){
+		if (primary === true){ // default + relation
 			return (data);
 		}
 
 		const result: Partial<User> = {};
-		relation.forEach(rel => {
-			if (data && data.hasOwnProperty(rel)) {
-				result[rel] = data[rel];
-			}
+		// Sadece ilişkileri döndür
+		Object.keys(relation).forEach((rel) => {
+			result[rel] = data[rel];
 		});
-		return (result as User);
+
+		return result as User;
 	}
+
+	// async getData(
+	// 	who: {userLogin?: string, socketId?: string},
+	// 	relation?: string[] | string,
+	// 	primary?: 'true',
+	// ){
+	// 	if (!who.userLogin && !who.socketId) {
+	// 		throw new Error('Either login or socketId must be provided.');
+	// 	}
+
+	// 	if (who.userLogin && who.socketId) {
+	// 		throw new Error('Provide only one of userLogin or socketId, not both.');
+	// 	}
+
+	// 	if (typeof relation === 'string') {
+	// 		relation = [relation];
+	// 	}
+
+	// 	const whereClause = who.userLogin ? { login: who.userLogin } : { socketId: who.socketId };
+	// 	const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
+	// 	if (!data)
+	// 		throw new NotFoundException('User not found!');
+
+	// 	if (relation === undefined || primary === 'true'){
+	// 		return (data);
+	// 	}
+
+	// 	const result: Partial<User> = {};
+	// 	relation.forEach(rel => {
+	// 		if (data && data.hasOwnProperty(rel)) {
+	// 			result[rel] = data[rel];
+	// 		}
+	// 	});
+	// 	return (result as User);
+	// }
 
 	async	findUser(
 		user: string | undefined,
@@ -198,16 +319,6 @@ export class UsersService {
 		return (tmpUser);
 	}
 
-	// /**
-	//  * Burada yeni bir 'user' olusturulup DB'ye kaydediliyor.
-	//  * @param createUserDto 
-	//  */
-	// async	createUser(createUserDto: CreateUserDto) {
-	// 	const	newUser = new User(createUserDto);
-	// 	await this.entityManager.save(newUser);
-	// 	return (`New user created: id[${newUser.id}]`);
-	// }
-
 	async	createUser(createUserDto: CreateUserDto) {
 		const	tmpUser = await this.findUser(createUserDto.login);
 		if (tmpUser)
@@ -217,45 +328,6 @@ export class UsersService {
 		console.log(`New User created: #${response.login}:[${response.id}]`);
 		return (`New User created: #${response.login}:[${response.id}]`);
 	}
-
-	// /**
-	//  * DB'deki butun Users kayitlarini aliyor.
-	//  */
-	// async	findAll() {
-	// 	const tmpUser = await this.usersRepository.find({relations: {channels: true}});
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("user.service.ts: find(): User not found!"));
-	// 	return (tmpUser);
-	// }
-
-	// /**
-	//  * Verilen id'nin karsilik geldigi 'User' verisini donduruyoruz.
-	//  * @param id
-	//  * @param login
-	//  * @returns User.
-	//  */
-	// async findOne(id?: number, login?: string, relations?: string[]) {
-	// 	if (!id && !login)
-	// 		throw new Error('Must be enter ID or login.');
-	// 	const tmpUser = await this.usersRepository.findOne({
-	// 		where: { id: id, login: login },
-	// 		relations: relations,
-	// 	});
-	// 	return (tmpUser);
-	// }
-
-	// async findOneSocket(socket: Socket): Promise<User | null> {
-	// 	if (!socket)
-	// 		throw new Error('Must be enter Socket.');
-	// 	const tmpUser = await this.usersRepository.findOne({where: {socketId: socket.id as string}});
-	// 	return (tmpUser);
-	// }
-
-	// async	putFile(
-	// 	file: string | string[] | undefined,
-	// ){
-		
-	// }
 
 	/**
 	 * DB'de var olan User verisini guncelliyoruz.
@@ -296,14 +368,6 @@ export class UsersService {
 		Object.assign(tmpUser, {socketId: socketId});
 		return (await this.usersRepository.save(tmpUser as User));
 	}
-
-	// /**
-	//  * Deleting all User tables.
-	//  * @returns 
-	//  */
-	// async	removeAll() {
-	// 	return (this.usersRepository.delete({}));
-	// }
 
 	async	deleteUser(
 		user: string | undefined,
@@ -372,25 +436,6 @@ export class UsersService {
 		return (`Delete finish: Status: ${responseDelete}`);
 	}
 
-	// async	deleteUser(
-	// 	user: string | undefined,
-	// ){
-	// 	const	tmpGameRoom = await this.findUser(user);
-	// 	if (!tmpGameRoom)
-	// 		return (`GameRoom: '${user}' not found.`); // 	// await	this.userRepository.delete()
-	// 	const	responseGameRoom = await this.gameRepository.remove(tmpGameRoom as User);
-	// 	// const	responseGameRoom = await this.entityManager.delete(user);
-	// 	return (responseGameRoom)
-	// }
-
-	// /**
-	//  * Sadece verilen id'ye sahip olan User tablosunu siliyor.
-	//  * @param id User id.
-	//  * @returns 
-	//  */
-	// async	remove(id: number) {
-	// 	return (this.usersRepository.delete(id));
-	// }
 }
 
 

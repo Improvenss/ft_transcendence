@@ -227,10 +227,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
 				throw new Error(`user[${author}] not in this channel(${channel})!`);
 			}
-			const tmpChannel = await this.chatService.getChannel({name: channel});
+			// const tmpChannel = await this.chatService.getChannel({name: channel});
+			const tmpChannel = await this.chatService.getChannelPrimary(channel);
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
-			const tmpUser = await this.usersService.getData({userLogin: author});
+			// const tmpUser = await this.usersService.getData({userLogin: author});
+			const tmpUser = await this.usersService.getUserPrimay({login: author});
 			const createMessageDto: CreateMessageDto = {
 				content: content,
 				sentAt: new Date(),
@@ -275,8 +277,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	{
 		try
 		{
-			const user = await this.usersService.getData({socketId: socket.id});
-			const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
+			// const user = await this.usersService.getData({socketId: socket.id});
+			const user = await this.usersService.getUserPrimay({socketId: socket.id});
+			// const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
+			const tmpChannel = await this.chatService.getChannelRelation({
+				channelName: channel.name,
+				relation: {
+					members: true,
+				},
+				primary: false,
+			});
 			if (!tmpChannel)
 				throw (new NotFoundException("Channel not found!"));
 
@@ -303,7 +313,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket
 	){
 		try {
-			const responseUser = await this.usersService.getData({socketId: socket.id})
+			// const responseUser = await this.usersService.getData({socketId: socket.id})
+			const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
 			if (responseUser === null){
 				throw (new NotFoundException("User not found!"));
 			}
@@ -319,7 +330,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket
 	){
 		try {
-			const responseUser = await this.usersService.getData({socketId: socket.id})
+			// const responseUser = await this.usersService.getData({socketId: socket.id})
+			const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
 			if (responseUser === null){
 				throw (new NotFoundException("User not found!"));
 			}

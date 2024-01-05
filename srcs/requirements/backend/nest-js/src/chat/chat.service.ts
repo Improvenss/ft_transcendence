@@ -3,7 +3,7 @@ import { CreateChannelDto, UpdateChannelDto } from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, Message } from './entities/chat.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { FindOptionsRelations, EntityManager, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 
@@ -36,6 +36,22 @@ export class ChatService {
 		return (await this.entityManager.save(newMessage));
 	}
 	
+	parsedRelation(relation: string[] | string): FindOptionsRelations<Channel> {
+		if (Array.isArray(relation)) {
+			const parsedRelation: FindOptionsRelations<Channel> = {};
+			relation.forEach(rel => {
+				parsedRelation[rel] = true;
+			});
+			return parsedRelation;
+		} else if (typeof relation === 'string') {
+			const parsedRelation: FindOptionsRelations<Channel> = {};
+			parsedRelation[relation] = true;
+			return parsedRelation;
+		} else {
+			throw new Error('Invalid relation format');
+		}
+	}
+
 	/* channel relationslarını döndürür, prefix var ise channels. şeklinde döndürür. */
 	async getRelationNames(prefix: boolean = false): Promise<string[]> {
 		const pre = prefix ? 'channels.' : '';
@@ -46,48 +62,63 @@ export class ChatService {
 		return relationNames;
 	}
 
-	/*
-		only channel name -> default 
-		channel name + relation -> relation
-		channel name + relation + primary -> default + relation
-		channel name + primary -> default + all
-	*/
-	async getChannel({name, relation, primary}: {
-		name: string,
-		relation?: string[] | string,
-		primary?: boolean,
-	}){
+	/* channel'ın relationlardan bağımsız verilerini döndürür. Channel yoksa null döner */
+	async getChannelPrimary(channelName: string){
+		return (await this.channelRepository.findOne({where: {name: channelName}}));
+	}
 
-		if (typeof relation === 'string') {
-			relation = [relation];
+	/* channel'ın default ve relation verilerini döndürür, 
+		channel name + relation(full) + primary(false) -> relation
+		channel name + relation(full) + primary(true) -> default + relation
+		channel name + relation(empty) + primary(false) -> relation all 
+		channel name + relation(empty) + primary(true) -> default + relation all 
+	*/
+	async getChannelRelation({channelName, relation, primary}: {
+		channelName: string,
+		relation: FindOptionsRelations<Channel>,
+		primary: boolean,
+	}){
+		if (!relation){
+			const allChannelRelation = await this.getRelationNames(false);
+			relation = allChannelRelation.reduce((acc, rel) => {
+				acc[rel] = true;
+				return acc;
+			}, {} as FindOptionsRelations<Channel>);
 		}
 
-		if (relation === undefined && primary) // for default + all relations
-			relation = await this.getRelationNames();
-
-		const data = await this.channelRepository.findOne({where: {name: name}, relations: relation});
+		const data = await this.channelRepository.findOne({where: {name: channelName}, relations: relation});
 		if (!data)
 			return (null);
 
-		if (relation === undefined || primary){ // default or default + all relations or default + relation
+		if (primary === true){ // default + relation
 			return (data);
 		}
 
 		const result: Partial<Channel> = {};
-		relation.forEach(rel => {
-			if (data && data.hasOwnProperty(rel)) {
-				result[rel] = data[rel];
-			}
+		// Sadece ilişkileri döndür
+		Object.keys(relation).forEach((rel) => {
+			result[rel] = data[rel];
 		});
-		return (result as Channel); // only relation
+
+		return result as Channel;
 	}
 
 	/* Kullanıcının kayıt olduğu tüm channelları döndürür(relationlarla) + public channeları döndürür */
 	async getChannels(
 		userLogin: string,
 	) {
-		const relations = await this.getRelationNames(true);
-		const { channels: involvedChannels } = await this.usersService.getData({ userLogin: userLogin }, relations);
+		// const relations = await this.getRelationNames(true);//?????????????????????????????????
+		// const { channels: involvedChannels } = await this.usersService.getData({ userLogin: userLogin }, relations);
+		// const { channels: involvedChannels } = await this.usersService.getUserRelation({
+		// 	user: { login: userLogin },
+		// 	relation: { channels: true }, //detayda döndürmemiz gerek sadece channels yetmiyor.
+		// 	primary: false,
+		// })
+		const { channels: involvedChannels } = await this.usersService.getUserRelationDetails({
+			login: userLogin,
+			relation: 'channels',
+		});
+		console.log("---->", involvedChannels);
 		if (!involvedChannels){
 			throw new Error('User not found!');
 		}
@@ -254,7 +285,12 @@ export class ChatService {
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
-		const tmpUser = await this.usersService.getData({userLogin: user}, 'channels', 'true');
+		// const tmpUser = await this.usersService.getData({userLogin: user}, 'channels', 'true');
+		const tmpUser = await this.usersService.getUserRelation({
+			user: { login: user },
+			relation: { channels: true },
+			primary: true,
+		})
 		if (!tmpUser){
 			throw new NotFoundException('User does not exist!');
 		}

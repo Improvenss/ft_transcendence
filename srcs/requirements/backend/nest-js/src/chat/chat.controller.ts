@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile, Patch, ParseBoolPipe } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
@@ -13,6 +13,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from 'src/users/entities/user.entity';
 import { multerConfig } from './channel.handler';
 import { ChatAdminGuard } from './admin.guard';
+import { FindOptionsRelations } from 'typeorm';
+import { Channel } from './entities/chat.entity';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -55,11 +57,16 @@ export class ChatController {
 		@Req() {user},
 		@Query('channel') name: string,
 		@Query('relation') relation: string[] | string,
-		@Query('primary') primary: true,
+		@Query('primary', ParseBoolPipe) primary: boolean,
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: Channel: [${name}], Relation: [${relation}] Primary: [${primary}]${C.END}`);
-			const data = await this.chatService.getChannel({name, relation, primary});
+			// const data = await this.chatService.getChannel({name, relation, primary});
+			const data = await this.chatService.getChannelRelation({
+				channelName: name,
+				relation: this.chatService.parsedRelation(relation),
+				primary: primary,
+			});
 			if (!data)
 				throw new Error('Channel not found!');
 			delete data.password;
@@ -111,7 +118,12 @@ export class ChatController {
 		{
 			console.log(`${C.B_YELLOW}POST: /channel/register: user: [${user.login}] channel: [${payload.channel}]${C.END}`);
 
-			const tmpChannel = await this.chatService.getChannel({name: payload.channel, primary: true});
+			// const tmpChannel = await this.chatService.getChannel({name: payload.channel, primary: true});
+			const tmpChannel = await this.chatService.getChannelRelation({
+				channelName: payload.channel,
+				relation: {},
+				primary: true,
+			});
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
 
@@ -245,10 +257,12 @@ export class ChatController {
 			const userSocket = this.chatGateway.getUserSocketConnection(user.socketId);
 			if (!userSocket)
 				throw new NotFoundException('User socket not found!');
-			const channel = await this.chatService.getChannel({name: name});
+			// const channel = await this.chatService.getChannel({name: name});
+			const channel = await this.chatService.getChannelPrimary(name);
 			if (channel)
 				throw new Error("A channel with the same name already exists.");
-			const tmpUser = await this.usersService.getData({userLogin: user.login});
+			// const tmpUser = await this.usersService.getData({userLogin: user.login});
+			const tmpUser = await this.usersService.getUserPrimay({login: user.login});
 
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
 			const	createChannelDto: CreateChannelDto = {
@@ -486,8 +500,5 @@ export class ChatController {
 			return ({err: err});
 		}
 	}
-
-
-
 
 }

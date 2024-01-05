@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, NotFoundException, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, NotFoundException, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors, ParseBoolPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -214,12 +214,20 @@ export class UsersController {
 	@Get()
 	async getData(
 		@Req() {user},
-		@Query('relation') relation: string[] | string | undefined,
-		@Query('primary') primary: 'true' | undefined,
+		@Query('relation') relation: string[] | string,
+		@Query('primary', ParseBoolPipe) primary: boolean,
 	){
 		try {
 			console.log(`${C.B_YELLOW}GET: relation: [${relation}] userData: [${primary}]${C.END}`);
-			return (await this.usersService.getData({userLogin: user.login}, relation, primary));
+			if (!relation && primary != true)
+				return (await this.usersService.getUserPrimay({login: user.login}));
+
+			// return (await this.usersService.getData({userLogin: user.login}, relation, primary));
+			return(await this.usersService.getUserRelation({
+				user: { login: user.login },
+				relation: this.usersService.parsedRelation(relation),
+				primary: primary,
+			}));
 		} catch (err) {
 			console.error("@Get(): ", err.message);
 			return ({err: err.message});
@@ -233,7 +241,16 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /user: who: [${who}]${C.END}`);
-			const data = await this.usersService.getData({userLogin: who}, (user.login === who ? 'friends': []), 'true');
+			// const data = await this.usersService.getData({userLogin: who}, (user.login === who ? 'friends': []), 'true');
+			if (user.login === who){
+				return (await this.usersService.getUserPrimay({login: user.login}));
+			}
+
+			const data = await this.usersService.getUserRelation({
+				user: { login: who },
+				relation: { friends: true },
+				primary: true,
+			});
 			delete data.socketId;
 			return (data);
 		} catch (err) {
@@ -242,121 +259,6 @@ export class UsersController {
 		}
 	}
 
-	// @Delete()
-	// async	removeAll() {
-	// 	return this.usersService.removeAll();
-	// }
-
-
-	// /**
-	//  * DB'den butun 'User' verilerini donduruyoruz.
-	//  * @returns All Users.
-	//  */
-	// @Get()
-	// findAll() {
-	// 	return this.usersService.findAll();
-	// }
-
-	// /**
-	//  * Verilen id'nin ya da login'in karsilik
-	//  *  geldigi 'User' verisini donduruyoruz.
-	//  * @param id Istenilen 'user'in 'id'si.  * @param login Istenilen 'user'in login'i.
-	//  * @returns 'user'.
-	//  */
-	// // @Get(':id/:login?')
-	// @Get('/:id(\\d+)')
-	// async findOneId(@Param('id') id: string) {
-	// 	const tmpUser = await this.usersService.findOne(+id, undefined);
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("@Get(':id'): findOneId(): User does not exist!"));
-	// 	return (tmpUser);
-	// }
-
-	// /**
-	//  * Verilen login'in karsilik geldigi 'User' verisini donduruyoruz.
-	//  * @param login Istenilen 'user'in login'i.
-	//  * @returns 'user'.
-	//  */
-	// @Get('/:login')
-	// async findOneLogin(@Param('login') login: string) {
-	// 	const tmpUser = await this.usersService.findOne(undefined, login);
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("@Get(':login'): findOne(): User does not exist!"));
-	// 	return (tmpUser);
-	// }
-
-	// /**
-	//  * DB'de var olan User verisini guncellemek icin.
-	//  * @param id 
-	//  * @param updateUserDto 
-	//  * @returns 
-	//  */
-	// @Patch('/:id(\\d+)')
-	// async	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-	// 	const	tmpDb: UpdateUserDto = {}; // DB'deki guncellenmis degerler atanacak.
-	// 	const	tmpUser = await this.usersService.update(+id, updateUserDto); // DB'deki eskisi yenisiyle guncelliyoruz, yeni halini donduruyoruz.
-	// 	if (!tmpUser)
-	// 		throw (new HttpException("@Patch(':id'): update(): id: User does not exist!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	// Bizim guncellemek icin attigimiz istekteki parametreleri DB'deki ile karsilastiriyoruz.
-	// 	// Eger ikisinde de varsa; tmpDb'ye atiyoruz.
-	// 	// Degismis mi degismemis mi DB'deki veriyi aliyoruz.
-	// 	// DB'deki veriyle, bizim istedigimizi karsilastiracagiz.
-	// 	// Degerler ayniysa basarili bir sekilde 'update' tamamlanmis oluyor.
-	// 	for (const key in updateUserDto)
-	// 		if (updateUserDto.hasOwnProperty(key) && tmpUser.hasOwnProperty(key))
-	// 			tmpDb[key] = tmpUser[key];
-	// 	// Burada JSON dosyasinin icerisindeki verileri parse'ledik.
-	// 	const updateUserObj = JSON.parse(JSON.stringify(updateUserDto));
-	// 	// const tmpUserObj = JSON.parse(JSON.stringify(tmpUser));
-	// 	const tmpDbObj = JSON.parse(JSON.stringify(tmpDb));
-	// 	console.log("-------------------");
-	// 	console.log("tmpDb -> :", tmpDb);
-	// 	// console.log(updateUserDto);
-	// 	// console.log(tmpUser);
-	// 	console.log("-------------------");
-	// 	console.log("updateUserObj -> :", updateUserObj);
-	// 	console.log("+++++++++++");
-	// 	console.log("tmpDbObj -> :", tmpDbObj);
-	// 	console.log("-------------------");
-	// 	// Burada da duzgunce alinmis JSON dosyasi uzerinden esitlik kontrolu yapiyoruz.
-	// 	if (JSON.stringify(updateUserObj) !== JSON.stringify(tmpDbObj))
-	// 		throw (new HttpException("@Patch(':id'): update(): id: User's in DB but User does not update!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	return ({message: "User updated successfully."});
-	// }
-
-	// @Delete()
-	// async	deleteUser(
-	// 	@Req() {user},
-	// 	@Query('user') quser: string | undefined,
-	// ){
-	// 	try
-	// 	{
-	// 		console.log(`${C.B_RED}DELETE: @Query('user'): [${quser}]${C.END}`);
-	// 		const	responseGameuser = await this.usersService.deleteUser(quser);
-	// 		return (responseGameuser);
-	// 	}
-	// 	catch (err)
-	// 	{
-	// 		console.log("@Delete(): ", err);
-	// 		return ({err: err});
-	// 	}
-	// }
-
-	// /**
-	//  * Disaridan 'string' olarak aldigimiz 'id' parametremizi
-	//  *  Number() ile 'number' tipine ceviriyoruz.
-	//  * @param id String
-	//  * @returns 
-	//  */
-	// @Delete('/:id')
-	// async	remove(@Param('id') id: string) {
-	// 	const	tmpUser = await this.usersService.findOne(Number(id));
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("@Delete(':id'): remove(): id : User does not exist!")); // Eger 'user' olusturulamazsa exception atiyoruz.
-	// 	return this.usersService.remove(+id);
-	// }
 }
 
 /**
