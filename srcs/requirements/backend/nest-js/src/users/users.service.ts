@@ -225,7 +225,10 @@ export class UsersService {
 			socketId: socketId,
 		};
 		
-		return (await this.usersRepository.findOne({where: whereClause}));
+		const user = await this.usersRepository.findOne({where: whereClause});
+		if (!user)
+			throw new NotFoundException('User not found!');
+		return (user);
 	}
 
 	/* user'ın default ve relation verilerini döndürür, 
@@ -355,7 +358,12 @@ export class UsersService {
 		user: string | undefined,
 		body: Partial<UpdateUserDto>,
 	){
-		const	tmpUsers = await this.findUser(user, null, 'all');
+		// const	tmpUsers = await this.findUser(user, null, 'all');
+		const tmpUsers = await this.getUserRelation({
+			user: {login: user},
+			relation: {},
+			primary: true,
+		})
 		if (!tmpUsers)
 			return (`User '${user}' not found.`);
 		if (!Array.isArray(tmpUsers))
@@ -376,12 +384,13 @@ export class UsersService {
 	 *  olusturulan Socket.id'sini DB'de guncellemek icin.
 	 * @param login 
 	 */
-	async	updateSocketLogin(login: string, socketId: string) {
-		const	tmpUser = await this.findUser(login);
-		if (!tmpUser)
-			return (null);
+	async updateSocketLogin(login: string, socketId: string) {
+		const tmpUser = await this.getUserPrimay({login: login});
+		if (!tmpUser){
+			throw (new NotFoundException(`User ${login} not found.`));
+		}
 		Object.assign(tmpUser, {socketId: socketId});
-		return (await this.usersRepository.save(tmpUser as User));
+		return (await this.usersRepository.save(tmpUser));
 	}
 
 	async	deleteUser(

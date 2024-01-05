@@ -86,16 +86,17 @@ export class ChatController {
 		@Req() {user},
 	){
 		try {
+			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
 			const userSocket = this.chatGateway.getUserSocketConnection(user.socketId);
 			if (!userSocket)
 				throw new NotFoundException('User socket not found!');
-			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
-			const	channels = await this.chatService.getChannels(user.login);
-			channels.filter((channel) =>  channel.status === 'involved')
-			.forEach((channel) => {
-				userSocket.join(channel.name);
-				console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
-			});
+			const channels = await this.chatService.getChannels(user.login);
+			channels
+				.filter((channel) =>  channel.status === 'involved') //backend'de daha güvenli olduğu için ekledim.
+				.forEach((channel) => {
+					userSocket.join(channel.name);
+					console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
+				});
 			return (channels);
 		} catch (err){
 			console.error("@Get('/channels'): ", err.message);
@@ -125,7 +126,6 @@ export class ChatController {
 			});
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
-			console.log("-->", tmpChannel);
 
 			if (await this.chatService.findChannelUser(tmpChannel, 'bannedUsers', user))
 				throw (new Error(`${user.login} banned in this Channel: ${payload.channel}.`));

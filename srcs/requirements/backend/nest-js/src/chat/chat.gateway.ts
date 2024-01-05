@@ -52,13 +52,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	 * @param client 
 	 * @param args 
 	 */
-	handleConnection(client: Socket, ...args: any[])
+	async handleConnection(client: Socket, ...args: any[])
 	{
-		if (this.connectedUsers.has(client.id)) {
-			console.log(`Client already connected 🟡: socket.id[${client.id}]`);
-			client.disconnect(true); // Bağlantıyı kapat
-			return;
-		}
+		// if (this.connectedUsers.has(client.id)) {
+		// 	console.log(`Client already connected 🟡: socket.id[${client.id}]`);
+		// 	client.disconnect(true); // Bağlantıyı kapat
+		// 	return;
+		// }
 		this.connectedUsers.set(client.id, client);
 		console.log(`Client connected ✅: socket.id[${client.id}]`);
 			//Do stuffs
@@ -68,11 +68,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	 *  Backend'e baglanan socket'in baglantisi kesildiginde calisir.
 	 * @param client Client socket.
 	 */
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		console.log(`Client disconnected 💔: socket.id[${client.id}]`);
 		this.connectedUsers.delete(client.id); // Bağlantı kesildiğinde soketi listeden kaldır
 		//Do stuffs
-		this.handleUserStatus({status: 'offline'}, client);
+		await this.handleUserStatus({status: 'offline'}, client);
 	}
 
 	/* Tüm serverdan kullanıcıyı buluyor. */
@@ -192,8 +192,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			socket.leave(roomData.name)
 			console.log(`${roomData.name} odasindan cikti: ${socket.id}`);
 		}
-		else
+		else {
+
 			console.log(`${socket.id} zaten ${roomData.name} oyun odasinda degil! :D?`);
+		}
 	}
 
 	/**
@@ -231,6 +233,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
 			const tmpUser = await this.usersService.getUserPrimay({login: author});
+			if (!tmpUser)
+				throw new NotFoundException('User not found!');
 			const createMessageDto: CreateMessageDto = {
 				content: content,
 				sentAt: new Date(),
@@ -299,8 +303,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				// this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
 			}
 		}
-		catch (err)
-		{
+		catch (err) {
 			console.error("@SubscribMessage('joinChannel'):", err.message);
 		}
 	}
@@ -323,20 +326,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
-	@SubscribeMessage('markAllNotifsAsRead')
-	async handleNotifsStatus(
-		@ConnectedSocket() socket: Socket
-	){
-		try {
-			// const responseUser = await this.usersService.getData({socketId: socket.id})
-			const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
-			if (responseUser === null){
-				throw (new NotFoundException("User not found!"));
-			}
+	// @SubscribeMessage('markAllNotifsAsRead')
+	// async handleNotifsStatus(
+	// 	@ConnectedSocket() socket: Socket
+	// ){
+	// 	try {
+	// 		// const responseUser = await this.usersService.getData({socketId: socket.id})
+	// 		const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
+	// 		if (responseUser === null){
+	// 			throw (new NotFoundException("User not found!"));
+	// 		}
 
-			await this.usersService.notifsMarkRead(responseUser.login);
-		} catch (err) {
-			console.error("@SubscribMessage(markAllNotifsAsRead):", err);
-		}
-	}
+	// 		await this.usersService.notifsMarkRead(responseUser.login);
+	// 	} catch (err) {
+	// 		console.error("@SubscribMessage(markAllNotifsAsRead):", err);
+	// 	}
+	// }
 }

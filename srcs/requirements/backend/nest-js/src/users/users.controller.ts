@@ -45,6 +45,13 @@ export class UsersController {
 	// 	}
 	// }
 
+	@Put('/notif')
+	async putNotif(
+		@Req() {user},
+	){
+		await this.usersService.notifsMarkRead(user.login);
+	}
+
 	// OK
 	@Get('/cookie')
 	async userCookie(
@@ -72,12 +79,10 @@ export class UsersController {
 		try
 		{
 			const	tmpUser = await this.usersService.updateSocketLogin(user.login, body.socketId);
-			if (!tmpUser)
-				throw (new NotFoundException(`User ${user.login} not found.`));
 			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
 		} catch(err) {
 			console.error("@Patch('/socket'): ", err.message);
-			return ({message: "Socket not updated.", err: err.message});
+			return ({err: err.message});
 		}
 	}
 

@@ -54,6 +54,17 @@
         }
       }
     },
+    "/users/notif": {
+      "put": {
+        "operationId": "UsersController_putNotif",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/cookie": {
       "get": {
         "operationId": "UsersController_userCookie",

@@ -3,7 +3,6 @@ import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import fetchRequest from '../utils/fetchRequest';
-import Cookies from 'js-cookie';
 
 // SocketContext'i oluştur
 const SocketContext = createContext<Socket | undefined>(undefined);
@@ -13,7 +12,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 	console.log("---------SOCKETHOOK-PAGE---------");
 	const isAuth = useAuth().isAuth;
 	const [socket, setSocket] = useState<Socket | undefined>(undefined);
-	const userCookie = Cookies.get("user");
 
 	useEffect(() => {
 		if (isAuth) {

@@ -29,6 +29,12 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: channelar silinince resimlerinide sil
  * TODO: arada bir user socketini bulamıyor neden idk
  * TODO: channel info'daki güncellemeler düzeltilmedi
+ * TODO: channel joinleme olayını frontend'e aktarılabilir idk
+ * ---->
+ * 		const startTime = new Date();
+		const endTime = new Date();
+		console.log(`findUser execution time: ${endTime.getTime() - startTime.getTime()} milliseconds`);
+ * 
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

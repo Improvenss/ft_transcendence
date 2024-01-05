@@ -6,6 +6,7 @@ import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
 import handleRequest from './utils/handleRequest';
 import Modal from "./utils/Modal";
 import './Notification.css';
+import fetchRequest from './utils/fetchRequest';
 
 function Notification() {
 	console.log("---------NOTIFICATION---------");
@@ -48,8 +49,12 @@ function Notification() {
 	useEffect(() => {
 		if (isAuth){
 			if (isModalOpen && unreadNotifs > 0){
+				fetchRequest({
+					method: 'PUT',
+					url: `/users/notif`,
+				});
 				setUnreadNotifs(0);
-				socket?.emit('markAllNotifsAsRead');
+				// socket?.emit('markAllNotifsAsRead');
 			}
 		}
 	}, [isModalOpen]);
