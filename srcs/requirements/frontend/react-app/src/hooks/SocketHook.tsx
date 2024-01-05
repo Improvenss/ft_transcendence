@@ -25,8 +25,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 				})
 				if (response.ok)
 				{
-					console.log("Socket update:", await response.json());
-					setSocket(newSocket);
+					const data = await response.json();
+					console.log("SocketHook:", data);
+					if (!data.err){
+						setSocket(newSocket);
+					}
 				}
 			});
 			newSocket.on('disconnect', () => {

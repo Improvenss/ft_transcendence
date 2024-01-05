@@ -87,7 +87,8 @@ export class ChatController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
-			const userSocket = this.chatGateway.getUserSocketConnection(user.socketId);
+			const {socketId: sockId} = await this.usersService.getUserPrimay({login: user.login});
+			const userSocket = this.chatGateway.getUserSocketConnection(sockId);
 			if (!userSocket)
 				throw new NotFoundException('User socket not found!');
 			const channels = await this.chatService.getChannels(user.login);

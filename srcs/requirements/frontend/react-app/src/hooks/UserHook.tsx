@@ -23,8 +23,8 @@ export interface IUserProps{
 	imageUrl: string,
 	socketId: string,
 	status: string,
-	nickname: string,
-	avatar: string,
+	nickname?: string,
+	avatar?: string,
 	friends: IUserProps[],
 	notifications: INotif[],
 }
@@ -47,7 +47,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 				console.log("IV: ---User Checking---");
 				const response = await fetchRequest({
 					method: 'GET',
-					url: `/users?relation=notifications&primary=true`,
+					url: `/users?relation=notifications&relation=friends&primary=true`,
 				});
 				if (response.ok){
 					console.log("IV: ---User Backend Connection '✅'---");
@@ -55,6 +55,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 					console.log("UserHook:", data);
 					if (!data.err){
 						console.log("IV: ---User Response '✅'---");
+						// socket?.emit("socketUpdate", {socketId: socket?.id, userLogin: data.login });
 						setUserInfo(data);
 					} else {
 						console.log("IV: ---User Response '❌'---");

@@ -114,6 +114,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Channel: [${channelName}] users leaved`);
 	}
 
+	// @SubscribeMessage('socketUpdate')
+	// handleSocketUpdate(
+	// 	@MessageBody() {userLogin, socketId}: {
+	// 		userLogin: string,
+	// 		socketId: string,
+	// 	}
+	// ){
+	// 	try {
+	// 		this.usersService.updateSocketLogin(userLogin, socketId);
+	// 		console.log(`Socket updated successfully. login[${userLogin}], socket.id[${socketId}]`);
+	// 	} catch (err) {
+	// 		console.error("@SubscribeMessage('socketUpdate'): ", err.message);
+	// 	}
+	// }
+
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
 	 *  ele aliyouz.
