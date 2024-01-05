@@ -57,19 +57,21 @@ function ChatPage () {
 	
 		fetchChannels();
 	
-		// handleListenChannel public bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
-		const	handleListenChannel = ({action, data, newChannel}: {
+		// handleListenChannel public/private bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
+		//Düzenlenecek!!!!
+		const	handleListenChannel = ({status, action, data, newChannel}: {
+			status: 'global' | 'private'
 			action: string,
 			data?: any,
 			newChannel?: IChannel
 		}) => {
-			console.log(`handleListenChannel: action: [${action}], data: [${data}]`);
+			console.log(`handleListenChannel: status: [${status}] action: [${action}], data: [${data}]`);
 			if (newChannel !== undefined) {
 				console.log("Channel Recived:", newChannel);
 				setChannels(prevChannels => {
 					if (!prevChannels) return prevChannels;
 					const existingChannelIndex = prevChannels.findIndex(channel => channel.name === newChannel.name) ;
-			
+
 					if (existingChannelIndex !== -1) {
 						const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
 						updatedChannels[existingChannelIndex] = newChannel;
@@ -92,15 +94,16 @@ function ChatPage () {
 			}
 
 			if (action === 'delete'){
-				console.log("...");
 				setChannels((prevChannels) => prevChannels?.filter((channel) => channel.name !== data));
 			}
 		}
 
+		socket?.on(`globalChannelListener`, handleListenChannel); //public bir değişim söz konusu olursa bu dinleme kullanılıyor.
 		// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
 			// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
 		socket?.on(`userChannelListener:${userInfo?.login}`, handleListenChannel);
 		return () => {
+			socket?.off(`globalChannelListener`, handleListenChannel);
 			socket?.off(`userChannelListener:${userInfo?.login}`, handleListenChannel);
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */

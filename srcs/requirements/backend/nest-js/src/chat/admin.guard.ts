@@ -29,12 +29,13 @@ export class ChatAdminGuard implements CanActivate {
 			const	decodedUser = this.jwtService.verify(token);
 			const	tmpUser = await this.usersService.getData({userLogin: decodedUser.login});
 
-			const	tmpChannel = await this.chatService.getChannel({name: request.headers.channel, relation: 'admins', primary: 'true'});
+			const	tmpChannel = await this.chatService.getChannel({name: request.headers.channel, relation: 'admins', primary: true});
 			if (!tmpChannel)
 				throw (new UnauthorizedException("Channel not found!"));
 
 			if (!tmpChannel.admins || !tmpChannel.admins.some(admin => admin.id === tmpUser.id))
 				throw new UnauthorizedException("User is not an admin for this channel!");
+
 			request.user = tmpUser;
 			request.channel = tmpChannel;
 			return (request);

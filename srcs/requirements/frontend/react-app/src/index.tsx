@@ -26,6 +26,7 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: database'ye birşeyleri kayıt ederken boş mu değil mi kontrol et. (Derleme aşamasında birşeyler kaydedince etksik kayıt oluyor.)
  * TODO: mesaj gönderirken bazen author boş oluyor, neden nasıl idk.
  * TODO: channel'dan levae yapıp, login yaptıktan hemen sonra channel'ün tıklayıp kapatıp açınca hata veriyor (güncelleme yaparken yavaş kaldığı için olduğunu düşünüyorum.)
+ * TODO: channelar silinince resimlerinide sil
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement

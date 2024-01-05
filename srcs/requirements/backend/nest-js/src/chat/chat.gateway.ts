@@ -75,17 +75,43 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.handleUserStatus({status: 'offline'}, client);
 	}
 
-	getConnection(userId: string): Socket | undefined {
+	/* Tüm serverdan kullanıcıyı buluyor. */
+	getUserSocketConnection(userId: string): Socket | undefined {
 		return this.connectedUsers.get(userId);
+	}
+	
+	/* Oda'ya kayıtlı kullanıcıların socketlerini döndürüyor. */
+	getRoomConnections(channelName: string){
+		const channelSockets = this.server.in(channelName).fetchSockets();
+		if (!channelSockets)
+			throw new NotFoundException('Channel socket not found.');
+		return (channelSockets);
+	}
+
+	/*
+		Oda socketinden dönen arrayden kullanıcının soketini buluyor.
+		Tüm serverdan aramak yerine böylesi daha efektif.
+	*/
+	async getRoomUserConnection(channelName: string, userSocketId: string) {
+		const channelSockets = await this.getRoomConnections(channelName);
+		const userSocket = channelSockets.find(socket => socket.id === userSocketId);
+		if (!userSocket)
+			throw new NotFoundException('User socket not found');
+		return (userSocket);
+	}
+
+	async userLeaveChannel(channelName: string, userSocketId: string){
+		const userSocket = await this.getRoomUserConnection(channelName, userSocketId);
+		userSocket.leave(channelName);
+		console.log(`Channel: [${channelName}] Leaved: [${userSocketId}]`);
 	}
 
 	/* Belirtilen kanaldaki tüm socket bağlantılarını koparıyor */
-	async forceLeaveChannel(channel: string) {
-		// this.server.in(channel).disconnectSockets(); // sadece buda kullanılabilir
-
-		const namespace = this.server.of('/chat');
-		namespace.in(channel).socketsLeave(channel);
-		console.log(`Channel: [${channel}] users leaved`);
+	forceLeaveChannel(channelName: string) {
+		// const namespace = this.server.of('/chat');
+		// namespace.in(channelName).socketsLeave(channelName);
+		this.server.in(channelName).socketsLeave(channelName);
+		console.log(`Channel: [${channelName}] users leaved`);
 	}
 
 	/**

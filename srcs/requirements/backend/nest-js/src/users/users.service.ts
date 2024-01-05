@@ -118,7 +118,8 @@ export class UsersService {
 
 	/* 
 		Kullanımı: getAllData({select: {login: true}, relations: {}})
-		Tüm kullanıcılara ait belirlenen verileri çekebilirsin.
+		Tüm kullanıcılara ait belirlenen default + relation verileri çekebilirsin.
+		Backend'i çok yoruyor.
 	 */
 	async getAllData({select, relations}:{
 		select: FindOptionsSelect<User>,
@@ -126,6 +127,18 @@ export class UsersService {
 	}){
 		return (await this.usersRepository.find({select, relations}));
 	}
+
+	/* Belirtilen relation'da hangi relation değeri(adı) ise kayıtlı kullanıcıların select değeri veya userın tüm bilgisi(default) dönüyor */
+	async getUsersInRelation({relation, value, select}: {relation: string, value: string, select: string}): Promise<string[]> {
+		const usersInRelation = await this.usersRepository
+			.createQueryBuilder('user')
+			.innerJoin(`user.${relation}`, 'relation', `relation.name = :value`, { value })
+			.select(`user.${select}`, 'selectedField')
+			.getRawMany();
+
+		return usersInRelation.map(result => result.selectedField);
+	}
+
 
 	async getData(
 		who: {userLogin?: string, socketId?: string},

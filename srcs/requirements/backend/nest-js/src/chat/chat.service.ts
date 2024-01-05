@@ -55,21 +55,21 @@ export class ChatService {
 	async getChannel({name, relation, primary}: {
 		name: string,
 		relation?: string[] | string,
-		primary?: 'true',
+		primary?: boolean,
 	}){
 
 		if (typeof relation === 'string') {
 			relation = [relation];
 		}
 
-		if (relation === undefined && primary === 'true') // for default + all relations
+		if (relation === undefined && primary) // for default + all relations
 			relation = await this.getRelationNames();
 
 		const data = await this.channelRepository.findOne({where: {name: name}, relations: relation});
 		if (!data)
 			return (null);
 
-		if (relation === undefined || primary === 'true'){ // default or default + all relations or default + relation
+		if (relation === undefined || primary){ // default or default + all relations or default + relation
 			return (data);
 		}
 
@@ -146,40 +146,40 @@ export class ChatService {
 		return (false)
 	}
 
-	async checkInvolvedUser(channels: Channel | Channel[], user: User) {
-		const channelArray = Array.isArray(channels) ? channels : [channels];
+	// async checkInvolvedUser(channels: Channel | Channel[], user: User) {
+	// 	const channelArray = Array.isArray(channels) ? channels : [channels];
 	
-		const involvedChannelsInfo = channelArray.map((channel) => {
-			if (channel.members.some((channelUser) => channelUser.login === user.login)) {
-				return {
-					status: 'involved',
-					name: channel.name,
-					type: channel.type,
-					description: channel.description,
-					image: channel.image || 'default_image_url',
-					members: channel.members || null,
-					admins: channel.admins || null,
-					messages: channel.messages ? channel.messages.map((message) => ({
-						id: message.id,
-						sender: message.author,
-						content: message.content,
-						timestamp: message.sentAt,
-					})) : null,
-					bannedUsers: channel.bannedUsers
-				};
-			} else if (channel.type === 'public') {
-				return {
-					status: 'public',
-					name: channel.name,
-					type: channel.type,
-					image: channel.image || 'default_image_url',
-				};
-			}
-			return null;
-		}).filter(Boolean); // Filter out null values
+	// 	const involvedChannelsInfo = channelArray.map((channel) => {
+	// 		if (channel.members.some((channelUser) => channelUser.login === user.login)) {
+	// 			return {
+	// 				status: 'involved',
+	// 				name: channel.name,
+	// 				type: channel.type,
+	// 				description: channel.description,
+	// 				image: channel.image || 'default_image_url',
+	// 				members: channel.members || null,
+	// 				admins: channel.admins || null,
+	// 				messages: channel.messages ? channel.messages.map((message) => ({
+	// 					id: message.id,
+	// 					sender: message.author,
+	// 					content: message.content,
+	// 					timestamp: message.sentAt,
+	// 				})) : null,
+	// 				bannedUsers: channel.bannedUsers
+	// 			};
+	// 		} else if (channel.type === 'public') {
+	// 			return {
+	// 				status: 'public',
+	// 				name: channel.name,
+	// 				type: channel.type,
+	// 				image: channel.image || 'default_image_url',
+	// 			};
+	// 		}
+	// 		return null;
+	// 	}).filter(Boolean); // Filter out null values
 	
-		return involvedChannelsInfo;
-	}
+	// 	return involvedChannelsInfo;
+	// }
 	
 	async addChannelUser(
 		channel: Channel,

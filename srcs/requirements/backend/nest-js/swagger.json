@@ -208,53 +208,6 @@
         }
       }
     },
-    "/chat/channel": {
-      "get": {
-        "operationId": "ChatController_findChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ChatController_deleteChannel",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "ChatController_patchChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/chat": {
       "get": {
         "operationId": "ChatController_getChannel",
@@ -272,7 +225,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "boolean"
             }
           }
         ],
@@ -341,6 +294,46 @@
         ],
         "responses": {
           "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel": {
+      "delete": {
+        "operationId": "ChatController_deleteChannel",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "ChatController_patchChannel",
+        "parameters": [
+          {
+            "name": "channel",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/create": {
+      "post": {
+        "operationId": "ChatController_createChannel",
+        "parameters": [],
+        "responses": {
+          "201": {
             "description": ""
           }
         }
@@ -427,17 +420,6 @@
             }
           }
         ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/create": {
-      "post": {
-        "operationId": "ChatController_createChannel",
-        "parameters": [],
         "responses": {
           "201": {
             "description": ""
