@@ -58,10 +58,13 @@ function InfoChannel() {
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
-		setActiveChannel(null);
 		const response = await fetchRequest({
 			method: 'DELETE',
-			url: `/chat/channel?channel=${selectedChannel}`,
+			headers: {
+				'channel': selectedChannel,
+			},
+			url: `/chat/channel`,
+			// url: `/chat/channel?channel=${selectedChannel}`,
 		});
 		if (response.ok){
 			const data = await response.json();
@@ -74,6 +77,7 @@ function InfoChannel() {
 		} else {
 			console.log("---Backend Connection '❌'---");
 		}
+		setActiveChannel(null);
 	}
 
  	const handleTabInfoClick = (tabId: string) => {
@@ -135,7 +139,7 @@ function InfoChannel() {
 		const response = await fetchRequest({
 			method: 'PATCH', //backend'den update oluştur bunun için
 			headers: {
-				"channel": activeChannel.name ,
+				"channel": activeChannel.name,
 			},
 			body: formData,
 			url: `/chat/channel?channel=${activeChannel.name}`

@@ -218,12 +218,12 @@ export class ChatService {
 		if (!tmpChannels)
 			return (`Channel'${channel}' not found.`);
 		if (!Array.isArray(tmpChannels))
-		{ // Game seklinde gelirse alttaki for()'un kafasi karismasin diye.
+		{ // Channel seklinde gelirse alttaki for()'un kafasi karismasin diye.
 			Object.assign(tmpChannels, body);
 			return (await this.channelRepository.save(tmpChannels));
 		}
 		for (const channel of tmpChannels)
-		{ // Game[] seklinde gelirse hepsini tek tek guncellemek icin.
+		{ // Channel[] seklinde gelirse hepsini tek tek guncellemek icin.
 			Object.assign(channel, body);
 			await this.channelRepository.save(channel);
 		}
@@ -241,26 +241,8 @@ export class ChatService {
 		if (!tmpChannel) {
 			throw new NotFoundException('Channel does not exist!');
 		}
-
-		// Kanala ait mesajları sil veya ilişkilendirmeyi kes
-		// NOT: Biz Channel'i silmek istedigimizde iliskili olan Message[] tablosunun {onDelete: 'CASCADE'} kodunu ekledigimizde burada elimizle silmemize gerek kalmiyor.
-		// await this.messageRepository.delete({ channel: { id: tmpChannel.id } });
-		
-		// Kanalı sil
-		const deletedChannel = await this.channelRepository.remove(tmpChannel);
+		const deletedChannel = await this.channelRepository.remove(tmpChannel as Channel);
 		return deletedChannel;
-
-		// console.log("chat.service.ts: removeChannel(): Channel:", channel);
-		// const tmpChannel = (channel === undefined)
-		// 	? await this.channelRepository.delete({})
-		// 	: await this.channelRepository.findOne({
-		// 			where: { name: channel },
-		// 		});
-		// if (!tmpChannel)
-		// 	return (null);
-		// await this.channelRepository.remove(tmpChannel as Channel);
-		// return (tmpChannel);
-		// not: await this.channelRepository.delete({ name: channel }); bunu yaptigimizda channel'in sadece name'sini siliyor.
 	}
 
 	async removeUser(

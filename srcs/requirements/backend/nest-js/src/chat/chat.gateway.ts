@@ -45,7 +45,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	console.log(`BACKEND: gelen msg[${count++}]:`, message);
 	// 	this.server.emit("messageToClient", message);
 	// }
-
+	
 	/**
 	 * Buradaki handleConnection function isimleri ozel isimlerdir.
 	 *  Bu soket basarili bir sekilde baglandiginda calisir.
@@ -77,6 +77,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	getConnection(userId: string): Socket | undefined {
 		return this.connectedUsers.get(userId);
+	}
+
+	/* Belirtilen kanaldaki tüm socket bağlantılarını koparıyor */
+	async forceLeaveChannel(channel: string) {
+		// this.server.in(channel).disconnectSockets(); // sadece buda kullanılabilir
+
+		const namespace = this.server.of('/chat');
+		namespace.in(channel).socketsLeave(channel);
+		console.log(`Channel: [${channel}] users leaved`);
 	}
 
 	/**
@@ -214,23 +223,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
-	@SubscribeMessage('leaveChannel')
-	async handleLeaveChannel(
-		@Body() channel: {
-			name: string
-		},
-		@ConnectedSocket() socket: Socket)
-	{
-		try {
-			const user = await this.usersService.getData({socketId: socket.id});
-			if (socket.rooms.has(channel.name)){
-				socket.leave(channel.name);
-				console.log(`Channel: [${channel.name}] Leaved: [${socket.id}]`);
-			}
-		} catch (err) {
-			console.error("@SubscribMessage('leaveChannel'):", err.message);
-		}
-	}
+	// @SubscribeMessage('leaveChannel')
+	// async handleLeaveChannel(
+	// 	@Body() channel: {
+	// 		name: string
+	// 	},
+	// 	@ConnectedSocket() socket: Socket)
+	// {
+	// 	try {
+	// 		const user = await this.usersService.getData({socketId: socket.id});
+	// 		if (socket.rooms.has(channel.name)){
+	// 			socket.leave(channel.name);
+	// 			console.log(`Channel: [${channel.name}] Leaved: [${socket.id}]`);
+	// 		}
+	// 	} catch (err) {
+	// 		console.error("@SubscribMessage('leaveChannel'):", err.message);
+	// 	}
+	// }
 
 	@SubscribeMessage('joinChannel')
 	async handleJoinChannel(

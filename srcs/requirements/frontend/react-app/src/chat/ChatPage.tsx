@@ -90,6 +90,10 @@ function ChatPage () {
 					}).filter(Boolean) as IChannel[];
 				});
 			}
+
+			if (action === 'delete'){
+				setChannels((prevChannels) => prevChannels?.filter((channel) => channel.name !== data));
+			}
 		}
 
 		// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için

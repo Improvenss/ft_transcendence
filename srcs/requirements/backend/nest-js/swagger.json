@@ -227,26 +227,17 @@
           }
         }
       },
-      "patch": {
-        "operationId": "ChatController_patchChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+      "delete": {
+        "operationId": "ChatController_deleteChannel",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
           }
         }
       },
-      "delete": {
-        "operationId": "ChatController_deleteChannel",
+      "patch": {
+        "operationId": "ChatController_patchChannel",
         "parameters": [
           {
             "name": "channel",
@@ -336,7 +327,7 @@
       }
     },
     "/chat/channel/leave": {
-      "post": {
+      "delete": {
         "operationId": "ChatController_leaveChannel",
         "parameters": [
           {
@@ -349,7 +340,7 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }

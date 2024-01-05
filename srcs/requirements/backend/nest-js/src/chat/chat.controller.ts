@@ -153,7 +153,7 @@ export class ChatController {
 
 	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
 	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
-	@Post('/channel/leave')
+	@Delete('/channel/leave')
 	async leaveChannel(
 		@Req() {user},
 		@Query ('channel') channel: string,
@@ -163,6 +163,7 @@ export class ChatController {
 			const userSocket = this.chatGateway.getConnection(user.socketId);
 			if (!userSocket)
 				throw new NotFoundException('User socket not found!');
+
 			if (userSocket.rooms.has(channel)){
 				userSocket.leave(channel);
 				console.log(`Channel: [${channel}] Leaved: [${user.socketId}]`);
@@ -179,11 +180,41 @@ export class ChatController {
 		}
 		catch(err)
 		{
-			console.error("@Post('/channel/leave'):", err.message);
+			console.error("@Delete('/channel/leave'):", err.message);
 			return (err.message);
 		}
 	}
 
+	// ---------- Delete ---------
+	@Delete('/channel')
+	@UseGuards(ChatAdminGuard)
+	async deleteChannel(
+		@Req() {user},
+		@Req() {channel},
+		// @Query('channel') channelName: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_RED}DELETE: Channel: ${channel.name}${C.END}`);
+			this.chatGateway.server.in(channel.name).socketsLeave(channel.name);
+			const allUserLogin = await this.usersService.getAllData({select: {login: true}, relations: {}});
+			for (const targetUser of allUserLogin) {
+				this.chatGateway.server.emit(`userChannelListener:${targetUser.login}`, {
+					action: 'delete',
+					data: channel,
+				});
+			}
+			const tmpChannel = await this.chatService.removeChannel(channel.name);
+			if (!tmpChannel)
+				throw (new NotFoundException("Channel does not exist!"));
+			return ({message: `Channel [${channel.name}] delete successfully.`});
+		}
+		catch (err)
+		{
+			console.error("@Delete('/channel'): deleteChannel():", err.message);
+			return (err.message);
+		}
+	}
 	// --------------- ADMIN -------------------------
 	@Post('/channel/kick')
 	@UseGuards(ChatAdminGuard)
@@ -446,27 +477,7 @@ export class ChatController {
 		}
 	}
 
-	// ---------- Delete ---------
-	@Delete('/channel')
-	async deleteChannel(
-		@Req() {user},
-		@Query('channel') channel: string | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_RED}DELETE: Channel: ${channel}${C.END}`);
-			const tmpChannel = await this.chatService.removeChannel(channel);
-			if (!tmpChannel)
-				throw (new NotFoundException("Channel does not exist!"));
-			this.chatGateway.server.emit('channelGlobalListener'); // Kullanicilara channel'in silinme infosu verip güncelleme yaptırtmak için sinyal gönderiyoruz.
-			return (tmpChannel);
-		}
-		catch (err)
-		{
-			console.error("@Delete('/channel'): removeChannel():", err);
-			return ({error: err.response});
-		}
-	}
+
 
 
 }
