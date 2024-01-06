@@ -1,28 +1,31 @@
-import { FormEvent } from 'react';
-import { IChannelJoinForm } from './iChannel';
+import { FormEvent, useState } from 'react';
 import './ChannelJoin.css';
 
 function ChannelJoin({ handleChannelAction}: { 
-		handleChannelAction:  (channelName: string, action: 'login' | 'register', password?: string) => Promise<void>
+		handleChannelAction:  (channelName: string, password: string) => Promise<void>
 	}){
 		console.log("---------CHANNEL-JOIN----------");
+		const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 		const handleSubmit = async (e: FormEvent) => {
 			e.preventDefault();
 			const formElement = e.currentTarget as HTMLFormElement;
-			const formObject: IChannelJoinForm = {
-				name: (formElement.elements.namedItem('name') as HTMLInputElement).value,
-				password: (formElement.elements.namedItem('password') as HTMLInputElement).value,
-				type: 'private',
-			};
-			console.log(formObject.name);
-			console.log(formObject.password);
-			handleChannelAction(formObject.name, 'register', formObject.password);
+			const name = (formElement.elements.namedItem('name') as HTMLInputElement).value
+			const password = (formElement.elements.namedItem('password') as HTMLInputElement).value
+			console.log(`Channel Join: name:[${name}] password:[${password}]`);
+			if (password != null && (/\s/.test(password))){
+				setErrorMessage('Your password must not contain any space characters.');
+				return;
+			}
+			if (errorMessage)
+				setErrorMessage(null)
+			handleChannelAction(name, password);
 			formElement.reset();
 		}
 
 	return (
 		<form onSubmit={handleSubmit}>
+			{errorMessage && <p className="error-message">{errorMessage}</p>}
 			<label htmlFor="channel-name">Channel Name:</label>
 			<input
 				id="channel-name"

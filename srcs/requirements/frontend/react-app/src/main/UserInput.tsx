@@ -1,8 +1,12 @@
-import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import './UserInput.css';
 import fetchRequest from '../utils/fetchRequest';
 import { isValidImage } from '../utils/fileValidation';
-import { IUserUpdateForm } from '../chat/iChannel';
+
+interface IUserUpdateForm {
+	nickname: string;
+	image: File | null; //avatar
+}
 
 const defaultForm: IUserUpdateForm = {
 	nickname: '',

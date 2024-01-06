@@ -21,11 +21,6 @@ function Channel() {
 	};
 
 	const handleChannelAction = async (channelName: string, password?: string ) => {
-		if (activeChannel?.name === channelName){
-			setActiveChannel(null);
-			return;
-		}
-
 		const requestBody = {
 			channel: channelName,
 			password: (password === undefined ? null : password),

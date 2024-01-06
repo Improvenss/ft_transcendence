@@ -17,7 +17,7 @@ function ActiveChannel(){
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const socket = useSocket();
-	const author = useUser().userInfo;
+	const {userInfo} = useUser();
 
 	const handleAdditionalMenuClick = () => {
 		setChannelInfo(!channelInfo); // InfoChannel'ı etkinleştirmek/devre dışı bırakmak için durumu değiştirin
@@ -41,10 +41,10 @@ function ActiveChannel(){
 	const handleSendMessage = () => {
 	// Mesajı gönderme işlemini gerçekleştir
 		if (messageInput.length > 0 && messageInput.length <= MAX_CHARACTERS) {
-			if (socket && activeChannel && author){
+			if (socket && activeChannel && userInfo){
 				socket.emit("createMessage", {
 					channel: activeChannel.name,
-					author: author.login,
+					author: userInfo.login,
 					content: messageInput
 				});
 				console.log(`Message sent: ${messageInput}`);
@@ -125,7 +125,7 @@ function ActiveChannel(){
 									</div>
 								) : null}
 							<div key={index} className={`message-content`}>
-								{(message.author.login !== author?.login) ? (
+								{(message.author.login !== userInfo?.login) ? (
 									<div className='message taken'>
 										{(index === 0 || message.author.login !== messages[index - 1].author.login) ? (
 											<>
