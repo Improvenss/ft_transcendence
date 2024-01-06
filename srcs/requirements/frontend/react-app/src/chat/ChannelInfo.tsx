@@ -34,6 +34,15 @@ function InfoChannel() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const navigate = useNavigate();
 
+	const handleTabInfoClick = (tabId: string) => {
+		if (selectedImage != null)
+			setSelectedImage(null);
+		if (activeTabInfo !== tabId){
+			setActiveTabInfo(tabId);
+			console.log(`Switched to channel ${tabId}`);
+		}
+ 	};
+
 	// User kendisi Leave Channel dediginde calisir admin icin kick olarak baska function yapacagiz.
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		setActiveChannel(null);
@@ -78,13 +87,6 @@ function InfoChannel() {
 		}
 		setActiveChannel(null);
 	}
-
- 	const handleTabInfoClick = (tabId: string) => {
-		if (selectedImage != null)
-			setSelectedImage(null);
- 		setActiveTabInfo(tabId);
- 		console.log(`Switched to channel ${tabId}`);
- 	};
 
 	const handleUpdate = async (fieldName: string) => {
 		if (!activeChannel)
@@ -136,12 +138,12 @@ function InfoChannel() {
 		}
 
 		const response = await fetchRequest({
-			method: 'PATCH', //backend'den update oluştur bunun için
+			method: 'PATCH',
 			headers: {
 				"channel": activeChannel.name,
 			},
 			body: formData,
-			url: `/chat/channel?channel=${activeChannel.name}`
+			url: `/chat/channel`
 		});
 		if (response.ok){
 			const data = await response.json();

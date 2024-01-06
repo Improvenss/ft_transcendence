@@ -31,6 +31,7 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: channel info'daki güncellemeler düzeltilmedi
  * TODO: channel joinleme olayını frontend'e aktarılabilir idk
  * TODO: userinput'un güncelle - tek method haline getir
+ * TODO: activechannels'ı doğrudan channels bloğundan çekebilirsin
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

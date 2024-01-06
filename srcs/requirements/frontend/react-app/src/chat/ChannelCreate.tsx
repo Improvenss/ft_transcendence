@@ -1,7 +1,6 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { IChannelCreateForm } from "./iChannel";
 import './ChannelCreate.css';
-import { useChannelContext } from "./ChatPage";
 import fetchRequest from "../utils/fetchRequest";
 import { isValidImage } from "../utils/fileValidation";
 
@@ -13,10 +12,13 @@ const defaultForm: IChannelCreateForm = {
 	description: ''
 }
 
-function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
+function ChannelCreate(
+	{ onSuccess, handleChannelAction }:{
+		onSuccess: (tabId: string) => void,
+		handleChannelAction:  (channelName: string, password: string | null) => Promise<void>
+}){
 	console.log("---------CHANNEL-CREATE----------");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { setActiveChannel,  } = useChannelContext();
 	const [channelData, setChannelData] = useState<IChannelCreateForm>(defaultForm);
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		const { name, value } = e.currentTarget;
@@ -67,8 +69,7 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 			console.log("ChannelCreate:", data);
 			if (!data.err){
 				console.log("---Channel created '✅'---");
-				setActiveChannel(data);
-				onSuccess('involved');
+				handleChannelAction(channelData.name, channelData.password);
 			} else {
 				console.log("ChannelCreate err:", data.err);
 			}

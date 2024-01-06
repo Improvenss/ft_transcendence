@@ -21,10 +21,11 @@ export class ChatService {
 	) {}
 
 	async parseType(value: string){
-		const channelType: ChannelType = ChannelType[value as keyof typeof ChannelType];
+		const channelType: ChannelType = ChannelType[value.toUpperCase() as keyof typeof ChannelType];
 		if (!channelType) {
 			throw new BadRequestException('Invalid channel type');
 		}
+		return (channelType);
 	}
 
 

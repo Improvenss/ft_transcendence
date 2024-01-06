@@ -16,6 +16,7 @@ import { useUser } from "../hooks/UserHook";
 
 export const ChannelContext = createContext<IChannelContext>({
 	channels: undefined,
+	setChannels: () => {},
 	activeChannel: null,
 	setActiveChannel: () => {},
 	channelInfo: false,
@@ -123,7 +124,7 @@ function ChatPage () {
 
 	return (
 		<div id="chat-page">
-			<ChannelContext.Provider value={{ channels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
+			<ChannelContext.Provider value={{ channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
 				<Channel />	
 				<ActiveChannel />
 				<ChannelInfo />

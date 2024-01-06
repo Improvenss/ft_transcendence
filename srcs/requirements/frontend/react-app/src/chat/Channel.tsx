@@ -10,7 +10,7 @@ import fetchRequest from '../utils/fetchRequest';
 
 function Channel() {
 	console.log("---------CHAT-CHANNELS---------");
-	const { channels, activeChannel, setActiveChannel } = useChannelContext();
+	const { channels, setChannels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
 	const [searchTerm, setSearchTerm] = useState('');
 	
@@ -20,7 +20,7 @@ function Channel() {
 		}
 	};
 
-	const handleChannelAction = async (channelName: string, password?: string ) => {
+	const handleChannelAction = async (channelName: string, password?: string | null ) => {
 		const requestBody = {
 			channel: channelName,
 			password: (password === undefined ? null : password),
@@ -34,8 +34,20 @@ function Channel() {
 			const data = await response.json();
 			console.log(`regiter channel: [${channelName}]`, data);
 			if (!data.err){
-				setActiveChannel(data);
+				setChannels(prevChannels => {
+					if (!prevChannels) return prevChannels;
+					const existingChannelIndex = prevChannels.findIndex(channel => channel.name === data.name) ;
+
+					if (existingChannelIndex !== -1) {
+						const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
+						updatedChannels[existingChannelIndex] = data;
+						return updatedChannels;
+					} else {
+						return [...prevChannels, data]; // Kanal yok, ekleyerek güncelle
+					}
+				});
 				setActiveTab('involved');
+				setActiveChannel(data);
 			} else {
 				console.log("handleChannelAction err:", data.err);
 			}
@@ -65,7 +77,7 @@ function Channel() {
 						{activeTab === 'join' && <h1>Join Channel</h1>}
 					</div>
 					{activeTab === 'create' && (
-						<ChannelCreate onSuccess={handleTabClick}/>
+						<ChannelCreate onSuccess={handleTabClick} handleChannelAction={handleChannelAction}/>
 					)}
 					{activeTab === 'join' && (
 						<ChannelJoin handleChannelAction={handleChannelAction} />

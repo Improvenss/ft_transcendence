@@ -11,7 +11,7 @@ import { formatDaytamp, formatTimestamp, isDifferentDay } from '../utils/dateUti
 
 function ActiveChannel(){
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
+	const { channels, setChannels, activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const MAX_CHARACTERS = 1000; // İstenilen maksimum karakter sayısı
 	const [messageInput, setMessageInput] = useState('');
 	const [messages, setMessages] = useState<IMessage[]>([]);
@@ -84,6 +84,20 @@ function ActiveChannel(){
 				...prevMessages,
 				newMessage
 			]);
+			setChannels((prevChannels) => { //kanallar arası geçiş yapıtığımda mesajların frontende kayboluyor.
+				if (!prevChannels) return prevChannels;
+			  
+				const updatedChannels = prevChannels.map((channel) => {
+				  if (channel.id === activeChannel?.id) {
+					const updatedMessages = [...channel.messages, newMessage];
+					return { ...channel, messages: updatedMessages };
+				  } else {
+					return channel;
+				  }
+				});
+			  
+				return updatedChannels;
+			});
 		}
 
 		socket?.on(`listenChannelMessage:${activeChannel?.name}`, handleListenMessage);

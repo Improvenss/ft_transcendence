@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsEnum, IsNumber, IsArray, IsNotEmpty } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
-import { ChannelType } from '../entities/chat.entity';
+import { ChannelType, Message } from '../entities/chat.entity';
 
 export class CreateChannelDto {
 	@IsString()
@@ -18,25 +18,25 @@ export class CreateChannelDto {
 	description: string;
 
 	@IsString()
-	@IsOptional()
-	password: string;
+	password: string | null;
 
 	@IsString()
-	@IsOptional()
+	@IsNotEmpty()
 	image: string;
 
 	@IsArray()
-	@IsOptional()
+	@IsNotEmpty()
 	members: User[];
 
 	@IsArray()
-	@IsOptional()
 	@IsNotEmpty() // veya @IsDefined()
 	admins: User[];
 
 	@IsArray()
-	@IsOptional()
-	bannedUsers?: User[];
+	bannedUsers: User[];
+
+	@IsArray()
+	messages: Message[];
 }
 
 export class UpdateChannelDto extends PartialType(CreateChannelDto) {}

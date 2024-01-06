@@ -28,6 +28,7 @@ export interface IChannel {
 
 export interface IChannelContext {
 	channels: IChannel[] | undefined;
+	setChannels: React.Dispatch<React.SetStateAction<IChannel[] | undefined>>;
 	activeChannel: IChannel | null;
 	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
 	channelInfo: boolean;
