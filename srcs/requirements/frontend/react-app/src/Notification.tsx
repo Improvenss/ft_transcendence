@@ -39,9 +39,9 @@ function Notification() {
 				}
 			}
 
-			socket.on(`notif:${userInfo.login}`, handleListenNotifs);
+			socket.on(`user-notif:${userInfo.id}`, handleListenNotifs);
 			return () => {
-				socket.off(`notif:${userInfo.login}`, handleListenNotifs);
+				socket.off(`user-notif:${userInfo.id}`, handleListenNotifs);
 			};
 		}
 	}, [isAuth, userInfo, socket]);

@@ -21,22 +21,22 @@ export class UsersService {
 
 	async friendRequest(
 		action: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
-		requesterUser: User,
-		target: string,
+		requesterUser: number,
+		target: number,
 	){
-		if (requesterUser.login === target)
+		if (requesterUser === target)
 			throw new Error("You can't perform friend actions on yourself.");
 
 		// const	targetUser = await this.getData({userLogin: target}, 'friends', 'true');
 		const targetUser = await this.getUserRelation({
-			user: { login: target },
+			user: { id: target },
 			relation: { friends: true },
 			primary: true,
 		})
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
 
-		if (targetUser.friends.some(friend => friend.id === requesterUser.id))
+		if (targetUser.friends.some(friend => friend.id === requesterUser))
 			throw new Error('Users are already friends.');
 
 		let message = '';
@@ -72,10 +72,10 @@ export class UsersService {
 	}
 
 	async notifsMarkRead(
-		userLogin: string,
+		userId: number,
 	){
 		const notifs = await this.getUserRelation({
-			user: { login: userLogin },
+			user: { id: userId },
 			relation: { notifications: true },
 			primary: false,
 		});
@@ -85,34 +85,25 @@ export class UsersService {
 
 	async createNotif(
 		requesterUser: string,
-		target: string,
+		target: number,
 		action: string,
 		text: string,
 	){
-		// const	targetUser = await this.getData({userLogin: target});
-		const targetUser = await this.getUserPrimay({login: target});
-		if (!targetUser)
+		const user = await this.getUserPrimay({id: target});
+		if (!user)
 			throw new NotFoundException('User not found!');
-		// const	notifs = await this.getData({userLogin: target}, 'notifications');
-		const notifs = await this.getUserRelation({
-			user: { login: target },
-			relation: { notifications: true },
-			primary: false,
-		});
 
 		const createNotfiDto: CreateNotifDto = {
 			type: NotificationType[action.toUpperCase() as keyof typeof NotificationType],
 			text: text,
 			date: new Date(),
-			user: targetUser,
+			user: user,
 			read: false,
 			from: requesterUser,
 		};
 
 		const newNotif = new Notif(createNotfiDto);
-		notifs.notifications.push(newNotif);
-		await this.notifRepository.save(newNotif);
-		return (newNotif);
+		return (await this.notifRepository.save(newNotif))
 	}
 
 	async deleteNotif(
@@ -160,11 +151,11 @@ export class UsersService {
 	}
 
 	async getUserChannelRelationDetails(
-		login: string,
+		id: number,
 		nestedRelations: string[],
 	){
 		const data = await this.usersRepository.findOne({
-			where: {login: login},
+			where: {id: id},
 			relations: nestedRelations,
 		});
 		return (data['channels']);
@@ -346,16 +337,16 @@ export class UsersService {
 		return (`New User created: #${response.login}:[${response.id}]`);
 	}
 
-	async updateUser({login, avatar, nickname, socketId, status}: {
-		login: string,
+	async updateUser({id, avatar, nickname, socketId, status}: {
+		id: number,
 		avatar?: string,
 		nickname?: string,
 		socketId?: string,
 		status?: string,
 	}){
-		const tmpUser = await this.getUserPrimay({login: login});
+		const tmpUser = await this.getUserPrimay({id: id});
 		Object.assign(tmpUser, { avatar, nickname, socketId, status });
-		this.usersRepository.save(tmpUser);
+		await this.usersRepository.save(tmpUser);
 	}
 
 	// /**

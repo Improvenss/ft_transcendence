@@ -36,51 +36,64 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		private readonly chatService: ChatService,
 	) {}
 
-	public connectedUsers: Map<string, Socket> = new Map();
+	public connectedIds: Map<number, Socket> = new Map();
+	public connectedSockets: Map<string, number> = new Map(); //returned user id
 
 	@WebSocketServer()
 	server: Server;
 
-	// @SubscribeMessage('createMessage')
-	// async handleMessage(@MessageBody() message: string) {
-	// 	console.log(`BACKEND: gelen msg[${count++}]:`, message);
-	// 	this.server.emit("messageToClient", message);
-	// }
-	
-	/**
-	 * Buradaki handleConnection function isimleri ozel isimlerdir.
-	 *  Bu soket basarili bir sekilde baglandiginda calisir.
-	 * @param client 
-	 * @param args 
-	 */
-	async handleConnection(client: Socket, ...args: any[])
-	{
-		// if (this.connectedUsers.has(client.id)) {
-		// 	console.log(`Client already connected 🟡: socket.id[${client.id}]`);
-		// 	client.disconnect(true); // Bağlantıyı kapat
-		// 	return;
-		// }
-		this.connectedUsers.set(client.id, client);
-		console.log(`Client connected ✅: socket.id[${client.id}]`);
-			//Do stuffs
-	}
-	/**
-	 * Buradaki handleDisconnect function isimleri ozel isimlerdir.
-	 *  Backend'e baglanan socket'in baglantisi kesildiginde calisir.
-	 * @param client Client socket.
-	 */
-	async handleDisconnect(client: Socket) {
-		console.log(`Client disconnected 💔: socket.id[${client.id}]`);
-		this.connectedUsers.delete(client.id); // Bağlantı kesildiğinde soketi listeden kaldır
-		//Do stuffs
-		await this.handleUserStatus({status: 'offline'}, client);
+	async handleConnection(client: Socket){
+		const clientId = client.id;
+		console.log(`Client connected ✅: socket.id[${clientId}]`);
+		const clientQuery = client.handshake.query;
+		const userId = parseInt(clientQuery.id as string);
+		const duplicateSocket = this.connectedIds.get(userId);
+		if (duplicateSocket) {
+			await this.handleDisconnect(duplicateSocket);
+		}
+		this.connectedIds.set(userId, client);
+		this.connectedSockets.set(clientId, userId);
+		await this.usersService.updateUser({id: userId, socketId: clientId});
 	}
 
-	/* Tüm serverdan kullanıcıyı buluyor. */
-	getUserSocketConnection(userId: string): Socket | undefined {
-		return this.connectedUsers.get(userId);
+	async handleDisconnect(client: Socket) {
+		const clientId = client.id;
+		console.log(`Client disconnected 💔: socket.id[${clientId}]`);
+		await this.handleUserStatus({status: 'offline'}, client);
+		const userId = this.connectedSockets.get(clientId);
+		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
+		this.connectedSockets.delete(clientId);
+		client.disconnect(true);
+	}
+
+	getUserSocket(userId: number){
+		return (this.connectedIds.get(userId));
+	}
+
+	@SubscribeMessage('userStatus')
+	async handleUserStatus(
+		@Body() body: {
+			status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
+		},
+		@ConnectedSocket() socket: Socket
+	){
+		try {
+			const userId = this.connectedSockets.get(socket.id);
+			console.log('Received userStatus:', `user[${userId}]`, `status[${body.status}]`);
+			await this.usersService.updateUser({
+				id: userId,
+				status: body.status,
+			})
+		} catch (err) {
+			console.error("@SubscribMessage(userStatus):", err.message);
+		}
 	}
 	
+//------------------------------------------------------------------------
+
+
+
+
 	/* Oda'ya kayıtlı kullanıcıların socketlerini döndürüyor. */
 	getRoomConnections(channelName: string){
 		const channelSockets = this.server.in(channelName).fetchSockets();
@@ -236,35 +249,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleMessage(
 		@MessageBody() 
 		{ channel, author, content }:
-			{ channel: string, author: string, content: string },
-		@ConnectedSocket() socket: Socket,
+			{ channel: number, author: number, content: string },
+		@ConnectedSocket() socket: Socket, //Eğer burada yine mesaj yazarı null olursa socket var mı yok mu kontrol ettir.
 	){
 		try {
-			if (!socket.rooms.has(channel))
+			const messageUser = await this.usersService.getUserPrimay({id: author});
+			if (!messageUser)
+				throw new NotFoundException('User not found!');
+			const messageChannel = await this.chatService.getChannelPrimary({id: channel});
+			if (!messageChannel)
+				throw new NotFoundException('Channel not found!');
+
+			if (!socket.rooms.has(messageChannel.name))
 			{
 				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
 				throw new Error(`user[${author}] not in this channel(${channel})!`);
 			}
-			const tmpChannel = await this.chatService.getChannelPrimary(channel);
-			if (!tmpChannel)
-				throw new NotFoundException('Channel not found!');
-			const tmpUser = await this.usersService.getUserPrimay({login: author});
-			if (!tmpUser)
-				throw new NotFoundException('User not found!');
 			const createMessageDto: CreateMessageDto = {
+				author: messageUser,
+				channel: messageChannel,
 				content: content,
 				sentAt: new Date(),
-				author: tmpUser,
-				channel: tmpChannel,
 			};
 			const returnMessage = await this.chatService.createMessage(createMessageDto);
 			delete returnMessage.channel;
 			console.log(`Message recived: channel[${channel}] user[${author}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
-			this.server.to(channel).emit(`listenChannelMessage:${channel}`, returnMessage);
+			this.server.to(messageChannel.name).emit(`listenChannelMessage:${channel}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err.message);
 			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
-			this.server.emit(`notif:${author}`, notif);
+			this.server.emit(`user-notif:${id}`, notif);
 		}
 	}
 
@@ -308,8 +322,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!tmpChannel)
 				throw (new NotFoundException("Channel not found!"));
 
-			const userExists = await this.chatService.findChannelUser(tmpChannel, 'members', user);
-			if (!userExists)
+			if (tmpChannel.members.some((channelUser) => {channelUser.id === user.id}))
 				throw (new NotFoundException("User is not in Channel!"));
 			if (socket.rooms.has(channel.name))
 				return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
@@ -324,26 +337,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 	
-	@SubscribeMessage('userStatus')
-	async handleUserStatus(
-		@Body() object: {status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'},
-		@ConnectedSocket() socket: Socket
-	){
-		try {
-			const user = await this.usersService.getUserPrimay({socketId: socket.id});
-			if (user === null){
-				throw (new NotFoundException("User not found!"));
-			}
-			
-			console.log('Received userStatus:', `user[${user.login}]`, `status[${object.status}]`);
-			await this.usersService.updateUser({
-				login: user.login,
-				status: object.status,
-			})
-		} catch (err) {
-			console.error("@SubscribMessage(userStatus):", err.message);
-		}
-	}
+
 
 	// @SubscribeMessage('markAllNotifsAsRead')
 	// async handleNotifsStatus(

@@ -36,7 +36,7 @@ function Channel() {
 			if (!data.err){
 				setChannels(prevChannels => {
 					if (!prevChannels) return prevChannels;
-					const existingChannelIndex = prevChannels.findIndex(channel => channel.name === data.name) ;
+					const existingChannelIndex = prevChannels.findIndex(channel => channel.id === data.id) ;
 
 					if (existingChannelIndex !== -1) {
 						const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle

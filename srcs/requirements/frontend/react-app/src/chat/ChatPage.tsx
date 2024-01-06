@@ -32,7 +32,6 @@ function ChatPage () {
 	const {isAuth} = useAuth();
 	const socket = useSocket();
 	const { userInfo } = useUser();
-
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
 	const [activeChannel, setActiveChannel] = useState<IChannel | null>(null);
 	const [channelInfo, setChannelInfo] = useState(false);
@@ -61,7 +60,7 @@ function ChatPage () {
 	}, [isAuth]);
 
 	useEffect(() => {
-		if (isAuth && socket){
+		if (isAuth && socket && userInfo){
 			// handleListenChannel public/private bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
 			//Düzenlenecek!!!!
 			const	handleListenChannel = ({status, action, data, newChannel}: {
@@ -103,13 +102,13 @@ function ChatPage () {
 				}
 			}
 
-			socket?.on(`globalChannelListener`, handleListenChannel); //public bir değişim söz konusu olursa bu dinleme kullanılıyor.
+			socket.on(`globalChannelListener`, handleListenChannel); //public bir değişim söz konusu olursa bu dinleme kullanılıyor.
 			// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
 				// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
-			socket?.on(`userChannelListener:${userInfo?.login}`, handleListenChannel);
+			socket.on(`userChannelListener:${userInfo.id}`, handleListenChannel);
 			return () => {
-				socket?.off(`globalChannelListener`, handleListenChannel);
-				socket?.off(`userChannelListener:${userInfo?.login}`, handleListenChannel);
+				socket.off(`globalChannelListener`, handleListenChannel);
+				socket.off(`userChannelListener:${userInfo.id}`, handleListenChannel);
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */

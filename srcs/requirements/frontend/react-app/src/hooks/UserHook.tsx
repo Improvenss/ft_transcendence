@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
-import { useSocket } from './SocketHook';
 import fetchRequest from '../utils/fetchRequest';
 
 export interface INotif {
@@ -17,6 +16,7 @@ export interface INotif {
 }
 
 export interface IUserProps{
+	id: number,
 	email: string,
 	login: string,
 	displayname: string,
@@ -38,11 +38,10 @@ const UserContext = createContext<{
 export function UserProvider({children}: {children: React.ReactNode}) {
 	console.log("---------USERHOOK-PAGE---------");
 	const {isAuth, setAuth} = useAuth();
-	const socket = useSocket();
 	const [userInfo, setUserInfo] = useState<IUserProps | undefined>(undefined);
 
 	useEffect(() => {
-		if (isAuth === true){
+		if (isAuth){
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
 				const response = await fetchRequest({
@@ -55,7 +54,6 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 					console.log("UserHook:", data);
 					if (!data.err){
 						console.log("IV: ---User Response '✅'---");
-						// socket?.emit("socketUpdate", {socketId: socket?.id, userLogin: data.login });
 						setUserInfo(data);
 					} else {
 						console.log("IV: ---User Response '❌'---");
@@ -71,7 +69,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			checkUser();
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [socket, isAuth]);
+	}, [isAuth]);
 
 	if ((isAuth === true && userInfo === undefined))
 		return (<LoadingPage />);

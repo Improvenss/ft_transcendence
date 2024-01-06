@@ -32,13 +32,13 @@ export class ChatService {
 	async createChannel(createChannelDto: CreateChannelDto) {
 		const	newChannel = new Channel(createChannelDto);
 		console.log(`New Channel created: #${newChannel.name}`);
-		return (await this.entityManager.save(newChannel));
+		return (await this.channelRepository.save(newChannel));
 	}
 
 	async createMessage(createMessageDto: CreateMessageDto) {
 		const	newMessage = new Message(createMessageDto);
 		console.log(`New Message created: #${newMessage.content}`);
-		return (await this.entityManager.save(newMessage));
+		return (await this.messageRepository.save(newMessage));
 	}
 	
 	parsedRelation(relation: string[] | string): FindOptionsRelations<Channel> {
@@ -68,8 +68,18 @@ export class ChatService {
 	}
 
 	/* channel'ın relationlardan bağımsız verilerini döndürür. Channel yoksa null döner */
-	async getChannelPrimary(channelName: string){
-		return (await this.channelRepository.findOne({where: {name: channelName}}));
+	async getChannelPrimary({id, name}:{id?: number, name?: string}){
+		const inputSize = [id, name].filter(Boolean).length;
+		if (inputSize !== 1){
+			throw new Error('Provide exactly one of id or name.');
+		}
+
+		const whereClause: Record<string, any> = {
+			id: id,
+			name: name,
+		};
+		
+		return (await this.channelRepository.findOne({where: whereClause}));
 	}
 
 	/* channel'ın default ve relation verilerini döndürür, 
@@ -110,9 +120,9 @@ export class ChatService {
 
 	/* Kullanıcının kayıt olduğu tüm channelları döndürür(relationlarla) + public channeları döndürür */
 	async getChannels(
-		userLogin: string,
+		userId: number,
 	) {
-		const involvedChannels = await this.usersService.getUserChannelRelationDetails( userLogin, await this.getRelationNames(true) );
+		const involvedChannels = await this.usersService.getUserChannelRelationDetails( userId, await this.getRelationNames(true) );
 		if (!involvedChannels){
 			throw new Error('User not found!');
 		}
@@ -189,73 +199,8 @@ export class ChatService {
 		return (tmpChannel);
 	}
 
-	async findChannelUser(
-		channel: Channel,
-		relation: 'members' | 'bannedUsers',
-		user: User
-	){
-		if (!channel || !user)
-			throw (new NotFoundException(`chat.service.ts: findChannelUser: channel: ${channel.name} || user: ${user.login} not found!`));
-		if (relation === 'members' || relation === 'bannedUsers') {
-			return (channel[relation].some((channelUser) => channelUser.login === user.login));
-		}
-		return (false)
-	}
-
-	// async checkInvolvedUser(channels: Channel | Channel[], user: User) {
-	// 	const channelArray = Array.isArray(channels) ? channels : [channels];
-	
-	// 	const involvedChannelsInfo = channelArray.map((channel) => {
-	// 		if (channel.members.some((channelUser) => channelUser.login === user.login)) {
-	// 			return {
-	// 				status: 'involved',
-	// 				name: channel.name,
-	// 				type: channel.type,
-	// 				description: channel.description,
-	// 				image: channel.image || 'default_image_url',
-	// 				members: channel.members || null,
-	// 				admins: channel.admins || null,
-	// 				messages: channel.messages ? channel.messages.map((message) => ({
-	// 					id: message.id,
-	// 					sender: message.author,
-	// 					content: message.content,
-	// 					timestamp: message.sentAt,
-	// 				})) : null,
-	// 				bannedUsers: channel.bannedUsers
-	// 			};
-	// 		} else if (channel.type === 'public') {
-	// 			return {
-	// 				status: 'public',
-	// 				name: channel.name,
-	// 				type: channel.type,
-	// 				image: channel.image || 'default_image_url',
-	// 			};
-	// 		}
-	// 		return null;
-	// 	}).filter(Boolean); // Filter out null values
-	
-	// 	return involvedChannelsInfo;
-	// }
-	
-	async addChannelUser(
-		channel: Channel,
-		user: User,
-		relation: 'members' | 'bannedUsers',
-	){
-		if (!relation)
-			throw (new Error(`Which relation do you add this user?`));
-		if (await this.findChannelUser(channel, relation, user))
-			throw (new Error(`${user.login} already in this ${channel.name}.`));
-		if (relation === 'members')
-			channel.members.push(user);
-		else if (relation === 'bannedUsers')
-			channel.bannedUsers.push(user);
-		else
-			throw (new Error(`There is no relation for add this user?`));
-		return (this.entityManager.save(channel));
-	}
-
-	async updateMessage(id: number, updateMessageDto: UpdateMessageDto) {
+	async saveChannel(channel: Channel){
+		return (this.channelRepository.save(channel));
 	}
 
 	/**

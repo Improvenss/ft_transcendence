@@ -44,8 +44,8 @@ const root = ReactDOM.createRoot(
 root.render(
 	<FontLoadedProvider>
 		<AuthProvider>
-			<SocketProvider>
 				<UserProvider>
+			<SocketProvider>
 						{/*<React.StrictMode>*/}
 							<BrowserRouter>
 								<StatusProvider>
@@ -53,8 +53,8 @@ root.render(
 								</StatusProvider>
 							</BrowserRouter>
 						{/*</React.StrictMode>*/}
-				</UserProvider>
 			</SocketProvider>
+				</UserProvider>
 		</AuthProvider>
 	</FontLoadedProvider>
 );

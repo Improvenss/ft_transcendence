@@ -43,8 +43,8 @@ function ActiveChannel(){
 		if (messageInput.length > 0 && messageInput.length <= MAX_CHARACTERS) {
 			if (socket && activeChannel && userInfo){
 				socket.emit("createMessage", {
-					channel: activeChannel.name,
-					author: userInfo.login,
+					channel: activeChannel.id,
+					author: userInfo.id,
 					content: messageInput
 				});
 				console.log(`Message sent: ${messageInput}`);
@@ -78,32 +78,34 @@ function ActiveChannel(){
 	}, [activeChannel]);
 
 	useEffect(() => {
-		const handleListenMessage = (newMessage: IMessage) => {
-			console.log("Message Recived:", newMessage);
-			setMessages(prevMessages => [
-				...prevMessages,
-				newMessage
-			]);
-			setChannels((prevChannels) => { //kanallar arası geçiş yapıtığımda mesajların frontende kayboluyor.
-				if (!prevChannels) return prevChannels;
-			  
-				const updatedChannels = prevChannels.map((channel) => {
-				  if (channel.id === activeChannel?.id) {
-					const updatedMessages = [...channel.messages, newMessage];
-					return { ...channel, messages: updatedMessages };
-				  } else {
-					return channel;
-				  }
+		if (activeChannel && socket){
+			const handleListenMessage = (newMessage: IMessage) => {
+				console.log("Message Recived:", newMessage);
+				setMessages(prevMessages => [
+					...prevMessages,
+					newMessage
+				]);
+				setChannels((prevChannels) => { //kanallar arası geçiş yapıtığımda mesajların frontende kayboluyor.
+					if (!prevChannels) return prevChannels;
+				
+					const updatedChannels = prevChannels.map((channel) => {
+					if (channel.id === activeChannel?.id) {
+						const updatedMessages = [...channel.messages, newMessage];
+						return { ...channel, messages: updatedMessages };
+					} else {
+						return channel;
+					}
+					});
+				
+					return updatedChannels;
 				});
-			  
-				return updatedChannels;
-			});
-		}
+			}
 
-		socket?.on(`listenChannelMessage:${activeChannel?.name}`, handleListenMessage);
-		return () => {
-			socket?.off(`listenChannelMessage:${activeChannel?.name}`, handleListenMessage);
-		};
+			socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+			return () => {
+				socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+			};
+		}
 	}, [activeChannel, socket]);
 
 	useEffect(() => {

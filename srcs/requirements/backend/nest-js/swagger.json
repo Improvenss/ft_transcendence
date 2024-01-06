@@ -76,17 +76,6 @@
         }
       }
     },
-    "/users/socket": {
-      "patch": {
-        "operationId": "UsersController_patchSocket",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/users/user": {
       "patch": {
         "operationId": "UsersController_patchUser",
@@ -162,7 +151,7 @@
             "required": true,
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           },
           {
@@ -286,94 +275,6 @@
       "post": {
         "operationId": "ChatController_createChannel",
         "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/kick": {
-      "post": {
-        "operationId": "ChatController_kickChannel",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/ban": {
-      "post": {
-        "operationId": "ChatController_banChannel",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/unban": {
-      "post": {
-        "operationId": "ChatController_unbanChannel",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/admin": {
-      "post": {
-        "operationId": "ChatController_setChannelPermission",
-        "parameters": [
-          {
-            "name": "action",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": ""

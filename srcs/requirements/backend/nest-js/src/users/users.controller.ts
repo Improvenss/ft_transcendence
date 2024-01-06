@@ -9,7 +9,7 @@ import { multerConfig } from 'src/chat/channel.handler';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import { ChatGateway } from 'src/chat/chat.gateway';
-import { Notif } from './entities/user.entity';
+import { Notif, User } from './entities/user.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -19,37 +19,11 @@ export class UsersController {
 		private readonly chatGateway: ChatGateway,
 	) {}
 
-	// @Get('/user')
-	// async getUser(
-	// 	@Req() {user},
-	// 	@Query ('user') findUser: string | 'me' | undefined,
-	// 	@Query ('socket') findSocket?: Socket | undefined,
-	// 	@Query('relations') relations?: string[] | null | 'all',
-	// ){
-	// 	try
-	// 	{
-	// 		console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('socket'): [${findSocket}], @Query('relations'): [${relations}]${C.END}`);
-	// 		const	tmpUser = await this.usersService.findUser(
-	// 			(findUser === 'me') ? user.login : findUser,
-	// 			findSocket,
-	// 			relations
-	// 		);
-	// 		if (!tmpUser)
-	// 			return ({message: "USER NOK", user: `User '${findUser}' not found.`});
-	// 		return ({message: "USER OK", user: tmpUser});
-	// 	}
-	// 	catch (err)
-	// 	{
-	// 		console.log("@Get('/user'): ", err);
-	// 		return ({err: err});
-	// 	}
-	// }
-
 	@Put('/notif')
 	async putNotif(
 		@Req() {user},
 	){
-		await this.usersService.notifsMarkRead(user.login);
+		await this.usersService.notifsMarkRead(user.id);
 	}
 
 	// OK
@@ -71,20 +45,20 @@ export class UsersController {
 	}
 
 	// OK
-	@Patch('/socket')
-	async	patchSocket(
-		@Req() {user},
-		@Body() body: {socketId: string}
-	){
-		try
-		{
-			const	tmpUser = await this.usersService.updateSocketLogin(user.login, body.socketId);
-			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
-		} catch(err) {
-			console.error("@Patch('/socket'): ", err.message);
-			return ({err: err.message});
-		}
-	}
+	// @Patch('/socket')
+	// async	patchSocket(
+	// 	@Req() {user},
+	// 	@Body() body: {socketId: string}
+	// ){
+	// 	try
+	// 	{
+	// 		const	tmpUser = await this.usersService.updateSocketLogin(user.login, body.socketId);
+	// 		return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
+	// 	} catch(err) {
+	// 		console.error("@Patch('/socket'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
+	// }
 
 	// @Put('/user/upload')
 	// @UseInterceptors(FileInterceptor('image', multerConfig))
@@ -121,7 +95,7 @@ export class UsersController {
 	@Patch('/user')
 	@UseInterceptors(FileInterceptor('avatar', multerConfig))
 	async	patchUser(
-		@Req() {user},
+		@Req() {user}:{user: User},
 		@UploadedFile() avatar: Express.Multer.File,
 		@Body('nickname') nickname: string,
 	){
@@ -129,7 +103,7 @@ export class UsersController {
 		{
 			console.log(`${C.B_PURPLE}PATCH: /user: user[${user.login}] nickname[${nickname}] avatar[${avatar ? 'ok' : 'nok'}]${C.END}`);
 			await this.usersService.updateUser({
-				login: user.login,
+				id: user.id,
 				avatar: avatar ? process.env.B_IMAGE_REPO + avatar.filename : null,
 				nickname: nickname,
 			})
@@ -141,8 +115,8 @@ export class UsersController {
 				promisify(fs.promises.unlink)(avatar.path);
 				console.log('Avatar removed successfully.');
 			}
-			const notif = await this.usersService.createNotif(user.login, user.login, 'text', err.message);
-			this.chatGateway.server.emit(`notif:${user.login}`, notif);
+			const notif = await this.usersService.createNotif(user.login, user.id, 'text', err.message);
+			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
 			console.log("@Patch('/user'): ", err.message);
 			return { success: false, error: err.message };
 		}
@@ -189,10 +163,10 @@ export class UsersController {
 
 	@Post()
 	async request(
-		@Req() {user},
+		@Req() {user}:{user: User},
 		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
-		@Query('target') target: string | undefined,
-		@Query('id') requestId?: number,
+		@Query('target') target: number,
+		@Query('id') requestId?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
 	){
 		try {
 			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${requestId}]${C.END}`);
@@ -208,15 +182,15 @@ export class UsersController {
 			else if (action === 'sendFriendRequest' ||
 					action === 'acceptFriendRequest' ||
 					action === 'declineFriendRequest')
-				result = await this.usersService.friendRequest(action, user, target);
+				result = await this.usersService.friendRequest(action, user.id, target);
 			else
 				throw new Error('Invalid action values!');
 
-			this.chatGateway.server.emit(`notif:${target}`, result);
-			return ({message: `${action} was successfully performed on user[${target}].`});
+			this.chatGateway.server.emit(`user-notif:${target}`, result);
+			return { success: true };
 		} catch (err) {
 			console.error("@Post(): ", err.message);
-			return ({err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 
@@ -234,11 +208,10 @@ export class UsersController {
 		try {
 			console.log(`${C.B_YELLOW}GET: relation: [${relation}] userData: [${primary}]${C.END}`);
 			if (!relation && primary != true)
-				return (await this.usersService.getUserPrimay({login: user.login}));
+				return (await this.usersService.getUserPrimay({id: user.id}));
 
-			// return (await this.usersService.getData({userLogin: user.login}, relation, primary));
 			return(await this.usersService.getUserRelation({
-				user: { login: user.login },
+				user: { id: user.id },
 				relation: this.usersService.parsedRelation(relation),
 				primary: primary,
 			}));

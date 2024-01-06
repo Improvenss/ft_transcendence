@@ -65,7 +65,7 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 	}, []);
 
 	useEffect(() => {
-		if (isAuth && status !== undefined) {
+		if (isAuth && status !== undefined && socket) {
 
 			if (status === 'online' && location.pathname.includes('/chat')) {
 				setStatus('in-chat');
@@ -73,7 +73,7 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 				setStatus('in-game');
 			} else {
 				// socket emit ile kullanıcı statüs'ünü değiştir
-				socket?.emit('userStatus', { status: status });
+				socket.emit('userStatus', { status: status });
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
