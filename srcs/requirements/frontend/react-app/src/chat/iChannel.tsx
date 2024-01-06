@@ -42,6 +42,11 @@ export interface IChannelCreateForm {
 	description: string;
 }
 
+export interface IUserUpdateForm {
+	nickname: string;
+	image: File | null; //avatar
+}
+
 /* -------- yukarı ok --------- */
 
 

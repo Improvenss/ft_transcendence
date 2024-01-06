@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChannelDto, UpdateChannelDto } from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel, Message } from './entities/chat.entity';
+import { Channel, ChannelType, Message } from './entities/chat.entity';
 import { FindOptionsRelations, EntityManager, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -19,6 +19,14 @@ export class ChatService {
 		private readonly	usersService: UsersService,
 		private readonly	entityManager: EntityManager,
 	) {}
+
+	async parseType(value: string){
+		const channelType: ChannelType = ChannelType[value as keyof typeof ChannelType];
+		if (!channelType) {
+			throw new BadRequestException('Invalid channel type');
+		}
+	}
+
 
 	async createChannel(createChannelDto: CreateChannelDto) {
 		const	newChannel = new Channel(createChannelDto);
@@ -108,7 +116,7 @@ export class ChatService {
 			throw new Error('User not found!');
 		}
 		// console.log("involved:",involvedChannels);
-		const publicChannels = await this.channelRepository.find({where: {type: 'public' }});
+		const publicChannels = await this.channelRepository.find({where: {type: ChannelType.PUBLIC }});
 		// console.log("public:", publicChannels);
 
 		for (const involvedChannel of involvedChannels) {

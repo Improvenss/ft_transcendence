@@ -86,56 +86,65 @@ export class UsersController {
 		}
 	}
 
-	@Put('/user/upload')
-	@UseInterceptors(FileInterceptor('image', multerConfig))
-	async	putFile(
-		@Req() {user},
-		@UploadedFile() image: any,
-	){
-		try
-		{
-			console.log(`${C.B_BLUE}PUT: /user/upload: @UploadedFile(): ${C.END}`, image);
-			if (!image)
-				throw (new Error(`File not found!: File Name:${image.filename}`));
-			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
-			if (!fs.existsSync(image.path))
-				throw (new Error(`File path is not valid. ${image.path}`));
-			return ({imgUrl});
-		}
-		catch (err)
-		{
-			if (image) {
-				try {
-					await promisify(fs.promises.unlink)(image.path);
-					console.log(`File successfully deleted. ✅: image.path: ${image.path}`);
-				} catch (unlinkErr) {
-					console.error('Error occurred while deleting file.:', unlinkErr);
-				}
-			}
-			console.error("@Put('/user/upload'): ", err.message);
-			return ({err: err.message});
-		}
-	}
+	// @Put('/user/upload')
+	// @UseInterceptors(FileInterceptor('image', multerConfig))
+	// async	putFile(
+	// 	@Req() {user},
+	// 	@UploadedFile() image: any,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_BLUE}PUT: /user/upload: @UploadedFile(): ${C.END}`, image);
+	// 		if (!image)
+	// 			throw (new Error(`File not found!: File Name:${image.filename}`));
+	// 		const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
+	// 		if (!fs.existsSync(image.path))
+	// 			throw (new Error(`File path is not valid. ${image.path}`));
+	// 		return ({imgUrl});
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		if (image) {
+	// 			try {
+	// 				await promisify(fs.promises.unlink)(image.path);
+	// 				console.log(`File successfully deleted. ✅: image.path: ${image.path}`);
+	// 			} catch (unlinkErr) {
+	// 				console.error('Error occurred while deleting file.:', unlinkErr);
+	// 			}
+	// 		}
+	// 		console.error("@Put('/user/upload'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
+	// }
 
 	// OK
 	@Patch('/user')
+	@UseInterceptors(FileInterceptor('avatar', multerConfig))
 	async	patchUser(
 		@Req() {user},
-		@Query('user') findUser: string | undefined,
-		@Body() body: Partial<UpdateUserDto>,
+		@UploadedFile() avatar: Express.Multer.File,
+		@Body('nickname') nickname: string,
 	){
 		try
 		{
-			// console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${user.login}] @Body(): [${body}]${C.END}`);
-			console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${findUser}] @Body():${C.END}`, body); // sonra yapilacak
-			// const	responseUser = await this.usersService.patchUser(user.login, body);
-			const	responseUser = await this.usersService.patchUser(findUser, body);
-			return (responseUser);
+			console.log(`${C.B_PURPLE}PATCH: /user: user[${user.login}] nickname[${nickname}] avatar[${avatar ? 'ok' : 'nok'}]${C.END}`);
+			await this.usersService.updateUser({
+				login: user.login,
+				avatar: avatar ? process.env.B_IMAGE_REPO + avatar.filename : null,
+				nickname: nickname,
+			})
+			return { success: true };
 		}
 		catch (err)
 		{
+			if (avatar && avatar.path && fs.existsSync(avatar.path)) {
+				promisify(fs.promises.unlink)(avatar.path);
+				console.log('Avatar removed successfully.');
+			}
+			const notif = await this.usersService.createNotif(user.login, user.login, 'text', err.message);
+			this.chatGateway.server.emit(`notif:${user.login}`, notif);
 			console.log("@Patch('/user'): ", err.message);
-			return ({err: err.message});
+			return { success: false, error: err.message };
 		}
 	}
 

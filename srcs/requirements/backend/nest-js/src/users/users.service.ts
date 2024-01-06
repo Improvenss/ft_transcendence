@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
-import { Notif, User } from './entities/user.entity';
+import { Notif, NotificationType, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
@@ -74,7 +74,6 @@ export class UsersService {
 	async notifsMarkRead(
 		userLogin: string,
 	){
-		// const userData = await this.getData({userLogin: userLogin}, 'notifications');
 		const notifs = await this.getUserRelation({
 			user: { login: userLogin },
 			relation: { notifications: true },
@@ -102,7 +101,7 @@ export class UsersService {
 		});
 
 		const createNotfiDto: CreateNotifDto = {
-			type: action,
+			type: NotificationType[action.toUpperCase() as keyof typeof NotificationType],
 			text: text,
 			date: new Date(),
 			user: targetUser,
@@ -347,37 +346,49 @@ export class UsersService {
 		return (`New User created: #${response.login}:[${response.id}]`);
 	}
 
-	/**
-	 * DB'de var olan User verisini guncelliyoruz.
-	 * Object.assign(); function'unda updateUserDto json bilgilerini
-	 *  tmpUser'e atiyoruz.
-	 * @param updateUserDto Guncellemek istedigmiz parametre.
-	 * @returns Guncellenen User.
-	 */
-	async	patchUser(
-		user: string | undefined,
-		body: Partial<UpdateUserDto>,
-	){
-		// const	tmpUsers = await this.findUser(user, null, 'all');
-		const tmpUsers = await this.getUserRelation({
-			user: {login: user},
-			relation: {},
-			primary: true,
-		})
-		if (!tmpUsers)
-			return (`User '${user}' not found.`);
-		if (!Array.isArray(tmpUsers))
-		{ // User seklinde gelirse alttaki for()'un kafasi karismasin diye.
-			Object.assign(tmpUsers, body);
-			return (await this.usersRepository.save(tmpUsers));
-		}
-		for (const tmpUser of tmpUsers)
-		{ // User[] seklinde gelirse hepsini tek tek guncellemek icin.
-			Object.assign(tmpUser, body);
-			await this.usersRepository.save(tmpUser);
-		}
-		return (tmpUsers);
+	async updateUser({login, avatar, nickname, socketId, status}: {
+		login: string,
+		avatar?: string,
+		nickname?: string,
+		socketId?: string,
+		status?: string,
+	}){
+		const tmpUser = await this.getUserPrimay({login: login});
+		Object.assign(tmpUser, { avatar, nickname, socketId, status });
+		this.usersRepository.save(tmpUser);
 	}
+
+	// /**
+	//  * DB'de var olan User verisini guncelliyoruz.
+	//  * Object.assign(); function'unda updateUserDto json bilgilerini
+	//  *  tmpUser'e atiyoruz.
+	//  * @param updateUserDto Guncellemek istedigmiz parametre.
+	//  * @returns Guncellenen User.
+	//  */
+	// async	patchUser(
+	// 	user: string | undefined,
+	// 	body: Partial<UpdateUserDto>,
+	// ){
+	// 	// const	tmpUsers = await this.findUser(user, null, 'all');
+	// 	const tmpUsers = await this.getUserRelation({
+	// 		user: {login: user},
+	// 		relation: {},
+	// 		primary: true,
+	// 	})
+	// 	if (!tmpUsers)
+	// 		return (`User '${user}' not found.`);
+	// 	if (!Array.isArray(tmpUsers))
+	// 	{ // User seklinde gelirse alttaki for()'un kafasi karismasin diye.
+	// 		Object.assign(tmpUsers, body);
+	// 		return (await this.usersRepository.save(tmpUsers));
+	// 	}
+	// 	for (const tmpUser of tmpUsers)
+	// 	{ // User[] seklinde gelirse hepsini tek tek guncellemek icin.
+	// 		Object.assign(tmpUser, body);
+	// 		await this.usersRepository.save(tmpUser);
+	// 	}
+	// 	return (tmpUsers);
+	// }
 
 	/**
 	 * Login asamasindan sonra User datasi DB'ye kayit edildikten sonra,

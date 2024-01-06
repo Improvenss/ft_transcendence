@@ -1,6 +1,6 @@
 export function isValidImage(file: File): { status: true } | { status: false; err: string } {
 	const errMessage = {
-		imageSize: 'Image size exceeds the limit (5 MB max). Please choose a smaller image.',
+		imageSize: 'Image size exceeds the limit (3 MB max). Please choose a smaller image.',
 		fileType: 'Please choose a valid image file.',
    		fileExtension: 'Invalid file type. Please choose a valid image file (jpg, jpeg, png, gif).',
 	}

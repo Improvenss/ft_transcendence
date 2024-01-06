@@ -87,30 +87,10 @@
         }
       }
     },
-    "/users/user/upload": {
-      "put": {
-        "operationId": "UsersController_putFile",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/users/user": {
       "patch": {
         "operationId": "UsersController_patchUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -203,34 +183,6 @@
       "get": {
         "operationId": "UsersController_getData",
         "parameters": [
-          {
-            "name": "primary",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat": {
-      "get": {
-        "operationId": "ChatController_getChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "primary",
             "required": true,

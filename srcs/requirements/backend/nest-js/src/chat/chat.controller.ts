@@ -14,7 +14,7 @@ import { User } from 'src/users/entities/user.entity';
 import { multerConfig } from './channel.handler';
 import { ChatAdminGuard } from './admin.guard';
 import { FindOptionsRelations } from 'typeorm';
-import { Channel } from './entities/chat.entity';
+import { Channel, ChannelType } from './entities/chat.entity';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -52,7 +52,7 @@ export class ChatController {
 	// }
 
 	/* Belirlenen kanala ait default + relation bilgilerini çekiyor */
-	@Get()
+	/*@Get()
 	async getChannel(
 		@Req() {user},
 		@Query('channel') name: string,
@@ -75,7 +75,7 @@ export class ChatController {
 			console.log("@Get(): ", err.message);
 			return ({err: err.message});
 		}
-	}
+	}*/
 
 	/*
 		Kullanıcının kayıt olduğu ve public olan kanalları çekiyor.
@@ -251,6 +251,7 @@ export class ChatController {
 		@Body('description') description: string,
 	  ) {
 		try {
+			await this.chatService.parseType(type);
 			if (!image)
 				throw new Error('No file uploaded');
 			if (!fs.existsSync(image.path))
@@ -260,9 +261,7 @@ export class ChatController {
 			if (!userSocket)
 				throw new NotFoundException('User socket not found!');
 			const channel = await this.chatService.getChannelPrimary(name);
-			console.log("->", channel);
 			if (channel){
-				console.log("--->...");
 				throw new Error("A channel with the same name already exists.");
 			}
 			const tmpUser = await this.usersService.getUserPrimay({login: user.login});
@@ -270,7 +269,7 @@ export class ChatController {
 			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
 			const	createChannelDto: CreateChannelDto = {
 				name: name,
-				type: type,
+				type: ChannelType[type.toUpperCase() as keyof typeof ChannelType],
 				description: description,
 				password: (password === undefined)
 					? null
@@ -484,13 +483,13 @@ export class ChatController {
 
 			if (updateDto.password !== undefined) {
 				if (updateDto.password !== ''){
-					updateDto.type = 'private';
+					updateDto.type = ChannelType.PUBLIC;
 					updateDto.password = bcrypt.hashSync(
 						updateDto.password,
 						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)
 						);
 				} else {
-					updateDto.type = 'public';
+					updateDto.type = ChannelType.PRIVATE;
 				}
 			}
 

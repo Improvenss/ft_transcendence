@@ -1,9 +1,9 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { PartialType } from "@nestjs/swagger";
 import { Channel } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { Message } from "src/chat/entities/chat.entity";
-import { User } from '../entities/user.entity';
+import { User, UserStatus } from '../entities/user.entity';
 
 export class CreateUserDto {
 	@IsNotEmpty({ message: 'Email cannot be empty' })
@@ -34,9 +34,13 @@ export class CreateUserDto {
 	@IsString({ message: 'Avatar must be a string' })
 	avatar?: string;
 
+	// @IsOptional()
+	// @IsString({ message: 'Status must be a string' })
+	// status?: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
+
 	@IsOptional()
-	@IsString({ message: 'Status must be a string' })
-	status?: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
+	@IsEnum(UserStatus, { message: 'Invalid status' })
+	status?: UserStatus = UserStatus.OFFLINE;
 
 	// Friends
 	@IsOptional()

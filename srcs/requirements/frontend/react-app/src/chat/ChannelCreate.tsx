@@ -128,8 +128,8 @@ function ChannelCreate({ onSuccess }: { onSuccess: (tabId: string) => void }){
 				id="channel-image"
 				type="file"
 				// accept="image/*"
-				accept="image/jpg, image/jpeg, image/png, image/gif"
 				name="image"
+				accept="image/jpg, image/jpeg, image/png, image/gif"
 				onChange={handleInputChange}
 				required
 			/>

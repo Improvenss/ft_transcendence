@@ -1,7 +1,15 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, ManyToOne } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
-import { IsEmail } from "class-validator";
+import { IsEmail, IsEnum } from "class-validator";
+
+export enum UserStatus {
+	ONLINE = 'online',
+	OFFLINE = 'offline',
+	IN_CHAT = 'in-chat',
+	IN_GAME = 'in-game',
+	AFK = 'afk',
+}
 
 // Public olarak belirtilmese dahi public olarak ele alınmaktadır.
 // @Entity({name: 'user'})
@@ -20,19 +28,23 @@ export class User {
 	@Column({ unique: true })
 	public login: string; // Intra login
 
-	@Column()
+	@Column({ unique: true })
 	public displayname: string; // Intra ad-soyad
 
-	@Column()
+	@Column({ unique: true })
 	public imageUrl: string; // Intra resim linki
 
-	@Column({ nullable: true })
-	public socketId: string; // Websocket
+	@Column({ unique: true, nullable: true })
+	public socketId: string;; // Websocket
 
 	//----------------------Status----------------------------//
 
-	@Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
-	public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
+	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.OFFLINE })
+	@IsEnum(UserStatus)
+	public status: UserStatus;
+
+	// @Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
+	// public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
 
 	//----------------------Optional----------------------------//
 
@@ -101,13 +113,24 @@ export class User {
 	}
 }
 
+export enum NotificationType {
+	TEXT = 'text',
+	SEND_FRIEND_REQUEST = 'sendFriendRequest',
+	ACCEPT_FRIEND_REQUEST = 'acceptFriendRequest',
+	DECLINE_FRIEND_REQUEST = 'declineFriendRequest',
+}
+
 @Entity('notification')
 export class Notif {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column({ type: 'enum', enum: ['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest']})
-	public type: string; // Bildiri tipi
+	@Column({ type: 'enum', enum: NotificationType })
+	@IsEnum(NotificationType)
+	public type: NotificationType;
+
+	// @Column({ type: 'enum', enum: ['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest']})
+	// public type: string; // Bildiri tipi
 
 	@Column()
 	public text: string; // Bildirim metni

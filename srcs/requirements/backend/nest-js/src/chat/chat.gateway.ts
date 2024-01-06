@@ -11,9 +11,10 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { Body, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/entities/user.entity';
+import { User, UserStatus } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import { CreateMessageDto } from './dto/chat-message.dto';
+import { UpdateUserDto } from 'src/users/dto/create-user.dto';
 
 var count: number = 0;
 
@@ -329,13 +330,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket
 	){
 		try {
-			// const responseUser = await this.usersService.getData({socketId: socket.id})
-			const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
-			if (responseUser === null){
+			const user = await this.usersService.getUserPrimay({socketId: socket.id});
+			if (user === null){
 				throw (new NotFoundException("User not found!"));
 			}
-			console.log('Received userStatus:', `user[${responseUser.login}]`, `status[${object.status}]`);
-			await this.usersService.patchUser(responseUser.login, object);
+			
+			console.log('Received userStatus:', `user[${user.login}]`, `status[${object.status}]`);
+			await this.usersService.updateUser({
+				login: user.login,
+				status: object.status,
+			})
 		} catch (err) {
 			console.error("@SubscribMessage(userStatus):", err.message);
 		}
