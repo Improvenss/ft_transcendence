@@ -83,6 +83,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		try {
 			const userId = this.connectedSockets.get(socket.id);
+			if (!userId)
+				throw new NotFoundException('User socket not found!');
 			console.log('Received userStatus:', `user[${userId}]`, `status[${body.status}]`);
 			await this.usersService.updateUser({
 				id: userId,

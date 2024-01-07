@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body} from '@nestjs/common';
 import { ApiService } from './api.service';
-import * as fs from 'fs';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Controller('api')
 export class ApiController {
@@ -38,10 +37,9 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 	 */
 	@Post('token')
 	async	loginToken(
-		@Body() status: {code: string}
+		@Body() status: {code: string},
 	) {
 		try {
-			// return ({ success: false, err: err.message});
 			// Burada 2/3 access_token'i aliyoruz
 			const dataToken = await this.apiService.fetchToken(status);
 
@@ -49,11 +47,11 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 			const dataClient = await this.apiService.fetchAccessToken(dataToken);
 
 			// 42 API'sinden alinan butun veriyi dosyaya kaydet.(opsiyonel)
-			const path = require('path');
-			const filename = "me_data.json";
-			const filepath = path.join(process.cwd(), filename);
-			console.log(`File saved this location: ${filepath}`);
-			fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
+			// const path = require('path');
+			// const filename = "me_data.json";
+			// const filepath = path.join(process.cwd(), filename);
+			// console.log(`File saved this location: ${filepath}`);
+			// fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
 
 			const createUserDto: CreateUserDto = {
 				login: dataClient.login,
@@ -72,9 +70,9 @@ ${process.env.API_REDIR_URI}&response_type=code`;
 				email: userData.email,
 			}
 
-			const cookie = await this.jwtService.signAsync(cookieDatas, {expiresIn: '1h'});
-			console.log("User Jwt Token(for postman):", cookie);
-			return ({ success: true, responseData: cookieDatas, cookie: cookie});
+			const token = await this.jwtService.signAsync(cookieDatas, {expiresIn: '1h'});
+			console.log("User Jwt Token(for postman):", token);
+			return ({ success: true, cookie: token });
 		} catch (err) {
 			console.log("Api:", err.message);
 			return ({ success: false, err: err.message});

@@ -35,12 +35,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			// newSocket.on(`userId-${userInfo.id}`, handleListenAction);
 			return () => {
 				// newSocket.off(`userId-${userInfo.id}`, handleListenAction);
-				// newSocket.close();
-				newSocket.disconnect();
+				if (newSocket.connected){
+					newSocket.disconnect();
+				}
 			};
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [isAuth, userInfo]); //isAuth'un güncellenmesini bekliyor, eğer güncellenmesse olmassa loadingPage görüntülenir sürekli
+	}, [isAuth]); //isAuth'un güncellenmesini bekliyor, eğer güncellenmesse olmassa loadingPage görüntülenir sürekli
 
 	if ((isAuth && socket === undefined) || (!isAuth && socket)) {
 		return (<LoadingPage />);

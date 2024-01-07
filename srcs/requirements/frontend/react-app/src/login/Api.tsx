@@ -30,6 +30,7 @@ function Api(){
 					Cookies.set("user", data.cookie);
 					localStorage.setItem("userLoginPage", "true");
 					setAuth(true);
+					
 					navigate('/', {replace: true});
 				} else {
 					console.log("III: ---API Token Backend Response '❌'---");

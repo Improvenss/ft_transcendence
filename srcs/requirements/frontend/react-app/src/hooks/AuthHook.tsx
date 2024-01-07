@@ -43,7 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					throw new Error("I: ---Cookie Backend Connection '❌'---");
 				}
 			} catch (err) {
-				console.log("AuthHook err:", err);
+				if (err instanceof Error) {
+					console.log("AuthHook err:", err.message);
+				}
 				Cookies.remove('user');
 				setAuth(false);
 			}
