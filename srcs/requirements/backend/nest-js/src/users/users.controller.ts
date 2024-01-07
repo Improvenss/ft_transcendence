@@ -167,28 +167,32 @@ export class UsersController {
 	async request(
 		@Req() {user}: {user: User},
 		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
-		@Query('target') target: number,
-		@Query('id') requestId?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
+		@Query('target') target: string,
+		@Query('id') sourceNotif?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
 	){
 		try {
-			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${requestId}]${C.END}`);
+			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${sourceNotif}]${C.END}`);
 			if (action === undefined || target === undefined)
 				throw Error(`Query is empty!`);
-			if (requestId)
-				await this.usersService.deleteNotif(user.id, requestId);
+			if (sourceNotif)
+				await this.usersService.deleteNotif(user.id, sourceNotif);
+			const targetUser = await this.usersService.getUserPrimay({login: target});
+			if (!targetUser){
+				throw new NotFoundException('User not found!');
+			}
 
 			let result : Notif;
 
 			if (action === 'poke')
-				result = await this.usersService.createNotif(user.id, target, 'text', `${user.displayname} poked you!`);
+				result = await this.usersService.createNotif(user.id, targetUser.id, 'text', `${user.displayname} poked you!`);
 			else if (action === 'sendFriendRequest' ||
 					action === 'acceptFriendRequest' ||
 					action === 'declineFriendRequest')
-				result = await this.usersService.friendRequest(action, user, target);
+				result = await this.usersService.friendRequest(action, user, targetUser.id);
 			else
 				throw new Error('Invalid action values!');
 
-			this.chatGateway.server.emit(`user-notif:${target}`, result);
+			this.chatGateway.server.emit(`user-notif:${targetUser.id}`, result);
 			return { success: true };
 		} catch (err) {
 			console.error("@Post(): ", err.message);

@@ -1,8 +1,7 @@
-import Cookies from "js-cookie";
+import fetchRequest from "./fetchRequest";
 
 const handleRequest = async (action: string, targetUser: string, notifId?: number) => {
 	console.log(action,targetUser);
-	const	userCookie = Cookies.get("user");
 	let url = '';
 	switch (action){
 		case 'poke':
@@ -25,12 +24,9 @@ const handleRequest = async (action: string, targetUser: string, notifId?: numbe
 	}
 
 	if (url){
-		const response = await fetch(process.env.REACT_APP_FETCH + url, {
+		const response = await fetchRequest({
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-			},
+			url: url,
 		});
 		if (!response.ok) {
 			throw new Error('API-den veri alınamadı.');

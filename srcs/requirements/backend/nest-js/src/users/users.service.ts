@@ -106,7 +106,7 @@ export class UsersService {
 		};
 
 		const newNotif = new Notif(createNotfiDto);
-		return (await this.notifRepository.save(newNotif))
+		return (await this.notifRepository.save(newNotif));
 	}
 
 	async deleteNotif(
