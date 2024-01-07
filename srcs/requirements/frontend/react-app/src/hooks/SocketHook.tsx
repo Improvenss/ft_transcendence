@@ -15,7 +15,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 	const [socket, setSocket] = useState<Socket | undefined>(undefined);
 
 	useEffect(() => {
-		if (isAuth && userInfo) {
+		if (isAuth && userInfo && socket === undefined) {
 			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string, {
 				query: {
 					id: userInfo.id,
@@ -29,9 +29,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 				console.log(`Client connection lost. 💔 Reason: ${reason}`);
 				setSocket(undefined);
 			});
-			newSocket.on('error', (error) => {
-				console.error('WebSocket Error:', error);
-			});
+			// newSocket.on('error', (error) => {
+			// 	console.error('WebSocket Error:', error);
+			// });
 			// newSocket.on(`userId-${userInfo.id}`, handleListenAction);
 			return () => {
 				// newSocket.off(`userId-${userInfo.id}`, handleListenAction);

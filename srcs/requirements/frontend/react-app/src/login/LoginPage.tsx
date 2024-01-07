@@ -36,7 +36,7 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 				console.log(data.requestLogin);
 				window.open(data.requestLogin, "intraPopup", "width=500,height=300");
 			} else {
-
+				throw new Error(data.err);
 			}
 		} else {
 			console.log("II: ---API Login Connection '❌'---");

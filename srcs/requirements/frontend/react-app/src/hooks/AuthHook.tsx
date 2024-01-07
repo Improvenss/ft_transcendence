@@ -25,11 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				const userCookie = Cookies.get("user");
 				// const userLStore = localStorage.getItem("user");
 				if (userCookie === undefined)
-				{
-					console.log("I: ---Cookie Not Found '❌'---");
-					setAuth(false);
-					return ;
-				}
+					throw new Error("I: ---Cookie Not Found '❌'---");
 				const response = await fetchRequest({
 					method: 'GET',
 					url: '/users/cookie',
@@ -37,15 +33,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				if (response.ok) {
 					console.log("I: ---Cookie Backend Connection '✅'---");
 					const data = await response.json();
-					console.log("AuthHook:", data);
-					setAuth((!data.err));
+					if (!data.err){
+						console.log("AuthHook:", data);
+						setAuth((!data.err));
+					} else {
+						throw new Error(data.err);
+					}
 				} else {
-					console.log("I: ---Cookie Backend Connection '❌'---");
-					Cookies.remove('user');
-					setAuth(false);
+					throw new Error("I: ---Cookie Backend Connection '❌'---");
 				}
 			} catch (err) {
 				console.log("AuthHook err:", err);
+				Cookies.remove('user');
 				setAuth(false);
 			}
 		};

@@ -36,13 +36,11 @@ export class UsersController {
 			if (!user)
 				throw (new Error("Cookie not provided"));
 			return ({message: `user[${user.login}] cookie is ✅`});
-			// return ({ success: true});
 		}
 		catch(err)
 		{
 			console.error("Cookie err:", err.message);
-			return ({message: `user[${user.login}] cookie is ❌`, err: err.message});
-			// return ({ success: false, err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 
