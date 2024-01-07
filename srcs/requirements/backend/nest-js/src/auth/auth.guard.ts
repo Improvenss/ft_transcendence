@@ -17,16 +17,15 @@ export class AuthGuard implements CanActivate {
 	): Promise<boolean> {
 		try
 		{
-			const	request = context.switchToHttp().getRequest();
-			const	authHeader = request.headers.authorization;
+			const request = context.switchToHttp().getRequest();
+			const authHeader = request.headers.authorization;
 			if (!authHeader || !authHeader.startsWith('Bearer '))
 				throw (new UnauthorizedException("Invalid 'Authorization' header format!"));
 			const	token = authHeader.split(' ')[1];
 			if (!token)
 				throw (new UnauthorizedException("Token not found!"));
-			const	decodedUser = this.jwtService.verify(token);
-			// const	tmpUser = await this.usersService.getData({userLogin: decodedUser.login});
-			const tmpUser = await this.usersService.getUserPrimay({login: decodedUser.login });
+			const decodedUser = this.jwtService.verify(token);
+			const tmpUser = await this.usersService.getUserPrimay({id: decodedUser.id });
 			request.user = tmpUser;
 			return (request);
 		}

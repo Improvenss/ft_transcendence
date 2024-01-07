@@ -13,21 +13,37 @@ export class ApiService {
 	 * 	aldik buraya verdik.
 	 * @returns access_token from 42 API.
 	 */
-	async	fetchToken(status: {code: string}) {
-		const response = await fetch(process.env.API_TOKEN_URL, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				grant_type: "authorization_code",
-				client_id: process.env.API_UID,
-				client_secret: process.env.API_SECRET,
-				code: status.code,
-				redirect_uri: process.env.API_REDIR_URI
-			})
-		});
-		return (response);
+	async	fetchToken(
+		status: {code: string}
+	) {
+		try {
+			const response = await fetch(process.env.API_TOKEN_URL, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					grant_type: "authorization_code",
+					client_id: process.env.API_UID,
+					client_secret: process.env.API_SECRET,
+					code: status.code,
+					redirect_uri: process.env.API_REDIR_URI
+				})
+			});
+			if (response.ok){
+				const dataToken = await response.json();
+				if (!dataToken.err){
+					return (dataToken);
+				} else {
+					throw new Error(dataToken.err);
+				}
+			} else {
+				throw new Error(`HTTP error! Status: ${response.status}`);
+			}
+		} catch (err){
+			console.log("Error during fetchToken:", err.message);
+			throw new Error(err.message);
+		}
 	}
 
 	/**
@@ -37,19 +53,33 @@ export class ApiService {
 	 * @param dataToken access_token
 	 * @returns 'user's all data from 42 API.
 	 */
-	async	fetchAccessToken(dataToken: any) {
-		const	responseAccessToken = await fetch(process.env.API_ME_URL, {
-			method: "GET",
-			headers: {
-				"Authorization": "Bearer " + dataToken.access_token
+	async	fetchAccessToken(
+		dataToken: any
+	) {
+		try {
+			const responseAccessToken = await fetch(process.env.API_ME_URL, {
+				method: "GET",
+				headers: {
+					"Authorization": "Bearer " + dataToken.access_token
+				}
+			});
+			if (responseAccessToken.ok){
+				const dataClient = await responseAccessToken.json();
+				if (!dataClient.err){
+					return (dataClient);
+				} else {
+					throw new Error(dataClient.err);
+				}
+			} else {
+				throw new Error(`HTTP error! Status: ${responseAccessToken.status}`);
 			}
-		});
-		return (responseAccessToken);
+		} catch (err){
+			console.log("Error during fetchAccessToken:", err.message);
+			throw new Error(err.message);
+		}
 	}
 
 	async	fetchCreateUserData(dataClient: CreateUserDto) {
-		console.log("kaydetemeden onceki data:", dataClient); // burasi yapilacak
-		const	responseSave = await this.usersService.createUser(dataClient);
-		return (responseSave);
+		return (await this.usersService.createUser(dataClient));
 	}
 }

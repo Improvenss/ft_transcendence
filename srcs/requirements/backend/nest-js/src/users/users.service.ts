@@ -16,7 +16,6 @@ export class UsersService {
 		private readonly	notifRepository: Repository<Notif>,
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
-
 	) {}
 
 	async friendRequest(
@@ -307,37 +306,40 @@ export class UsersService {
 	// 	return (result as User);
 	// }
 
-	async	findUser(
-		user: string | undefined,
-		socket?: Socket,
-		relations?: string[] | 'all' | null,
-	){
-		// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
-		const relationObject = (relations === 'all')
-		? {notifications: true, friends: true, channels: true, adminChannels: true, messages: true, bannedChannels: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
-		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
-			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
-			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
-				? { [relations]: true } // sadece bunu ata.
-				: null)); // hicbiri degilse null ata.
-		// console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
-		const tmpUser = (user === undefined)
-			? await this.usersRepository.find({relations: relationObject})
-			: await this.usersRepository.findOne({
-					where: {login: user, socketId: socket?.id},
-					relations: relationObject
-				});
-		return (tmpUser);
-	}
+	// async	findUser(
+	// 	user: string | undefined,
+	// 	socket?: Socket,
+	// 	relations?: string[] | 'all' | null,
+	// ){
+	// 	// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
+	// 	const relationObject = (relations === 'all')
+	// 	? {notifications: true, friends: true, channels: true, adminChannels: true, messages: true, bannedChannels: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
+	// 	: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
+	// 		? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
+	// 		: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
+	// 			? { [relations]: true } // sadece bunu ata.
+	// 			: null)); // hicbiri degilse null ata.
+	// 	// console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
+	// 	const tmpUser = (user === undefined)
+	// 		? await this.usersRepository.find({relations: relationObject})
+	// 		: await this.usersRepository.findOne({
+	// 				where: {login: user, socketId: socket?.id},
+	// 				relations: relationObject
+	// 			});
+	// 	return (tmpUser);
+	// }
 
 	async	createUser(createUserDto: CreateUserDto) {
-		const	tmpUser = await this.findUser(createUserDto.login);
-		if (tmpUser)
-			return (`User: '${createUserDto.login}' already created.`);
-		const	newUser = new User(createUserDto);
-		const	response = await this.usersRepository.save(newUser);
-		console.log(`New User created: #${response.login}:[${response.id}]`);
-		return (`New User created: #${response.login}:[${response.id}]`);
+		const user = await this.usersRepository.findOne({where: {login: createUserDto.login}});
+		if (user){
+			console.log(`User: '${user.login}' already created.`);
+			return (user);
+		} else {
+			const	newUser = new User(createUserDto);
+			const	response = await this.usersRepository.save(newUser);
+			console.log(`New User created: #${response.login}:[${response.id}]`);
+			return (response);
+		}
 	}
 
 	async updateUser({id, avatar, nickname, socketId, status}: {
@@ -384,86 +386,86 @@ export class UsersService {
 	// 	return (tmpUsers);
 	// }
 
-	/**
-	 * Login asamasindan sonra User datasi DB'ye kayit edildikten sonra,
-	 *  olusturulan Socket.id'sini DB'de guncellemek icin.
-	 * @param login 
-	 */
-	async updateSocketLogin(login: string, socketId: string) {
-		const tmpUser = await this.getUserPrimay({login: login});
-		if (!tmpUser){
-			throw (new NotFoundException(`User ${login} not found.`));
-		}
-		Object.assign(tmpUser, {socketId: socketId});
-		return (await this.usersRepository.save(tmpUser));
-	}
+	// /**
+	//  * Login asamasindan sonra User datasi DB'ye kayit edildikten sonra,
+	//  *  olusturulan Socket.id'sini DB'de guncellemek icin.
+	//  * @param login 
+	//  */
+	// async updateSocketLogin(login: string, socketId: string) {
+	// 	const tmpUser = await this.getUserPrimay({login: login});
+	// 	if (!tmpUser){
+	// 		throw (new NotFoundException(`User ${login} not found.`));
+	// 	}
+	// 	Object.assign(tmpUser, {socketId: socketId});
+	// 	return (await this.usersRepository.save(tmpUser));
+	// }
 
-	async	deleteUser(
-		user: string | undefined,
-	){
-		const	tmpUser = await this.findUser(user);
-		if (!tmpUser)
-			return (`User: '${user}' not found.`);
-		const	responseUser = await this.usersRepository.remove(tmpUser as User);
-		return (responseUser)
-	}
+	// async	deleteUser(
+	// 	user: string | undefined,
+	// ){
+	// 	const	tmpUser = await this.findUser(user);
+	// 	if (!tmpUser)
+	// 		return (`User: '${user}' not found.`);
+	// 	const	responseUser = await this.usersRepository.remove(tmpUser as User);
+	// 	return (responseUser)
+	// }
 
-	async	deleteFolder(filesFolder: string)
-	{
-		const uploadsPath = path.join(process.cwd(), filesFolder ? filesFolder: 'uploads');
-		if (!fs.existsSync(uploadsPath))
-			throw (new NotFoundException(`File path is not exist!: Path: ${uploadsPath}`));
-		const files = fs.readdirSync(uploadsPath);
-		if (files.length === 0)
-		{
-			console.warn(`There is no file for delete!: Folder: ${uploadsPath}`);
-			return (`There is no file for delete!: ${filesFolder}`);
-		}
-		for (const file of files) {
-			const filePath = path.join(uploadsPath, file);
-			fs.unlinkSync(filePath);
-			console.log(`File successfully deleted: ${filePath}`);
-		}
-		// if (!rimraf.sync(uploadsPath)) // Burada dosyanin kendisini sildigimizde; backend yeniden baslatilmazsa herhangi bir PUT islemindeyken hata veriyor. Bu yuzden klasoru silmiyoruz icerisindeki dosyalari siliyoruz.
-		// 	return (null);
-		console.log(`Folder inside successfully deleted! Folder: ${uploadsPath}`);
-		return (`Folder inside succesfully deleted!: ${filesFolder}`);
-	}
+	// async	deleteFolder(filesFolder: string)
+	// {
+	// 	const uploadsPath = path.join(process.cwd(), filesFolder ? filesFolder: 'uploads');
+	// 	if (!fs.existsSync(uploadsPath))
+	// 		throw (new NotFoundException(`File path is not exist!: Path: ${uploadsPath}`));
+	// 	const files = fs.readdirSync(uploadsPath);
+	// 	if (files.length === 0)
+	// 	{
+	// 		console.warn(`There is no file for delete!: Folder: ${uploadsPath}`);
+	// 		return (`There is no file for delete!: ${filesFolder}`);
+	// 	}
+	// 	for (const file of files) {
+	// 		const filePath = path.join(uploadsPath, file);
+	// 		fs.unlinkSync(filePath);
+	// 		console.log(`File successfully deleted: ${filePath}`);
+	// 	}
+	// 	// if (!rimraf.sync(uploadsPath)) // Burada dosyanin kendisini sildigimizde; backend yeniden baslatilmazsa herhangi bir PUT islemindeyken hata veriyor. Bu yuzden klasoru silmiyoruz icerisindeki dosyalari siliyoruz.
+	// 	// 	return (null);
+	// 	console.log(`Folder inside successfully deleted! Folder: ${uploadsPath}`);
+	// 	return (`Folder inside succesfully deleted!: ${filesFolder}`);
+	// }
 
-	async	deleteFilesFromArray(files: string[])
-	{
-		for (const file of files) {
-			const filePath = path.join(process.cwd(), 'uploads', file);
-			if (!fs.existsSync(filePath))
-			{
-				console.warn(`File not found: ${filePath}`);
-				continue;
-			}
-			fs.unlinkSync(filePath);
-			console.log(`File successfully deleted: ${filePath}`);
-		}
-		return (`OK: ${files}`);
-	}
+	// async	deleteFilesFromArray(files: string[])
+	// {
+	// 	for (const file of files) {
+	// 		const filePath = path.join(process.cwd(), 'uploads', file);
+	// 		if (!fs.existsSync(filePath))
+	// 		{
+	// 			console.warn(`File not found: ${filePath}`);
+	// 			continue;
+	// 		}
+	// 		fs.unlinkSync(filePath);
+	// 		console.log(`File successfully deleted: ${filePath}`);
+	// 	}
+	// 	return (`OK: ${files}`);
+	// }
 
-	async	deleteFile(
-		file: string | string[]| undefined,
-	){
-		// const filePath = path.join(process.cwd(), 'uploads', file);
-		// if (!fs.existsSync(filePath))
-		// 	throw (new Error(`File path is not valid: ${filePath}`));
-		// fs.unlinkSync(`./uploads/${file}`);
-		// console.log(`File successfully deleted. ✅: File Path: ${filePath}`);
-		// return (`File deleted successfully.`);
+	// async	deleteFile(
+	// 	file: string | string[]| undefined,
+	// ){
+	// 	// const filePath = path.join(process.cwd(), 'uploads', file);
+	// 	// if (!fs.existsSync(filePath))
+	// 	// 	throw (new Error(`File path is not valid: ${filePath}`));
+	// 	// fs.unlinkSync(`./uploads/${file}`);
+	// 	// console.log(`File successfully deleted. ✅: File Path: ${filePath}`);
+	// 	// return (`File deleted successfully.`);
 
-		const responseDelete = (file === undefined)
-			? await this.deleteFolder('uploads')
-			: (Array.isArray(file) // file array[] ise bu array'deki dosyalar silinecek.
-				? await this.deleteFilesFromArray(file)
-				: (typeof(file) === 'string' // file array degilse sadece 1 tane string ise,
-					? await this.deleteFilesFromArray([`${file}`]) // Burada array[] gibi veriyoruz. Raad sikinti yok.
-					: null)); // Hicbiri de olmazssa artik sikinti var demek.
-		return (`Delete finish: Status: ${responseDelete}`);
-	}
+	// 	const responseDelete = (file === undefined)
+	// 		? await this.deleteFolder('uploads')
+	// 		: (Array.isArray(file) // file array[] ise bu array'deki dosyalar silinecek.
+	// 			? await this.deleteFilesFromArray(file)
+	// 			: (typeof(file) === 'string' // file array degilse sadece 1 tane string ise,
+	// 				? await this.deleteFilesFromArray([`${file}`]) // Burada array[] gibi veriyoruz. Raad sikinti yok.
+	// 				: null)); // Hicbiri de olmazssa artik sikinti var demek.
+	// 	return (`Delete finish: Status: ${responseDelete}`);
+	// }
 
 }
 

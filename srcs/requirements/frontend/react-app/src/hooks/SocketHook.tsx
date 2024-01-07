@@ -21,18 +21,21 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					id: userInfo.id,
 				},
 			});
-			newSocket.on('connect', async () => {
+			newSocket.on('connect', () => {
 				console.log('Client connected to Server. ✅');
 				setSocket(newSocket);
 			});
-			newSocket.on('disconnect', () => {
-				console.log('Client connection lost. 💔');
+			newSocket.on('disconnect', (reason) => {
+				console.log(`Client connection lost. 💔 Reason: ${reason}`);
 				setSocket(undefined);
+			});
+			newSocket.on('error', (error) => {
+				console.error('WebSocket Error:', error);
 			});
 			// newSocket.on(`userId-${userInfo.id}`, handleListenAction);
 			return () => {
 				// newSocket.off(`userId-${userInfo.id}`, handleListenAction);
-				newSocket.close();
+				// newSocket.close();
 				newSocket.disconnect();
 			};
 		}

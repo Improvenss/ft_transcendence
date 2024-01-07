@@ -18,9 +18,8 @@ export class GameService {
 	) {}
 
 	async	createGameRoom(login: string, createGameDto: CreateGameDto) {
-		const	tmpUser = await this.usersService.findUser(login);
-		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		if (!singleUser)
+		const	tmpUser = await this.usersService.getUserPrimay({login: login});
+		if (!tmpUser)
 			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
 		const	tmpGameRoom = await this.findGameRoom(createGameDto.name);
 		const	singleRoom = Array.isArray(tmpGameRoom) ? tmpGameRoom[0] : tmpGameRoom;
@@ -35,8 +34,8 @@ export class GameService {
 		})
 		console.log("olusturulacak olan game sifresi:", createGameDto);
 		const	newRoom = new Game(createGameDto);
-		newRoom.players = [singleUser];
-		newRoom.admins = [singleUser];
+		newRoom.players = [tmpUser];
+		newRoom.admins = [tmpUser];
 		const	response = await this.gameRepository.save(newRoom);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
@@ -84,13 +83,12 @@ export class GameService {
 		if (!singleRoom)
 			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
 
-		const tmpUser = await this.usersService.findUser(user);
-		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		if (!singleUser)
+		const	tmpUser = await this.usersService.getUserPrimay({login: user});
+		if (!tmpUser)
 			throw (new NotFoundException("'User' not found for register Game Room!"));
 
-		if (await this.isRoomUser(singleRoom, singleUser))
-			throw (new Error(`${singleUser.login} already in this ${singleRoom.name}.`));
+		if (await this.isRoomUser(singleRoom, tmpUser))
+			throw (new Error(`${tmpUser.login} already in this ${singleRoom.name}.`));
 
 		if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
 		{
@@ -98,7 +96,7 @@ export class GameService {
 			throw (new Error("Password is WRONG!!!"));
 		}
 		console.log("singleRoom passs OK");
-		singleRoom.players.push(singleUser);
+		singleRoom.players.push(tmpUser);
 		return (this.gameRepository.save(singleRoom));
 	}
 

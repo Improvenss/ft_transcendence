@@ -136,7 +136,7 @@ export class ChatController {
 			await this.chatGateway.userLeaveChannel(channel, user.socketId);
 			await this.chatService.removeUser(channel, 'members', user.login);
 			console.log(`${C.B_RED}Channel Leave: ${channel} - ${user.login}${C.END}`);
-			this.chatGateway.server.emit(`userChannelListener:${user.login}`, {
+			this.chatGateway.server.emit(`userChannelListener:${user.id}`, {
 				action: 'leave',
 				data: channel,
 			});

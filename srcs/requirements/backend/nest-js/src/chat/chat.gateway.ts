@@ -128,8 +128,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			if (!socket.rooms.has(messageChannel.name))
 			{
-				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
-				throw new Error(`user[${author}] not in this channel(${channel})!`);
+				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this channel(${messageChannel.name})!`);
+				throw new Error(`user[${messageUser.login}] not in this channel(${messageChannel.name})!`);
 			}
 			const createMessageDto: CreateMessageDto = {
 				author: messageUser,
@@ -139,8 +139,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			};
 			const returnMessage = await this.chatService.createMessage(createMessageDto);
 			delete returnMessage.channel;
-			console.log(`Message recived: channel[${channel}] user[${author}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
-			this.server.to(messageChannel.name).emit(`listenChannelMessage:${channel}`, returnMessage);
+			console.log(`Message recived: channel[${messageChannel.name}] user[${messageUser.login}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
+			this.server.to(messageChannel.name).emit(`listenChannelMessage:${messageChannel.id}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err.message);
 			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
