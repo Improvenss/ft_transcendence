@@ -29,28 +29,6 @@ export class ChatController {
 		private readonly chatGateway: ChatGateway,
 	) {}
 
-	// @Get('/channel')
-	// async findChannel(
-	// 	@Req() {user},
-	// 	@Query('channel') channel: string | undefined,
-	// 	@Query('relations') relations: string[] | null | 'all',
-	// ) {
-	// 	try
-	// 	{
-	// 		console.log(`${C.B_GREEN}GET: /channel: Channel: [${channel}], Relation: [${relations}]${C.END}`);
-	// 		const	tmpChannel = await this.chatService.findChannel(channel, relations);
-	// 		const	channelArray = Array.isArray(tmpChannel) ? tmpChannel[0]: tmpChannel;
-	// 		if (channelArray && channelArray.members)
-	// 			return (await this.chatService.checkInvolvedUser(tmpChannel, user));
-	// 		return (tmpChannel);
-	// 	}
-	// 	catch (err)
-	// 	{
-	// 		console.log("@Get('/channel'): ", err.message);
-	// 		return ({err: err.message});
-	// 	}
-	// }
-
 	/* Belirlenen kanala ait default + relation bilgilerini çekiyor */
 	/*@Get()
 	async getChannel(
@@ -88,8 +66,6 @@ export class ChatController {
 		try {
 			console.log(`${C.B_GREEN}GET: /channels: requester[${user.login}]${C.END}`);
 			const userSocket = this.chatGateway.getUserSocket(user.id);
-			if (!userSocket)
-				throw new NotFoundException('User socket not found!');
 			const channels = await this.chatService.getChannels(user.id);
 			channels
 				.filter((channel) =>  channel.status === 'involved') //backend'de daha güvenli olduğu için ekledim.
@@ -102,11 +78,6 @@ export class ChatController {
 			console.error("@Get('/channels'): ", err.message);
 			return ({err: err.message});
 		}
-	}
-
-	@Post(':message')
-	createMessage(@Body() createMessageDto: CreateMessageDto) {
-		return this.chatService.createMessage(createMessageDto);
 	}
 
 	@Post('/channel/register')
@@ -140,17 +111,15 @@ export class ChatController {
 			channelResponse['status'] = 'involved';
 
 			const userSocket = this.chatGateway.getUserSocket(user.id);
-			if (!userSocket)
-				throw new NotFoundException('User socket not found!');
 			userSocket.join(body.channel);
 			console.log(`Channel: [${body.channel}] Joined: [${user.socketId}]`);
 
 			return (channelResponse);
 		} catch (err) {
 			console.error("@Post('/channel/register'): registerChannel:", err.message);
-			const notif = await this.usersService.createNotif(user.login, user.login, 'text', err.message);
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
 			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
-			return ({err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 
@@ -158,7 +127,7 @@ export class ChatController {
 	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
 	@Delete('/channel/leave')
 	async leaveChannel(
-		@Req() {user},
+		@Req() {user}: {user: User},
 		@Query ('channel') channel: string,
 	){
 		try
@@ -171,17 +140,18 @@ export class ChatController {
 				action: 'leave',
 				data: channel,
 			});
-			return ({message: 'User left the channel successfully!'});
+			return { success: true };
 		}
 		catch(err)
 		{
-			if (err instanceof NotFoundException) {
-				// Özel işleme
-				return { message: err.message, statusCode: 404 };
-			} else {
-				console.error("@Delete('/channel/leave'):", err.message);
-				return { message: 'Internal Server Error', statusCode: 500 };
-			}
+			return ({ success: false, err: err.message});
+			// if (err instanceof NotFoundException) {
+			// 	// Özel işleme
+			// 	return { message: err.message, statusCode: 404 };
+			// } else {
+			// 	console.error("@Delete('/channel/leave'):", err.message);
+			// 	return { message: 'Internal Server Error', statusCode: 500 };
+			// }
 		}
 	}
 
@@ -189,8 +159,8 @@ export class ChatController {
 	@Delete('/channel')
 	@UseGuards(ChatAdminGuard)
 	async deleteChannel(
-		@Req() {user},
-		@Req() {channel},
+		@Req() {user}: {user: User},
+		@Req() {channel}: {channel: Channel},
 	){
 		try
 		{
@@ -207,10 +177,10 @@ export class ChatController {
 				const channelUsersLogins = await this.usersService.getUsersInRelation({
 					relation: 'channels',
 					value: channel.name,
-					select: 'login',
+					select: 'id',
 				});
-				channelUsersLogins.forEach((user) => {
-					this.chatGateway.server.emit(`userChannelListener:${user}`, {
+				channelUsersLogins.forEach((userId) => {
+					this.chatGateway.server.emit(`userChannelListener:${userId}`, {
 						status: 'private',
 						action: 'delete',
 						data: channel.name,
@@ -218,15 +188,13 @@ export class ChatController {
 				});
 			}
 
-			const tmpChannel = await this.chatService.removeChannel(channel.name);
-			if (!tmpChannel)
-				throw (new NotFoundException("Channel does not exist!"));
-			return ({message: `Channel [${channel.name}] delete successfully.`});
+			await this.chatService.removeChannel(channel);
+			return ({ success: true });
 		}
 		catch (err)
 		{
 			console.error("@Delete('/channel'): deleteChannel():", err.message);
-			return ({err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 
@@ -289,7 +257,7 @@ export class ChatController {
 				promisify(fs.promises.unlink)(image.path);
 				console.log('Image removed successfully.');
 			}
-			const notif = await this.usersService.createNotif(user.login, user.id, 'text', err.message);
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
 			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
 			console.error("@Post('/channel/create'): ", err.message);
 			return ({ success: false, err: err.message});
@@ -441,8 +409,8 @@ export class ChatController {
 	@UseGuards(ChatAdminGuard)
 	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
 	async patchChannel(
-		@Req() {user},
-		@Req() {channel},
+		@Req() {user}: {user: User},
+		@Req() {channel}: {channel: Channel},
 		@UploadedFile() image: Express.Multer.File,
 		@Body('channelName') name: string,
 		@Body('channelDescription') description: string,
@@ -474,15 +442,16 @@ export class ChatController {
 
 			const	responseChannel = await this.chatService.patchChannel(channel.name, updateDto);
 			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
+			return ({ success: true });
 		} catch (err) {
 			if (image && image.path && fs.existsSync(image.path)) {
 				promisify(fs.promises.unlink)(image.path);
 				console.log('Image removed successfully.');
 			}
-			const notif = await this.usersService.createNotif(user.login, user.login, 'text', err.message);
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
 			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
 			console.log("@Patch('/channel'): ", err.message);
-			return ({err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 }

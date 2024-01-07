@@ -28,7 +28,6 @@ export class ChatService {
 		return (channelType);
 	}
 
-
 	async createChannel(createChannelDto: CreateChannelDto) {
 		const	newChannel = new Channel(createChannelDto);
 		console.log(`New Channel created: #${newChannel.name}`);
@@ -175,30 +174,6 @@ export class ChatService {
 		// return mergedChannelsWithoutPassword;
 	}
 
-	async findChannel(
-		channel: string | undefined,
-		relations?: string[] | 'all' | null
-	){
-		// console.log(`ChatService: findChannel(): relations(${typeof(relations)}): [${relations}]`);
-		const relationObject = (relations === 'all')
-			? {members: true, admins: true, messages: true, bannedUsers: true} // relations all ise hepsini ata.
-			: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
-				? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
-				: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
-					? { [relations]: true } // sadece bunu ata.
-					: null)); // hicbiri degilse null ata.
-		// console.log(`ChatService: findChannel(): relationsObject(${typeof(relationObject)}):`, relationObject);
-		const tmpChannel = (channel === undefined)
-			? await this.channelRepository.find({relations: relationObject})
-			: await this.channelRepository.findOne({
-					where: {name: channel},
-					relations: relationObject
-				});
-		if (!tmpChannel)
-			throw (new NotFoundException("chat.service.ts: findChannel(): Channel not found!"));
-		return (tmpChannel);
-	}
-
 	async saveChannel(channel: Channel){
 		return (this.channelRepository.save(channel));
 	}
@@ -209,41 +184,33 @@ export class ChatService {
 	async	patchChannel(
 		channel: string | undefined,
 		body: Partial<UpdateChannelDto>,
-		// body: {
-		// 	name: string,
-		// 	description: string,
-		// 	password: string,
-		// }
 	){
-		const	tmpChannels = await this.findChannel(channel, 'all');
-		if (!tmpChannels)
+		const tmpChannel = await this.getChannelRelation({
+			channelName: channel,
+			relation: {}, 
+			primary: true
+		});
+		if (!tmpChannel)
 			return (`Channel'${channel}' not found.`);
-		if (!Array.isArray(tmpChannels))
+		if (!Array.isArray(tmpChannel))
 		{ // Channel seklinde gelirse alttaki for()'un kafasi karismasin diye.
-			Object.assign(tmpChannels, body);
-			return (await this.channelRepository.save(tmpChannels));
+			Object.assign(tmpChannel, body);
+			return (await this.channelRepository.save(tmpChannel));
 		}
-		for (const channel of tmpChannels)
+		for (const channel of tmpChannel)
 		{ // Channel[] seklinde gelirse hepsini tek tek guncellemek icin.
 			Object.assign(channel, body);
 			await this.channelRepository.save(channel);
 		}
-		return (tmpChannels);
+		return (tmpChannel);
 	}
 
 	async removeAllChannel() {
 		return (await this.channelRepository.delete({}));
 	}
-
-	async removeChannel(
-		channel: string | undefined,
-	){
-		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel } });
-		if (!tmpChannel) {
-			throw new NotFoundException('Channel does not exist!');
-		}
-		const deletedChannel = await this.channelRepository.remove(tmpChannel as Channel);
-		return deletedChannel;
+	
+	async removeChannel(channel: Channel){
+		return (await this.channelRepository.remove(channel));
 	}
 
 	async removeUser(

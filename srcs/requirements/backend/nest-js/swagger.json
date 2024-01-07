@@ -86,24 +86,6 @@
           }
         }
       },
-      "delete": {
-        "operationId": "UsersController_deleteUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
       "get": {
         "operationId": "UsersController_getUser",
         "parameters": [
@@ -116,17 +98,6 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/file/delete": {
-      "delete": {
-        "operationId": "UsersController_deleteImage",
-        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -194,27 +165,6 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/{message}": {
-      "post": {
-        "operationId": "ChatController_createMessage",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
             "description": ""
           }
         }
@@ -379,10 +329,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateMessageDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateGameDto": {
         "type": "object",
         "properties": {}

@@ -67,7 +67,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	getUserSocket(userId: number){
-		return (this.connectedIds.get(userId));
+		const userSocket = this.connectedIds.get(userId);
+		if (!userSocket){	
+			throw new NotFoundException('User socket not found!');
+		}
+		return (userSocket);
 	}
 
 	@SubscribeMessage('userStatus')
@@ -88,11 +92,67 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.error("@SubscribMessage(userStatus):", err.message);
 		}
 	}
-	
-//------------------------------------------------------------------------
 
+	/**
+	 * https://<project_ip>:3000/chat'e baglanan socket'in;
+	 *  .emit() fonksiyonu ile 'createMessage' istegi attiginda calistigi yer.
+	 * 
+	 * Postman'dan mesaj gondermek istediginde;
+	 *  Socket.IO ile url kismina 'https://10.12.14.8:3000/chat' yazarak,
+	 *  baglandiktan sonra, 'event name' kismina da 'createMessage' yazarak
+	 *  mesaji gonderdigimizde burasi calisir ama burada ekstradan
+	 *  channel de var.
+	 * ornek;
+	 *  https://10.12.14.8:3000/chat -> createMessage -> compose message: Postman:
+	 *  Change type 'Text' to 'JSON'.
+	 *  {
+	 * 		"channel": "global",
+	 * 		"message": "Message from Postman! :)"
+	 *  }
+	 * @param param0 
+	 */
+	@SubscribeMessage('createMessage')
+	async handleMessage(
+		@MessageBody() 
+		{ channel, author, content }:
+			{ channel: number, author: number, content: string },
+		@ConnectedSocket() socket: Socket, //Eğer burada yine mesaj yazarı null olursa socket var mı yok mu kontrol ettir.
+	){
+		try {
+			const messageUser = await this.usersService.getUserPrimay({id: author});
+			if (!messageUser)
+				throw new NotFoundException('User not found!');
+			const messageChannel = await this.chatService.getChannelPrimary({id: channel});
+			if (!messageChannel)
+				throw new NotFoundException('Channel not found!');
 
+			if (!socket.rooms.has(messageChannel.name))
+			{
+				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
+				throw new Error(`user[${author}] not in this channel(${channel})!`);
+			}
+			const createMessageDto: CreateMessageDto = {
+				author: messageUser,
+				channel: messageChannel,
+				content: content,
+				sentAt: new Date(),
+			};
+			const returnMessage = await this.chatService.createMessage(createMessageDto);
+			delete returnMessage.channel;
+			console.log(`Message recived: channel[${channel}] user[${author}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
+			this.server.to(messageChannel.name).emit(`listenChannelMessage:${channel}`, returnMessage);
+		} catch (err){
+			console.log("CreateMessage Err: ", err.message);
+			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
+			this.server.emit(`user-notif:${author}`, notif);
+		}
+	}
 
+	/* Belirtilen kanaldaki tüm socket bağlantılarını koparıyor */
+	forceLeaveChannel(channelName: string) {
+		this.server.in(channelName).socketsLeave(channelName);
+		console.log(`Channel: [${channelName}] users leaved`);
+	}
 
 	/* Oda'ya kayıtlı kullanıcıların socketlerini döndürüyor. */
 	getRoomConnections(channelName: string){
@@ -120,13 +180,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Channel: [${channelName}] Leaved: [${userSocketId}]`);
 	}
 
-	/* Belirtilen kanaldaki tüm socket bağlantılarını koparıyor */
-	forceLeaveChannel(channelName: string) {
-		// const namespace = this.server.of('/chat');
-		// namespace.in(channelName).socketsLeave(channelName);
-		this.server.in(channelName).socketsLeave(channelName);
-		console.log(`Channel: [${channelName}] users leaved`);
-	}
+//------------------------------------------------------------------------
+
 
 	// @SubscribeMessage('socketUpdate')
 	// handleSocketUpdate(
@@ -227,60 +282,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
-	/**
-	 * https://<project_ip>:3000/chat'e baglanan socket'in;
-	 *  .emit() fonksiyonu ile 'createMessage' istegi attiginda calistigi yer.
-	 * 
-	 * Postman'dan mesaj gondermek istediginde;
-	 *  Socket.IO ile url kismina 'https://10.12.14.8:3000/chat' yazarak,
-	 *  baglandiktan sonra, 'event name' kismina da 'createMessage' yazarak
-	 *  mesaji gonderdigimizde burasi calisir ama burada ekstradan
-	 *  channel de var.
-	 * ornek;
-	 *  https://10.12.14.8:3000/chat -> createMessage -> compose message: Postman:
-	 *  Change type 'Text' to 'JSON'.
-	 *  {
-	 * 		"channel": "global",
-	 * 		"message": "Message from Postman! :)"
-	 *  }
-	 * @param param0 
-	 */
-	@SubscribeMessage('createMessage')
-	async handleMessage(
-		@MessageBody() 
-		{ channel, author, content }:
-			{ channel: number, author: number, content: string },
-		@ConnectedSocket() socket: Socket, //Eğer burada yine mesaj yazarı null olursa socket var mı yok mu kontrol ettir.
-	){
-		try {
-			const messageUser = await this.usersService.getUserPrimay({id: author});
-			if (!messageUser)
-				throw new NotFoundException('User not found!');
-			const messageChannel = await this.chatService.getChannelPrimary({id: channel});
-			if (!messageChannel)
-				throw new NotFoundException('Channel not found!');
 
-			if (!socket.rooms.has(messageChannel.name))
-			{
-				console.log(`Socket[${socket.id}] - user[${author}] not in this channel(${channel})!`);
-				throw new Error(`user[${author}] not in this channel(${channel})!`);
-			}
-			const createMessageDto: CreateMessageDto = {
-				author: messageUser,
-				channel: messageChannel,
-				content: content,
-				sentAt: new Date(),
-			};
-			const returnMessage = await this.chatService.createMessage(createMessageDto);
-			delete returnMessage.channel;
-			console.log(`Message recived: channel[${channel}] user[${author}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
-			this.server.to(messageChannel.name).emit(`listenChannelMessage:${channel}`, returnMessage);
-		} catch (err){
-			console.log("CreateMessage Err: ", err.message);
-			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
-			this.server.emit(`user-notif:${id}`, notif);
-		}
-	}
 
 	// @SubscribeMessage('leaveChannel')
 	// async handleLeaveChannel(
@@ -300,42 +302,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	}
 	// }
 
-	@SubscribeMessage('joinChannel')
-	async handleJoinChannel(
-		@Body() channel: {
-			name: string
-		},
-		@ConnectedSocket() socket: Socket)
-	{
-		try
-		{
-			// const user = await this.usersService.getData({socketId: socket.id});
-			const user = await this.usersService.getUserPrimay({socketId: socket.id});
-			// const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
-			const tmpChannel = await this.chatService.getChannelRelation({
-				channelName: channel.name,
-				relation: {
-					members: true,
-				},
-				primary: false,
-			});
-			if (!tmpChannel)
-				throw (new NotFoundException("Channel not found!"));
+	// @SubscribeMessage('joinChannel')
+	// async handleJoinChannel(
+	// 	@Body() channel: {
+	// 		name: string
+	// 	},
+	// 	@ConnectedSocket() socket: Socket)
+	// {
+	// 	try
+	// 	{
+	// 		// const user = await this.usersService.getData({socketId: socket.id});
+	// 		const user = await this.usersService.getUserPrimay({socketId: socket.id});
+	// 		// const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
+	// 		const tmpChannel = await this.chatService.getChannelRelation({
+	// 			channelName: channel.name,
+	// 			relation: {
+	// 				members: true,
+	// 			},
+	// 			primary: false,
+	// 		});
+	// 		if (!tmpChannel)
+	// 			throw (new NotFoundException("Channel not found!"));
 
-			if (tmpChannel.members.some((channelUser) => {channelUser.id === user.id}))
-				throw (new NotFoundException("User is not in Channel!"));
-			if (socket.rooms.has(channel.name))
-				return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
-			socket.join(channel.name);
-			if (user.socketId === socket.id) {
-				console.log(`Channel: [${channel.name}] Joined: [${socket.id}]`);
-				// this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
-			}
-		}
-		catch (err) {
-			console.error("@SubscribMessage('joinChannel'):", err.message);
-		}
-	}
+	// 		if (tmpChannel.members.some((channelUser) => {channelUser.id === user.id}))
+	// 			throw (new NotFoundException("User is not in Channel!"));
+	// 		if (socket.rooms.has(channel.name))
+	// 			return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
+	// 		socket.join(channel.name);
+	// 		if (user.socketId === socket.id) {
+	// 			console.log(`Channel: [${channel.name}] Joined: [${socket.id}]`);
+	// 			// this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
+	// 		}
+	// 	}
+	// 	catch (err) {
+	// 		console.error("@SubscribMessage('joinChannel'):", err.message);
+	// 	}
+	// }
 	
 
 

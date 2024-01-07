@@ -21,7 +21,7 @@ export class UsersController {
 
 	@Put('/notif')
 	async putNotif(
-		@Req() {user},
+		@Req() {user}: {user: User},
 	){
 		await this.usersService.notifsMarkRead(user.id);
 	}
@@ -29,18 +29,20 @@ export class UsersController {
 	// OK
 	@Get('/cookie')
 	async userCookie(
-		@Req() {user},
+		@Req() {user}: {user: User},
 	){
 		try
 		{
 			if (!user)
 				throw (new Error("Cookie not provided"));
 			return ({message: `user[${user.login}] cookie is ✅`});
+			return ({ success: true});
 		}
 		catch(err)
 		{
 			console.error("Cookie err:", err.message);
 			return ({message: `user[${user.login}] cookie is ❌`, err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 
@@ -95,7 +97,7 @@ export class UsersController {
 	@Patch('/user')
 	@UseInterceptors(FileInterceptor('avatar', multerConfig))
 	async	patchUser(
-		@Req() {user}:{user: User},
+		@Req() {user}: {user: User},
 		@UploadedFile() avatar: Express.Multer.File,
 		@Body('nickname') nickname: string,
 	){
@@ -115,55 +117,55 @@ export class UsersController {
 				promisify(fs.promises.unlink)(avatar.path);
 				console.log('Avatar removed successfully.');
 			}
-			const notif = await this.usersService.createNotif(user.login, user.id, 'text', err.message);
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
 			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
 			console.log("@Patch('/user'): ", err.message);
 			return { success: false, error: err.message };
 		}
 	}
 
-	// OK
-	@Delete('/user')
-	async	deleteUser(
-		@Req() {user},
-		@Query('user') delUser: string | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_RED}DELETE: /user: @Query('user'): [${delUser}]${C.END}`);
-			const	responseUser = await this.usersService.deleteUser(delUser);
-			return (responseUser);
-		}
-		catch (err)
-		{
-			console.error("@Delete('/user'): ", err.message);
-			return ({err: err.message});
-		}
-	}
+	// // OK
+	// @Delete('/user')
+	// async	deleteUser(
+	// 	@Req() {user},
+	// 	@Query('user') delUser: string | undefined,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_RED}DELETE: /user: @Query('user'): [${delUser}]${C.END}`);
+	// 		const	responseUser = await this.usersService.deleteUser(delUser);
+	// 		return (responseUser);
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.error("@Delete('/user'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
+	// }
 
-	@Delete('/file/delete')
-	async deleteImage(
-		@Req() {user},
-		@Query('file') file: string | string[] | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_RED}DELETE: /user/delete: @Query('file'): [${file}]${C.END}`);
-			const	responseDeleteFile = await this.usersService.deleteFile(file)
-			if (!responseDeleteFile)
-				throw (new Error('Error deleting file:'));
-			return (responseDeleteFile);
-		}
-		catch (err)
-		{
-			console.error("@Delete('/file/delete'): ", err.message);
-			return ({err: err.message});
-		}
-	}
+	// @Delete('/file/delete')
+	// async deleteImage(
+	// 	@Req() {user},
+	// 	@Query('file') file: string | string[] | undefined,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_RED}DELETE: /user/delete: @Query('file'): [${file}]${C.END}`);
+	// 		const	responseDeleteFile = await this.usersService.deleteFile(file)
+	// 		if (!responseDeleteFile)
+	// 			throw (new Error('Error deleting file:'));
+	// 		return (responseDeleteFile);
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.error("@Delete('/file/delete'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
+	// }
 
 	@Post()
 	async request(
-		@Req() {user}:{user: User},
+		@Req() {user}: {user: User},
 		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
 		@Query('target') target: number,
 		@Query('id') requestId?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
@@ -178,11 +180,11 @@ export class UsersController {
 			let result : Notif;
 
 			if (action === 'poke')
-				result = await this.usersService.createNotif(user.login, target, 'text', `${user.displayname} poked you!`);
+				result = await this.usersService.createNotif(user.id, target, 'text', `${user.displayname} poked you!`);
 			else if (action === 'sendFriendRequest' ||
 					action === 'acceptFriendRequest' ||
 					action === 'declineFriendRequest')
-				result = await this.usersService.friendRequest(action, user.id, target);
+				result = await this.usersService.friendRequest(action, user, target);
 			else
 				throw new Error('Invalid action values!');
 
@@ -201,7 +203,7 @@ export class UsersController {
 	*/
 	@Get()
 	async getData(
-		@Req() {user},
+		@Req() {user}: {user: User},
 		@Query('relation') relation: string[] | string,
 		@Query('primary', ParseBoolPipe) primary: boolean,
 	){
@@ -217,13 +219,13 @@ export class UsersController {
 			}));
 		} catch (err) {
 			console.error("@Get(): ", err.message);
-			return ({err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 
 	@Get('/user')
 	async getUser(
-		@Req() {user},
+		@Req() {user}: {user: User},
 		@Query ('who') who: string,
 	){
 		try {
@@ -242,7 +244,7 @@ export class UsersController {
 			return (data);
 		} catch (err) {
 			console.log("@Get('/user'): ", err.message);
-			return ({err: err.message});
+			return ({ success: false, err: err.message});
 		}
 	}
 

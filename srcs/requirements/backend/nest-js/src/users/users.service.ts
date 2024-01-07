@@ -21,34 +21,33 @@ export class UsersService {
 
 	async friendRequest(
 		action: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
-		requesterUser: number,
-		target: number,
+		sourceUser: User,
+		destId: number,
 	){
-		if (requesterUser === target)
+		if (sourceUser.id === destId)
 			throw new Error("You can't perform friend actions on yourself.");
 
-		// const	targetUser = await this.getData({userLogin: target}, 'friends', 'true');
 		const targetUser = await this.getUserRelation({
-			user: { id: target },
+			user: { id: destId },
 			relation: { friends: true },
 			primary: true,
 		})
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
 
-		if (targetUser.friends.some(friend => friend.id === requesterUser))
+		if (targetUser.friends.some(friend => friend.id === sourceUser.id))
 			throw new Error('Users are already friends.');
 
 		let message = '';
 
 		switch (action){
 			case 'sendFriendRequest':
-				message =  `${requesterUser.displayname}(${requesterUser.login}) send friend request!`;
+				message =  `${sourceUser.displayname}(${sourceUser.login}) send friend request!`;
 				break;
 			case 'acceptFriendRequest':
-				// const	requester = await this.getData({userLogin: requesterUser.login}, 'friends', 'true');
+
 				const requester = await this.getUserRelation({
-					user: { login: requesterUser.login },
+					user: { login: sourceUser.login },
 					relation: { friends: true },
 					primary: true,
 				})
@@ -59,16 +58,16 @@ export class UsersService {
 				targetUser.friends = [...targetUser.friends, requester];
 
 				await this.usersRepository.save([requester, targetUser]);
-				message = `${requester.displayname}(${requesterUser.login}) accepted the friend request.`;
+				message = `${requester.displayname}(${sourceUser.login}) accepted the friend request.`;
 				break;
 			case 'declineFriendRequest':
-				message = `${requesterUser.displayname}(${requesterUser.login}) rejected the friend request!`;
+				message = `${sourceUser.displayname}(${sourceUser.login}) rejected the friend request!`;
 				break;
 			default:
 				break;
 		}
 
-		return (await this.createNotif(requesterUser.login, target, action, message));
+		return (await this.createNotif(sourceUser.id, destId, action, message));
 	}
 
 	async notifsMarkRead(
@@ -84,22 +83,26 @@ export class UsersService {
 	}
 
 	async createNotif(
-		requesterUser: string,
-		target: number,
+		sourceId: number,
+		destId: number,
 		action: string,
 		text: string,
 	){
-		const user = await this.getUserPrimay({id: target});
-		if (!user)
-			throw new NotFoundException('User not found!');
+		const source = await this.getUserPrimay({id: sourceId});
+		if (!source)
+			throw new NotFoundException('Source user not found!');
+
+		const destination = await this.getUserPrimay({id: destId});
+		if (!destination)
+			throw new NotFoundException('Destination user not found!');
 
 		const createNotfiDto: CreateNotifDto = {
 			type: NotificationType[action.toUpperCase() as keyof typeof NotificationType],
 			text: text,
 			date: new Date(),
-			user: user,
+			user: destination,
 			read: false,
-			from: requesterUser,
+			from: source.login,
 		};
 
 		const newNotif = new Notif(createNotfiDto);
