@@ -33,11 +33,11 @@
       }
     },
     "/api/login": {
-      "post": {
-        "operationId": "ApiController_loginStatus",
+      "get": {
+        "operationId": "ApiController_loginLink",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }

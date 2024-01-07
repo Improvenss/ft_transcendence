@@ -15,8 +15,7 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 	try {
 		console.log("II: ---API Login Connection---");
 		const response = await fetchRequest({
-			method: 'POST',
-			body: JSON.stringify({ requestLogin: 'LOGIN' }),
+			method: 'GET',
 			url: '/api/login',
 		}, false);
 		if (response.ok){
@@ -33,7 +32,6 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 					}
 				}
 				window.addEventListener('message', messageHandler);
-				console.log(data.requestLogin);
 				window.open(data.requestLogin, "intraPopup", "width=500,height=300");
 			} else {
 				throw new Error(data.err);

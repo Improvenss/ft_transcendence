@@ -47,13 +47,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`Client connected ✅: socket.id[${clientId}]`);
 		const clientQuery = client.handshake.query;
 		const userId = parseInt(clientQuery.id as string);
-		await this.usersService.updateUser({id: userId, socketId: clientId});
 		const duplicateSocket = this.connectedIds.get(userId);
 		if (duplicateSocket) {
 			await this.handleDisconnect(duplicateSocket);
 		}
 		this.connectedIds.set(userId, client);
 		this.connectedSockets.set(clientId, userId);
+		await this.usersService.updateUser({id: userId, socketId: clientId});
 	}
 
 	async handleDisconnect(client: Socket) {

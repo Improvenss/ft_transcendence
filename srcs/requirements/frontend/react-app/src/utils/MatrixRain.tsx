@@ -5,18 +5,6 @@ import './MatrixRain.css';
 const MatrixRain: React.FC = () => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-	const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミ' +
-		'リヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレ' +
-		'ヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-	const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	const nums = '0123456789';
-	const matrixChars = katakana + latin + nums;
-	const matrixCharsLength = matrixChars.length;
-	const targetFPS = 15; // Hedef FPS değeri
-	const frameDelay = 1000 / targetFPS; // İki ardışık çerçeve arasındaki zaman farkı
-	let lastFrameTime = 0;
-	const generateRandomChar = () => matrixChars[Math.floor(Math.random() * matrixCharsLength)];
-
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -28,6 +16,17 @@ const MatrixRain: React.FC = () => {
 			};
 			resizeCanvas();
 
+			const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミ' +
+				'リヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレ' +
+				'ヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+			const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			const nums = '0123456789';
+			const matrixChars = katakana + latin + nums;
+			const matrixCharsLength = matrixChars.length;
+			const targetFPS = 15; // Hedef FPS değeri
+			const frameDelay = 1000 / targetFPS; // İki ardışık çerçeve arasındaki zaman farkı
+			let lastFrameTime = 0;
+			const generateRandomChar = () => matrixChars[Math.floor(Math.random() * matrixCharsLength)];
 			const columns = Math.floor(canvas.width / 15);
 			const drops: number[] = [];
 

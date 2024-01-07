@@ -106,7 +106,7 @@ function ActiveChannel(){
 				socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
 			};
 		}
-	}, [activeChannel, socket]);
+	}, [activeChannel, socket]); //setChannels'dan emin değilim (eklenebilir / eklenmeyebilir)
 
 	useEffect(() => {
 	// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.
