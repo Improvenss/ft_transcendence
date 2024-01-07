@@ -3,31 +3,7 @@ import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
 import fetchRequest from '../utils/fetchRequest';
-
-export interface INotif {
-	id: number,
-	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
-	// type: string,
-	text: string,
-	date: string,
-	// date: Date,
-	read: boolean,
-	from: string,
-}
-
-export interface IUserProps{
-	id: number,
-	email: string,
-	login: string,
-	displayname: string,
-	imageUrl: string,
-	socketId: string,
-	status: string,
-	nickname?: string,
-	avatar?: string,
-	friends: IUserProps[],
-	notifications: INotif[],
-}
+import { IUserProps } from '../chat/iChannel';
 
 const UserContext = createContext<{
 	userInfo: IUserProps | undefined;

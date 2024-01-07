@@ -117,7 +117,7 @@ function ActiveChannel(){
 
 	return (
 		<>
-			{activeChannel && (
+			{userInfo && activeChannel && (
 				<div id="activeChannel">
 					<div id="channel-header">
 						<img src={activeChannel.image} alt={activeChannel.image} />
@@ -141,9 +141,9 @@ function ActiveChannel(){
 									</div>
 								) : null}
 							<div key={index} className={`message-content`}>
-								{(message.author.login !== userInfo?.login) ? (
+								{(message.author.id !== userInfo.id) ? (
 									<div className='message taken'>
-										{(index === 0 || message.author.login !== messages[index - 1].author.login) ? (
+										{(index === 0 || message.author.id !== messages[index - 1].author.id) ? (
 											<>
 												<img src={message.author.imageUrl} alt={message.author.imageUrl} className="user-image" />
 												<div className='first-message'>
@@ -162,7 +162,7 @@ function ActiveChannel(){
 									</div>
 								) : (
 									<div className='message sent'>
-										{(index === 0 || message.author.login !== messages[index - 1].author.login) && (
+										{(index === 0 || message.author.id !== messages[index - 1].author.id) && (
 											<span className="icon-span"><IconMessage /></span>
 										)}
 										<p>{formatMessageContent(message.content)}</p>

@@ -8,7 +8,7 @@ import LoadingPage from "../utils/LoadingPage";
 import "./ProfilePage.css";
 import handleRequest from '../utils/handleRequest'
 import fetchRequest from "../utils/fetchRequest";
-import {IUserProps} from "../hooks/UserHook";
+import { IUserProps } from "../chat/iChannel";
 
 function ProfilePage() {
 	console.log("---------PROFILE-PAGE---------");

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { INotif, useUser } from './hooks/UserHook';
+import { useUser } from './hooks/UserHook';
 import { useAuth } from './hooks/AuthHook';
 import { useSocket } from './hooks/SocketHook';
 import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
@@ -7,6 +7,7 @@ import handleRequest from './utils/handleRequest';
 import Modal from "./utils/Modal";
 import './Notification.css';
 import fetchRequest from './utils/fetchRequest';
+import { INotif } from './chat/iChannel';
 
 function Notification() {
 	console.log("---------NOTIFICATION---------");
