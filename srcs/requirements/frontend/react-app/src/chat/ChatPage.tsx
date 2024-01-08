@@ -109,7 +109,6 @@ function ChatPage () {
 							const updatedChannels = prevChannels.map((channel) => {
 							if (channel.id === channelId) {
 								const updatedMessages = [...channel.messages, data];
-								// updatedMessages.sort((a, b) => a.id - b.id);
 								return { ...channel, messages: updatedMessages };
 							} else {
 								return channel;

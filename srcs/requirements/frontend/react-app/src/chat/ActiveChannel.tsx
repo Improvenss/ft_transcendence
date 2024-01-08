@@ -8,12 +8,10 @@ import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
 import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
 import { formatDaytamp, formatTimestamp, isDifferentDay } from '../utils/dateUtils';
+import MessageInput from './MessageInput';
 
 function ActiveChannel(){
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { channels, setChannels, activeChannel, channelInfo, setChannelInfo } = useChannelContext();
-	const MAX_CHARACTERS = 1000; // İstenilen maksimum karakter sayısı
-	const [messageInput, setMessageInput] = useState('');
+	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const socket = useSocket();
@@ -21,40 +19,6 @@ function ActiveChannel(){
 
 	const handleAdditionalMenuClick = () => {
 		setChannelInfo(!channelInfo); // InfoChannel'ı etkinleştirmek/devre dışı bırakmak için durumu değiştirin
-	};
-
-	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-	// Kullanıcının daha fazla karakter girmesini engelle
-		if (e.target.value.length <= MAX_CHARACTERS) {
-			setMessageInput(e.target.value);
-		}
-	};
-
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-	// Eğer basılan tuş Enter ise
-		if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault();
-			handleSendMessage(); // Send butonunu çalıştır
-		}
-	};
-  
-	const handleSendMessage = () => {
-	// Mesajı gönderme işlemini gerçekleştir
-		if (messageInput.length > 0 && messageInput.length <= MAX_CHARACTERS) {
-			if (socket && activeChannel && userInfo){
-				socket.emit("createMessage", {
-					channel: activeChannel.id,
-					author: userInfo.id,
-					content: messageInput
-				});
-				console.log(`Message sent: ${messageInput}`);
-				setMessageInput('');
-				if (errorMessage)
-					setErrorMessage(null);
-			} else {
-				setErrorMessage("Can't send message!");
-			}
-		}
 	};
 
 	function formatMessageContent(content: string) {
@@ -77,36 +41,22 @@ function ActiveChannel(){
 		}
 	}, [activeChannel]);
 
-	// useEffect(() => {
-	// 	if (activeChannel && socket){
-	// 		const handleListenMessage = (newMessage: IMessage) => {
-	// 			console.log("Message Recived:", newMessage);
-	// 			setMessages(prevMessages => [
-	// 				...prevMessages,
-	// 				newMessage
-	// 			]);
-	// 			// setChannels((prevChannels) => { //kanallar arası geçiş yapıtığımda mesajların frontende kayboluyor.
-	// 			// 	if (!prevChannels) return prevChannels;
-				
-	// 			// 	const updatedChannels = prevChannels.map((channel) => {
-	// 			// 	if (channel.id === activeChannel?.id) {
-	// 			// 		const updatedMessages = [...channel.messages, newMessage];
-	// 			// 		return { ...channel, messages: updatedMessages };
-	// 			// 	} else {
-	// 			// 		return channel;
-	// 			// 	}
-	// 			// 	});
-				
-	// 			// 	return updatedChannels;
-	// 			// });
-	// 		}
+	useEffect(() => {
+		if (activeChannel && socket){
+			const handleListenMessage = (newMessage: IMessage) => {
+				console.log("Message Recived:", newMessage);
+				setMessages(prevMessages => [
+					...prevMessages,
+					newMessage
+				]);
+			}
 
-	// 		socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-	// 		return () => {
-	// 			socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-	// 		};
-	// 	}
-	// }, [activeChannel, socket]); //setChannels'dan emin değilim (eklenebilir / eklenmeyebilir)
+			socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+			return () => {
+				socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+			};
+		}
+	}, [activeChannel, socket]);
 
 
 	useEffect(() => {
@@ -175,18 +125,7 @@ function ActiveChannel(){
 						))}
 						<div ref={messagesEndRef} />
 					</div>
-					{errorMessage && <p className="error-message">{errorMessage}</p>}
-					<div id="message-input">
-						<textarea
-							id='messageTextarea' //uyarı verdiği için ekledim.
-							value={messageInput}
-							onChange={handleInputChange}
-							onKeyDown={handleKeyDown}
-							placeholder="Type your message"
-						/>
-						<div id="char-count">{messageInput.length}/{MAX_CHARACTERS}</div>
-						<button onClick={handleSendMessage}>Send</button>
-					</div>
+					<MessageInput channelId={activeChannel.id} userId={userInfo.id} />
 				</div>
 			)}
 		</>

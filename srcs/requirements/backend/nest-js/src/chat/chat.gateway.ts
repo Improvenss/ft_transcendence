@@ -146,6 +146,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				channelId: channel,
 				data: returnMessage,
 			});
+			this.server.to(messageChannel.name).emit(`listenChannelMessage:${messageChannel.id}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err.message);
 			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
