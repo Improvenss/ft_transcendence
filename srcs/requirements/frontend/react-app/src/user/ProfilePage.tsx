@@ -110,8 +110,6 @@ function ProfilePage() {
 					<span>{userPanel.displayname}</span>
 					<p>Email:</p>
 					<span>{userPanel.email}</span>
-					<button id="poke" onClick={() => handleRequest('poke', userPanel.login)}>Poke</button>
-					<button id="addFriend" onClick={() => handleRequest('sendFriendRequest', userPanel.login)}>Add Friend</button>
 					{ userPanel.login === userInfo.login ? (
  							<div id="friends">
  								<input
@@ -139,6 +137,7 @@ function ProfilePage() {
  							</div>
  						) : (
 							<>
+								<button id="poke" onClick={() => handleRequest('poke', userPanel.login)}>Poke</button>
 								<button id="addFriend" onClick={() => handleRequest('sendFriendRequest', userPanel.login)}>Add Friend</button>
 								<button id="sendMessage">Send Message</button>
 							</>

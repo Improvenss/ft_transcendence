@@ -43,11 +43,10 @@ function InfoChannel() {
 		}
  	};
 
-	// User kendisi Leave Channel dediginde calisir admin icin kick olarak baska function yapacagiz.
 	const	handleChannelLeave = async (selectedChannel: string) => {
 		setActiveChannel(null);
 		const response = await fetchRequest({
-			method: 'DELETE', //post'tan delete yap backend
+			method: 'DELETE',
 			headers: {
 				'channel': selectedChannel,
 			},
@@ -88,6 +87,7 @@ function InfoChannel() {
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
+		setActiveChannel(null);
 		const response = await fetchRequest({
 			method: 'DELETE',
 			headers: {
@@ -106,7 +106,6 @@ function InfoChannel() {
 		} else {
 			console.log("---Backend Connection '❌'---");
 		}
-		setActiveChannel(null);
 	}
 
 	const handleUpdate = async (fieldName: string) => {
@@ -232,7 +231,7 @@ function InfoChannel() {
 												{user.login !== userInfo?.login && (
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
-														<button onClick={() => handleChannelRequest('directMessage', user.login, activeChannel.name, activeChannel.id)}> <IconDM /> </button>
+														<button onClick={() => console.log("dm yok yaz")}> <IconDM /> </button>
 														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
@@ -240,14 +239,14 @@ function InfoChannel() {
 													<>
 														{user.login !== userInfo?.login && (
 															<>
-																<button onClick={() => handleChannelRequest('userKick', user.login, activeChannel.name, activeChannel.id)}> <IconKick /> </button>
-																<button onClick={() => handleChannelRequest('userBan', user.login, activeChannel.name, activeChannel.id)}> <IconBan /> </button>
+																<button onClick={() => handleChannelRequest('kick', user.id, activeChannel.id)}> <IconKick /> </button>
+																<button onClick={() => handleChannelRequest('ban', user.id, activeChannel.id)}> <IconBan /> </button>
 															</>
 														)}
 														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
-															<button onClick={() => handleChannelRequest('removeAdmin', user.login, activeChannel.name, activeChannel.id)}>Remove Admin</button>
+															<button onClick={() => handleChannelRequest('removeAdmin', user.id, activeChannel.id)}>Remove Admin</button>
 														) : (
-															<button onClick={() => handleChannelRequest('setAdmin', user.login, activeChannel.name, activeChannel.id)}>Set Admin</button>
+															<button onClick={() => handleChannelRequest('setAdmin', user.id, activeChannel.id)}>Set Admin</button>
 														)}
 													</>
 												)}
@@ -262,7 +261,7 @@ function InfoChannel() {
 
 						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
-								{activeChannel.admins.some((admin) => admin.login === userInfo?.login) ? (
+								{activeChannel.admins.some((admin) => admin.login === userInfo?.login) && (
 									<>
 										{errorMessage && <p className="error-message">{errorMessage}</p>}
 										<label htmlFor="channelName">Channel Name:</label>
@@ -312,14 +311,6 @@ function InfoChannel() {
 											placeholder="Change Password..."
 										/>
 										<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
-
-										<button
-											id='leaveButton'
-											onClick={() => {handleChannelLeave(activeChannel.name)}}
-										>
-											Leave Channel
-										</button>
-
 										<button
 											id='deleteButton'
 											onClick={() => {handleChannelDelete(activeChannel.name)}}
@@ -327,14 +318,13 @@ function InfoChannel() {
 											Delete Channel
 										</button>
 									</>
-								) : (
-									<button
-										id='leaveButton'
-										onClick={() => {handleChannelLeave(activeChannel.name)}}
-									>
-										Leave Channel
-									</button>
 								)}
+								<button
+									id='leaveButton'
+									onClick={() => {handleChannelLeave(activeChannel.name)}}
+								>
+									Leave Channel
+								</button>
  							</div>
  						)}
 
@@ -379,7 +369,7 @@ function InfoChannel() {
  										<div
  											key={user.login}
  											id='banned-users'
-											onClick={() => handleChannelRequest('userUnban', user.login, activeChannel.name, activeChannel.id)}
+											onClick={() => handleChannelRequest('unban', user.id, activeChannel.id)}
  										>
  											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>

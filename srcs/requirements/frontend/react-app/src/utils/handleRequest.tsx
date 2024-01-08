@@ -28,11 +28,16 @@ const handleRequest = async (action: string, targetUser: string, notifId?: numbe
 			method: 'POST',
 			url: url,
 		});
-		if (!response.ok) {
-			throw new Error('API-den veri alınamadı.');
+		if (response.ok){
+			const data = await response.json();
+			if (!data.err){
+				console.log("handleRequest:", data);
+			} else {
+				console.log("handleRequest err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
 		}
-		const data = await response.json();
-		console.log("handleRequest:", data);
 	}
 }
 

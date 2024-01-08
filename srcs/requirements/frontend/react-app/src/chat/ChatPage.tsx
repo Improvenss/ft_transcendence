@@ -68,7 +68,11 @@ function ChatPage () {
 				NewMessage = 'newMessage',
 				Join = 'join',
 				Leave = 'leave',
+				Kick = 'updateUser',
 				Ban = 'ban',
+				UnBan = 'unban',
+				SetAdmin = 'setAdmin',
+				RemoveAdmin = 'removeAdmin',
 				Update = 'update',
 			}
 
@@ -111,7 +115,6 @@ function ChatPage () {
 								return channel;
 							}
 							});
-						
 							return updatedChannels;
 						});
 						break;
@@ -125,7 +128,6 @@ function ChatPage () {
 									...channel,
 									...data
 								};
-								console.log(updatedChannel);
 								return (updatedChannel);
 							} else {
 								return channel;
@@ -134,6 +136,22 @@ function ChatPage () {
 						
 							return updatedChannels;
 						});
+						break;
+					case ActionType.RemoveAdmin:
+						// setChannels((prevChannels) => {
+						// 	if (!prevChannels) return prevChannels;
+
+						// 	const updatedChannels = prevChannels.map((channel) => {
+						// 	if (channel.id === channelId) {
+
+						// 		return (updatedChannel);
+						// 	} else {
+						// 		return channel;
+						// 	}
+						// 	});
+						
+						// 	return updatedChannels;
+						// });
 						break;
 				}
 			}
@@ -153,7 +171,7 @@ function ChatPage () {
 				setActiveChannel(updatedActiveChannel);
 			}
 		}
-	}, [channels]);
+	}, [channels]); /// activeChannel yerine doğrudan channels'dan çekilebilir verileri. bu sayede tekrardan derleme olayı ortadan kalkabilir
 	  
 
 	if (!isAuth)

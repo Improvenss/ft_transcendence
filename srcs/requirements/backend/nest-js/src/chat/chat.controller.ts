@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile, Patch, ParseBoolPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, NotFoundException, Query, UseGuards, Req, UseInterceptors, UploadedFile, Patch, ParseBoolPipe, Param, ParseIntPipe } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { UsersService } from 'src/users/users.service';
@@ -306,143 +306,51 @@ export class ChatController {
 		}
 	}
 
-	/*@Post('/channel/kick')
+	@Post('/channel/:action/:userId')
 	@UseGuards(ChatAdminGuard)
-	async kickChannel(
-		@Req() {user},
-		@Req() {channel},
-		// @Query ('channel') channel: string,
-		@Query ('user') userName: string | undefined, // kicklenecek user'in adi.
+	async channelAction(
+		@Req() {user}: {user: User},
+		@Req() {channel}: {channel: Channel},
+		@Param('action') action: string,
+		@Param('userId', ParseIntPipe) userId: number
 	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /channel/kick: @Req() user: [${userName}] channel: [${channel.name}]${C.END}`);
-			const tmpUser = await this.usersService.getUserPrimay({login: userName});
+		try {
+			console.log(`${C.B_YELLOW}POST: /channel/:${action}: @Req() user: [${user.login}] channel: [${channel.name}]${C.END}`);
+			const targetUser = await this.usersService.getUserPrimay({id: userId});
 
-			const	responseRemove = await this.chatService.removeUser(channel.name, 'members', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
-			console.log(`${C.B_RED}Channel Kick: ${channel} - ${userName}${C.END}`);
-			this.chatGateway.server.emit('channelGlobalListener');
-
-			// const userSocket = this.chatGateway.connectedUsers.get({socketId: tmpUser.socketId});
-			const userSocket = this.chatGateway.getIdSocketConnection(tmpUser.id);
-			if (userSocket.rooms.has(channel.name))
-			{
-				// this.chatGateway.server.emit(`listenChannelMessage:${channel.name}`, `Admin[${user.login}] kicked ${userName}!`);
-				userSocket.leave(channel.name)
-				console.log(`${channel.name} channel'den socket baglantisi koparildi: ${userSocket.id}`);
+			if (action === 'kick' || action === 'ban'){
+				await this.chatService.removeUser(channel.name, 'members', userId);
 			}
-			else
-				console.log(`${userSocket.id} zaten ${channel.name} channel'de degil! :D?`);
-			return ({message: 'User kicked the channel successfully!'});
-		}
-		catch(err)
-		{
-			console.error("@Post('/channel/kick'):", err.message);
-			return ({err: err.message});
+			if (action === 'ban'){
+				await this.chatService.addUser(channel.name, 'bannedUsers', targetUser);
+			}
+			if (action === 'unban'){
+				await this.chatService.removeUser(channel.name, 'bannedUsers', userId);
+			}
+			if (action === 'setAdmin' || action === 'removeAdmin'){
+				await this.chatService.setPermission(channel, targetUser, action);
+			}
+			
+			console.log(`${C.B_RED}Channel ${action}: ${channel.name} - ${targetUser.login}${C.END}`);
+			this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+				action: action,
+				channelId: channel.id,
+				data: {
+					id: userId
+				}
+			});
+
+			if (action === 'kick' || action === 'ban'){
+				const userSocket = this.chatGateway.getUserSocket(userId);
+				if (userSocket.rooms.has(channel.id.toString()))
+					userSocket.leave(channel.id.toString())
+			}
+			//Channel'daki herkese bildirim atama ekle
+			return ({ success: true });
+		} catch (err){
+			console.error(`@Post('/channel/${action}'):`, err.message);
+			return ({ success: false, err: err.message});
 		}
 	}
-
-	@Post('/channel/ban')
-	@UseGuards(ChatAdminGuard)
-	async banChannel(
-		@Req() {user},
-		@Req() {channel},
-		// @Query ('channel') channel: string,
-		@Query ('user') userName: string | undefined, // kicklenecek user'in adi.
-	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /channel/ban: @Req() user: [${userName}] channel: [${channel.name}]${C.END}`);
-			const tmpUser = await this.usersService.getUserPrimay({login: userName});
-
-			const	responseBanUser = await this.chatService.addChannelUser(channel, tmpUser, 'bannedUsers');
-			console.log("resopnseGBANUser:", responseBanUser);
-			const	responseRemove = await this.chatService.removeUser(channel.name, 'members', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
-			console.log("responsereREmove:", responseRemove);
-			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
-			this.chatGateway.server.emit('channelGlobalListener');
-
-			// const userSocket = this.chatGateway.connectedUsers.get({socketId: tmpUser.socketId});
-			const userSocket = this.chatGateway.getIdSocketConnection(tmpUser.id);
-			if (userSocket.rooms.has(channel.name))
-			{
-				// this.chatGateway.server.emit(`listenChannelMessage:${channel.name}`, `Admin[${user.login}] kicked ${userName}!`);
-				userSocket.leave(channel.name)
-				console.log(`${channel.name} channel'den socket baglantisi koparildi: ${userSocket.id}`);
-			}
-			else
-				console.log(`${userSocket.id} zaten ${channel.name} channel'de degil! :D?`);
-			return ({message: 'User banned the channel successfully!'});
-		}
-		catch(err)
-		{
-			console.error("@Post('/channel/ban'):", err.message);
-			return ({err: err.message});
-		}
-	}
-
-	@Post('/channel/unban')
-	@UseGuards(ChatAdminGuard)
-	async unbanChannel(
-		@Req() {user},
-		@Req() {channel},
-		// @Query ('channel') channel: string,
-		@Query ('user') userName: string | undefined, // kicklenecek user'in adi.
-	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /channel/unban: @Req() user: [${userName}] channel: [${channel.name}]${C.END}`);
-			const tmpUser = await this.usersService.getUserPrimay({login: userName});
-
-			//const	responseBanUser = await this.chatService.addChannelUser(channel, 'members', singleUser);
-			const	responseRemove = await this.chatService.removeUser(channel.name, 'bannedUsers', userName); // bu channel'den user'i cikariyoruz admin cikardigi icin de kickleme oluyor.
-			console.log(`${C.B_RED}Channel Ban: ${channel} - ${userName}${C.END}`);
-			this.chatGateway.server.emit('channelGlobalListener');
-
-			// const userSocket = this.chatGateway.connectedUsers.get({socketId: tmpUser.socketId});
-			const userSocket = this.chatGateway.getIdSocketConnection(tmpUser.id);
-			if (userSocket.rooms.has(channel.name))
-			{
-				// this.chatGateway.server.emit(`listenChannelMessage:${channel.name}`, `Admin[${user.login}] kicked ${userName}!`);
-				userSocket.leave(channel.name)
-				console.log(`${channel.name} channel'den socket baglantisi koparildi: ${userSocket.id}`);
-			}
-			else
-				console.log(`${userSocket.id} zaten ${channel.name} channel'de degil! :D?`);
-			return ({message: 'User banned the channel successfully!'});
-		}
-		catch(err)
-		{
-			console.error("@Post('/channel/ban'):", err.message);
-			return ({err: err.message});
-		}
-	}
-
-	@Post('/channel/admin')
-	@UseGuards(ChatAdminGuard)
-	async setChannelPermission(
-		@Req() {user},
-		@Req() {channel},
-		@Query ('action') action: 'remove' | 'set',
-		@Query ('user') targetUser: string,
-	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /channel/admin: @Req() action: [${action}] user: [${targetUser}] channel: [${channel.name}]${C.END}`);
-
-			const	tmpUser = await this.usersService.findUser(targetUser);
-			const	singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-			const	response = await this.chatService.setPermission(channel, singleUser, action);
-			console.log(response);
-			return ({message: `User administrator successfully ${action}`});
-		}
-		catch(err)
-		{
-			console.error("@Post('/channel/admin'):", err.message);
-			return ({err: err.message});
-		}
-	}*/
 	// -----------------------------------------------
-
-	
 }

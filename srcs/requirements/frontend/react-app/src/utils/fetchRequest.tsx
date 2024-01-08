@@ -15,9 +15,6 @@ async function fetchRequest(request: {
 		headers['Content-Type'] = 'application/json';
 	}
 
-	// if (request.body instanceof FormData)
-	// 	delete headers['Content-Type'];
-
 	if (cookie === true){
 		headers['Authorization'] = 'Bearer ' + userCookie;
 	}
@@ -27,11 +24,6 @@ async function fetchRequest(request: {
 		headers: headers,
 		body: (request.body ? request.body : undefined),
 	});
-	// console.log({
-	// 	method: request.method,
-	// 	headers: headers,
-	// 	body: (request.body ? request.body : undefined),	
-	// })
 	return (response);
 }
 

@@ -45,9 +45,9 @@ export class ChatAdminGuard implements CanActivate {
 			request.channel = tmpChannel;
 			return (request);
 		}
-		catch (error)
+		catch (err)
 		{
-			console.log("ChatAdminGuard: ", error.message);
+			console.log("ChatAdminGuard: ", err.message);
 			throw (new UnauthorizedException());
 		}
 	}

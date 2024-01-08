@@ -4,7 +4,6 @@ import { ReactComponent as IconMenu } from '../assets/chat/iconMenu.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useChannelContext } from './ChatPage';
 import { IMessage } from './iChannel';
-import { useUser } from '../hooks/UserHook';
 import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
 import { formatDaytamp, formatTimestamp, isDifferentDay } from '../utils/dateUtils';
 import MessageInput from './MessageInput';

@@ -249,14 +249,35 @@ export class ChatService {
 		return (await this.messageRepository.delete({}));
 	}
 
+	async addUser(
+		channel: string,
+		relation: 'members' | 'bannedUsers',
+		user: User
+	){
+		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: [relation]});
+		if (!tmpChannel){
+			throw new NotFoundException('Channel does not exist!');
+		}
+
+		if (relation === 'members')
+			tmpChannel.members.push(user);
+		else if (relation === 'bannedUsers')
+			tmpChannel.bannedUsers.push(user);
+		else
+			throw (new NotFoundException('Relation not found!'));
+
+		await this.channelRepository.save(tmpChannel);
+		return (tmpChannel.id);
+	}
+
 	async setPermission(
 		channel: Channel,
 		user: User,
-		action: 'remove' | 'set',
+		action: string,
 	){
-		if (action === 'remove')
+		if (action === 'removeAdmin')
 		{
-			const index = channel.admins.findIndex(admin => admin.login === user.login);
+			const index = channel.admins.findIndex(admin => admin.id === user.id);
 			if (index === -1) {
 				throw new Error(`user[${user.login}] does not have permission anyway!`);
 			} else {
@@ -264,7 +285,7 @@ export class ChatService {
 				await this.channelRepository.save(channel);
 			}
 		}
-		else if (action === 'set')
+		else if (action === 'setAdmin')
 		{
 			if (channel.admins.some(admin => admin.login === user.login)) {
 				throw new Error(`user[${user.login}] already has permission!`);
@@ -273,6 +294,5 @@ export class ChatService {
 				await this.channelRepository.save(channel);
 			}
 		}
-		return ({admins: channel.admins});
 	}
 }
