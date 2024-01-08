@@ -61,54 +61,70 @@ function ChatPage () {
 
 	useEffect(() => {
 		if (isAuth && socket && userInfo){
-			// handleListenChannel public/private bir channel oluşturulduğunda / silindiğinde veya kicklendiğimizde update atmak için olacak.
-			//Düzenlenecek!!!!
-			const	handleListenChannel = ({status, action, data, newChannel}: {
-				status: 'global' | 'private'
-				action: string,
-				data?: any,
-				newChannel?: IChannel
+
+			enum ActionType {
+				Create = 'create',
+				Delete = 'delete',
+				NewMessage = 'newMessage',
+				Join = 'join',
+				Leave = 'leave',
+				Ban = 'ban',
+				ChangeName = 'changeName',
+				ChangeImage = 'changeImage',
+				ChangeDescription = 'changeDescription',
+				ChangeType = 'changeTye',
+			}
+
+			const	handleListenChannel = ({action, channelId, data}: {
+				action: ActionType,
+				channelId: number,
+				data?: any
 			}) => {
-				console.log(`handleListenChannel: status: [${status}] action: [${action}], data: [${data}]`);
-				if (newChannel !== undefined) {
-					console.log("Channel Recived:", newChannel);
-					setChannels(prevChannels => {
-						if (!prevChannels) return prevChannels;
-						const existingChannelIndex = prevChannels.findIndex(channel => channel.name === newChannel.name) ;
-
-						if (existingChannelIndex !== -1) {
-							const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
-							updatedChannels[existingChannelIndex] = newChannel;
-							return updatedChannels;
-						} else {
-							return [...prevChannels, newChannel]; // Kanal yok, ekleyerek güncelle
-						}
-					});
-				}
-
-				if (action === 'leave') {
-					setChannels((prevChannels) => {
-						return prevChannels?.map((channel) => {
-							if (channel.name === data) {
-								return channel.type === 'public' ? { ...channel, status: 'public' } : null;
+				console.log(`handleListenChannel: action[${action}] channelId[${channelId}]`);
+				switch (action) {
+					case ActionType.Create:
+						console.log("Channel Recived:", data);
+						setChannels(prevChannels => {
+							if (!prevChannels) return prevChannels;
+							const existingChannelIndex = prevChannels.findIndex(channel => channel.id === channelId) ;
+	
+							if (existingChannelIndex !== -1) {
+								const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
+								updatedChannels[existingChannelIndex] = data;
+								return updatedChannels;
+							} else {
+								return [...prevChannels, data]; // Kanal yok, ekleyerek güncelle
 							}
-							return channel;
-						}).filter(Boolean) as IChannel[];
-					});
-				}
+						});
+						break;
+					case ActionType.Delete:
+						setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
+						break;
+					case ActionType.Leave:
+						break;
+					case ActionType.NewMessage:
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
 
-				if (action === 'delete'){
-					setChannels((prevChannels) => prevChannels?.filter((channel) => channel.name !== data));
+							const updatedChannels = prevChannels.map((channel) => {
+							if (channel.id === channelId) {
+								const updatedMessages = [...channel.messages, data];
+								// updatedMessages.sort((a, b) => a.id - b.id);
+								return { ...channel, messages: updatedMessages };
+							} else {
+								return channel;
+							}
+							});
+						
+							return updatedChannels;
+						});
+						break;
 				}
 			}
 
-			socket.on(`globalChannelListener`, handleListenChannel); //public bir değişim söz konusu olursa bu dinleme kullanılıyor.
-			// Kayıtlı olunan kanallarda değişiklik meydanda geldiğinde, kayıtlı kullanıcılarda update yapmak için
-				// Private bir kanalda ve kanal silindi-adı güncellendi vs vs
-			socket.on(`userChannelListener:${userInfo.id}`, handleListenChannel);
+			socket.on('channelListener', handleListenChannel);
 			return () => {
-				socket.off(`globalChannelListener`, handleListenChannel);
-				socket.off(`userChannelListener:${userInfo.id}`, handleListenChannel);
+				socket.off(`channelListener`, handleListenChannel);
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
@@ -132,3 +148,16 @@ function ChatPage () {
 	)
 }
 export default ChatPage;
+
+/*
+	if (action === 'leave') {
+		setChannels((prevChannels) => {
+			return prevChannels?.map((channel) => {
+				if (channel.name === data) {
+					return channel.type === 'public' ? { ...channel, status: 'public' } : null;
+				}
+				return channel;
+			}).filter(Boolean) as IChannel[];
+		});
+	}
+}*/

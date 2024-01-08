@@ -216,33 +216,22 @@ export class ChatService {
 	async removeUser(
 		channel: string,
 		relation: 'members' | 'bannedUsers',
-		user: string
+		userId: number
 	){
 		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: [relation]});
 		if (!tmpChannel){
 			throw new NotFoundException('Channel does not exist!');
 		}
-		// const tmpUser = await this.usersService.getData({userLogin: user}, 'channels', 'true');
-		const tmpUser = await this.usersService.getUserRelation({
-			user: { login: user },
-			relation: { channels: true },
-			primary: true,
-		})
-		if (!tmpUser){
-			throw new NotFoundException('User does not exist!');
-		}
-		tmpUser.channels = tmpUser.channels.filter(c => c.id !== tmpChannel.id);
 
 		if (relation === 'members')
-			tmpChannel.members = tmpChannel.members.filter(m => m.id !== tmpUser.id);
+			tmpChannel.members = tmpChannel.members.filter(m => m.id !== userId);
 		else if (relation === 'bannedUsers')
-			tmpChannel.bannedUsers = tmpChannel.bannedUsers.filter(m => m.id !== tmpUser.id);
+			tmpChannel.bannedUsers = tmpChannel.bannedUsers.filter(m => m.id !== userId);
 		else
 			throw (new NotFoundException('Relation not found!'));
 
-		await this.userRepository.save(tmpUser);
 		await this.channelRepository.save(tmpChannel);
-		return ({message: 'User removed from the channel successfully' });
+		return (tmpChannel.id);
 	}
 
 	async removeMessage() {

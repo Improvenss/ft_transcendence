@@ -43,7 +43,7 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 			checkUser();
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, []);
+	}, [isAuth]);
 
 	if ((isAuth && userInfo === undefined))
 		return (<LoadingPage />);

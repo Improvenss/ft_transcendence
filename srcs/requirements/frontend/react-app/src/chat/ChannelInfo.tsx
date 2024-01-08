@@ -19,7 +19,7 @@ import handleRequest from '../utils/handleRequest';
 import fetchRequest from "../utils/fetchRequest";
 
 function InfoChannel() {
-	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
+	const { setChannels, activeChannel, setActiveChannel, channelInfo } = useChannelContext();
 	const { userInfo } = useUser();
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -57,7 +57,28 @@ function InfoChannel() {
 			const data = await response.json();
 			console.log(`Leave channel: [${selectedChannel}]`,data);
 			if (!data.err){
-				///boş
+				if (activeChannel?.type === 'private')
+					setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== activeChannel?.id));
+				else {
+					setChannels((prevChannels) => {
+						if (prevChannels) {
+							return prevChannels.map((channel) => {
+							if (channel.id === activeChannel?.id) {
+								return {
+									...channel,
+									members: [],
+									admins: [],
+									messages: [],
+									bannedUsers: [],
+									status: 'public',
+								};
+							}
+							return channel;
+							});
+						}
+						return prevChannels;
+					});
+				}
 			} else {
 				console.log("handleChannelLeave err:", data.err);
 			}

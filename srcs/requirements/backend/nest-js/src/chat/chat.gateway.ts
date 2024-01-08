@@ -128,8 +128,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!messageChannel)
 				throw new NotFoundException('Channel not found!');
 
-			if (!socket.rooms.has(messageChannel.name))
-			{
+			if (!socket.rooms.has(messageChannel.name)) {
 				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this channel(${messageChannel.name})!`);
 				throw new Error(`user[${messageUser.login}] not in this channel(${messageChannel.name})!`);
 			}
@@ -142,7 +141,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const returnMessage = await this.chatService.createMessage(createMessageDto);
 			delete returnMessage.channel;
 			console.log(`Message recived: channel[${messageChannel.name}] user[${messageUser.login}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
-			this.server.to(messageChannel.name).emit(`listenChannelMessage:${messageChannel.id}`, returnMessage);
+			this.server.to(messageChannel.name).emit(`channelListener`,{
+				action: 'newMessage',
+				channelId: channel,
+				data: returnMessage,
+			});
 		} catch (err){
 			console.log("CreateMessage Err: ", err.message);
 			const notif = await this.usersService.createNotif(author, author, 'text', err.message);

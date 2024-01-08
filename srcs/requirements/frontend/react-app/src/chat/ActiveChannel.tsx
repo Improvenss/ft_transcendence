@@ -77,36 +77,37 @@ function ActiveChannel(){
 		}
 	}, [activeChannel]);
 
-	useEffect(() => {
-		if (activeChannel && socket){
-			const handleListenMessage = (newMessage: IMessage) => {
-				console.log("Message Recived:", newMessage);
-				setMessages(prevMessages => [
-					...prevMessages,
-					newMessage
-				]);
-				setChannels((prevChannels) => { //kanallar arası geçiş yapıtığımda mesajların frontende kayboluyor.
-					if (!prevChannels) return prevChannels;
+	// useEffect(() => {
+	// 	if (activeChannel && socket){
+	// 		const handleListenMessage = (newMessage: IMessage) => {
+	// 			console.log("Message Recived:", newMessage);
+	// 			setMessages(prevMessages => [
+	// 				...prevMessages,
+	// 				newMessage
+	// 			]);
+	// 			// setChannels((prevChannels) => { //kanallar arası geçiş yapıtığımda mesajların frontende kayboluyor.
+	// 			// 	if (!prevChannels) return prevChannels;
 				
-					const updatedChannels = prevChannels.map((channel) => {
-					if (channel.id === activeChannel?.id) {
-						const updatedMessages = [...channel.messages, newMessage];
-						return { ...channel, messages: updatedMessages };
-					} else {
-						return channel;
-					}
-					});
+	// 			// 	const updatedChannels = prevChannels.map((channel) => {
+	// 			// 	if (channel.id === activeChannel?.id) {
+	// 			// 		const updatedMessages = [...channel.messages, newMessage];
+	// 			// 		return { ...channel, messages: updatedMessages };
+	// 			// 	} else {
+	// 			// 		return channel;
+	// 			// 	}
+	// 			// 	});
 				
-					return updatedChannels;
-				});
-			}
+	// 			// 	return updatedChannels;
+	// 			// });
+	// 		}
 
-			socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-			return () => {
-				socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-			};
-		}
-	}, [activeChannel, socket]); //setChannels'dan emin değilim (eklenebilir / eklenmeyebilir)
+	// 		socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+	// 		return () => {
+	// 			socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+	// 		};
+	// 	}
+	// }, [activeChannel, socket]); //setChannels'dan emin değilim (eklenebilir / eklenmeyebilir)
+
 
 	useEffect(() => {
 	// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.

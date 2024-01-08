@@ -111,9 +111,14 @@ export class ChatController {
 			channelResponse['status'] = 'involved';
 
 			const userSocket = this.chatGateway.getUserSocket(user.id);
-			userSocket.join(body.channel);
-			console.log(`Channel: [${body.channel}] Joined: [${user.socketId}]`);
-
+			userSocket.join(tmpChannel.name);
+// // Kanala bağlı olan tüm kullanıcılara bir mesaj gönderme
+// this.chatGateway.server.to(body.channel).emit('newMessage', {
+//	channel: 'channel-1'
+// 	sender: 'system',
+// 	content: `${user.username} kanala katıldı!`,
+//   });
+			console.log(`Channel: [${tmpChannel.name}] Joined: [${user.socketId}]`);
 			return (channelResponse);
 		} catch (err) {
 			console.error("@Post('/channel/register'): registerChannel:", err.message);
@@ -128,30 +133,27 @@ export class ChatController {
 	@Delete('/channel/leave')
 	async leaveChannel(
 		@Req() {user}: {user: User},
-		@Query ('channel') channel: string,
+		@Query ('channel') name: string,
 	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /channel/leave: user: [${user.login}] channel: [${channel}]${C.END}`);
-			await this.chatGateway.userLeaveChannel(channel, user.socketId);
-			await this.chatService.removeUser(channel, 'members', user.login);
-			console.log(`${C.B_RED}Channel Leave: ${channel} - ${user.login}${C.END}`);
-			this.chatGateway.server.emit(`userChannelListener:${user.id}`, {
+		try {
+			console.log(`${C.B_YELLOW}POST: /channel/leave: user: [${user.login}] channel: [${name}]${C.END}`);
+
+			const userSocket = this.chatGateway.getUserSocket(user.id);
+			userSocket.leave(name);
+			const channelId = await this.chatService.removeUser(name, 'members', user.id);
+			console.log(`${C.B_RED}Channel Leave: ${name} - ${user.login}${C.END}`);
+
+			this.chatGateway.server.to(name).emit('channelListener', {
 				action: 'leave',
-				data: channel,
+				channelId: channelId,
+				data: {
+					userId: user.id,
+					login: user.login,
+				}
 			});
 			return { success: true };
-		}
-		catch(err)
-		{
+		} catch(err){
 			return ({ success: false, err: err.message});
-			// if (err instanceof NotFoundException) {
-			// 	// Özel işleme
-			// 	return { message: err.message, statusCode: 404 };
-			// } else {
-			// 	console.error("@Delete('/channel/leave'):", err.message);
-			// 	return { message: 'Internal Server Error', statusCode: 500 };
-			// }
 		}
 	}
 
@@ -162,37 +164,25 @@ export class ChatController {
 		@Req() {user}: {user: User},
 		@Req() {channel}: {channel: Channel},
 	){
-		try
-		{
+		try {
 			console.log(`${C.B_RED}DELETE: Channel: ${channel.name}${C.END}`);
-			this.chatGateway.forceLeaveChannel(channel.name);
-
+			
 			if (channel.type === 'public'){
-				this.chatGateway.server.emit('globalChannelListener', {
-					status: 'global',
+				this.chatGateway.server.emit('channelListener', {
 					action: 'delete',
-					data: channel.name,
+					channelId: channel.id
 				});
 			} else if (channel.type === 'private'){
-				const channelUsersLogins = await this.usersService.getUsersInRelation({
-					relation: 'channels',
-					value: channel.name,
-					select: 'id',
-				});
-				channelUsersLogins.forEach((userId) => {
-					this.chatGateway.server.emit(`userChannelListener:${userId}`, {
-						status: 'private',
-						action: 'delete',
-						data: channel.name,
-					});
+				this.chatGateway.server.to(channel.name).emit('channelListener', {
+					action: 'delete',
+					channelId: channel.id
 				});
 			}
 
+			this.chatGateway.forceLeaveChannel(channel.name);
 			await this.chatService.removeChannel(channel);
 			return ({ success: true });
-		}
-		catch (err)
-		{
+		} catch (err) {
 			console.error("@Delete('/channel'): deleteChannel():", err.message);
 			return ({ success: false, err: err.message});
 		}
@@ -238,19 +228,19 @@ export class ChatController {
 
 			const response = await this.chatService.createChannel(createChannelDto);
 			if (response.type === 'public'){
-				this.chatGateway.server.emit(`globalChannelListener`, {
-					status: 'global',
+				this.chatGateway.server.emit('channelListener', {
 					action: 'create',
-					newChannel: {
+					channelId: response.id,
+					data: {
 						id: response.id,
-						type: response.type,
 						name: response.name,
 						description: response.description,
 						image: response.image,
-						status: 'public',
+						status: 'public'
 					}
 				});
 			}
+
 			return { success: true };
 		} catch (err) {
 			if (image.path && fs.existsSync(image.path)) {
