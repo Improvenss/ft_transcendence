@@ -31,7 +31,7 @@ export class ChatAdminGuard implements CanActivate {
 			if (!tmpUser)
 				throw (new UnauthorizedException("User not found!"));
 			const tmpChannel = await this.chatService.getChannelRelation({
-				channelName: request.headers.channel,
+				id: request.headers.channel,
 				relation: { admins: true },
 				primary: true,
 			});

@@ -87,11 +87,22 @@ export class ChatService {
 		channel name + relation(empty) + primary(false) -> relation all 
 		channel name + relation(empty) + primary(true) -> default + relation all 
 	*/
-	async getChannelRelation({channelName, relation, primary}: {
-		channelName: string,
+	async getChannelRelation({id, name, relation, primary}: {
+		id?: number,
+		name?: string,
 		relation: FindOptionsRelations<Channel>,
 		primary: boolean,
 	}){
+		const inputSize = [id, name].filter(Boolean).length;
+		if (inputSize !== 1){
+			throw new Error('Provide exactly one of id or name.');
+		}
+
+		const whereClause: Record<string, any> = {
+			id: id,
+			name: name,
+		};
+
 		if (Object.keys(relation).length === 0){
 			const allChannelRelation = await this.getRelationNames();
 			relation = allChannelRelation.reduce((acc, rel) => {
@@ -100,7 +111,7 @@ export class ChatService {
 			}, {} as FindOptionsRelations<Channel>);
 		}
 
-		const data = await this.channelRepository.findOne({where: {name: channelName}, relations: relation});
+		const data = await this.channelRepository.findOne({where: whereClause, relations: relation});
 		if (!data)
 			return (null);
 
@@ -182,16 +193,16 @@ export class ChatService {
 	 * PATCH genellikle guncellemek icin kullanilir.
 	 */
 	async	patchChannel(
-		channel: string | undefined,
+		id: number,
 		body: Partial<UpdateChannelDto>,
 	){
 		const tmpChannel = await this.getChannelRelation({
-			channelName: channel,
+			id: id,
 			relation: {}, 
 			primary: true
 		});
 		if (!tmpChannel)
-			return (`Channel'${channel}' not found.`);
+			return (`Channel'${id}' not found.`);
 		if (!Array.isArray(tmpChannel))
 		{ // Channel seklinde gelirse alttaki for()'un kafasi karismasin diye.
 			Object.assign(tmpChannel, body);

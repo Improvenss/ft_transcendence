@@ -4,6 +4,7 @@ const handleChannelRequest = async (
 	action: string,
 	targetUser: string,
 	channelName: string,
+	channelId: number,
 ) => {
 	const	userCookie = Cookies.get("user");
 
@@ -51,7 +52,7 @@ const handleChannelRequest = async (
 			headers: {
 				'Content-Type': 'application/json',
 				"Authorization": "Bearer " + userCookie,
-				"channel": channelName,
+				"channel": channelId.toString(),
 			},
 		});
 		if (!response.ok) {

@@ -69,10 +69,7 @@ function ChatPage () {
 				Join = 'join',
 				Leave = 'leave',
 				Ban = 'ban',
-				ChangeName = 'changeName',
-				ChangeImage = 'changeImage',
-				ChangeDescription = 'changeDescription',
-				ChangeType = 'changeTye',
+				Update = 'update',
 			}
 
 			const	handleListenChannel = ({action, channelId, data}: {
@@ -118,6 +115,26 @@ function ChatPage () {
 							return updatedChannels;
 						});
 						break;
+					case ActionType.Update:
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+
+							const updatedChannels = prevChannels.map((channel) => {
+							if (channel.id === channelId) {
+								const updatedChannel = {
+									...channel,
+									...data
+								};
+								console.log(updatedChannel);
+								return (updatedChannel);
+							} else {
+								return channel;
+							}
+							});
+						
+							return updatedChannels;
+						});
+						break;
 				}
 			}
 
@@ -128,6 +145,16 @@ function ChatPage () {
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [isAuth, socket]);
+
+	useEffect(() => {
+		if (activeChannel && channels) {
+			const updatedActiveChannel = channels.find((channel) => channel.id === activeChannel.id);
+			if (updatedActiveChannel) {
+				setActiveChannel(updatedActiveChannel);
+			}
+		}
+	}, [channels]);
+	  
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
@@ -140,23 +167,13 @@ function ChatPage () {
 		<div id="chat-page">
 			<ChannelContext.Provider value={{ channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
 				<Channel />	
-				<ActiveChannel />
+				{userInfo && (
+					<ActiveChannel userId={userInfo.id}/>
+				)}
 				<ChannelInfo />
 			</ChannelContext.Provider>
 		</div>
 	)
 }
-export default ChatPage;
 
-/*
-	if (action === 'leave') {
-		setChannels((prevChannels) => {
-			return prevChannels?.map((channel) => {
-				if (channel.name === data) {
-					return channel.type === 'public' ? { ...channel, status: 'public' } : null;
-				}
-				return channel;
-			}).filter(Boolean) as IChannel[];
-		});
-	}
-}*/
+export default ChatPage;

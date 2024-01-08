@@ -70,7 +70,7 @@ export class ChatController {
 			channels
 				.filter((channel) =>  channel.status === 'involved') //backend'de daha güvenli olduğu için ekledim.
 				.forEach((channel) => {
-					userSocket.join(channel.name);
+					userSocket.join(channel.id.toString());
 					console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
 				});
 			return (channels);
@@ -88,7 +88,7 @@ export class ChatController {
 		try {
 			console.log(`${C.B_YELLOW}POST: /channel/register: user: [${user.login}] channel: [${body.channel}]${C.END}`);
 			const tmpChannel = await this.chatService.getChannelRelation({
-				channelName: body.channel,
+				name: body.channel,
 				relation: {},
 				primary: true,
 			});
@@ -111,14 +111,8 @@ export class ChatController {
 			channelResponse['status'] = 'involved';
 
 			const userSocket = this.chatGateway.getUserSocket(user.id);
-			userSocket.join(tmpChannel.name);
-// // Kanala bağlı olan tüm kullanıcılara bir mesaj gönderme
-// this.chatGateway.server.to(body.channel).emit('newMessage', {
-//	channel: 'channel-1'
-// 	sender: 'system',
-// 	content: `${user.username} kanala katıldı!`,
-//   });
-			console.log(`Channel: [${tmpChannel.name}] Joined: [${user.socketId}]`);
+			userSocket.join(tmpChannel.id.toString());
+			console.log(`Channel: [${tmpChannel.name}] Joined: [${user.login}]`);
 			return (channelResponse);
 		} catch (err) {
 			console.error("@Post('/channel/register'): registerChannel:", err.message);
@@ -173,7 +167,7 @@ export class ChatController {
 					channelId: channel.id
 				});
 			} else if (channel.type === 'private'){
-				this.chatGateway.server.to(channel.name).emit('channelListener', {
+				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
 					action: 'delete',
 					channelId: channel.id
 				});
@@ -255,6 +249,63 @@ export class ChatController {
 	}
 
 	// --------------- ADMIN -------------------------
+	// channel settings kısmında güncelleme yapıyoruz, yaparken tek tek gerçekleştiriyoruz.
+	// Güncellemediğimiz ayar undefined olarak geliyor.
+	@Patch('/channel')
+	@UseGuards(ChatAdminGuard)
+	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
+	async patchChannel(
+		@Req() {user}: {user: User},
+		@Req() {channel}: {channel: Channel},
+		@UploadedFile() image: Express.Multer.File,
+		@Body('channelName') name: string,
+		@Body('channelDescription') description: string,
+		@Body('channelPassword') password: string,
+	) {
+		try {
+			const data = { name, description, password, image };
+			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel.name}] @Body():${C.END}`, {data});
+
+			const	updateDto: Partial<CreateChannelDto> = Object.entries(data)
+				.filter(([_, value]) => value !== undefined)
+				.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+			if (updateDto.password !== undefined) {
+				if (updateDto.password !== ''){
+					updateDto.type = ChannelType.PRIVATE;
+					updateDto.password = bcrypt.hashSync(
+						updateDto.password,
+						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)
+					);
+				} else {
+					updateDto.type = ChannelType.PUBLIC;
+				}
+			}
+
+			if (updateDto.image !== undefined) {
+				updateDto.image = process.env.B_IMAGE_REPO + image.filename;
+			}
+
+			await this.chatService.patchChannel(channel.id, updateDto);
+			delete updateDto.password;
+			this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+				action: 'update',
+				channelId: channel.id,
+				data: updateDto
+			});
+			return ({ success: true });
+		} catch (err) {
+			if (image && image.path && fs.existsSync(image.path)) {
+				promisify(fs.promises.unlink)(image.path);
+				console.log('Image removed successfully.');
+			}
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
+			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
+			console.log("@Patch('/channel'): ", err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
 	/*@Post('/channel/kick')
 	@UseGuards(ChatAdminGuard)
 	async kickChannel(
@@ -393,55 +444,5 @@ export class ChatController {
 	}*/
 	// -----------------------------------------------
 
-	// channel settings kısmında güncelleme yapıyoruz, yaparken tek tek gerçekleştiriyoruz.
-	//	Güncellemediğimiz ayar undefined olarak geliyor.
-	@Patch('/channel')
-	@UseGuards(ChatAdminGuard)
-	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
-	async patchChannel(
-		@Req() {user}: {user: User},
-		@Req() {channel}: {channel: Channel},
-		@UploadedFile() image: Express.Multer.File,
-		@Body('channelName') name: string,
-		@Body('channelDescription') description: string,
-		@Body('channelPassword') password: string,
-	) {
-		try {
-			const validArgs = { name, description, password, image };
-			console.log(`${C.B_PURPLE}PATCH: /channel: @Query('channel'): [${user.login}][${channel.name}] @Body():${C.END}`, {validArgs});
-
-			const	updateDto: Partial<CreateChannelDto> = Object.entries(validArgs)
-				.filter(([_, value]) => value !== undefined)
-				.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
-
-			if (updateDto.password !== undefined) {
-				if (updateDto.password !== ''){
-					updateDto.type = ChannelType.PUBLIC;
-					updateDto.password = bcrypt.hashSync(
-						updateDto.password,
-						bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)
-						);
-				} else {
-					updateDto.type = ChannelType.PRIVATE;
-				}
-			}
-
-			if (updateDto.image !== undefined) {
-				updateDto.image = process.env.B_IMAGE_REPO + image.filename;
-			}
-
-			const	responseChannel = await this.chatService.patchChannel(channel.name, updateDto);
-			console.log("PATCH sonrasi update edilmis hali:", responseChannel);
-			return ({ success: true });
-		} catch (err) {
-			if (image && image.path && fs.existsSync(image.path)) {
-				promisify(fs.promises.unlink)(image.path);
-				console.log('Image removed successfully.');
-			}
-			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
-			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
-			console.log("@Patch('/channel'): ", err.message);
-			return ({ success: false, err: err.message});
-		}
-	}
+	
 }

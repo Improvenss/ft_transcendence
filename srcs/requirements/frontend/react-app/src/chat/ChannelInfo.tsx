@@ -161,7 +161,7 @@ function InfoChannel() {
 		const response = await fetchRequest({
 			method: 'PATCH',
 			headers: {
-				"channel": activeChannel.name,
+				"channel": activeChannel.id.toString(),
 			},
 			body: formData,
 			url: `/chat/channel`
@@ -232,7 +232,7 @@ function InfoChannel() {
 												{user.login !== userInfo?.login && (
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
-														<button onClick={() => handleChannelRequest('directMessage', user.login, activeChannel.name)}> <IconDM /> </button>
+														<button onClick={() => handleChannelRequest('directMessage', user.login, activeChannel.name, activeChannel.id)}> <IconDM /> </button>
 														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
@@ -240,14 +240,14 @@ function InfoChannel() {
 													<>
 														{user.login !== userInfo?.login && (
 															<>
-																<button onClick={() => handleChannelRequest('userKick', user.login, activeChannel.name)}> <IconKick /> </button>
-																<button onClick={() => handleChannelRequest('userBan', user.login, activeChannel.name)}> <IconBan /> </button>
+																<button onClick={() => handleChannelRequest('userKick', user.login, activeChannel.name, activeChannel.id)}> <IconKick /> </button>
+																<button onClick={() => handleChannelRequest('userBan', user.login, activeChannel.name, activeChannel.id)}> <IconBan /> </button>
 															</>
 														)}
 														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
-															<button onClick={() => handleChannelRequest('removeAdmin', user.login, activeChannel.name)}>Remove Admin</button>
+															<button onClick={() => handleChannelRequest('removeAdmin', user.login, activeChannel.name, activeChannel.id)}>Remove Admin</button>
 														) : (
-															<button onClick={() => handleChannelRequest('setAdmin', user.login, activeChannel.name)}>Set Admin</button>
+															<button onClick={() => handleChannelRequest('setAdmin', user.login, activeChannel.name, activeChannel.id)}>Set Admin</button>
 														)}
 													</>
 												)}
@@ -364,7 +364,7 @@ function InfoChannel() {
  							</div>
  						)}
 
-						{ activeTabInfo === 'banList' && (
+						{activeTabInfo === 'banList' && (
  							<div>
  								<input
  									id="banSearch"
@@ -379,7 +379,7 @@ function InfoChannel() {
  										<div
  											key={user.login}
  											id='banned-users'
-											onClick={() => handleChannelRequest('userUnban', user.login, activeChannel.name)}
+											onClick={() => handleChannelRequest('userUnban', user.login, activeChannel.name, activeChannel.id)}
  										>
  											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>

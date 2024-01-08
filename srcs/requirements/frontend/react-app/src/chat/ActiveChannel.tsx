@@ -4,18 +4,15 @@ import { ReactComponent as IconMenu } from '../assets/chat/iconMenu.svg';
 import { useEffect, useRef, useState } from 'react';
 import { useChannelContext } from './ChatPage';
 import { IMessage } from './iChannel';
-import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
 import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
 import { formatDaytamp, formatTimestamp, isDifferentDay } from '../utils/dateUtils';
 import MessageInput from './MessageInput';
 
-function ActiveChannel(){
+function ActiveChannel({userId}:{userId:number}){
 	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const socket = useSocket();
-	const {userInfo} = useUser();
 
 	const handleAdditionalMenuClick = () => {
 		setChannelInfo(!channelInfo); // InfoChannel'ı etkinleştirmek/devre dışı bırakmak için durumu değiştirin
@@ -41,22 +38,22 @@ function ActiveChannel(){
 		}
 	}, [activeChannel]);
 
-	useEffect(() => {
-		if (activeChannel && socket){
-			const handleListenMessage = (newMessage: IMessage) => {
-				console.log("Message Recived:", newMessage);
-				setMessages(prevMessages => [
-					...prevMessages,
-					newMessage
-				]);
-			}
+	// useEffect(() => {
+	// 	if (activeChannel && socket){
+	// 		const handleListenMessage = (newMessage: IMessage) => {
+	// 			console.log("Message Recived:", newMessage);
+	// 			setMessages(prevMessages => [
+	// 				...prevMessages,
+	// 				newMessage
+	// 			]);
+	// 		}
 
-			socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-			return () => {
-				socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-			};
-		}
-	}, [activeChannel, socket]);
+	// 		socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+	// 		return () => {
+	// 			socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
+	// 		};
+	// 	}
+	// }, [activeChannel, socket]);
 
 
 	useEffect(() => {
@@ -68,7 +65,7 @@ function ActiveChannel(){
 
 	return (
 		<>
-			{userInfo && activeChannel && (
+			{activeChannel && (
 				<div id="activeChannel">
 					<div id="channel-header">
 						<img src={activeChannel.image} alt={activeChannel.image} />
@@ -92,7 +89,7 @@ function ActiveChannel(){
 									</div>
 								) : null}
 							<div key={index} className={`message-content`}>
-								{(message.author.id !== userInfo.id) ? (
+								{(message.author.id !== userId) ? (
 									<div className='message taken'>
 										{(index === 0 || message.author.id !== messages[index - 1].author.id) ? (
 											<>
@@ -125,7 +122,7 @@ function ActiveChannel(){
 						))}
 						<div ref={messagesEndRef} />
 					</div>
-					<MessageInput channelId={activeChannel.id} userId={userInfo.id} />
+					<MessageInput channelId={activeChannel.id} userId={userId} />
 				</div>
 			)}
 		</>
