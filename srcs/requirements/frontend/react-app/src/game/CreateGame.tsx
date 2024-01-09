@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import "./CreateGame.css";
-import Cookies from 'js-cookie';
 import { IGameRoom } from './IGame';
 import { useNavigate } from 'react-router-dom';
+import fetchRequest from '../utils/fetchRequest';
 
 const configs = {
 	winningScore: {
@@ -24,7 +24,6 @@ function CreateGame() {
 	const [gameDuration, setGameDuration] = useState(configs.gameDuration.default);
 	const [password, setPassword] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
-	const userCookie = Cookies.get("user");
 	const [description, setDescription] = useState('');
 	const navigate = useNavigate();
 
@@ -62,20 +61,22 @@ function CreateGame() {
 			description: description,
 			type: password === '' ? 'public' : 'private'
 		}
-		const	response = await fetch(
-			process.env.REACT_APP_FETCH + '/game/room', {
-				method: 'POST',
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": "Bearer " + userCookie,
-				},
-				body: JSON.stringify(createRoomObject),
+		const response = await fetchRequest({
+			method: 'POST',
+			body: JSON.stringify(createRoomObject),
+			url: '/game/room'
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log("responses", data);
+			if (!data.err){
+				navigate(`/game/lobby/${roomName}`);
+			} else {
+				navigate('/404');
 			}
-		);
-		const	data = await response.json();
-		console.log("responses", data);
-
-		navigate(`/game/lobby/${roomName}`);
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 
 		// Başarı durumunda hata mesajını sıfırla
 		if (errorMessage != null)

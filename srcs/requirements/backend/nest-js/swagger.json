@@ -260,9 +260,29 @@
         }
       }
     },
+    "/game/lobby/{name}": {
+      "get": {
+        "operationId": "GameController_getGameLobby",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/game/room": {
       "get": {
-        "operationId": "GameController_getGameRoom",
+        "operationId": "GameController_getGameRooms",
         "parameters": [
           {
             "name": "room",

@@ -16,15 +16,43 @@ export class GameController {
 		private readonly chatGateway: ChatGateway,
 	) {}
 
+
+	@Get('/lobby/:name')
+	async getGameLobby(
+		@Req() {user}:{user: User},
+		@Param('name') name: string,
+	){
+		try {
+			console.log(`${C.B_GREEN}GET: /room/:${name}: user[${user.login}]${C.END}`);
+			const game = await this.gameService.getGameRelation({
+				name: name,
+				relation: {},
+				primary: true
+			});
+			if (!game)
+				throw new NotFoundException(`Game[${name}] not found!`);
+
+			if (!game.players.some((player) => player.id === user.id)) {
+				throw new NotFoundException(`User not found in game[${name}]`);
+			}
+			delete game.password;
+			// game['playerLeft'] = game.players[0];
+			// game['playerRight'] = game.players[1];
+			return (game);
+		} catch (err){
+			console.log(`@Get('/lobby/:${name}`, err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
 	// Get Game Room
 	@Get('/room')
-	async	getGameRoom(
-		@Req() {user},
+	async	getGameRooms(
+		@Req() {user}:{user: User},
 		@Query('room') room: string | undefined,
-		@Query('relations') relations: string[] | undefined | 'all',
+		@Query('relations') relations: string[] | undefined | 'all', //silinecek
 	){
-		try
-		{
+		try {
 			console.log(`${C.B_GREEN}GET: /room: @Query('room'): [${room}], @Query('relations'): [${relations}]${C.END}`);
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
 			if (!tmpGameRoom)
@@ -42,11 +70,9 @@ export class GameController {
 				return { name, mode, type, winScore, duration };
 			}
 			return (tmpGameRoom);
-		}
-		catch (err)
-		{
+		} catch (err) {
 			console.log("@Get('/room'): ", err);
-			return ({err: err});
+			return ({ success: false, err: err});
 		}
 	}
 
