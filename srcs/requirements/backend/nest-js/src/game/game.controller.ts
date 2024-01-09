@@ -7,8 +7,6 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
 
-
-
 @UseGuards(AuthGuard)
 @Controller('/game')
 export class GameController {
@@ -38,10 +36,8 @@ export class GameController {
 						const { name, mode, type, winScore, duration } = game;
 						return { name, mode, type, winScore, duration };
 					});
-					
 					return extractedData;
 				}
-				
 				const { name, mode, type, winScore, duration } = tmpGameRoom;
 				return { name, mode, type, winScore, duration };
 			}
@@ -62,20 +58,18 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
-			const	responseRoom = await this.gameService.addGameRoomUser(user.login, body);
-			if (!responseRoom)
-
+			const	responseRoom = await this.gameService.addGameRoomUser(user, body);
+			
 			this.chatGateway.server.emit('roomListener', responseRoom);
 
 			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
 
 			return (responseRoom);
-			//return ({response: true, message: `${user.login} registered in this ${room}.`});
 		}
 		catch (err)
 		{
-			console.error("@Post('/channel/register'): registerChannel:", err);
-			return ({warning: err});
+			console.error("@Post('/channel/register'): registerChannel:", err.message);
+			return ({err: err.message});
 		}
 	}
 

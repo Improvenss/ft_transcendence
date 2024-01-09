@@ -33,9 +33,9 @@ var count: number = 0;
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
-		private readonly usersService: UsersService,
-		private readonly chatService: ChatService,
-		private readonly gameService: GameService,
+		protected readonly usersService: UsersService,
+		protected readonly chatService: ChatService,
+		protected readonly gameService: GameService,
 	) {}
 
 	public connectedIds: Map<number, Socket> = new Map();

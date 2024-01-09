@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { IsEnum, IsInt, IsNumber, IsString, Max, Min, min } from 'class-validator';
 import { GameMode } from '../dto/create-game.dto';
@@ -76,12 +76,18 @@ export class Game {
 
 	//----------------------User----------------------------//
 
-	@ManyToMany(() => User, user => user.gameRooms, {nullable: true, onDelete: 'CASCADE'})
+	@Column({ nullable: true, default: 0 })
+	public pLeftId: number;
+
+	@Column({ nullable: true, default: 0 })
+	public pRightId: number;
+
+	@Column({ nullable: true, default: 0 })
+	public adminId: number;
+
+	@OneToMany(() => User, (user) => user.currentRoom, {
+		nullable: true,
+		cascade: true,
+	})
 	public players: User[];
-
-	@ManyToMany(() => User, user => user.gameRoomsAdmin, {nullable: true, onDelete: 'CASCADE'})
-	public admins: User[];
-
-	@ManyToMany(() => User, user => user.gameRoomsWatcher, {nullable: true, onDelete: 'CASCADE'})
-	public watchers: User[];
 }

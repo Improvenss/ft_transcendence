@@ -70,13 +70,11 @@ export class CreateUserDto {
 	gamesLost?: number;
 
 	@IsOptional()
-	gameRooms?: Game[];
+	@IsNumber()
+	currentRoomId?: number;
 
 	@IsOptional()
-	gameRoomsAdmin?: Game[];
-
-	@IsOptional()
-	gameRoomsWatcher?: Game[];
+	currentRoom?: Game;
 }
 
 

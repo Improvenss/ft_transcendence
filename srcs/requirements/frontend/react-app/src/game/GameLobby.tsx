@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/SocketHook';
@@ -16,8 +17,9 @@ export interface IUser {
 }
 
 interface Lobby {
-	admins: IUser[], // 1 tane admin olabilir düzelt
-	players: IUser[],
+	admin: IUser,
+	playerLeft: IUser,
+	playerRight: IUser,
 	mode: 'classic',
 	name: string,
 	winScore: number,
@@ -30,7 +32,9 @@ const GameLobby = () => {
 	const socket = useSocket();
 	const my = useUser().userInfo;
 	const [lobby, setLobby] = useState<Lobby | undefined>(undefined);
-
+	const navigate = useNavigate();
+	const location = useLocation();
+	
 	useEffect(() => {
 		const fetchLobby = async () => {
 			const response = await fetch(process.env.REACT_APP_FETCH + `/game/room?room=${roomName}&relations=all`, {
@@ -42,13 +46,14 @@ const GameLobby = () => {
 			if (!response.ok)
 				throw (new Error("API fetch error."));
 			const data = await response.json();
-			console.log("GameLobby:",data);
+			console.log("GameLobby:", data);
 			setLobby({
 				mode: data.mode,
 				name: data.name,
 				winScore: data.winScore,
-				players: data.players,
-				admins: data.admins,
+				playerLeft: data.players[0],
+				playerRight: data.players[1],
+				admin: data.players[0],
 				duration: data.duration,
 			});
 			// oda olmama durumu, odaya register olmayan kullanıcı durumunun kontrol edilip yönlendirilmesi yapılması gerekmektedir.
@@ -65,8 +70,22 @@ const GameLobby = () => {
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [socket]);
 
+
+	useEffect(() => {
+		console.log("CIKTIM");
+	},[location.pathname])
+
 	if (lobby === undefined){
 		return (<LoadingPage />);
+	}
+
+	const	LoadPongGame = () =>{
+		// const _game = new PongGame({});
+
+		// if (lobby.playerRight)
+		// {
+			navigate(`/game/${roomName}`);
+		// }
 	}
 
 	// Lobbye katılan kişinin admin veya user olma durumuna göre hazırım / oyunu başlat gibi yapılara sahip olması gerekmektedir.
@@ -77,32 +96,32 @@ const GameLobby = () => {
 			<h3>Win Score: {lobby.winScore}</h3>
 			<h3>Duration: {lobby.duration} second</h3>
 			<div className='players'>
-				{lobby.players[0] ? (
+				{lobby.playerLeft ? (
 					<div className='leftPlayer'>
 						<img
 							className='image'
-							src={lobby.players[0].avatar ? lobby.players[0].avatar : lobby.players[0].imageUrl}
-							alt={lobby.players[0].login}
+							src={lobby.playerLeft.avatar ? lobby.playerLeft.avatar : lobby.playerLeft.imageUrl}
+							alt={lobby.playerLeft.login}
 						/>
-						<span>{lobby.players[0].nickname ? lobby.players[0].nickname : lobby.players[0].login}</span>
+						<span>{lobby.playerLeft.nickname ? lobby.playerLeft.nickname : lobby.playerLeft.login}</span>
 					</div>
 				) : 'null'}
-				{lobby.players[1] ? (
+				{lobby.playerRight ? (
 					<div className='rightPlayer'>
 						<img
 							className='image'
-							src={lobby.players[1].avatar ? lobby.players[1].avatar : lobby.players[1].imageUrl}
-							alt={lobby.players[1].login}
+							src={lobby.playerRight.avatar ? lobby.playerRight.avatar : lobby.playerRight.imageUrl}
+							alt={lobby.playerRight.login}
 						/>
-						<span>{lobby.players[1].nickname ? lobby.players[1].nickname : lobby.players[1].login}</span>		
+						<span>{lobby.playerRight.nickname ? lobby.playerRight.nickname : lobby.playerRight.login}</span>
 					</div>
 				) : (
 					<button className='invite'>Invite</button>
 				)}
 			</div>
 			<Map className='map'/>
-			{lobby.admins.some((admin) => admin.login === my?.login) ? ( //admin sayısı teke düşürüldüğünde some methodu kaldırılacak.
-				<button className='start'>Start Game</button>
+			{(lobby.admin.login === my?.login) ? (
+				<button className='start' onClick={LoadPongGame} >Start Game</button>
 			) : (
 				<button className='ready'>Ready</button>
 			)}

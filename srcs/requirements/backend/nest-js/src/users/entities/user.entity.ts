@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, ManyToOne } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, JoinColumn, ManyToOne } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail, IsEnum } from "class-validator";
+import { GameHistory } from "src/game/entities/gameHistory.entity";
 
 export enum UserStatus {
 	ONLINE = 'online',
@@ -15,6 +16,10 @@ export enum UserStatus {
 // @Entity({name: 'user'})
 @Entity('user')
 export class User {
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
+
 	@PrimaryGeneratedColumn()
 	public id: number; // Database'deki sıralama için değişken
 
@@ -94,23 +99,22 @@ export class User {
 	@Column({ default: 0 })
 	public gamesLost: number;
 
+	@OneToMany(() => GameHistory, history => history.user, {
+		nullable: true,
+		cascade: true,
+	})
+	@JoinTable()
+	public gameHistory: GameHistory[];
+
 	// game achievementler
+	
+	// Aktif oldugu oyun odasi.
+	@Column({ nullable: true })
+	public currentRoomId: number;
 
-	@ManyToMany(() => Game, game => game.players, { nullable: true, onDelete: 'CASCADE' })
-	@JoinTable()
-	public gameRooms: Game[];
-
-	@ManyToMany(() => Game, game => game.admins, { nullable: true, onDelete: 'CASCADE' })
-	@JoinTable()
-	public gameRoomsAdmin: Game[];
-
-	@ManyToMany(() => Game, game => game.watchers, { nullable: true, onDelete: 'CASCADE' })
-	@JoinTable()
-	public gameRoomsWatcher: Game[];
-
-	constructor(user: Partial<User>) {
-		Object.assign(this, user);
-	}
+	@ManyToOne(() => Game, game => game.players)
+	@JoinColumn({ name: 'currentRoomId' })
+	public currentRoom: Game;
 }
 
 export enum NotificationType {

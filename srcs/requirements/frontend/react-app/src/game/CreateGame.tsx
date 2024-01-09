@@ -101,7 +101,7 @@ function CreateGame() {
 				onChange={(e) => setGameMode(e.target.value)}
 			>
 				<option value="classic">Classic</option>
-				<option value="time_attack">Time Attack</option>
+				<option value="teamBattle">Team Battle</option>
 			</select>
 
 			<label htmlFor='winning-score'>Winning Score:</label>
