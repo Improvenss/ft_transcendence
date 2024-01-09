@@ -15,6 +15,7 @@ import { User, UserStatus } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { UpdateUserDto } from 'src/users/dto/create-user.dto';
+import { GameService } from 'src/game/game.service';
 
 var count: number = 0;
 
@@ -34,6 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly chatService: ChatService,
+		private readonly gameService: GameService,
 	) {}
 
 	public connectedIds: Map<number, Socket> = new Map();

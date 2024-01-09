@@ -29,31 +29,13 @@ function ActiveChannel({userId}:{userId:number}){
 
 	useEffect(() => {
 		if (activeChannel){
-			setMessages(activeChannel.messages);
+			setMessages(activeChannel.messages.sort((a, b) => a.id - b.id));
 		}
 		const messageInput = document.getElementById("messageTextarea");
 		if (messageInput) {
 		  messageInput.focus();
 		}
 	}, [activeChannel]);
-
-	// useEffect(() => {
-	// 	if (activeChannel && socket){
-	// 		const handleListenMessage = (newMessage: IMessage) => {
-	// 			console.log("Message Recived:", newMessage);
-	// 			setMessages(prevMessages => [
-	// 				...prevMessages,
-	// 				newMessage
-	// 			]);
-	// 		}
-
-	// 		socket.on(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-	// 		return () => {
-	// 			socket.off(`listenChannelMessage:${activeChannel.id}`, handleListenMessage);
-	// 		};
-	// 	}
-	// }, [activeChannel, socket]);
-
 
 	useEffect(() => {
 	// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.

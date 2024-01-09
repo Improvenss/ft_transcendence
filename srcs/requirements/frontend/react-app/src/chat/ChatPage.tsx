@@ -109,7 +109,7 @@ function ChatPage () {
 
 							const updatedChannels = prevChannels.map((channel) => {
 							if (channel.id === channelId) {
-								const updatedMessages = [...channel.messages, data];
+								const updatedMessages = [...channel.messages, data];;
 								return { ...channel, messages: updatedMessages };
 							} else {
 								return channel;

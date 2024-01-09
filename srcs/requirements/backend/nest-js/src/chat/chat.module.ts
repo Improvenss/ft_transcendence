@@ -12,10 +12,10 @@ import { UsersService } from 'src/users/users.service';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([User, Channel, Message, Notif]),
+		TypeOrmModule.forFeature([User, Channel, Message, Notif, Game]),
 	], // Burasi da User CRUD'unu kullanabilmemizi sagliyor.
 	controllers: [ChatController],
-	providers: [UsersService, ChatService, ChatGateway],
+	providers: [UsersService, ChatService, ChatGateway, GameService],
 	exports: [TypeOrmModule, ChatGateway],
 })
 export class ChatModule {}
