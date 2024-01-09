@@ -202,7 +202,7 @@ export class ChatController {
 			if (channel){
 				throw new Error("A channel with the same name already exists.");
 			}
-			const tmpUser = await this.usersService.getUserPrimay({id: user.id});
+			const tmpUser = await this.usersService.getUserPrimary({id: user.id});
 			const imgUrl = process.env.B_IMAGE_REPO + image.filename;
 			const createChannelDto: CreateChannelDto = {
 				name: name,
@@ -316,7 +316,7 @@ export class ChatController {
 	){
 		try {
 			console.log(`${C.B_YELLOW}POST: /channel/:${action}: @Req() user: [${user.login}] channel: [${channel.name}]${C.END}`);
-			const targetUser = await this.usersService.getUserPrimay({id: userId});
+			const targetUser = await this.usersService.getUserPrimary({id: userId});
 
 			if (action === 'kick' || action === 'ban'){
 				await this.chatService.removeUser(channel.name, 'members', userId);
@@ -342,8 +342,17 @@ export class ChatController {
 
 			if (action === 'kick' || action === 'ban'){
 				const userSocket = this.chatGateway.getUserSocket(userId);
-				if (userSocket.rooms.has(channel.id.toString()))
+				if (userSocket.rooms.has(channel.id.toString())){
+					userSocket.emit('channelListener', {
+						action: 'delete',
+						channelId: channel.id,
+						data: {
+							userId: targetUser.id,
+							login: targetUser.login,
+						}
+					})
 					userSocket.leave(channel.id.toString())
+				}
 			}
 			//Channel'daki herkese bildirim atama ekle
 			return ({ success: true });

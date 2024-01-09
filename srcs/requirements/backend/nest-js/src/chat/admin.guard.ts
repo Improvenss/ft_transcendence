@@ -27,7 +27,7 @@ export class ChatAdminGuard implements CanActivate {
 				throw (new UnauthorizedException("Channel header not found!"));
 
 			const decodedUser = this.jwtService.verify(token);
-			const tmpUser = await this.usersService.getUserPrimay({id: decodedUser.id});
+			const tmpUser = await this.usersService.getUserPrimary({id: decodedUser.id});
 			if (!tmpUser)
 				throw (new UnauthorizedException("User not found!"));
 			const tmpChannel = await this.chatService.getChannelRelation({

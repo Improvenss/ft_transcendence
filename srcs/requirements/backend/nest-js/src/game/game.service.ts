@@ -17,7 +17,7 @@ export class GameService {
 	) {}
 
 	async	createGameRoom(login: string, createGameDto: CreateGameDto) {
-		const	tmpUser = await this.usersService.getUserPrimay({login: login});
+		const	tmpUser = await this.usersService.getUserPrimary({login: login});
 		if (!tmpUser)
 			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
 		const	tmpGameRoom = await this.findGameRoom(createGameDto.name);

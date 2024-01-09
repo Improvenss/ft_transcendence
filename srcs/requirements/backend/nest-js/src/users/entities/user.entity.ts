@@ -133,9 +133,6 @@ export class Notif {
 	@IsEnum(NotificationType)
 	public type: NotificationType;
 
-	// @Column({ type: 'enum', enum: ['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest']})
-	// public type: string; // Bildiri tipi
-
 	@Column()
 	public text: string; // Bildirim metni
 

@@ -43,69 +43,46 @@ function InfoChannel() {
 		}
  	};
 
-	const	handleChannelLeave = async (selectedChannel: string) => {
-		setActiveChannel(null);
+	const	handleChannelLeave = async (selectedChannel: number) => {
 		const response = await fetchRequest({
 			method: 'DELETE',
 			headers: {
-				'channel': selectedChannel,
+				'channel': selectedChannel.toString(),
 			},
 			url: `/chat/channel/leave?channel=${selectedChannel}`
 		});
-		if (response.ok){
-			const data = await response.json();
-			console.log(`Leave channel: [${selectedChannel}]`,data);
-			if (!data.err){
-				if (activeChannel?.type === 'private')
-					setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== activeChannel?.id));
-				else {
-					setChannels((prevChannels) => {
-						if (prevChannels) {
-							return prevChannels.map((channel) => {
-							if (channel.id === activeChannel?.id) {
-								return {
-									...channel,
-									members: [],
-									admins: [],
-									messages: [],
-									bannedUsers: [],
-									status: 'public',
-								};
-							}
-							return channel;
-							});
-						}
-						return prevChannels;
-					});
-				}
-			} else {
-				console.log("handleChannelLeave err:", data.err);
-			}
-		} else {
-			console.log("---Backend Connection '❌'---");
-		}
+		//if (response.ok){
+		//	const data = await response.json();
+		//	console.log(`Leave channel: [${selectedChannel}]`,data);
+		//	if (!data.err){
+		//		//boş
+		//	} else {
+		//		console.log("handleChannelLeave err:", data.err);
+		//	}
+		//} else {
+		//	console.log("---Backend Connection '❌'---");
+		//}
 	}
 
-	const	handleChannelDelete = async (selectedChannel: string) => {
-		setActiveChannel(null);
+	const	handleChannelDelete = async (selectedChannel: number) => {
 		const response = await fetchRequest({
 			method: 'DELETE',
 			headers: {
-				'channel': selectedChannel,
+				'channel': selectedChannel.toString(),
 			},
 			url: `/chat/channel`,
 		});
-		if (response.ok){
-			const data = await response.json();
-			console.log(`Delete channel: [${selectedChannel}]`,data);
-			if (!data.err){
-				///boş
-			} else {
-				console.log("handleChannelDelete err:", data.err);
-			}
-		} else {
-			console.log("---Backend Connection '❌'---");
-		}
+		//if (response.ok){
+		//	const data = await response.json();
+		//	console.log(`Delete channel: [${selectedChannel}]`,data);
+		//	if (!data.err){
+		//		///boş
+		//	} else {
+		//		console.log("handleChannelDelete err:", data.err);
+		//	}
+		//} else {
+		//	console.log("---Backend Connection '❌'---");
+		//}
 	}
 
 	const handleUpdate = async (fieldName: string) => {
@@ -227,7 +204,7 @@ function InfoChannel() {
 										</div>
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
-												<button onClick={() => navigate('/profile/' + userInfo?.login)}> <IconProfile /> </button>
+												<button onClick={() => navigate('/profile/' + user.login)}> <IconProfile /> </button>
 												{user.login !== userInfo?.login && (
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
@@ -313,7 +290,7 @@ function InfoChannel() {
 										<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
 										<button
 											id='deleteButton'
-											onClick={() => {handleChannelDelete(activeChannel.name)}}
+											onClick={() => {handleChannelDelete(activeChannel.id)}}
 										>
 											Delete Channel
 										</button>
@@ -321,7 +298,7 @@ function InfoChannel() {
 								)}
 								<button
 									id='leaveButton'
-									onClick={() => {handleChannelLeave(activeChannel.name)}}
+									onClick={() => {handleChannelLeave(activeChannel.id)}}
 								>
 									Leave Channel
 								</button>
