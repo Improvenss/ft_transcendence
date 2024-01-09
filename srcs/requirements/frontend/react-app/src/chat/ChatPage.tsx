@@ -7,14 +7,16 @@ import { useAuth } from "../hooks/AuthHook";
 import Channel from "./Channel";
 import ActiveChannel from "./ActiveChannel";
 import { createContext, useContext, useEffect, useState } from "react";
-import { IChannel, IChannelContext } from './iChannel';
 import ChannelInfo from "./ChannelInfo";
-import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
+import { IChannel, IChannelContext } from "./iChannel";
+import fetchRequest from "../utils/fetchRequest";
+import { useUser } from "../hooks/UserHook";
 
 export const ChannelContext = createContext<IChannelContext>({
 	channels: undefined,
+	setChannels: () => {},
 	activeChannel: null,
 	setActiveChannel: () => {},
 	channelInfo: false,
@@ -27,64 +29,150 @@ export const useChannelContext = () => {
 
 function ChatPage () {
 	console.log("---------CHAT-PAGE---------");
-	const isAuth = useAuth().isAuth;
+	const {isAuth} = useAuth();
 	const socket = useSocket();
-	const userCookie = Cookies.get("user");
-
-	const [channelInfo, setChannelInfo] = useState(false);
+	const { userInfo } = useUser();
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
-	const [activeChannel, setActiveChannel] = useState<IChannel | null>(() => {
-		const globalChannel = channels?.find(channel => channel.status === 'involved' && channel.name === 'Global Channel');
-		if (globalChannel === undefined) //Henüz global channel olmadığı için null dönüyor, ama boş channel oluşturup seçilirse pencere açılır.
-			return (null);
-		return (globalChannel);
-	});
+	const [activeChannel, setActiveChannel] = useState<IChannel | null>(null);
+	const [channelInfo, setChannelInfo] = useState(false);
 
 	useEffect(() => {
-		const fetchChannels = async () => {
-		  try {
-			//  const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?channel=abc&relations=all", {
-				const responseAllChannels = await fetch(process.env.REACT_APP_FETCH + "/chat/channel?relations=members", {
-					method: 'GET', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-					headers: {
-						'Content-Type': 'application/json',
-						"Authorization": "Bearer " + userCookie,
-					},
+		if (isAuth){
+			const fetchChannels = async () => {
+				const response = await fetchRequest({
+					method: 'GET',
+					url: "/chat/channels",
 				});
-	
-				if (!responseAllChannels.ok) {
-					throw new Error('API-den veri alınamadı.');
+				if (response.ok){
+					const data = await response.json();
+					console.log("fetchChannels:", data);
+					if (!data.err){
+						setChannels(data);
+					} else {
+						console.log("fetchChannels error:", data.err);
+					}
+				} else {
+					console.log("---Backend Connection '❌'---");
 				}
-				const data = await responseAllChannels.json();
-				console.log("Get Channels: ", data);
-				setChannels(data);
-			} catch (error) {
-				console.error('Veri getirme hatası:', error);
-			}
-		};
-	
-		fetchChannels();
-
-		const	channelListener = (channel: IChannel) => {
-			console.log("Channel listesi guncelleniyor cunku degisiklik oldu.");
-			fetchChannels(); // channel list update için
+			};
+			fetchChannels();
 		}
-		socket?.on("channelListener", channelListener);
-		return () => {
-			socket?.off("channelListener", channelListener);
+	}, [isAuth]);
+
+	useEffect(() => {
+		if (isAuth && socket && userInfo){
+
+			enum ActionType {
+				Create = 'create',
+				Delete = 'delete',
+				NewMessage = 'newMessage',
+				Join = 'join',
+				Leave = 'leave',
+				Kick = 'updateUser',
+				Ban = 'ban',
+				UnBan = 'unban',
+				SetAdmin = 'setAdmin',
+				RemoveAdmin = 'removeAdmin',
+				Update = 'update',
+			}
+
+			const	handleListenChannel = ({action, channelId, data}: {
+				action: ActionType,
+				channelId: number,
+				data?: any
+			}) => {
+				console.log(`handleListenChannel: action[${action}] channelId[${channelId}]`);
+				switch (action) {
+					case ActionType.Create:
+						console.log("Channel Recived:", data);
+						setChannels(prevChannels => {
+							if (!prevChannels) return prevChannels;
+							const existingChannelIndex = prevChannels.findIndex(channel => channel.id === channelId) ;
+	
+							if (existingChannelIndex !== -1) {
+								const updatedChannels = [...prevChannels]; // Kanal zaten var, güncelle
+								updatedChannels[existingChannelIndex] = data;
+								return updatedChannels;
+							} else {
+								return [...prevChannels, data]; // Kanal yok, ekleyerek güncelle
+							}
+						});
+						break;
+					case ActionType.Delete:
+						setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
+						break;
+					case ActionType.Leave:
+						break;
+					case ActionType.NewMessage:
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+
+							const updatedChannels = prevChannels.map((channel) => {
+							if (channel.id === channelId) {
+								const updatedMessages = [...channel.messages, data];;
+								return { ...channel, messages: updatedMessages };
+							} else {
+								return channel;
+							}
+							});
+							return updatedChannels;
+						});
+						break;
+					case ActionType.Update:
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+
+							const updatedChannels = prevChannels.map((channel) => {
+							if (channel.id === channelId) {
+								const updatedChannel = {
+									...channel,
+									...data
+								};
+								return (updatedChannel);
+							} else {
+								return channel;
+							}
+							});
+						
+							return updatedChannels;
+						});
+						break;
+					case ActionType.RemoveAdmin:
+						// setChannels((prevChannels) => {
+						// 	if (!prevChannels) return prevChannels;
+
+						// 	const updatedChannels = prevChannels.map((channel) => {
+						// 	if (channel.id === channelId) {
+
+						// 		return (updatedChannel);
+						// 	} else {
+						// 		return channel;
+						// 	}
+						// 	});
+						
+						// 	return updatedChannels;
+						// });
+						break;
+				}
+			}
+
+			socket.on('channelListener', handleListenChannel);
+			return () => {
+				socket.off(`channelListener`, handleListenChannel);
+			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, []);
+	}, [isAuth, socket]);
 
 	useEffect(() => {
-		if (isAuth && channels){
-			channels
-			.filter((channel) => channel.status === 'involved')
-			.forEach((channel) => {
-				socket?.emit('joinChannel', { name: channel.name });
-			});
+		if (activeChannel && channels) {
+			const updatedActiveChannel = channels.find((channel) => channel.id === activeChannel.id);
+			if (updatedActiveChannel) {
+				setActiveChannel(updatedActiveChannel);
+			}
 		}
-	}, [channels, socket]);
+	}, [channels]); /// activeChannel yerine doğrudan channels'dan çekilebilir verileri. bu sayede tekrardan derleme olayı ortadan kalkabilir
+	  
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
@@ -95,12 +183,15 @@ function ChatPage () {
 
 	return (
 		<div id="chat-page">
-			<ChannelContext.Provider value={{ channels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
+			<ChannelContext.Provider value={{ channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
 				<Channel />	
-				<ActiveChannel />
+				{userInfo && (
+					<ActiveChannel userId={userInfo.id}/>
+				)}
 				<ChannelInfo />
 			</ChannelContext.Provider>
 		</div>
 	)
 }
+
 export default ChatPage;

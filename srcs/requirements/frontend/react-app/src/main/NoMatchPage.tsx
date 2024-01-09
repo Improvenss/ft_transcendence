@@ -1,7 +1,9 @@
+import './NoMatchPage.css';
 function NoMatchPage(){
+
 	return (
-		<div id="404">
-			<h1>404</h1>
+		<div className='not-found'>
+			<div title="404">404</div>
 		</div>
 	)
 }

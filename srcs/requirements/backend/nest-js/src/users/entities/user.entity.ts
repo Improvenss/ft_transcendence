@@ -1,12 +1,25 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, JoinColumn, ManyToOne } from "typeorm";
 import { Channel, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
-import { IsEmail } from "class-validator";
+import { IsEmail, IsEnum } from "class-validator";
+import { GameHistory } from "src/game/entities/gameHistory.entity";
+
+export enum UserStatus {
+	ONLINE = 'online',
+	OFFLINE = 'offline',
+	IN_CHAT = 'in-chat',
+	IN_GAME = 'in-game',
+	AFK = 'afk',
+}
 
 // Public olarak belirtilmese dahi public olarak ele alınmaktadır.
 // @Entity({name: 'user'})
 @Entity('user')
 export class User {
+	constructor(user: Partial<User>) {
+		Object.assign(this, user);
+	}
+
 	@PrimaryGeneratedColumn()
 	public id: number; // Database'deki sıralama için değişken
 
@@ -20,19 +33,23 @@ export class User {
 	@Column({ unique: true })
 	public login: string; // Intra login
 
-	@Column()
+	@Column({ unique: true })
 	public displayname: string; // Intra ad-soyad
 
-	@Column()
+	@Column({ unique: true })
 	public imageUrl: string; // Intra resim linki
 
-	@Column({ nullable: true })
-	public socketId: string; // Websocket
+	@Column({ unique: true, nullable: true })
+	public socketId: string;; // Websocket
 
 	//----------------------Status----------------------------//
 
-	@Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
-	public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
+	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.OFFLINE })
+	@IsEnum(UserStatus)
+	public status: UserStatus;
+
+	// @Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
+	// public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
 
 	//----------------------Optional----------------------------//
 
@@ -47,6 +64,11 @@ export class User {
 	@ManyToMany(() => User, user => user.friends)
 	@JoinTable()
 	public friends: User[];
+
+	//----------------------Notfis----------------------------//
+
+	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
+	public notifications: Notif[];
 
 	//----------------------Channel----------------------------//
 
@@ -77,22 +99,60 @@ export class User {
 	@Column({ default: 0 })
 	public gamesLost: number;
 
+	@OneToMany(() => GameHistory, history => history.user, {
+		nullable: true,
+		cascade: true,
+	})
+	@JoinTable()
+	public gameHistory: GameHistory[];
+
 	// game achievementler
+	
+	// Aktif oldugu oyun odasi.
+	@Column({ nullable: true })
+	public currentRoomId: number;
 
-	@ManyToMany(() => Game, game => game.players, { nullable: true, onDelete: 'CASCADE' })
-	@JoinTable()
-	public gameRooms: Game[];
+	@ManyToOne(() => Game, game => game.players)
+	@JoinColumn({ name: 'currentRoomId' })
+	public currentRoom: Game;
+}
 
-	@ManyToMany(() => Game, game => game.admins, { nullable: true, onDelete: 'CASCADE' })
-	@JoinTable()
-	public gameRoomsAdmin: Game[];
+export enum NotificationType {
+	TEXT = 'text',
+	SEND_FRIEND_REQUEST = 'sendFriendRequest',
+	ACCEPT_FRIEND_REQUEST = 'acceptFriendRequest',
+	DECLINE_FRIEND_REQUEST = 'declineFriendRequest',
+}
 
-	@ManyToMany(() => Game, game => game.watchers, { nullable: true, onDelete: 'CASCADE' })
-	@JoinTable()
-	public gameRoomsWatcher: Game[];
+@Entity('notification')
+export class Notif {
+	@PrimaryGeneratedColumn()
+	public id: number;
 
-	constructor(user: Partial<User>) {
-		Object.assign(this, user);
+	@Column({ type: 'enum', enum: NotificationType })
+	@IsEnum(NotificationType)
+	public type: NotificationType;
+
+	// @Column({ type: 'enum', enum: ['text', 'sendFriendRequest', 'acceptFriendRequest', 'declineFriendRequest']})
+	// public type: string; // Bildiri tipi
+
+	@Column()
+	public text: string; // Bildirim metni
+
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	public date: Date; // Bildirim tarihi
+
+	@ManyToOne(() => User, user => user.notifications)
+	public user: User; // Kullanıcı ile ilişkilendirme
+
+	@Column({ default: false })
+	public read: boolean; // Okunma durumu
+
+	@Column()
+	public from: string; // Gönderen kişinin logini
+
+	constructor(notification: Partial<Notif>) {
+		Object.assign(this, notification);
 	}
 }
 

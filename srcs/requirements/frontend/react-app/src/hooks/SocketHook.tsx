@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthHook';
-import Cookies from 'js-cookie';
 import LoadingPage from '../utils/LoadingPage';
+import { useUser } from './UserHook';
 
 // SocketContext'i oluştur
 const SocketContext = createContext<Socket | undefined>(undefined);
@@ -10,37 +10,34 @@ const SocketContext = createContext<Socket | undefined>(undefined);
 // Provider component'ini oluştur
 export function SocketProvider({ children }: { children: React.ReactNode }) {
 	console.log("---------SOCKETHOOK-PAGE---------");
-	const isAuth = useAuth().isAuth;
-	const userCookie = Cookies.get("user");
+	const {isAuth} = useAuth();
+	const {userInfo} = useUser();
 	const [socket, setSocket] = useState<Socket | undefined>(undefined);
 
 	useEffect(() => {
-		if (isAuth) {
-			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string);
-			newSocket.on('connect', async () => {
-				console.log('Client connected to Server. ✅');
-				const response = await fetch(process.env.REACT_APP_SOCKET as string, {
-					method: "PATCH",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie as string,
-					},
-					body: JSON.stringify({
-						socketId: newSocket.id as string,
-					})
-				})
-				if (response.ok)
-				{
-					console.log("Socket update:", await response.json());
-					setSocket(newSocket);
-				}
+		if (isAuth && userInfo && socket === undefined) {
+			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string, {
+				query: {
+					id: userInfo.id,
+				},
 			});
-			newSocket.on('disconnect', () => {
-				console.log('Client connection lost. 💔');
+			newSocket.on('connect', () => {
+				console.log('Client connected to Server. ✅');
+				setSocket(newSocket);
+			});
+			newSocket.on('disconnect', (reason) => {
+				console.log(`Client connection lost. 💔 Reason: ${reason}`);
 				setSocket(undefined);
 			});
+			// newSocket.on('error', (error) => {
+			// 	console.error('WebSocket Error:', error);
+			// });
+			// newSocket.on(`userId-${userInfo.id}`, handleListenAction);
 			return () => {
-				newSocket.close();
+				// newSocket.off(`userId-${userInfo.id}`, handleListenAction);
+				if (newSocket.connected){
+					newSocket.disconnect();
+				}
 			};
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */

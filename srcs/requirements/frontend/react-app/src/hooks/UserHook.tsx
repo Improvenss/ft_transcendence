@@ -2,18 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import Cookies from 'js-cookie';
-
-interface IUserProps{
-	email: string;
-	login: string;
-	displayname: string;
-	imageUrl: string;
-	socketId?: string;
-	nickname?: string;
-	avatar?: string;
-	status: string;
-	friends: IUserProps[];
-}
+import fetchRequest from '../utils/fetchRequest';
+import { IUserProps } from '../chat/iChannel';
 
 const UserContext = createContext<{
 	userInfo: IUserProps | undefined;
@@ -23,41 +13,27 @@ const UserContext = createContext<{
 
 export function UserProvider({children}: {children: React.ReactNode}) {
 	console.log("---------USERHOOK-PAGE---------");
-	const isAuth = useAuth().isAuth;
-	const userCookie = Cookies.get("user");
+	const {isAuth} = useAuth();
 	const [userInfo, setUserInfo] = useState<IUserProps | undefined>(undefined);
 
 	useEffect(() => {
-		if (isAuth === true){
+		if (isAuth){
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
-				//const response = await fetch(process.env.REACT_APP_USER as string, {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=me&relations=friends`, {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie as string,
-					},
+				const response = await fetchRequest({
+					method: 'GET',
+					url: `/users?relation=notifications&relation=friends&primary=true`,
 				});
 				if (response.ok){
 					console.log("IV: ---User Backend Connection '✅'---");
 					const data = await response.json();
-					if (data.message === 'USER OK'){
+					console.log("UserHook:", data);
+					if (!data.err){
 						console.log("IV: ---User Response '✅'---");
-						setUserInfo({
-							email: data.user.email,
-							login: data.user.login,
-							displayname: data.user.displayname,
-							imageUrl: data.user.imageUrl,
-							socketId: data.user.socketId,
-							nickname: data.user.nickname,
-							avatar: data.user.avatar,
-							status: data.user.status,
-							friends: data.user.friends,
-						});
-						console.log("userInfo:", data.user);
+						setUserInfo(data);
 					} else {
 						console.log("IV: ---User Response '❌'---");
+						console.log("UserHook Error:", data.err);
 						Cookies.remove('user');
 					}
 				} else {
@@ -65,11 +41,11 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 				}
 			}
 			checkUser();
-		} 
+		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, []);
+	}, [isAuth]);
 
-	if ((isAuth === true && userInfo === undefined))
+	if ((isAuth && userInfo === undefined))
 		return (<LoadingPage />);
 
 	return (

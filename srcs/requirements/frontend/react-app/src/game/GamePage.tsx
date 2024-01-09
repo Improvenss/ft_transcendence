@@ -1,7 +1,7 @@
 // GamePage.tsx
 
 import React, { useState } from 'react';
-import Modal from './Modal';
+import Modal from "..//utils/Modal";
 import './GamePage.css';
 import CreateGame from './CreateGame';
 import JoinGame from './JoinGame';
@@ -44,7 +44,17 @@ const GamePage: React.FC = () => {
 			<GameButton content="Join Game" onClick={() => openModal(<JoinGame />)} />
 			<GameButton content="Create Game" onClick={() => openModal(<CreateGame />)} />
 
-			<Modal isOpen={isModalOpen} onClose={closeModal}>
+			{/* <Modal isOpen={isModalOpen} onClose={closeModal}>
+				{modalContent}
+			</Modal> */}
+			<Modal
+				isOpen={isModalOpen}
+				onClose={closeModal}
+				mouse={true}
+				overlayClassName='game-overlay'
+				modalClassName='game-modal'
+				closeButtonClassName='game-close-button'
+			>
 				{modalContent}
 			</Modal>
 		</div>

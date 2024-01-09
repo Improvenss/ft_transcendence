@@ -217,3 +217,12 @@
 	padding-right: 5px;
 	padding-left: 5px;
 }
+
+#activeChannel .error-message {
+	color: orange;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	width: 100%;
+	display: inline-block;
+	text-align: center;
+}

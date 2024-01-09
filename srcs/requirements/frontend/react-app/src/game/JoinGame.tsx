@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import { IGame } from "./IGame";
 import { useNavigate } from "react-router-dom";
+import fetchRequest from "../utils/fetchRequest";
 
 export interface IGameJoinForm {
 	name: string,
@@ -34,12 +35,12 @@ function JoinGame(){
 						},
 					});
 				if (!response.ok)
-					throw new Error('API-den veri alınamadı.');
+					throw new Error('API-den veri alinamadi.');
 				const data = await response.json();
 				console.log("Get Channels: ", data);
 				setRooms(data);
 			} catch (error) {
-				console.error('Veri getirme hatası:', error);
+				console.error('Veri getirme hatasi:', error);
 			}
 		};
 	
@@ -57,25 +58,28 @@ function JoinGame(){
 	}, [socket]);
 
 	const handleSubmit = async (game: IGame, password: string | null) => {
-		const response = await fetch(process.env.REACT_APP_FETCH + `/game/room/register`, {
+		const response = await fetchRequest({
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-			},
 			body: JSON.stringify({
 				room: game.name,
 				password: password,
 			}),
+			url: `/game/room/register`
 		});
-		if (!response.ok)
-			throw (new Error("API fetch error."));
-		const data = await response.json();
-		console.log("Join-game: ", data);
-		navigate(`/game/lobby/${game.name}`);
-
-		if (errorMessage != null)
-		  setErrorMessage('');
+		if (response.ok){
+			const data = await response.json();
+			console.log("Join-game: ", data);
+			if (!data.err){
+				navigate(`/game/lobby/${game.name}`);
+				if (errorMessage != null)
+					setErrorMessage('');
+			} else {
+				console.log("Join-game:", data.err);
+				setErrorMessage(data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
 
 	return(
@@ -142,12 +146,12 @@ function JoinGame(){
 										onClick={() => {
 											const enteredPassword = password.current?.value;
 											if (!enteredPassword || !enteredPassword.trim()) {
-											  setErrorMessage("Password is required.");
+												setErrorMessage("Password is required.");
 											} else {
-											  setErrorMessage('');
-											  handleSubmit(game, enteredPassword);
+												{errorMessage && setErrorMessage('')}
+												handleSubmit(game, enteredPassword);
 											}
-										  }}
+										}}
 									>
 										Join
 									</button>

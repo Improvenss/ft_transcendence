@@ -13,25 +13,13 @@ import { useUser } from "./hooks/UserHook";
 import ProfilePage from "./user/ProfilePage";
 import GamePage from './game/GamePage';
 import GameLobby from './game/GameLobby';
-import { ReactComponent as IconNotifs } from './assets/iconNotification.svg';
-import { useEffect, useState } from 'react';
+import Notification from './Notification';
 
 function App() {
 	console.log("---------APP-PAGE---------");
 	const { isAuth, setAuth } = useAuth();
 	const { userInfo } = useUser();
 	const navigate = useNavigate();
-	const [notifs, setNotifs] = useState<boolean>(false);
-	const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
-
-	useEffect(() => {
-		// bildirim için useEffect kullanılacak, burada socket dinlemesi gerçekleştirilmelidir,
-		//		Kullanıcıya, arkadaşlık isteği, oyun isteği gibi istekleri ve diğer bildirimleri listeleteceğiz.
-		//		Bu yapılar, buton içerikli, text içerikli olacak.
-		if (notifs) {
-		  setUnreadNotifications((prevCount) => prevCount + 1);
-		}
-	}, [notifs]);
 
 	function logOut() {
 		localStorage.clear();
@@ -44,7 +32,7 @@ function App() {
 
 	return (
 		<div id="app">
-			{isAuth && <FallingChars />}
+			{/* {isAuth && <FallingChars />} */}
 			<header>
 				{isAuth ? (
 					<>
@@ -61,21 +49,8 @@ function App() {
 								<img src={userInfo?.imageUrl} alt="Profile" />
 							)}
 						</Link>
-						<div id="notifs-container">
-							<IconNotifs id='notifs' onClick={() => setNotifs(!notifs)} />
-							{unreadNotifications > 0 && (
-								<div className="notification-count">
-									{unreadNotifications}
-								</div>
-							)}
-						</div>
+						<Notification />
 					</ul>
-						{notifs && (
-							<div className="notifs-content">
-								abcabcabcabcabca
-								abcabcabcabcabca
-							</div>	
-						)}
 					</>
 				) : (
 					<nav>
@@ -99,4 +74,5 @@ function App() {
 		</div>
 	);
 };
+
 export default App;

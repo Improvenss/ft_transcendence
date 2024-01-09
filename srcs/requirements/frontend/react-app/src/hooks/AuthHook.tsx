@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import LoadingPage from '../utils/LoadingPage';
+import fetchRequest from '../utils/fetchRequest';
 
 // Create an AuthContext
 const AuthContext = createContext<{
@@ -19,36 +20,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		const checkAuth = async () => {
-			console.log("I: ---Cookie Checking---");
-			const userCookie = Cookies.get("user");
-			// const userLStore = localStorage.getItem("user");
-			// 'https://localhost/backend/api/cookie' veya /backend/api/cookie
-			if (userCookie === undefined)
-			{
-				console.log("I: ---Cookie Not Found '❌'---");
-				setAuth(false);
-				return ;
-			}
-			const response = await fetch(process.env.REACT_APP_USER_COOKIE as string, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": "Bearer " + userCookie as string,
-				},
-			});
-			if (response.ok)
-			{
-				console.log("I: ---Cookie Backend Connection '✅'---");
-				const data = await response.json();
-				if (data.message === "COOKIE OK") {
-					console.log("I: ---Cookie Response '✅'---");
-					setAuth(true);
+			try {
+				console.log("I: ---Cookie Checking---");
+				const userCookie = Cookies.get("user");
+				// const userLStore = localStorage.getItem("user");
+				if (userCookie === undefined)
+					throw new Error("I: ---Cookie Not Found '❌'---");
+				const response = await fetchRequest({
+					method: 'GET',
+					url: '/users/cookie',
+				});
+				if (response.ok) {
+					console.log("I: ---Cookie Backend Connection '✅'---");
+					const data = await response.json();
+					if (!data.err){
+						console.log("AuthHook:", data);
+						setAuth((!data.err));
+					} else {
+						throw new Error(data.err);
+					}
 				} else {
-					console.log("I: ---Cookie Response '❌'---");
-					setAuth(false);
+					throw new Error("I: ---Cookie Backend Connection '❌'---");
 				}
-			} else {
-				console.log("I: ---Cookie Backend Connection '❌'---");
+			} catch (err) {
+				if (err instanceof Error) {
+					console.log("AuthHook err:", err.message);
+				}
+				Cookies.remove('user');
 				setAuth(false);
 			}
 		};
@@ -61,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	return (
 		<>
 			<AuthContext.Provider value={{ isAuth, setAuth }}>
-			{children}
+				{children}
 			</AuthContext.Provider>
 		</>
 	);

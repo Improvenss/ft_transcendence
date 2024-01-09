@@ -18,14 +18,25 @@ import { StatusProvider } from './hooks/StatusHook';
  *   Arasina yazmamiz gerekiyor her seyi.
  *  </BrowserRouter>
  * 
- * TODO: Kullanici adlarini koy.
- * TODO: User list yap.
- * TODO: Channel list yap.
- * TODO: Channel olustururken; ChatPage.tsx'te olacak ama function
- *  implementation'larini(definition) ayri bir 'Channel.tsx' dosyasinda yaz.
- * TODO: Sol & Sag mesajlari genisligini sinirla.
- * TODO: Mesajlari 'await' ile synchronize hale getir.
- * TODO: /chat baglaninca otomatik bir sekilde /chat/#global yonlendirilecek.
+ * TODO: notification'da tüm bildirileri sil butonu ekle
+ * TODO: profilePage'de friends bölümüne arkadaşlıktan çıkar ekle, başka birinin profiline gidincede buton olarak ekle
+ * TODO: backend'den çoğu yapıyı tek formatta çek yani ne gerekiyorsa onu al
+ * TODO: frontend'de notif'ler okunduğu zaman bazen okundu olarak işaretlemiyor bugta kalıyor
+ * TODO: chat kanal üstüne tıklayınca kapanmıyor.
+ * TODO: database'ye birşeyleri kayıt ederken boş mu değil mi kontrol et. (Derleme aşamasında birşeyler kaydedince etksik kayıt oluyor.)
+ * TODO: mesaj gönderirken bazen author boş oluyor, neden nasıl idk.
+ * TODO: channel'dan levae yapıp, login yaptıktan hemen sonra channel'ün tıklayıp kapatıp açınca hata veriyor (güncelleme yaparken yavaş kaldığı için olduğunu düşünüyorum.)
+ * TODO: channelar silinince resimlerinide sil
+ * TODO: arada bir user socketini bulamıyor neden idk
+ * TODO: channel info'daki güncellemeler düzeltilmedi
+ * TODO: channel joinleme olayını frontend'e aktarılabilir idk
+ * TODO: userinput'un güncelle - tek method haline getir
+ * TODO: activechannels'ı doğrudan channels bloğundan çekebilirsin
+ * ---->
+ * 		const startTime = new Date();
+		const endTime = new Date();
+		console.log(`findUser execution time: ${endTime.getTime() - startTime.getTime()} milliseconds`);
+ * 
  */
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
@@ -33,8 +44,8 @@ const root = ReactDOM.createRoot(
 root.render(
 	<FontLoadedProvider>
 		<AuthProvider>
-			<SocketProvider>
-				<UserProvider>
+			<UserProvider>
+				<SocketProvider>
 						{/*<React.StrictMode>*/}
 							<BrowserRouter>
 								<StatusProvider>
@@ -42,8 +53,8 @@ root.render(
 								</StatusProvider>
 							</BrowserRouter>
 						{/*</React.StrictMode>*/}
-				</UserProvider>
-			</SocketProvider>
+				</SocketProvider>
+			</UserProvider>
 		</AuthProvider>
 	</FontLoadedProvider>
 );

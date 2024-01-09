@@ -6,7 +6,7 @@ import { Channel } from '../entities/chat.entity';
 export class CreateMessageDto {
 	@IsString()
 	@IsNotEmpty()
-	message: string;
+	content: string;
 
 	@IsDate()
 	@IsOptional()

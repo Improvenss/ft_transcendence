@@ -12,14 +12,15 @@ import { ReactComponent as IconAddFriend } from '../assets/chat/iconAddFriend.sv
 import { ReactComponent as IconInviteGame } from '../assets/chat/iconInviteGame.svg';
 import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
-import Cookies from "js-cookie";
 import { useUser } from "../hooks/UserHook";
 import { useNavigate } from "react-router-dom";
+import handleChannelRequest from '../utils/handleChannelRequest';
+import handleRequest from '../utils/handleRequest';
+import fetchRequest from "../utils/fetchRequest";
 
- function InfoChannel() {
-	const { activeChannel, setActiveChannel, channelInfo } = useChannelContext();
-	const userCookie = Cookies.get("user");
-	const my = useUser().userInfo;
+function InfoChannel() {
+	const { setChannels, activeChannel, setActiveChannel, channelInfo } = useChannelContext();
+	const { userInfo } = useUser();
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
  	const [friendSearchTerm, setFriendSearchTerm] = useState('');
@@ -33,51 +34,83 @@ import { useNavigate } from "react-router-dom";
 	const [errorMessage, setErrorMessage] = useState('');
 	const navigate = useNavigate();
 
-	// User kendisi Leave Channel dediginde calisir admin icin kick olarak baska function yapacagiz.
-	const	handleChannelLeave = async (selectedChannel: string) => {
-		console.log(`User leave ${selectedChannel} channel`);
-		const responseChannelLeave = await fetch(process.env.REACT_APP_FETCH + `/chat/channel/leave?channel=${selectedChannel}`, {
-			method: 'POST', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-				"channel": selectedChannel,
-			},
-		});
-		if (!responseChannelLeave.ok) {
-			throw new Error('API-den veri alınamadı.');
+	const handleTabInfoClick = (tabId: string) => {
+		if (selectedImage != null)
+			setSelectedImage(null);
+		if (activeTabInfo !== tabId){
+			setActiveTabInfo(tabId);
+			console.log(`Switched to channel ${tabId}`);
 		}
-		const data = await responseChannelLeave.json();
-		console.log("Leave Channel:", data);
+ 	};
+
+	const	handleChannelLeave = async (selectedChannel: string) => {
 		setActiveChannel(null);
+		const response = await fetchRequest({
+			method: 'DELETE',
+			headers: {
+				'channel': selectedChannel,
+			},
+			url: `/chat/channel/leave?channel=${selectedChannel}`
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log(`Leave channel: [${selectedChannel}]`,data);
+			if (!data.err){
+				if (activeChannel?.type === 'private')
+					setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== activeChannel?.id));
+				else {
+					setChannels((prevChannels) => {
+						if (prevChannels) {
+							return prevChannels.map((channel) => {
+							if (channel.id === activeChannel?.id) {
+								return {
+									...channel,
+									members: [],
+									admins: [],
+									messages: [],
+									bannedUsers: [],
+									status: 'public',
+								};
+							}
+							return channel;
+							});
+						}
+						return prevChannels;
+					});
+				}
+			} else {
+				console.log("handleChannelLeave err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
 
 	const	handleChannelDelete = async (selectedChannel: string) => {
-		const responseChannelDelete = await fetch(process.env.REACT_APP_FETCH + `/chat/channel?channel=${selectedChannel}`, {
-			method: 'DELETE', // ya da 'POST', 'PUT', 'DELETE' gibi isteğinize uygun HTTP metodunu seçin
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-			},
-		});
-		if (!responseChannelDelete.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await responseChannelDelete.json();
-		console.log("DELETE Channel:", data);
 		setActiveChannel(null);
+		const response = await fetchRequest({
+			method: 'DELETE',
+			headers: {
+				'channel': selectedChannel,
+			},
+			url: `/chat/channel`,
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log(`Delete channel: [${selectedChannel}]`,data);
+			if (!data.err){
+				///boş
+			} else {
+				console.log("handleChannelDelete err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
 
- 	const handleTabInfoClick = (tabId: string) => {
-		if (selectedImage != null)
-			setSelectedImage(null);
- 		setActiveTabInfo(tabId);
- 		// Implement logic to update content based on the selected tab
- 		// For now, let's just log a message to the console
- 		console.log(`Switched to channel ${tabId}`);
- 	};
-
 	const handleUpdate = async (fieldName: string) => {
+		if (!activeChannel)
+			return ;
 		const formData = new FormData();
 
 		switch (fieldName) {
@@ -124,77 +157,29 @@ import { useNavigate } from "react-router-dom";
 			break;
 		}
 
-		const	responseChannelCustomize = await fetch(
-			process.env.REACT_APP_FETCH + `/chat/channel?channel=${activeChannel?.name}`, {
+		const response = await fetchRequest({
 			method: 'PATCH',
 			headers: {
-				"Authorization": "Bearer " + userCookie as string,
-				"channel": activeChannel?.name || "",
+				"channel": activeChannel.id.toString(),
 			},
 			body: formData,
+			url: `/chat/channel`
 		});
-		if (!responseChannelCustomize.ok)
-			console.log("Channel Customize screen update error.");
+		if (response.ok){
+			const data = await response.json();
+			console.log(`Update channel: [${activeChannel.name}]`,data);
+			if (!data.err){
+				///boş
+			} else {
+				console.log("handleUpdate err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 
 		if (errorMessage != null)
 			setErrorMessage('');
 	};
-
-	const handleInfo = async (action: string, targetUser: string) => {
-		if (!activeChannel || !my)
-			return;
-		console.log("me:", my.login, "- channel:", activeChannel.name);
-		let url = '';
-		switch (action) {
-			case 'goProfile':
-				navigate('/profile/' + targetUser);
-				return;
-			case 'addFriend':
-				console.log(`User[${my.login}] sending friend request to 'user[${targetUser}]'.`);
-				url = `/users/friend/add?user=${targetUser}`;
-				break;
-			case 'directMessage':
-				console.log(action);
-				break;
-			case 'inviteGame':
-				console.log(action);
-				break;
-			case 'userKick':
-				console.log(`User[${targetUser}] kick from channel[${activeChannel.name}]`);
-				url = `/chat/channel/kick?user=${targetUser}`;
-				break;
-			case 'userBan':
-				console.log(`User[${targetUser}] banned from channel[${activeChannel.name}]`);
-				url = `/chat/channel/ban?user=${targetUser}`;
-				break;
-			case 'userUnban':
-				console.log(`User[${targetUser}] was unbanned from channel[${activeChannel.name}]`);
-				url = `/chat/channel/unban?user=${targetUser}`;
-				break;
-			case 'setAdmin':
-				console.log(action);
-				break;
-			case 'removeAdmin':
-				console.log(action);
-				break;
-			default:
-				break;
-		}
-
-		const response = await fetch(process.env.REACT_APP_FETCH + url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				"Authorization": "Bearer " + userCookie,
-				"channel": activeChannel.name,
-			},
-		});
-		if (!response.ok) {
-			throw new Error('API-den veri alınamadı.');
-		}
-		const data = await response.json();
-		console.log("HandleInfo:", data);
-	}
 
  	return (
  		<>
@@ -242,26 +227,26 @@ import { useNavigate } from "react-router-dom";
 										</div>
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
-												<button onClick={() => handleInfo('goProfile', user.login)}> <IconProfile /> </button>
-												{user.login !== my?.login && (
+												<button onClick={() => navigate('/profile/' + userInfo?.login)}> <IconProfile /> </button>
+												{user.login !== userInfo?.login && (
 													<>
-														<button onClick={() => handleInfo('addFriend', user.login)}> <IconAddFriend /> </button>
-														<button onClick={() => handleInfo('directMessage', user.login)}> <IconDM /> </button>
-														<button onClick={() => handleInfo('inviteGame', user.login)}> <IconInviteGame /> </button>
+														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
+														<button onClick={() => console.log("dm yok yaz")}> <IconDM /> </button>
+														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
-												{activeChannel.admins.some((admin) => admin.login === my?.login) && (
+												{activeChannel.admins.some((admin) => admin.login === userInfo?.login) && (
 													<>
-														{user.login !== my?.login && (
+														{user.login !== userInfo?.login && (
 															<>
-																<button onClick={() => handleInfo('userKick', user.login)}> <IconKick /> </button>
-																<button onClick={() => handleInfo('userBan', user.login)}> <IconBan /> </button>
+																<button onClick={() => handleChannelRequest('kick', user.id, activeChannel.id)}> <IconKick /> </button>
+																<button onClick={() => handleChannelRequest('ban', user.id, activeChannel.id)}> <IconBan /> </button>
 															</>
 														)}
 														{activeChannel.admins.some((admin) => admin.login === user.login) ? (
-															<button onClick={() => handleInfo('removeAdmin', user.login)}>Remove Admin</button>
+															<button onClick={() => handleChannelRequest('removeAdmin', user.id, activeChannel.id)}>Remove Admin</button>
 														) : (
-															<button onClick={() => handleInfo('setAdmin', user.login)}>Set Admin</button>
+															<button onClick={() => handleChannelRequest('setAdmin', user.id, activeChannel.id)}>Set Admin</button>
 														)}
 													</>
 												)}
@@ -276,7 +261,7 @@ import { useNavigate } from "react-router-dom";
 
 						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
-								{activeChannel.admins.some((admin) => admin.login === my?.login) ? (
+								{activeChannel.admins.some((admin) => admin.login === userInfo?.login) && (
 									<>
 										{errorMessage && <p className="error-message">{errorMessage}</p>}
 										<label htmlFor="channelName">Channel Name:</label>
@@ -326,14 +311,6 @@ import { useNavigate } from "react-router-dom";
 											placeholder="Change Password..."
 										/>
 										<button onClick={() => handleUpdate('channelPassword')}>Change Password </button>
-
-										<button
-											id='leaveButton'
-											onClick={() => {handleChannelLeave(activeChannel.name)}}
-										>
-											Leave Channel
-										</button>
-
 										<button
 											id='deleteButton'
 											onClick={() => {handleChannelDelete(activeChannel.name)}}
@@ -341,14 +318,13 @@ import { useNavigate } from "react-router-dom";
 											Delete Channel
 										</button>
 									</>
-								) : (
-									<button
-										id='leaveButton'
-										onClick={() => {handleChannelLeave(activeChannel.name)}}
-									>
-										Leave Channel
-									</button>
 								)}
+								<button
+									id='leaveButton'
+									onClick={() => {handleChannelLeave(activeChannel.name)}}
+								>
+									Leave Channel
+								</button>
  							</div>
  						)}
 
@@ -361,7 +337,7 @@ import { useNavigate } from "react-router-dom";
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{my?.friends
+ 								{userInfo?.friends
  									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
@@ -378,7 +354,7 @@ import { useNavigate } from "react-router-dom";
  							</div>
  						)}
 
-						{ activeTabInfo === 'banList' && (
+						{activeTabInfo === 'banList' && (
  							<div>
  								<input
  									id="banSearch"
@@ -393,7 +369,7 @@ import { useNavigate } from "react-router-dom";
  										<div
  											key={user.login}
  											id='banned-users'
-											onClick={() => handleInfo('userUnban', user.login)}
+											onClick={() => handleChannelRequest('unban', user.id, activeChannel.id)}
  										>
  											<img src={user.imageUrl} alt={user.imageUrl} />
  											<div id='banned-users-table'>

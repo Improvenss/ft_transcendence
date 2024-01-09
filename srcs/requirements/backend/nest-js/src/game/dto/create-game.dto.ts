@@ -67,15 +67,20 @@ export class CreateGameDto {
 	@IsOptional()
 	playerRightScore?: number;
 
+	@IsNumber()
 	@IsOptional()
-	players: User[];
+	public pLeftId: number;
 
-	// @IsNotEmpty()
+	@IsNumber()
 	@IsOptional()
-	admins: User[];
+	public pRightId: number;
+
+	@IsNumber()
+	@IsOptional()
+	public adminId: number;
 
 	@IsOptional()
-	watchers: User[];
+	public players: User[];
 }
 
 export class UpdateGameDto extends PartialType(CreateGameDto) {}

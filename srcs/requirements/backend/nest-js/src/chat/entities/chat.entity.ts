@@ -5,7 +5,13 @@ import { Entity,
 	ManyToMany,
 	OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+
+export enum ChannelType {
+	PUBLIC = 'public',
+	PRIVATE = 'private',
+	DM ='directMessage',
+}
 
 @Entity('channel')
 export class Channel {
@@ -23,8 +29,16 @@ export class Channel {
 	@Column({ nullable: false})
 	public description: string; // Kanal tanımı
 
-	@Column({ type: 'enum', enum: ['public', 'private', 'direct_message']})
-	public type: string; // Kanal tipi: public, private, direct_message
+	@Column({ type: 'enum', enum: ChannelType })
+	@IsEnum(ChannelType)
+	public type: ChannelType;
+	// @Column({ type: 'varchar', length: 20 })
+	// @IsNotEmpty()
+	// @IsEnum(['public', 'private', 'direct_message'])
+	// public type: 'public' | 'private' | 'direct_message';
+
+	// @Column({ type: 'enum', enum: ['public', 'private', 'direct_message']})
+	// public type: string; // Kanal tipi: public, private, direct_message
 
 	@Column({ nullable: true }) // Şifre, private kanallar için
 	public password: string;
@@ -47,6 +61,9 @@ export class Channel {
 
 	@OneToMany(() => Message, message => message.channel, { nullable: true, cascade: true, onDelete: 'CASCADE' })
 	public messages: Message[]; // Kanalın mesajları
+
+	@IsOptional()
+	public status: string;
 }
 
 @Entity('message')
@@ -59,11 +76,12 @@ export class Message {
 	public id: number;
 
 	@Column({type: 'varchar', length: 2048})
-	public message: string; // Mesaj içeriği
+	public content: string; // Mesaj içeriği
 
 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public sentAt: Date; // Mesajın gönderildiği tarih
 
+	// @ManyToOne(() => User, user => user.messages)
 	@ManyToOne(() => User, user => user.messages, { eager: true })
 	public author: User; // Mesajın yazarı
 

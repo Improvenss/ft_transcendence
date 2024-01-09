@@ -17,7 +17,6 @@ export class ChatAdminGuard implements CanActivate {
 		{
 			console.log("ChatAdminGuard: inside the guard.");
 			const request = context.switchToHttp().getRequest();
-			// console.log("once", request.headers);
 			const authHeader = request.headers.authorization;
 			if (!authHeader || !authHeader.startsWith('Bearer '))
 				throw (new UnauthorizedException("Invalid 'Authorization' header format!"));
@@ -25,29 +24,31 @@ export class ChatAdminGuard implements CanActivate {
 			if (!token)
 				throw (new UnauthorizedException("Token not found!"));
 			if (!request.headers.channel)
+				throw (new UnauthorizedException("Channel header not found!"));
+
+			const decodedUser = this.jwtService.verify(token);
+			const tmpUser = await this.usersService.getUserPrimay({id: decodedUser.id});
+			if (!tmpUser)
+				throw (new UnauthorizedException("User not found!"));
+			const tmpChannel = await this.chatService.getChannelRelation({
+				id: request.headers.channel,
+				relation: { admins: true },
+				primary: true,
+			});
+			if (!tmpChannel)
 				throw (new UnauthorizedException("Channel not found!"));
 
-			const	decodedUser = this.jwtService.verify(token);
-			const	tmpUser = await this.usersService.findUser(decodedUser.login, null, "all");
-			const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-			if (!singleUser)
-				throw (new UnauthorizedException("User not found in DB!"));
-
-			const	tmpChannel = await this.chatService.findChannel(request.headers.channel, "all")
-			const singleChannel = Array.isArray(tmpChannel) ? tmpChannel[0] : tmpChannel;
-			if (!singleChannel)
-				throw (new UnauthorizedException("Chanenl not found in DB!"));
-			if (!singleChannel.admins || !singleChannel.admins.some(admin => admin.id === singleUser.id))
+			if (!tmpChannel.admins || !tmpChannel.admins.some(admin => admin.id === tmpUser.id))
 				throw new UnauthorizedException("User is not an admin for this channel!");
-			request.user = singleUser;
-			request.channel = singleChannel;
+
+			request.user = tmpUser;
+			request.channel = tmpChannel;
+			return (request);
 		}
-		catch (error)
+		catch (err)
 		{
-			console.log("ChatAdminGuard: ", error);
+			console.log("ChatAdminGuard: ", err.message);
 			throw (new UnauthorizedException());
 		}
-		// throw (new UnauthorizedException("AuthGuard: You can't acces.")); // Bu 401(Unauthorized) error'u dondurur.
-		return true; // Bu false olursa 403(Forbidden) error'u dondurur.
 	}
 }

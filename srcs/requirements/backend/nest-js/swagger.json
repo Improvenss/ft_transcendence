@@ -33,11 +33,11 @@
       }
     },
     "/api/login": {
-      "post": {
-        "operationId": "ApiController_loginStatus",
+      "get": {
+        "operationId": "ApiController_loginLink",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
@@ -54,55 +54,10 @@
         }
       }
     },
-    "/users/user": {
-      "get": {
-        "operationId": "UsersController_getUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "UsersController_patchUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "UsersController_deleteUser",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+    "/users/notif": {
+      "put": {
+        "operationId": "UsersController_putNotif",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -121,16 +76,61 @@
         }
       }
     },
-    "/users/friend/add": {
-      "post": {
-        "operationId": "UsersController_addUser",
+    "/users/user": {
+      "patch": {
+        "operationId": "UsersController_patchUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "UsersController_getUser",
         "parameters": [
           {
-            "name": "user",
+            "name": "who",
             "required": true,
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_request",
+        "parameters": [
+          {
+            "name": "action",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "target",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -139,107 +139,16 @@
             "description": ""
           }
         }
-      }
-    },
-    "/users/socket": {
-      "patch": {
-        "operationId": "UsersController_patchSocket",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/user/upload": {
-      "put": {
-        "operationId": "UsersController_putFile",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/file/delete": {
-      "delete": {
-        "operationId": "UsersController_deleteImage",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel": {
-      "get": {
-        "operationId": "ChatController_findChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
       },
-      "patch": {
-        "operationId": "ChatController_patchChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ChatController_deleteChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/message": {
       "get": {
-        "operationId": "ChatController_findMessage",
+        "operationId": "UsersController_getData",
         "parameters": [
           {
-            "name": "message",
+            "name": "primary",
             "required": true,
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "boolean"
             }
           }
         ],
@@ -250,22 +159,12 @@
         }
       }
     },
-    "/chat/{message}": {
-      "post": {
-        "operationId": "ChatController_createMessage",
+    "/chat/channels": {
+      "get": {
+        "operationId": "ChatController_getChannels",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
-              }
-            }
-          }
-        },
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
@@ -283,7 +182,7 @@
       }
     },
     "/chat/channel/leave": {
-      "post": {
+      "delete": {
         "operationId": "ChatController_leaveChannel",
         "parameters": [
           {
@@ -296,67 +195,27 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
       }
     },
-    "/chat/channel/kick": {
-      "post": {
-        "operationId": "ChatController_kickChannel",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+    "/chat/channel": {
+      "delete": {
+        "operationId": "ChatController_deleteChannel",
+        "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
-      }
-    },
-    "/chat/channel/ban": {
-      "post": {
-        "operationId": "ChatController_banChannel",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+      },
+      "patch": {
+        "operationId": "ChatController_patchChannel",
+        "parameters": [],
         "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/chat/channel/unban": {
-      "post": {
-        "operationId": "ChatController_unbanChannel",
-        "parameters": [
-          {
-            "name": "user",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         }
@@ -366,6 +225,34 @@
       "post": {
         "operationId": "ChatController_createChannel",
         "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/{action}/{userId}": {
+      "post": {
+        "operationId": "ChatController_channelAction",
+        "parameters": [
+          {
+            "name": "action",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -470,10 +357,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateMessageDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateGameDto": {
         "type": "object",
         "properties": {}

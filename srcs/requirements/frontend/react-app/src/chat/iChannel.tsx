@@ -1,79 +1,70 @@
 export interface IMessage {
-	id: number;
-	sender: IUser;
-	content: string;
-	timestamp: number;
+	id: number,
+	content: string,
+	sentAt: number,
+	author: IUser,
 }
 
 export interface IUser {
-	login: string;
-	imageUrl: string;
-	nickname: string;
-	avatar: string;
-	status: string;
+	id: number,
+	login: string,
+	imageUrl: string,
+	nickname: string,
+	avatar: string,
+	status: string,
+}
+
+export interface INotif {
+	id: number,
+	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
+	// type: string,
+	text: string,
+	date: string,
+	// date: Date,
+	read: boolean,
+	from: string,
+}
+
+export interface IUserProps{
+	id: number,
+	email: string,
+	login: string,
+	displayname: string,
+	imageUrl: string,
+	socketId: string,
+	status: string,
+	nickname?: string,
+	avatar?: string,
+	friends: IUserProps[],
+	notifications: INotif[],
 }
 
 export interface IChannel {
-	status: 'public' | 'involved';
-	name: string;
-	description: string;
-	type: 'public' | 'involved';
-	password?: string;
-	image: string;
-	members: IUser[];
-	admins: IUser[];
-	messages: IMessage[];
-	bannedUsers: IUser[];
-}
-
-export interface IChannelCreateForm {
-	name: string;
-	type: 'public' | 'private';
-	password: string | null;
-	image: File | null;
-	description: string;
-}
-
-export interface IChannelJoinForm {
+	id: number,
 	name: string,
-	password: string,
-	type: 'private',
+	description: string,
+	type: 'public' | 'private',
+	image: string,
+	members: IUser[],
+	admins: IUser[],
+	bannedUsers: IUser[],
+	messages: IMessage[],
+	status: 'involved' | 'public'//'not-involved',
 }
 
 export interface IChannelContext {
-	channels: IChannel[] | undefined;
-	activeChannel: IChannel | null;
-	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>;
-	channelInfo: boolean;
-	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>;
+	channels: IChannel[] | undefined,
+	setChannels: React.Dispatch<React.SetStateAction<IChannel[] | undefined>>,
+	activeChannel: IChannel | null,
+	setActiveChannel: React.Dispatch<React.SetStateAction<IChannel | null>>,
+	channelInfo: boolean,
+	setChannelInfo: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-// Backend DTO
-export interface CreateChannelDto {
-	status: 'public' | 'involved';
-	name: string;
-	type: 'public' | 'private' | 'protected';
-	password?: string;
-	image: string;
+export interface IChannelCreateForm {
+	name: string,
+	type: 'public' | 'private',
+	password: string | null,
+	image: File | null,
+	description: string,
 }
-
-// export interface IChannelProps{
-// 	// setActiveChannel:  React.Dispatch<React.SetStateAction<IChannel | null>>;
-// 	channelsData: {
-// 		channels: IChannel[];
-// 		activeChannel: IChannel;
-// 	}
-// }
-
-export interface IOnChannelProps {
-	activeChannel: IChannel | null;
-	isInfoChannelActive: boolean;
-	setIsInfoChannelActive: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export interface IFriend {
-	name: string;
-	status: 'online' | 'offline' | 'AFK';
-	image: string;
-}
-

@@ -4,6 +4,7 @@ import Countdown from "../utils/Countdown";
 import './LoginPage.css';
 import { useAuth } from "../hooks/AuthHook";
 import MatrixRain from '../utils/MatrixRain';
+import fetchRequest from "../utils/fetchRequest";
 
 interface ILoginProps{
 	setClicked: (value: boolean) => void,
@@ -11,37 +12,37 @@ interface ILoginProps{
 }
 
 async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
-	console.log("II: ---API Login Connection---");
-	const	response = await fetch(process.env.REACT_APP_API_LOGIN as string, {
-		method: 'POST',
-		headers: {
-			'Content-Type':'application/json',
-		},
-		body: JSON.stringify({
-			requestLogin: 'LOGIN'
-		})
-	})
-	if (response.ok)
-	{
-		console.log("II: ---API Login Connection '✅'---");
-		const	data = await response.json();
-		const	messageHandler = function(event: MessageEvent<any>) {
-			if (event.origin === process.env.REACT_APP_IP) {
-				const data = event.data;
-				if (data.message === 'popupRedirect'){
-					navigate('/api?code=' + data.additionalData, { replace: true });
-					window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
+	try {
+		console.log("II: ---API Login Connection---");
+		const response = await fetchRequest({
+			method: 'GET',
+			url: '/api/login',
+		}, false);
+		if (response.ok){
+			console.log("II: ---API Login Connection '✅'---");
+			const data = await response.json();
+			if (!data.err){
+				const messageHandler = function(event: MessageEvent<any>) {
+					if (event.origin === process.env.REACT_APP_IP) {
+						const data = event.data;
+						if (data.message === 'popupRedirect'){
+							navigate('/api?code=' + data.additionalData, { replace: true });
+							window.removeEventListener('message', messageHandler); //birden fazla kez çalışmaması için remove etmemiz gerekiyor.
+						}
+					}
 				}
+				window.addEventListener('message', messageHandler);
+				window.open(data.requestLogin, "intraPopup", "width=500,height=300");
+			} else {
+				throw new Error(data.err);
 			}
+		} else {
+			console.log("II: ---API Login Connection '❌'---");
+			setClicked(false); // Bu da butonun tekrar tiklanabilir olmamasini sagliyor.
 		}
-		window.addEventListener('message', messageHandler);
-		console.log(data.requestLogin);
-		window.open(data.requestLogin, "intraPopup", "width=500,height=300");
-	}
-	else{
-
-		console.log("II: ---API Login Connection '❌'---");
-		setClicked(false); // Bu da butonun tekrar tiklanabilir olmamasini sagliyor.
+	} catch (err){
+		console.log("LoginPage err:", err);
+		navigate('/404');
 	}
 }
 

@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
 import { useParams } from "react-router-dom";
@@ -7,55 +6,32 @@ import { useUser } from "../hooks/UserHook";
 import NoMatchPage from "../main/NoMatchPage";
 import LoadingPage from "../utils/LoadingPage";
 import "./ProfilePage.css";
-
-interface IUserProps{
-	email: string;
-	login: string;
-	displayname: string;
-	imageUrl: string;
-	socketId?: string;
-	nickname?: string;
-	avatar?: string;
-	status: string;
-	friends: IUserProps[];
-}
+import handleRequest from '../utils/handleRequest'
+import fetchRequest from "../utils/fetchRequest";
+import { IUserProps } from "../chat/iChannel";
 
 function ProfilePage() {
 	console.log("---------PROFILE-PAGE---------");
 	const	{ userInfo } = useUser();
 	const	isAuth = useAuth().isAuth;
 	const	{ username } = useParams(); //profile/akaraca'daki akaraca'yı ele alıyor.
-	const	userCookie = Cookies.get("user");
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
 
 	useEffect(() => {
 		if (isAuth){
 			const checkUser = async () => {
-				const response = await fetch(process.env.REACT_APP_FETCH + `/users/user?user=${username}&relations=friends`, {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": "Bearer " + userCookie as string,
-					},
+				const	response = await fetchRequest({
+					method: 'GET',
+					url: `/users/user?who=${username}`,
 				});
 				if (response.ok){
 					console.log("---User Profile Backend Connection '✅'---");
-					const dataUser = await response.json();
-					if (dataUser.message === 'USER OK'){
+					const data = await response.json();
+					console.log("ProfilePage:", data);
+					if (!data.err){
 						console.log("---User Profile Response '✅'---");
-						setUserPanel({
-							email: dataUser.user.email,
-							login: dataUser.user.login,
-							displayname: dataUser.user.displayname,
-							imageUrl: dataUser.user.imageUrl,
-							socketId: dataUser.user.socketId,
-							nickname: dataUser.user.nickname,
-							avatar: dataUser.user.avatar,
-							status: dataUser.user.status,
-							friends: dataUser.user.friends,
-						});
-						console.log("userInfo:", dataUser);
+						setUserPanel(data);
 					} else {
 						console.log("---User Profile Response '❌'---");
 						setUserPanel(null);
@@ -68,7 +44,7 @@ function ProfilePage() {
 			checkUser();
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [username]);
+	}, []);
 
 	if (!isAuth || !userInfo) { //!userInfo sadece userInfo'nun varlığını kesinleştiriyor.
 		return (<Navigate to='/login' replace />);
@@ -77,45 +53,42 @@ function ProfilePage() {
 	if ((userPanel === undefined))
 		return (<LoadingPage />);
 
-	/*
-			kullanıcı login - nickname - image - avatar - displayname - email
-			game history - oynanılan oyun sayısı - kazanılan oyun sayısı - kaybedilen oyun sayısı - xp bar
-			achivment bar
-			frinedlist - arkadaş olarak ekleme - çıkarma,
-			DM gönderme
-			kullanıcı statü durumu -> online - offline - oyunda
-		*/
-
+/*
+	-> game history - oynanılan oyun sayısı - kazanılan oyun sayısı - kaybedilen oyun sayısı - xp bar
+	-> achivment bar
+	-> arkadaşlıktan çıkarma,
+	-> DM gönderme
+*/
 		const getRandomDate = () => {
-			const date = new Date(+(new Date()) - Math.floor(Math.random() * 10000000000));
-			return date.toISOString().split('T')[0];
-		  };
+		const date = new Date(+(new Date()) - Math.floor(Math.random() * 10000000000));
+		return date.toISOString().split('T')[0];
+		};
 		
-		  // Rastgele oyun, rakip ve durum bilgileri
-		  const historyData = Array.from({ length: 20 }, (_, index) => ({
-			date: getRandomDate(),
-			game: `Game ${index + 1}`,
-			rival: `Rival ${index + 1}`,
-			status: Math.random() < 0.5 ? 'Win' : 'Lose',
-		  }));
+		// Rastgele oyun, rakip ve durum bilgileri
+		const historyData = Array.from({ length: 20 }, (_, index) => ({
+		date: getRandomDate(),
+		game: `Game ${index + 1}`,
+		rival: `Rival ${index + 1}`,
+		status: Math.random() < 0.5 ? 'Win' : 'Lose',
+		}));
 		
-		  const achievements = [
-			{ icon: '🎮', title: 'Game Master', progress: 50 },
-			{ icon: '🔧', title: 'Mechanic', progress: 75 },
-			{ icon: '🏆', title: 'Champion', progress: 80 },
-			{ icon: '🎖️', title: 'Veteran', progress: 65 },
-			{ icon: '🚀', title: 'Explorer', progress: 90 },
-			{ icon: '🌟', title: 'Superstar', progress: 30 },
-			{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
+		const achievements = [
+		{ icon: '🎮', title: 'Game Master', progress: 50 },
+		{ icon: '🔧', title: 'Mechanic', progress: 75 },
+		{ icon: '🏆', title: 'Champion', progress: 80 },
+		{ icon: '🎖️', title: 'Veteran', progress: 65 },
+		{ icon: '🚀', title: 'Explorer', progress: 90 },
+		{ icon: '🌟', title: 'Superstar', progress: 30 },
+		{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
 
-			{ icon: '🎮', title: 'Game Master', progress: 50 },
-			{ icon: '🔧', title: 'Mechanic', progress: 75 },
-			{ icon: '🏆', title: 'Champion', progress: 80 },
-			{ icon: '🎖️', title: 'Veteran', progress: 65 },
-			{ icon: '🚀', title: 'Explorer', progress: 90 },
-			{ icon: '🌟', title: 'Superstar', progress: 30 },
-			{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
-			];
+		{ icon: '🎮', title: 'Game Master', progress: 50 },
+		{ icon: '🔧', title: 'Mechanic', progress: 75 },
+		{ icon: '🏆', title: 'Champion', progress: 80 },
+		{ icon: '🎖️', title: 'Veteran', progress: 65 },
+		{ icon: '🚀', title: 'Explorer', progress: 90 },
+		{ icon: '🌟', title: 'Superstar', progress: 30 },
+		{ icon: '🏅', title: 'Pro Gamer', progress: 55 },
+		];
 
 	return (
 		<>
@@ -137,7 +110,6 @@ function ProfilePage() {
 					<span>{userPanel.displayname}</span>
 					<p>Email:</p>
 					<span>{userPanel.email}</span>
-
 					{ userPanel.login === userInfo.login ? (
  							<div id="friends">
  								<input
@@ -147,7 +119,7 @@ function ProfilePage() {
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{userPanel.friends
+ 								{userPanel.friends && userPanel.friends
  									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
@@ -165,7 +137,8 @@ function ProfilePage() {
  							</div>
  						) : (
 							<>
-								<button id="addFriend">Add Friend</button>
+								<button id="poke" onClick={() => handleRequest('poke', userPanel.login)}>Poke</button>
+								<button id="addFriend" onClick={() => handleRequest('sendFriendRequest', userPanel.login)}>Add Friend</button>
 								<button id="sendMessage">Send Message</button>
 							</>
 						)}

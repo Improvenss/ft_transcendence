@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpException, HttpStatus, ConsoleLogger, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, NotFoundException, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors, ParseBoolPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Socket } from 'socket.io';
 import { Colors as C } from 'src/colors';
@@ -8,328 +8,248 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/chat/channel.handler';
 import { promisify } from 'util';
 import * as fs from 'fs';
-import * as path from 'path';
-import { User } from './entities/user.entity';
+import { ChatGateway } from 'src/chat/chat.gateway';
+import { Notif, User } from './entities/user.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
 export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
+		private readonly chatGateway: ChatGateway,
 	) {}
 
-	@Get('/user')
-	async getUser(
-		@Req() {user},
-		@Query ('user') findUser: string | 'me' | undefined,
-		@Query ('socket') findSocket?: Socket | undefined,
-		@Query('relations') relations?: string[] | null | 'all',
+	@Put('/notif')
+	async putNotif(
+		@Req() {user}: {user: User},
 	){
-		try
-		{
-			console.log(`${C.B_GREEN}GET: /user: @Query('user'): [${findUser}], @Query('socket'): [${findSocket}], @Query('relations'): [${relations}]${C.END}`);
-			const	tmpUser = await this.usersService.findUser(
-				(findUser === 'me') ? user.login : findUser,
-				findSocket,
-				relations
-			);
-			if (!tmpUser)
-				return ({message: "USER NOK", user: `User '${findUser}' not found.`});
-			return ({message: "USER OK", user: tmpUser});
-		}
-		catch (err)
-		{
-			console.log("@Get('/user'): ", err);
-			return ({err: err});
-		}
+		await this.usersService.notifsMarkRead(user.id);
 	}
 
 	// OK
 	@Get('/cookie')
 	async userCookie(
-		@Req() {user},
+		@Req() {user}: {user: User},
 	){
 		try
 		{
 			if (!user)
 				throw (new Error("Cookie not provided"));
-			return ({message: "COOKIE OK"});
+			return ({message: `user[${user.login}] cookie is ✅`});
 		}
 		catch(err)
 		{
-			console.error("Cookie err:", err);
-			return ({message: "COOKIE NOK"});
-		}
-	}
-
-	@Post('/friend/add')
-	async	addUser(
-		@Req() {user},
-		@Query ('user') targetUser: string | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_YELLOW}POST: /friend/add: @Query('user'): [${targetUser}]${C.END}`);
-			const	responseAddFriend = await this.usersService.addFriend(user, targetUser);
-			if (!responseAddFriend)
-				return ({message: "USER NOK", user: `User '${targetUser}' not found.`});
-			return ({message: responseAddFriend});
-		}
-		catch (err)
-		{
-			console.log("@Post('/friend/add'): ", err);
-			return ({err: err});
-		}
-	}
-
-	// @Post('/create')
-	// async	createUser(
-	// 	@Body() createUserDto: CreateUserDto,
-	// ){
-	// 	const	newUser = await this.usersService.createUser(createUserDto);
-	// 	if (!newUser)
-	// 		throw (new HttpException("@Post(): create(): User could not be created!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	return (newUser);
-	// }
-
-	// OK
-	@Patch('/socket')
-	async	patchSocket(
-		@Req() {user},
-		@Body() status: {socketId: string}
-	){
-		try
-		{
-			const	tmpUser = await this.usersService.updateSocketLogin(user.login, status.socketId);
-			if (!tmpUser)
-				throw (new NotFoundException(`User ${user.login} not found.`));
-			return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
-		} catch(err) {
-			console.error("@Patch('/socket'): ", err);
-			return ({message: "Socket not updated."});
-		}
-	}
-
-	// @Patch('/:login')
-	// async	patchSocketLogin(
-	// 	@Param('login') login: string,
-	// 	@Body() socketData: string
-	// ){
-	// 	const	tmpUser = await this.usersService.updateSocketLogin(login, socketData);
-	// 	if (!tmpUser)
-	// 		throw (new HttpException("@Patch(':login'): update(): id: User does not exist!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	return ({message: "User socket_id updated."});
-	// }
-
-	@Put('/user/upload')
-	@UseInterceptors(FileInterceptor('image', multerConfig))
-	async	putFile(
-		@Req() {user},
-		@UploadedFile() image: any,
-	){
-		try
-		{
-			console.log(`${C.B_BLUE}PUT: /user/upload: @UploadedFile(): ${C.END}`, image);
-			if (!image)
-				throw (new Error(`File not found!: File Name:${image.filename}`));
-			const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
-			if (!fs.existsSync(image.path))
-				throw (new Error(`File path is not valid. ${image.path}`));
-			return ({imgUrl});
-		}
-		catch (err)
-		{
-			if (image) {
-				try {
-					await promisify(fs.promises.unlink)(image.path);
-					console.log(`File successfully deleted. ✅: image.path: ${image.path}`);
-				} catch (unlinkErr) {
-					console.error('Error occurred while deleting file.:', unlinkErr);
-				}
-			}
-			console.error("@Put('/user/upload'): ", err);
-			return ({ message: "Image can't uploaded.", err});
+			console.error("Cookie err:", err.message);
+			return ({ success: false, err: err.message});
 		}
 	}
 
 	// OK
-	@Patch('/user')
-	async	patchUser(
-		@Req() {user},
-		@Query('user') findUser: string | undefined,
-		@Body() body: Partial<UpdateUserDto>,
-	){
-		try
-		{
-			// console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${user.login}] @Body(): [${body}]${C.END}`);
-			console.log(`${C.B_PURPLE}PATCH: /user: @Query('user'): [${findUser}] @Body():${C.END}`, body); // sonra yapilacak
-			// const	responseUser = await this.usersService.patchUser(user.login, body);
-			const	responseUser = await this.usersService.patchUser(findUser, body);
-			return (responseUser);
-		}
-		catch (err)
-		{
-			console.log("@Patch('/user'): ", err);
-			return ({err: err});
-		}
-	}
-
-	// OK
-	@Delete('/user')
-	async	deleteUser(
-		@Req() {user},
-		@Query('user') delUser: string | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_RED}DELETE: /user: @Query('user'): [${delUser}]${C.END}`);
-			const	responseUser = await this.usersService.deleteUser(delUser);
-			return (responseUser);
-		}
-		catch (err)
-		{
-			console.error("@Delete('/user'): ", err);
-			return ({err: err});
-		}
-	}
-
-	@Delete('/file/delete')
-	async deleteImage(
-		@Req() {user},
-		@Query('file') file: string | string[] | undefined,
-	){
-		try
-		{
-			console.log(`${C.B_RED}DELETE: /user/delete: @Query('file'): [${file}]${C.END}`);
-			const	responseDeleteFile = await this.usersService.deleteFile(file)
-			if (!responseDeleteFile)
-				throw (new Error('Error deleting file:'));
-			return (responseDeleteFile);
-		}
-		catch (err)
-		{
-			console.error("@Delete('/file/delete'): ", err);
-			return ({message: `Failed to delete file.: Error: ${err}`});
-		}
-	}
-
-	// @Delete()
-	// async	removeAll() {
-	// 	return this.usersService.removeAll();
-	// }
-
-
-	// /**
-	//  * DB'den butun 'User' verilerini donduruyoruz.
-	//  * @returns All Users.
-	//  */
-	// @Get()
-	// findAll() {
-	// 	return this.usersService.findAll();
-	// }
-
-	// /**
-	//  * Verilen id'nin ya da login'in karsilik
-	//  *  geldigi 'User' verisini donduruyoruz.
-	//  * @param id Istenilen 'user'in 'id'si.  * @param login Istenilen 'user'in login'i.
-	//  * @returns 'user'.
-	//  */
-	// // @Get(':id/:login?')
-	// @Get('/:id(\\d+)')
-	// async findOneId(@Param('id') id: string) {
-	// 	const tmpUser = await this.usersService.findOne(+id, undefined);
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("@Get(':id'): findOneId(): User does not exist!"));
-	// 	return (tmpUser);
-	// }
-
-	// /**
-	//  * Verilen login'in karsilik geldigi 'User' verisini donduruyoruz.
-	//  * @param login Istenilen 'user'in login'i.
-	//  * @returns 'user'.
-	//  */
-	// @Get('/:login')
-	// async findOneLogin(@Param('login') login: string) {
-	// 	const tmpUser = await this.usersService.findOne(undefined, login);
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("@Get(':login'): findOne(): User does not exist!"));
-	// 	return (tmpUser);
-	// }
-
-	// /**
-	//  * DB'de var olan User verisini guncellemek icin.
-	//  * @param id 
-	//  * @param updateUserDto 
-	//  * @returns 
-	//  */
-	// @Patch('/:id(\\d+)')
-	// async	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-	// 	const	tmpDb: UpdateUserDto = {}; // DB'deki guncellenmis degerler atanacak.
-	// 	const	tmpUser = await this.usersService.update(+id, updateUserDto); // DB'deki eskisi yenisiyle guncelliyoruz, yeni halini donduruyoruz.
-	// 	if (!tmpUser)
-	// 		throw (new HttpException("@Patch(':id'): update(): id: User does not exist!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	// Bizim guncellemek icin attigimiz istekteki parametreleri DB'deki ile karsilastiriyoruz.
-	// 	// Eger ikisinde de varsa; tmpDb'ye atiyoruz.
-	// 	// Degismis mi degismemis mi DB'deki veriyi aliyoruz.
-	// 	// DB'deki veriyle, bizim istedigimizi karsilastiracagiz.
-	// 	// Degerler ayniysa basarili bir sekilde 'update' tamamlanmis oluyor.
-	// 	for (const key in updateUserDto)
-	// 		if (updateUserDto.hasOwnProperty(key) && tmpUser.hasOwnProperty(key))
-	// 			tmpDb[key] = tmpUser[key];
-	// 	// Burada JSON dosyasinin icerisindeki verileri parse'ledik.
-	// 	const updateUserObj = JSON.parse(JSON.stringify(updateUserDto));
-	// 	// const tmpUserObj = JSON.parse(JSON.stringify(tmpUser));
-	// 	const tmpDbObj = JSON.parse(JSON.stringify(tmpDb));
-	// 	console.log("-------------------");
-	// 	console.log("tmpDb -> :", tmpDb);
-	// 	// console.log(updateUserDto);
-	// 	// console.log(tmpUser);
-	// 	console.log("-------------------");
-	// 	console.log("updateUserObj -> :", updateUserObj);
-	// 	console.log("+++++++++++");
-	// 	console.log("tmpDbObj -> :", tmpDbObj);
-	// 	console.log("-------------------");
-	// 	// Burada da duzgunce alinmis JSON dosyasi uzerinden esitlik kontrolu yapiyoruz.
-	// 	if (JSON.stringify(updateUserObj) !== JSON.stringify(tmpDbObj))
-	// 		throw (new HttpException("@Patch(':id'): update(): id: User's in DB but User does not update!",
-	// 			HttpStatus.INTERNAL_SERVER_ERROR));
-	// 	return ({message: "User updated successfully."});
-	// }
-
-	// @Delete()
-	// async	deleteUser(
+	// @Patch('/socket')
+	// async	patchSocket(
 	// 	@Req() {user},
-	// 	@Query('user') quser: string | undefined,
+	// 	@Body() body: {socketId: string}
 	// ){
 	// 	try
 	// 	{
-	// 		console.log(`${C.B_RED}DELETE: @Query('user'): [${quser}]${C.END}`);
-	// 		const	responseGameuser = await this.usersService.deleteUser(quser);
-	// 		return (responseGameuser);
-	// 	}
-	// 	catch (err)
-	// 	{
-	// 		console.log("@Delete(): ", err);
-	// 		return ({err: err});
+	// 		const	tmpUser = await this.usersService.updateSocketLogin(user.login, body.socketId);
+	// 		return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
+	// 	} catch(err) {
+	// 		console.error("@Patch('/socket'): ", err.message);
+	// 		return ({err: err.message});
 	// 	}
 	// }
 
-	// /**
-	//  * Disaridan 'string' olarak aldigimiz 'id' parametremizi
-	//  *  Number() ile 'number' tipine ceviriyoruz.
-	//  * @param id String
-	//  * @returns 
-	//  */
-	// @Delete('/:id')
-	// async	remove(@Param('id') id: string) {
-	// 	const	tmpUser = await this.usersService.findOne(Number(id));
-	// 	if (!tmpUser)
-	// 		throw (new NotFoundException("@Delete(':id'): remove(): id : User does not exist!")); // Eger 'user' olusturulamazsa exception atiyoruz.
-	// 	return this.usersService.remove(+id);
+	// @Put('/user/upload')
+	// @UseInterceptors(FileInterceptor('image', multerConfig))
+	// async	putFile(
+	// 	@Req() {user},
+	// 	@UploadedFile() image: any,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_BLUE}PUT: /user/upload: @UploadedFile(): ${C.END}`, image);
+	// 		if (!image)
+	// 			throw (new Error(`File not found!: File Name:${image.filename}`));
+	// 		const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
+	// 		if (!fs.existsSync(image.path))
+	// 			throw (new Error(`File path is not valid. ${image.path}`));
+	// 		return ({imgUrl});
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		if (image) {
+	// 			try {
+	// 				await promisify(fs.promises.unlink)(image.path);
+	// 				console.log(`File successfully deleted. ✅: image.path: ${image.path}`);
+	// 			} catch (unlinkErr) {
+	// 				console.error('Error occurred while deleting file.:', unlinkErr);
+	// 			}
+	// 		}
+	// 		console.error("@Put('/user/upload'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
 	// }
+
+	// OK
+	@Patch('/user')
+	@UseInterceptors(FileInterceptor('avatar', multerConfig))
+	async	patchUser(
+		@Req() {user}: {user: User},
+		@UploadedFile() avatar: Express.Multer.File,
+		@Body('nickname') nickname: string,
+	){
+		try
+		{
+			console.log(`${C.B_PURPLE}PATCH: /user: user[${user.login}] nickname[${nickname}] avatar[${avatar ? 'ok' : 'nok'}]${C.END}`);
+			await this.usersService.updateUser({
+				id: user.id,
+				avatar: avatar ? process.env.B_IMAGE_REPO + avatar.filename : null,
+				nickname: nickname,
+			})
+			return { success: true };
+		}
+		catch (err)
+		{
+			if (avatar && avatar.path && fs.existsSync(avatar.path)) {
+				promisify(fs.promises.unlink)(avatar.path);
+				console.log('Avatar removed successfully.');
+			}
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
+			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
+			console.log("@Patch('/user'): ", err.message);
+			return { success: false, error: err.message };
+		}
+	}
+
+	// // OK
+	// @Delete('/user')
+	// async	deleteUser(
+	// 	@Req() {user},
+	// 	@Query('user') delUser: string | undefined,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_RED}DELETE: /user: @Query('user'): [${delUser}]${C.END}`);
+	// 		const	responseUser = await this.usersService.deleteUser(delUser);
+	// 		return (responseUser);
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.error("@Delete('/user'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
+	// }
+
+	// @Delete('/file/delete')
+	// async deleteImage(
+	// 	@Req() {user},
+	// 	@Query('file') file: string | string[] | undefined,
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_RED}DELETE: /user/delete: @Query('file'): [${file}]${C.END}`);
+	// 		const	responseDeleteFile = await this.usersService.deleteFile(file)
+	// 		if (!responseDeleteFile)
+	// 			throw (new Error('Error deleting file:'));
+	// 		return (responseDeleteFile);
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.error("@Delete('/file/delete'): ", err.message);
+	// 		return ({err: err.message});
+	// 	}
+	// }
+
+	@Post()
+	async request(
+		@Req() {user}: {user: User},
+		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
+		@Query('target') target: string,
+		@Query('id') sourceNotif?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
+	){
+		try {
+			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${sourceNotif}]${C.END}`);
+			if (action === undefined || target === undefined)
+				throw Error(`Query is empty!`);
+			if (sourceNotif)
+				await this.usersService.deleteNotif(user.id, sourceNotif);
+			const targetUser = await this.usersService.getUserPrimay({login: target});
+			if (!targetUser){
+				throw new NotFoundException('User not found!');
+			}
+
+			let result : Notif;
+
+			if (action === 'poke')
+				result = await this.usersService.createNotif(user.id, targetUser.id, 'text', `${user.displayname} poked you!`);
+			else if (action === 'sendFriendRequest' ||
+					action === 'acceptFriendRequest' ||
+					action === 'declineFriendRequest')
+				result = await this.usersService.friendRequest(action, user, targetUser.id);
+			else
+				throw new Error('Invalid action values!');
+
+			this.chatGateway.server.emit(`user-notif:${targetUser.id}`, result);
+			return { success: true };
+		} catch (err) {
+			console.error("@Post(): ", err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
+	/*
+		default yapı için 	->	`/users`
+		sadece notif 		-> 	`/users?relation=notifications`
+		default + notif 	->	`/users?relation=notifications&primary=true`
+	*/
+	@Get()
+	async getData(
+		@Req() {user}: {user: User},
+		@Query('relation') relation: string[] | string,
+		@Query('primary', ParseBoolPipe) primary: boolean,
+	){
+		try {
+			console.log(`${C.B_YELLOW}GET: relation: [${relation}] userData: [${primary}]${C.END}`);
+			if (!relation && primary != true)
+				return (await this.usersService.getUserPrimay({id: user.id}));
+
+			return(await this.usersService.getUserRelation({
+				user: { id: user.id },
+				relation: this.usersService.parsedRelation(relation),
+				primary: primary,
+			}));
+		} catch (err) {
+			console.error("@Get(): ", err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
+	@Get('/user')
+	async getUser(
+		@Req() {user}: {user: User},
+		@Query ('who') who: string,
+	){
+		try {
+			console.log(`${C.B_GREEN}GET: /user: who: [${who}]${C.END}`);
+			// const data = await this.usersService.getData({userLogin: who}, (user.login === who ? 'friends': []), 'true');
+			if (user.login === who){
+				return (await this.usersService.getUserPrimay({login: user.login}));
+			}
+
+			const data = await this.usersService.getUserRelation({
+				user: { login: who },
+				relation: { friends: true },
+				primary: true,
+			});
+			delete data.socketId;
+			return (data);
+		} catch (err) {
+			console.log("@Get('/user'): ", err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
 }
 
 /**

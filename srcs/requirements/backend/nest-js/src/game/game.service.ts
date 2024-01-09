@@ -11,33 +11,44 @@ import * as bcrypt from 'bcrypt';
 export class GameService {
 	constructor(
 		@InjectRepository(Game)
-		private readonly	gameRepository: Repository<Game>, // Bunlarin sirasi cok onemli
+		private readonly	gameRepository: Repository<Game>,
 		private readonly	usersService: UsersService,
-		// private readonly	userRepository: Repository<User>, // Bunlarin sirasi cok onemli
-		// private readonly	entityManager: EntityManager, // Burasi Repository<Game>'den once olmamali.
 	) {}
 
 	async	createGameRoom(login: string, createGameDto: CreateGameDto) {
-		const	tmpUser = await this.usersService.findUser(login);
-		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		if (!singleUser)
+		const	tmpUser = await this.usersService.getUserPrimay({login: login});
+		if (!tmpUser)
 			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
 		const	tmpGameRoom = await this.findGameRoom(createGameDto.name);
 		const	singleRoom = Array.isArray(tmpGameRoom) ? tmpGameRoom[0] : tmpGameRoom;
 		if (singleRoom)
 			return (`GameRoom: '${createGameDto.name}' already created.`);
+		Object.assign(createGameDto, {
+			password: (createGameDto.password === (undefined || null))
+			? null
+			: bcrypt.hashSync(
+				createGameDto.password,
+				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
+		})
+		createGameDto.players = [tmpUser];
+		createGameDto.pLeftId = tmpUser.id;
+		createGameDto.pRightId = null;
+		createGameDto.adminId = tmpUser.id;
 		const	newRoom = new Game(createGameDto);
-		newRoom.players = [singleUser];
-		newRoom.admins = [singleUser];
+		console.log("newRoom", newRoom);
 		const	response = await this.gameRepository.save(newRoom);
+		console.log("OYUN ODASI KAYITTAN SONRAAA RSPONESE", response);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 	}
 
-	async findRoomUser(room: Game, user: User) {
+	async isRoomUser(room: Game, user: User) {
 		if (!room || !user)
 			throw (new NotFoundException(`game.service.ts: findRoomUser: room: ${room.name} || user: ${user.login} not found!`));
 		const foundUser = room.players.find((roomUser) => roomUser.login === user.login);
+		// const isLeftPlayer = room.pLeftId && room.pLeftId === user.id;
+		// const isRightPlayer = room.pRightId && room.pRightId === user.id;
+		// return (isLeftPlayer || isRightPlayer);
 		if (!foundUser)
 			return (false);
 		return (true);
@@ -48,48 +59,43 @@ export class GameService {
 		relations?: string[] | 'all' | undefined
 	){
 		const relationObject = (relations === 'all')
-		? {players: true, admins: true, watchers: true} // relations all ise hepsini ata.
-		: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
-			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
-			: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
-				? { [relations]: true } // sadece bunu ata.
-				: null)); // hicbiri degilse null ata.
+		? {players: true}
+		: (Array.isArray(relations)
+			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {})
+			: (typeof(relations) === 'string'
+				? { [relations]: true }
+				: null));
 		// console.log(`GameService: findGameRoom(): relationsObject(${typeof(relationObject)}):`, relationObject);
-		const tmpChannel = (room === undefined)
+		const tmpRoom = (room === undefined)
 			? await this.gameRepository.find({relations: relationObject})
 			: await this.gameRepository.findOne({
 					where: {name: room},
 					relations: relationObject
 				});
-		// if (!tmpChannel)
-		// 	throw (new NotFoundException("game.service.ts: findGameRoom(): GameRoom not found!"));
-		return (tmpChannel);
+		return (tmpRoom);
 	}
 
 	async addGameRoomUser(
-		user: string,
+		user: User,
 		body: {room: string, password: string},
 	){
+
+		if (!user)
+			throw (new NotFoundException("'User' not found for register Game Room!"));
 
 		const	tmpRoom = await this.findGameRoom(body.room, ['players']);
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
-			return (new NotFoundException("'Game Room' not found for register Game Room!"));
-		// if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
-		// {
-		// 	console.log("SIFRE HATALIIIIIII");
-		// 	return (new Error("Password is WRONG!!!"));
-		// }
-		// console.log("singleRoom passs OK");
+			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
 
-		const tmpUser = await this.usersService.findUser(user);
-		const singleUser = Array.isArray(tmpUser) ? tmpUser[0] : tmpUser;
-		if (!singleUser)
-			return (new NotFoundException("'User' not found for register Game Room!"));
-
-		if (await this.findRoomUser(singleRoom, singleUser))
-			return (new Error(`${singleUser.login} already in this ${singleRoom.name}.`));
-		singleRoom.players.push(singleUser);
+		if (await this.isRoomUser(singleRoom, user))
+			throw (new Error(`User '${user.login}' already in this room[${singleRoom.name}].`));
+		if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
+			throw (new Error("Password is WRONG!!!"));
+		if (singleRoom.players.length > 2)
+			throw (new Error("Game Room is full!"));
+		singleRoom.players.push(user);
+		singleRoom.pRightId = user.id;
 		return (this.gameRepository.save(singleRoom));
 	}
 
