@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/swagger';
 import { IsString, IsArray, IsNotEmpty } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
-import { Message } from '../entities/chat.entity';
+import { DmMessage, Message } from '../entities/chat.entity';
 
 export class CreateDmDto {
 	@IsString()
@@ -17,7 +17,7 @@ export class CreateDmDto {
 	members: User[];
 
 	@IsArray()
-	messages: Message[];
+	messages: DmMessage[];
 }
 
 export class UpdateDmDto extends PartialType(CreateDmDto) {}

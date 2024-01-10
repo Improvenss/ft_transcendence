@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, JoinColumn, ManyToOne } from "typeorm";
-import { Channel, Dm, Message } from "src/chat/entities/chat.entity";
+import { Channel, Dm, DmMessage, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail, IsEnum } from "class-validator";
 import { GameHistory } from "src/game/entities/gameHistory.entity";
@@ -66,7 +66,7 @@ export class User {
 	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
 	public notifications: Notif[];
 
-	//----------------------Channel----------------------------//
+	//----------------------Channel&Messages----------------------------//
 
 	// @ManyToMany(() => Channel, channel => channel.members)
 	@ManyToMany(() => Channel, channel => channel.members, {cascade: true})
@@ -81,17 +81,19 @@ export class User {
 	@JoinTable()
 	public bannedChannels: Channel[];
 
-	//----------------------DirectMessage----------------------------//
+	@OneToMany(() => Message, message => message.author, {nullable: true})
+	@JoinTable()
+	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
+
+	//----------------------DirectMessage&Messages----------------------------//
 
 	@ManyToMany(() => Dm, dm => dm.members, {cascade: true})
 	@JoinTable()
 	public dm: Dm[];
 
-	//----------------------Message----------------------------//
-
-	@OneToMany(() => Message, message => message.author, {nullable: true})
+	@OneToMany(() => DmMessage, message => message.author, {nullable: true})
 	@JoinTable()
-	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
+	public dmMessages: DmMessage[];
 
 	//----------------------Game-------------------------------//
 

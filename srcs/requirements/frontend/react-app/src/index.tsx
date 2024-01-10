@@ -31,6 +31,8 @@ import { StatusProvider } from './hooks/StatusHook';
  * TODO: Game'den sonra profilePage'yi güncelle
  * TODO: Game için model/mod eklenecek
  * TODO: Oyun için level ladder ekle
+ * TODO: Dm için activeChannel yapısı gibi bir şey yap, ama info channels vs olmasın (yani menü yok, yerine leave dm butonu koy), 
+ * 			ActiveChannel varken, Dm'ye tıklanırsa, ActiveChannelı null yap Dm'yi bastır, diğer durum tam tersi yap.
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

@@ -53,6 +53,10 @@ export interface IChannel {
 }
 
 export interface IChannelContext {
+	dms: IDms[] | undefined,
+	setDms: React.Dispatch<React.SetStateAction<IDms[] | undefined>>,
+	activeDm: IDms | null,
+	setActiveDm: React.Dispatch<React.SetStateAction<IDms | null>>,
 	channels: IChannel[] | undefined,
 	setChannels: React.Dispatch<React.SetStateAction<IChannel[] | undefined>>,
 	activeChannel: IChannel | null,
@@ -67,4 +71,12 @@ export interface IChannelCreateForm {
 	password: string | null,
 	image: File | null,
 	description: string,
+}
+
+export interface IDms {
+	id: number,
+	name: string,
+	image: string,
+	members: IUser[],
+	messages: IMessage[], //kesin değil, kontrol et
 }

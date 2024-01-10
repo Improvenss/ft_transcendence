@@ -2,10 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateChannelDto, UpdateChannelDto } from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel, ChannelType, Message } from './entities/chat.entity';
+import { Channel, ChannelType, Dm, Message } from './entities/chat.entity';
 import { FindOptionsRelations, EntityManager, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { CreateDmDto } from './dto/chat-dm.dto';
 
 @Injectable()
 export class ChatService {
@@ -16,6 +17,8 @@ export class ChatService {
 		private readonly	messageRepository: Repository<Message>,
 		@InjectRepository(User)
 		private readonly	userRepository: Repository<User>,
+		@InjectRepository(Dm)
+		private readonly	dmRepository: Repository<Dm>,
 		private readonly	usersService: UsersService,
 		private readonly	entityManager: EntityManager,
 	) {}
@@ -40,6 +43,12 @@ export class ChatService {
 		return (await this.messageRepository.save(newMessage));
 	}
 	
+	async createDm(createDmDto: CreateDmDto) {
+		const newDm = new Dm(createDmDto);
+		console.log(`New Direct Message created: #${newDm.name}`);
+		return (await this.dmRepository.save(newDm));
+	}
+
 	parsedRelation(relation: string[] | string): FindOptionsRelations<Channel> {
 		if (Array.isArray(relation)) {
 			const parsedRelation: FindOptionsRelations<Channel> = {};
@@ -132,10 +141,14 @@ export class ChatService {
 	async getChannels(
 		userId: number,
 	) {
-		const involvedChannels = await this.usersService.getUserChannelRelationDetails( userId, await this.getRelationNames(true) );
+		const involvedChannels = await this.usersService.getUserChannelRelationDetails(
+			userId,
+			await this.getRelationNames(true)
+		);
 		if (!involvedChannels){
 			throw new Error('User not found!');
 		}
+
 		// console.log("involved:",involvedChannels);
 		const publicChannels = await this.channelRepository.find({where: {type: ChannelType.PUBLIC }});
 		// console.log("public:", publicChannels);
@@ -183,6 +196,20 @@ export class ChatService {
 	  
 		// const mergedChannelsWithoutPassword = mergedChannels.map(({ password, ...rest }) => rest);
 		// return mergedChannelsWithoutPassword;
+	}
+
+	async getDms(
+		userId: number,
+	){
+		const dmChannels = await this.usersService.getUserDmRelationDetails(
+			userId,
+			['dm', 'dm.members', 'dm.messages']
+		);
+		if (!dmChannels){
+			throw new Error('User not found!');
+		}
+
+		return (dmChannels);
 	}
 
 	async saveChannel(channel: Channel){

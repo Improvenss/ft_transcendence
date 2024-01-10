@@ -10,7 +10,7 @@ import fetchRequest from '../utils/fetchRequest';
 
 function Channel() {
 	console.log("---------CHAT-CHANNELS---------");
-	const { channels, setChannels, activeChannel, setActiveChannel } = useChannelContext();
+	const { dms, channels, activeDm, setActiveDm, setChannels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
 	const [searchTerm, setSearchTerm] = useState('');
 	
@@ -47,6 +47,8 @@ function Channel() {
 					}
 				});
 				setActiveTab('involved');
+				if (activeDm)
+					setActiveDm(null);
 				setActiveChannel(data);
 			} else {
 				console.log("handleChannelAction err:", data.err);
@@ -91,6 +93,27 @@ function Channel() {
 							onChange={(e) => setSearchTerm(e.target.value)}
 							placeholder="Search channels..."
 						/>
+						{dms && activeTab === 'involved' && dms
+							.map((dm) => (
+								<div
+									key={dm.name}
+									className={activeDm && activeDm.name === dm.name ? 'active' : 'inactive'}
+									id={activeTab === 'involved' ? 'involved-channel' : ''}
+									onClick={() => {
+										if (activeDm?.name === dm.name)
+											setActiveDm(null);
+										else {
+											if (activeChannel)
+												setActiveChannel(null);
+											setActiveDm(dm);
+										}
+									}}
+								>
+									<img src={dm.image} alt={dm.image}/>
+									<span>{dm.name} {' | Direct Message'}</span>
+								</div>
+							))
+						}
 						{channels && channels
 							.filter((channel) => channel.status === activeTab && channel.name.toLowerCase().includes(searchTerm.toLowerCase()))
 							.map((channel) => (
@@ -104,6 +127,8 @@ function Channel() {
 										} else if (activeChannel?.name === channel.name){
 											setActiveChannel(null)
 										} else {
+											if (activeDm)
+												setActiveDm(null);
 											setActiveChannel(channel);
 										}
 									}}

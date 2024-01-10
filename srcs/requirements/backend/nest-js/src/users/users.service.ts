@@ -161,9 +161,22 @@ export class UsersService {
 	){
 		const data = await this.usersRepository.findOne({
 			where: {id: id},
-			relations: nestedRelations,
+			relations: nestedRelations, // channels, channels.members, channels.admins ...
 		});
+
 		return (data['channels']);
+	}
+
+	async getUserDmRelationDetails(
+		id: number,
+		nestedRelations: string[],
+	){
+		const data = await this.usersRepository.findOne({
+			where: {id: id},
+			relations: nestedRelations, // dm, dm.members, dm.messages ...
+		});
+
+		return (data['dm']);
 	}
 
 	// async getUserChannelRelationDetails(login: string, additionalRelations: string[] = []){

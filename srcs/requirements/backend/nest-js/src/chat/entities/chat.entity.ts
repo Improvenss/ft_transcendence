@@ -93,16 +93,34 @@ export class Dm {
 
 	@Column({ unique: true })
 	@IsNotEmpty()
-	public name: string;
+	public name: string; //Karşı kullanıcı login adı
 
 	@Column()
 	@IsNotEmpty()
-	public image: string;
+	public image: string; //Karşı kullanıcı resmi
 
 	@ManyToMany(() => User, user => user.dm, {nullable: true, onDelete: 'CASCADE'})
 	public members: User[];
 
-	//@Column()
-	//public messages: Message[];
+	@OneToMany(() => DmMessage, dmMessage => dmMessage.dm, { cascade: true, onDelete: 'CASCADE' })
+	public messages: DmMessage[];
 
+}
+
+@Entity('dm_message')
+export class DmMessage {
+	@PrimaryGeneratedColumn()
+	public id: number;
+
+	@Column()
+	public content: string; // Mesaj içeriği
+
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	public sentAt: Date; // Mesajın gönderildiği tarih
+
+	@ManyToOne(() => User, user => user.dmMessages, { eager: true })
+	public author: User; // Mesajın yazarı
+
+	@ManyToOne(() => Dm, dm => dm.messages, { onDelete: 'CASCADE' })
+	public dm: Dm; // Mesajın ait olduğu DM
 }
