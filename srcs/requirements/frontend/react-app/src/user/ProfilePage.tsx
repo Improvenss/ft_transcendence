@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/AuthHook";
 import { useUser } from "../hooks/UserHook";
 import NoMatchPage from "../main/NoMatchPage";
@@ -17,6 +17,22 @@ function ProfilePage() {
 	const	{ username } = useParams(); //profile/akaraca'daki akaraca'yı ele alıyor.
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
+	const navigate = useNavigate();
+
+	const handleMessage = async (userId: number) => {
+		//--> 1. backend'de mesajı gönderene özel kanal oluşturulacak. alan kişide olmayacak.
+		//--> 2. backend'den fend'e socket bilgisi gitcek, kanala focuslan diye
+		//--> 3. chat'e yönlendir 
+		//--> 4. gönderen mesajı yazana kadar, alan kişide kanal gözükmeyecek
+		//--> 5. kanal tek taraflı silinecek
+		//--> info yapısı yok, sadece leave channel olacak.
+
+		navigate('/chat');
+		const response = await fetchRequest({
+			method: 'POST',
+			url: `/chat/dm/${userId}`
+		});
+	}
 
 	useEffect(() => {
 		if (isAuth){
@@ -139,7 +155,7 @@ function ProfilePage() {
 							<>
 								<button id="poke" onClick={() => handleRequest('poke', userPanel.login)}>Poke</button>
 								<button id="addFriend" onClick={() => handleRequest('sendFriendRequest', userPanel.login)}>Add Friend</button>
-								<button id="sendMessage">Send Message</button>
+								<button id="sendMessage" onClick={() => handleMessage(userPanel.id)} >Send Message</button>
 							</>
 						)}
 				</div>

@@ -161,6 +161,26 @@
         }
       }
     },
+    "/chat/dm/{user}": {
+      "post": {
+        "operationId": "ChatController_createDm",
+        "parameters": [
+          {
+            "name": "user",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/channels": {
       "get": {
         "operationId": "ChatController_getChannels",

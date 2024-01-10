@@ -10,11 +10,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 import ChannelInfo from "./ChannelInfo";
 import { useSocket } from "../hooks/SocketHook";
 import LoadingPage from "../utils/LoadingPage";
-import { IChannel, IChannelContext } from "./iChannel";
+import { IChannel, IChannelContext, IDms } from "./iChannel";
 import fetchRequest from "../utils/fetchRequest";
 import { useUser } from "../hooks/UserHook";
+import ActiveDm from "./ActiveDm";
 
 export const ChannelContext = createContext<IChannelContext>({
+	dms: undefined,
+	setDms: () => {},
+	activeDm: null,
+	setActiveDm: () => {},
 	channels: undefined,
 	setChannels: () => {},
 	activeChannel: null,
@@ -33,7 +38,9 @@ function ChatPage () {
 	const socket = useSocket();
 	const { userInfo } = useUser();
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);
+	const [dms, setDms] = useState<IDms[] | undefined>(undefined);
 	const [activeChannel, setActiveChannel] = useState<IChannel | null>(null);
+	const [activeDm, setActiveDm] = useState<IDms | null>(null);
 	const [channelInfo, setChannelInfo] = useState(false);
 
 	useEffect(() => {
@@ -47,7 +54,8 @@ function ChatPage () {
 					const data = await response.json();
 					console.log("fetchChannels:", data);
 					if (!data.err){
-						setChannels(data);
+						setChannels(data.channels);
+						setDms(data.dms);
 					} else {
 						console.log("fetchChannels error:", data.err);
 					}
@@ -58,7 +66,6 @@ function ChatPage () {
 			fetchChannels();
 		}
 	}, [isAuth]);
-
 
 	useEffect(() => {
 		if (isAuth && socket && userInfo){
@@ -306,10 +313,13 @@ function ChatPage () {
 
 	return (
 		<div id="chat-page">
-			<ChannelContext.Provider value={{ channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
+			<ChannelContext.Provider value={{ dms, setDms, activeDm, setActiveDm, channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
 				<Channel />	
-				{userInfo && (
+				{userInfo && activeChannel && (
 					<ActiveChannel userId={userInfo.id}/>
+				)}
+				{userInfo && activeDm && (
+					<ActiveDm userId={userInfo.id}/>
 				)}
 				<ChannelInfo />
 			</ChannelContext.Provider>

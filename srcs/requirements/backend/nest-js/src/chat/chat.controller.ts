@@ -16,6 +16,7 @@ import { ChatAdminGuard } from './admin.guard';
 import { FindOptionsRelations } from 'typeorm';
 import { Channel, ChannelType } from './entities/chat.entity';
 import { ChatGuard } from './chat.guard';
+import { CreateDmDto } from './dto/chat-dm.dto';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -56,6 +57,32 @@ export class ChatController {
 		}
 	}*/
 
+	@Post('/dm/:user')
+	async createDm(
+		@Req() {user}: {user: User},
+		@Param('user', ParseIntPipe) targetId: number,
+	){
+		try {
+
+			console.log(`${C.B_GREEN}POST: /dm/:${targetId}: source[${user.login}]${C.END}`);
+			const targetUser = await this.usersService.getUserPrimary({id: targetId});
+			
+			const createDmDto: CreateDmDto = {
+				name: targetUser.login,
+				image: targetUser.imageUrl,
+				members: [user],
+				messages: []
+			}
+			
+			await this.chatService.createDm(createDmDto);
+			return { success: true };
+		} catch (err) {
+			console.error(`@Post('/dm/:${targetId}'): `, err.message);
+			return ({ success: false, err: err.message});
+		}
+		
+	}
+
 	/*
 		Kullanıcının kayıt olduğu ve public olan kanalları çekiyor.
 		Burada sadece default bilgiler çekilmektedir.
@@ -71,10 +98,18 @@ export class ChatController {
 			channels
 				.filter((channel) =>  channel.status === 'involved') //backend'de daha güvenli olduğu için ekledim.
 				.forEach((channel) => {
-					userSocket.join(channel.id.toString());
+					userSocket.join(`${channel.id}`);
 					console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
 				});
-			return (channels);
+			
+			
+			
+			const dms = await this.chatService.getDms(user.id);
+			dms.forEach((dm) => {
+				userSocket.join(`dm-${dm.id}`);
+				console.log(`Dm: [${user.login}] Joined: [${user.socketId}]`);
+			})
+			return ({channels, dms});
 		} catch (err){
 			console.error("@Get('/channels'): ", err.message);
 			return ({err: err.message});
@@ -111,14 +146,14 @@ export class ChatController {
 			delete channelResponse.password;
 			channelResponse['status'] = 'involved';
 
-			this.chatGateway.server.to(tmpChannel.id.toString()).emit('channelListener', {
+			this.chatGateway.server.to(`${tmpChannel.id}`).emit('channelListener', {
 				action: 'join',
 				channelId: tmpChannel.id,
 				data: user
 			});
 
 			const userSocket = this.chatGateway.getUserSocket(user.id);
-			userSocket.join(tmpChannel.id.toString());
+			userSocket.join(`${tmpChannel.id}`);
 			console.log(`Channel: [${tmpChannel.name}] Joined: [${user.login}]`);
 			return (channelResponse);
 		} catch (err) {
@@ -235,7 +270,7 @@ export class ChatController {
 
 			await this.chatService.patchChannel(channel.id, updateDto);
 			delete updateDto.password;
-			this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+			this.chatGateway.server.to(`${channel.id}`).emit('channelListener', {
 				action: 'update',
 				channelId: channel.id,
 				data: updateDto
@@ -267,7 +302,7 @@ export class ChatController {
 			const channelId = await this.chatService.removeUser(channel.name, 'members', user.id);
 			console.log(`${C.B_RED}Channel Leave: ${channel.name} - ${user.login}${C.END}`);
 
-			this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+			this.chatGateway.server.to(`${channel.id}`).emit('channelListener', {
 				action: 'leave',
 				channelId: channelId,
 				data: {
@@ -277,7 +312,7 @@ export class ChatController {
 				}
 			});
 			const userSocket = this.chatGateway.getUserSocket(user.id);
-			userSocket.leave(channel.id.toString());
+			userSocket.leave(`${channel.id}`);
 			return { success: true }; 
 		} catch(err){
 			return ({ success: false, err: err.message});
@@ -300,7 +335,7 @@ export class ChatController {
 					channelId: channel.id
 				});
 			} else if (channel.type === 'private'){
-				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+				this.chatGateway.server.to(`${channel.id}`).emit('channelListener', {
 					action: 'delete',
 					channelId: channel.id
 				});
@@ -348,7 +383,7 @@ export class ChatController {
 			
 			if (action === 'kick' || action === 'ban'){
 				const userSocket = this.chatGateway.getUserSocket(userId);
-				if (userSocket.rooms.has(channel.id.toString())){
+				if (userSocket.rooms.has(`${channel.id}`)){
 					userSocket.emit('channelListener', {
 						action: 'leave',
 						channelId: channel.id,
@@ -358,19 +393,19 @@ export class ChatController {
 							type: channel.type
 						}
 					})
-					userSocket.leave(channel.id.toString())
+					userSocket.leave(`${channel.id}`)
 				}
 			}
 
 			console.log(`${C.B_RED}Channel ${action}: ${channel.name} - ${targetUser.login}${C.END}`);
 			if (action === 'setAdmin' || action === 'ban' || action === 'unban'){
-				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+				this.chatGateway.server.to(`${channel.id}`).emit('channelListener', {
 					action: action,
 					channelId: channel.id,
 					data: targetUser
 				});
 			} else {
-				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+				this.chatGateway.server.to(`${channel.id}`).emit('channelListener', {
 					action: action,
 					channelId: channel.id,
 					data: {

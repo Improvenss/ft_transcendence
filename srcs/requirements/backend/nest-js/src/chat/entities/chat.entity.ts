@@ -81,3 +81,46 @@ export class Message {
 	@ManyToOne(() => Channel, channel => channel.messages, {onDelete: 'CASCADE'}) // Buradaki olay channel silinirken bu mesajlar da silinme durumuna giriyor, bu durumda ne yapacagini soyluyoruz biz { onDelete: 'CASCADE' } diyere. Yani sil diyoruz.
 	public channel: Channel; // Mesajın gönderildiği kanal
 }
+
+@Entity('dm')
+export class Dm {
+	constructor(dm: Partial<Dm>) {
+		Object.assign(this, dm);
+	}
+
+	@PrimaryGeneratedColumn()
+	public id: number;
+
+	@Column({ unique: true })
+	@IsNotEmpty()
+	public name: string; //Karşı kullanıcı login adı
+
+	@Column()
+	@IsNotEmpty()
+	public image: string; //Karşı kullanıcı resmi
+
+	@ManyToMany(() => User, user => user.dm, {nullable: true, onDelete: 'CASCADE'})
+	public members: User[];
+
+	@OneToMany(() => DmMessage, dmMessage => dmMessage.dm, { cascade: true, onDelete: 'CASCADE' })
+	public messages: DmMessage[];
+
+}
+
+@Entity('dm_message')
+export class DmMessage {
+	@PrimaryGeneratedColumn()
+	public id: number;
+
+	@Column()
+	public content: string; // Mesaj içeriği
+
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	public sentAt: Date; // Mesajın gönderildiği tarih
+
+	@ManyToOne(() => User, user => user.dmMessages, { eager: true })
+	public author: User; // Mesajın yazarı
+
+	@ManyToOne(() => Dm, dm => dm.messages, { onDelete: 'CASCADE' })
+	public dm: Dm; // Mesajın ait olduğu DM
+}

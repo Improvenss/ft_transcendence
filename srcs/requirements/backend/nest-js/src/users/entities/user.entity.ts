@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, JoinColumn, ManyToOne } from "typeorm";
-import { Channel, Message } from "src/chat/entities/chat.entity";
+import { Channel, Dm, DmMessage, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
 import { IsEmail, IsEnum } from "class-validator";
 import { GameHistory } from "src/game/entities/gameHistory.entity";
@@ -25,7 +25,6 @@ export class User {
 
 	//----------------------Mandatory----------------------------//
 
-	// @Column({type: "text", nullable: true})
 	@Column({ unique: true })
 	@IsEmail()
 	public email: string; // Intra email
@@ -48,9 +47,6 @@ export class User {
 	@IsEnum(UserStatus)
 	public status: UserStatus;
 
-	// @Column({ default: 'offline' }) // Default olarak offline olarak tanımlandı
-	// public status: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
-
 	//----------------------Optional----------------------------//
 
 	@Column({ nullable: true })
@@ -70,7 +66,7 @@ export class User {
 	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
 	public notifications: Notif[];
 
-	//----------------------Channel----------------------------//
+	//----------------------Channel&Messages----------------------------//
 
 	// @ManyToMany(() => Channel, channel => channel.members)
 	@ManyToMany(() => Channel, channel => channel.members, {cascade: true})
@@ -85,11 +81,19 @@ export class User {
 	@JoinTable()
 	public bannedChannels: Channel[];
 
-	//----------------------Message----------------------------//
-
 	@OneToMany(() => Message, message => message.author, {nullable: true})
 	@JoinTable()
 	public messages: Message[]; // Kullanıcının gönderdiği ve aldığı mesajlar
+
+	//----------------------DirectMessage&Messages----------------------------//
+
+	@ManyToMany(() => Dm, dm => dm.members, {cascade: true})
+	@JoinTable()
+	public dm: Dm[];
+
+	@OneToMany(() => DmMessage, message => message.author, {nullable: true})
+	@JoinTable()
+	public dmMessages: DmMessage[];
 
 	//----------------------Game-------------------------------//
 
