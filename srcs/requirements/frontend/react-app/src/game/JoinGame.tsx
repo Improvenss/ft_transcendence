@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import "./JoinGame.css";
-import Cookies from "js-cookie";
 import { useSocket } from "../hooks/SocketHook";
 import { IGame } from "./IGame";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +15,6 @@ function JoinGame(){
 	console.log("---------JOIN-GAME---------");
 	const [searchTerm, setSearchTerm] = useState('');
 	const socket = useSocket();
-	const userCookie = Cookies.get("user");
 	const [rooms, setRooms] = useState<IGame[]>([]);
 	const navigate = useNavigate();
 	const password = useRef<HTMLInputElement>(null);
@@ -25,22 +23,20 @@ function JoinGame(){
 
 	useEffect(() => {
 		const fetchRooms = async () => {
-			try {
-				const response = await fetch(
-					process.env.REACT_APP_FETCH + "/game/room", {
-						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-							"Authorization": "Bearer " + userCookie,
-						},
-					});
-				if (!response.ok)
-					throw new Error('API-den veri alinamadi.');
+			const response = await fetchRequest({
+				method: 'GET',
+				url: "/game/room"
+			});
+			if (response.ok){
 				const data = await response.json();
 				console.log("Get Channels: ", data);
-				setRooms(data);
-			} catch (error) {
-				console.error('Veri getirme hatasi:', error);
+				if (!data.err){
+					setRooms(data);
+				} else {
+
+				}
+			} else {
+				console.log("---Backend Connection '❌'---");
 			}
 		};
 	
@@ -70,7 +66,7 @@ function JoinGame(){
 			const data = await response.json();
 			console.log("Join-game: ", data);
 			if (!data.err){
-				navigate(`/game/lobby/${game.name}`);
+				navigate(`/game/lobby/${game.name}`, {replace: true});
 				if (errorMessage != null)
 					setErrorMessage('');
 			} else {

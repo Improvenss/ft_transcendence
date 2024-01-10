@@ -30,11 +30,6 @@ export class ApiController {
 		}
 	}
 
-		// if (status.requestLogin === "LOGIN") // Basarili bir sekilde giris yapabilir.
-		// 	return ({message: "Login Successfully!", requestLogin: URL});
-		// else // Buradaki requestLogin kismini login ya da 404 sayfasi yapabilirsin.
-		// 	return ({message: "Connection Failed!", requestLogin: process.env.API_LOGIN_URL});
-
 	/**
 	 * 2/3 & 3/3 adimlar burada gerceklesiyor.
 	 * Buradaki islemler bittigi anda 42 API'den user'in butun

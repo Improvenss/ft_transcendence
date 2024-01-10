@@ -32,13 +32,6 @@ export class Channel {
 	@Column({ type: 'enum', enum: ChannelType })
 	@IsEnum(ChannelType)
 	public type: ChannelType;
-	// @Column({ type: 'varchar', length: 20 })
-	// @IsNotEmpty()
-	// @IsEnum(['public', 'private', 'direct_message'])
-	// public type: 'public' | 'private' | 'direct_message';
-
-	// @Column({ type: 'enum', enum: ['public', 'private', 'direct_message']})
-	// public type: string; // Kanal tipi: public, private, direct_message
 
 	@Column({ nullable: true }) // Şifre, private kanallar için
 	public password: string;

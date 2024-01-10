@@ -44,7 +44,7 @@ function ProfilePage() {
 			checkUser();
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, []);
+	}, [username]);
 
 	if (!isAuth || !userInfo) { //!userInfo sadece userInfo'nun varlığını kesinleştiriyor.
 		return (<Navigate to='/login' replace />);

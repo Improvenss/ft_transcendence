@@ -6,9 +6,6 @@ const handleChannelRequest = async (
 	channelId: number,
 ) => {
 
-	if (!channelId || !targetId || !action)
-		return;
-
 	console.log(`User[${targetId}] ${action} from channel[${channelId}]`);
 
 	const response = await fetchRequest({

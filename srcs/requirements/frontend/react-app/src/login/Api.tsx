@@ -34,9 +34,11 @@ function Api(){
 					navigate('/', {replace: true});
 				} else {
 					console.log("III: ---API Token Backend Response '❌'---");
+					navigate('/404');
 				}
 			} else {
 				console.log("III: ---API Token Connection '❌'---");
+				navigate('/404');
 			}
 			setLoading(false);
 		}

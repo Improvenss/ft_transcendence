@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { Notif, NotificationType, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -65,7 +65,6 @@ export class UsersService {
 			default:
 				break;
 		}
-
 		return (await this.createNotif(sourceUser.id, destId, action, message));
 	}
 
@@ -87,16 +86,20 @@ export class UsersService {
 		action: string,
 		text: string,
 	){
-		const source = await this.getUserPrimay({id: sourceId});
+		if (!Object.values(NotificationType).includes(action as NotificationType)) {
+			throw new BadRequestException(`Invalid notification type: ${action}`);
+		}
+
+		const source = await this.getUserPrimary({id: sourceId});
 		if (!source)
 			throw new NotFoundException('Source user not found!');
 
-		const destination = await this.getUserPrimay({id: destId});
+		const destination = await this.getUserPrimary({id: destId});
 		if (!destination)
 			throw new NotFoundException('Destination user not found!');
 
 		const createNotfiDto: CreateNotifDto = {
-			type: NotificationType[action.toUpperCase() as keyof typeof NotificationType],
+			type: action as NotificationType,
 			text: text,
 			date: new Date(),
 			user: destination,
@@ -201,7 +204,7 @@ export class UsersService {
 	/* burdaki alınan değerler select'te olabilir lakin güvenlikli mi bilgim yok.
 		Belirlenen kullanıcı verisine göre kullanıcın default yapılarını döndürüyor.
 	*/
-	async getUserPrimay({id, login, socketId}: {
+	async getUserPrimary({id, login, socketId}: {
 		id?: number,
 		login?: string,
 		socketId?: string,
@@ -349,9 +352,12 @@ export class UsersService {
 		socketId?: string,
 		status?: string,
 	}){
-		const tmpUser = await this.getUserPrimay({id: id});
-		Object.assign(tmpUser, { avatar, nickname, socketId, status });
-		await this.usersRepository.save(tmpUser);
+		const user = await this.usersRepository.findOne({where: {id: id}});
+		if (user){
+			const tmpUser = await this.getUserPrimary({id: id});
+			Object.assign(tmpUser, { avatar, nickname, socketId, status });
+			await this.usersRepository.save(tmpUser);
+		}
 	}
 
 	// /**
@@ -392,7 +398,7 @@ export class UsersService {
 	//  * @param login 
 	//  */
 	// async updateSocketLogin(login: string, socketId: string) {
-	// 	const tmpUser = await this.getUserPrimay({login: login});
+	// 	const tmpUser = await this.getUserPrimary({login: login});
 	// 	if (!tmpUser){
 	// 		throw (new NotFoundException(`User ${login} not found.`));
 	// 	}

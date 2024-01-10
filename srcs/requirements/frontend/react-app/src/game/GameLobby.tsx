@@ -1,5 +1,4 @@
-import Cookies from 'js-cookie';
-import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/SocketHook';
@@ -7,73 +6,82 @@ import { useUser } from '../hooks/UserHook';
 import LoadingPage from '../utils/LoadingPage';
 import "./GameLobby.css";
 import { ReactComponent as Map } from '../assets/map/iconMap1.svg';
-
-export interface IUser {
-	login: string;
-	imageUrl: string;
-	nickname: string;
-	avatar: string;
-	status: string;
-}
+import fetchRequest from '../utils/fetchRequest';
+import { useAuth } from '../hooks/AuthHook';
+import { IUser } from '../chat/iChannel';
 
 interface Lobby {
-	admin: IUser,
-	playerLeft: IUser,
-	playerRight: IUser,
-	mode: 'classic',
+	id: number,
 	name: string,
+	type: string,
+	mode: string,
 	winScore: number,
 	duration: number,
+	description: string,
+	adminId: number,
+	players: IUser,
+	playerLeftId: number,
+	playerRightId: number,
+	playerLeft: IUser,
+	playerRight: IUser,
 }
 
 const GameLobby = () => {
 	const { roomName } = useParams();
-	const userCookie = Cookies.get("user");
 	const socket = useSocket();
 	const my = useUser().userInfo;
 	const [lobby, setLobby] = useState<Lobby | undefined>(undefined);
 	const navigate = useNavigate();
 	const location = useLocation();
+	const {isAuth} = useAuth();
 	
 	useEffect(() => {
-		const fetchLobby = async () => {
-			const response = await fetch(process.env.REACT_APP_FETCH + `/game/room?room=${roomName}&relations=all`, {
-				method: 'GET',
-				headers: {
-					"Authorization": "Bearer " + userCookie,
+		if (isAuth){
+			const fetchLobby = async () => {
+				const response = await fetchRequest({
+					method: 'GET',
+					url: `/game/lobby/${roomName}`
+				})
+				if (response.ok){
+					const data = await response.json();
+					console.log("GameLobby:", data);
+					if (!data.err){
+						const playerLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
+						const playerRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
+						console.log("playerLeft:", playerLeft);
+						console.log("playerRight:", playerRight);
+						setLobby({...data, playerLeft, playerRight});
+					} else {
+						navigate('/404', {replace: true});
+					}
+				} else {
+					console.log("---Backend Connection '❌'---");
 				}
-			});
-			if (!response.ok)
-				throw (new Error("API fetch error."));
-			const data = await response.json();
-			console.log("GameLobby:", data);
-			setLobby({
-				mode: data.mode,
-				name: data.name,
-				winScore: data.winScore,
-				playerLeft: data.players[0],
-				playerRight: data.players[1],
-				admin: data.players[0],
-				duration: data.duration,
-			});
-			// oda olmama durumu, odaya register olmayan kullanıcı durumunun kontrol edilip yönlendirilmesi yapılması gerekmektedir.
-		}
-		fetchLobby();
-
-		const	lobbyListener = () => {
+				// oda olmama durumu, odaya register olmayan kullanıcı durumunun kontrol edilip yönlendirilmesi yapılması gerekmektedir.
+			}
 			fetchLobby();
-		}
-		socket?.on(`lobbyListener:${roomName}`, lobbyListener);
-		return () => {
-			socket?.off(`lobbyListener:${roomName}`, lobbyListener);
+			
+			const	lobbyListener = () => {
+				fetchLobby();
+			}
+			socket?.on(`lobbyListener:${roomName}`, lobbyListener);
+			return () => {
+				socket?.off(`lobbyListener:${roomName}`, lobbyListener);
+			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [socket]);
 
-
 	useEffect(() => {
 		console.log("CIKTIM");
 	},[location.pathname])
+		
+	if (!isAuth)
+	{
+		return (
+			<Navigate to='/login' replace />
+		);
+	}
 
 	if (lobby === undefined){
 		return (<LoadingPage />);
@@ -84,7 +92,7 @@ const GameLobby = () => {
 
 		// if (lobby.playerRight)
 		// {
-			navigate(`/game/${roomName}`);
+			navigate(`/game/${roomName}`, {replace: true});
 		// }
 	}
 
@@ -120,7 +128,7 @@ const GameLobby = () => {
 				)}
 			</div>
 			<Map className='map'/>
-			{(lobby.admin.login === my?.login) ? (
+			{(lobby.adminId === my?.id) ? (
 				<button className='start' onClick={LoadPongGame} >Start Game</button>
 			) : (
 				<button className='ready'>Ready</button>

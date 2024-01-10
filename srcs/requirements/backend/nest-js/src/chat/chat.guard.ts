@@ -4,7 +4,7 @@ import { UsersService } from 'src/users/users.service';
 import { ChatService } from './chat.service';
 
 @Injectable()
-export class ChatAdminGuard implements CanActivate {
+export class ChatGuard implements CanActivate {
 	constructor(
 		private readonly jwtService: JwtService,
 		private readonly usersService: UsersService,
@@ -15,7 +15,7 @@ export class ChatAdminGuard implements CanActivate {
 	): Promise<boolean> {
 		try
 		{
-			console.log("ChatAdminGuard: inside the guard.");
+			console.log("ChatGuard: inside the guard.");
 			const request = context.switchToHttp().getRequest();
 			const authHeader = request.headers.authorization;
 			if (!authHeader || !authHeader.startsWith('Bearer '))
@@ -32,13 +32,13 @@ export class ChatAdminGuard implements CanActivate {
 				throw (new UnauthorizedException("User not found!"));
 			const tmpChannel = await this.chatService.getChannelRelation({
 				id: request.headers.channel,
-				relation: { admins: true },
+				relation: { members: true },
 				primary: true,
 			});
 			if (!tmpChannel)
 				throw (new UnauthorizedException("Channel not found!"));
 
-			if (!tmpChannel.admins || !tmpChannel.admins.some(admin => admin.id === tmpUser.id))
+			if (!tmpChannel.members || !tmpChannel.members.some(user => user.id === tmpUser.id))
 				throw new UnauthorizedException("User is not an admin for this channel!");
 
 			request.user = tmpUser;
@@ -47,7 +47,7 @@ export class ChatAdminGuard implements CanActivate {
 		}
 		catch (err)
 		{
-			console.log("ChatAdminGuard: ", err.message);
+			console.log("ChatGuard: ", err.message);
 			throw (new UnauthorizedException());
 		}
 	}

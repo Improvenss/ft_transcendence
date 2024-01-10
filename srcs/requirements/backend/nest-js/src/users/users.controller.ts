@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, NotFoundException, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors, ParseBoolPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, NotFoundException, Req, UseGuards, Query, Put, UploadedFile, UseInterceptors, ParseBoolPipe, Param, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -161,12 +161,14 @@ export class UsersController {
 	// 	}
 	// }
 
-	@Post()
+	@Post('/:action/:user')
 	async request(
 		@Req() {user}: {user: User},
-		@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
-		@Query('target') target: string,
-		@Query('id') sourceNotif?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
+		@Param('action') action: string,
+		@Param('user') target: string,
+		@Query('notifID', ParseIntPipe) sourceNotif: number, // undefined gelmiyor bu yüzden 0 gönderiyorum
+		//@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
+		//@Query('id') sourceNotif?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
 	){
 		try {
 			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${sourceNotif}]${C.END}`);
@@ -174,7 +176,7 @@ export class UsersController {
 				throw Error(`Query is empty!`);
 			if (sourceNotif)
 				await this.usersService.deleteNotif(user.id, sourceNotif);
-			const targetUser = await this.usersService.getUserPrimay({login: target});
+			const targetUser = await this.usersService.getUserPrimary({login: target});
 			if (!targetUser){
 				throw new NotFoundException('User not found!');
 			}
@@ -193,6 +195,8 @@ export class UsersController {
 			this.chatGateway.server.emit(`user-notif:${targetUser.id}`, result);
 			return { success: true };
 		} catch (err) {
+			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);
+			this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
 			console.error("@Post(): ", err.message);
 			return ({ success: false, err: err.message});
 		}
@@ -212,7 +216,7 @@ export class UsersController {
 		try {
 			console.log(`${C.B_YELLOW}GET: relation: [${relation}] userData: [${primary}]${C.END}`);
 			if (!relation && primary != true)
-				return (await this.usersService.getUserPrimay({id: user.id}));
+				return (await this.usersService.getUserPrimary({id: user.id}));
 
 			return(await this.usersService.getUserRelation({
 				user: { id: user.id },
@@ -232,9 +236,8 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /user: who: [${who}]${C.END}`);
-			// const data = await this.usersService.getData({userLogin: who}, (user.login === who ? 'friends': []), 'true');
-			if (user.login === who){
-				return (await this.usersService.getUserPrimay({login: user.login}));
+			if (user.login !== who){
+				return (await this.usersService.getUserPrimary({login: who}));
 			}
 
 			const data = await this.usersService.getUserRelation({

@@ -123,7 +123,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket, //Eğer burada yine mesaj yazarı null olursa socket var mı yok mu kontrol ettir.
 	){
 		try {
-			const messageUser = await this.usersService.getUserPrimay({id: author});
+			const messageUser = await this.usersService.getUserPrimary({id: author});
 			if (!messageUser)
 				throw new NotFoundException('User not found!');
 			const messageChannel = await this.chatService.getChannelPrimary({id: channel});
@@ -320,7 +320,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	try
 	// 	{
 	// 		// const user = await this.usersService.getData({socketId: socket.id});
-	// 		const user = await this.usersService.getUserPrimay({socketId: socket.id});
+	// 		const user = await this.usersService.getUserPrimary({socketId: socket.id});
 	// 		// const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
 	// 		const tmpChannel = await this.chatService.getChannelRelation({
 	// 			channelName: channel.name,
@@ -355,7 +355,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// ){
 	// 	try {
 	// 		// const responseUser = await this.usersService.getData({socketId: socket.id})
-	// 		const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
+	// 		const responseUser = await this.usersService.getUserPrimary({socketId: socket.id});
 	// 		if (responseUser === null){
 	// 			throw (new NotFoundException("User not found!"));
 	// 		}

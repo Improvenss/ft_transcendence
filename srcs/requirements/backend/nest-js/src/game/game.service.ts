@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { FindOptionsRelations } from 'typeorm';
 
 @Injectable()
 export class GameService {
@@ -16,7 +17,7 @@ export class GameService {
 	) {}
 
 	async	createGameRoom(login: string, createGameDto: CreateGameDto) {
-		const	tmpUser = await this.usersService.getUserPrimay({login: login});
+		const	tmpUser = await this.usersService.getUserPrimary({login: login});
 		if (!tmpUser)
 			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
 		const	tmpGameRoom = await this.findGameRoom(createGameDto.name);
@@ -53,6 +54,89 @@ export class GameService {
 			return (false);
 		return (true);
 	}
+
+	async getRelationNames(): Promise<string[]> {
+		const metadata = this.gameRepository.metadata;
+		const relationNames = metadata.relations.map((relation) => (relation.propertyName));
+		return relationNames;
+	}
+
+	async getGamePrimary({id, name}:{id?: number, name?: string}){
+		const inputSize = [id, name].filter(Boolean).length;
+		if (inputSize !== 1){
+			throw new Error('Provide exactly one of id or name.');
+		}
+
+		const whereClause: Record<string, any> = {
+			id: id,
+			name: name,
+		};
+		
+		return (await this.gameRepository.findOne({where: whereClause}));
+	}
+
+	async getGameRelation({id, name, relation, primary}: {
+		id?: number,
+		name?: string,
+		relation: FindOptionsRelations<Game>,
+		primary: boolean,
+	}){
+		const inputSize = [id, name].filter(Boolean).length;
+		if (inputSize !== 1){
+			throw new Error('Provide exactly one of id or name.');
+		}
+
+		const whereClause: Record<string, any> = {
+			id: id,
+			name: name,
+		};
+
+		if (Object.keys(relation).length === 0){
+			const allChannelRelation = await this.getRelationNames();
+			relation = allChannelRelation.reduce((acc, rel) => {
+				acc[rel] = true;
+				return acc;
+			}, {} as FindOptionsRelations<Game>);
+		}
+
+		const data = await this.gameRepository.findOne({where: whereClause, relations: relation});
+		if (!data)
+			return (null);
+
+		if (primary === true){ // default + relation
+			return (data);
+		}
+
+		const result: Partial<Game> = {};
+		// Sadece ilişkileri döndür
+		Object.keys(relation).forEach((rel) => {
+			result[rel] = data[rel];
+		});
+
+		return result as Game;
+	}
+
+	async	findGameRoomWId(
+		id: number,
+		relations?: string[] | 'all' | undefined,
+	){
+		const relationObject = (relations === 'all')
+		? {players: true}
+		: (Array.isArray(relations)
+			? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {})
+			: (typeof(relations) === 'string'
+				? { [relations]: true }
+				: null));
+		// console.log(`GameService: findGameRoomWId(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		const tmpRoom = (id === undefined)
+			? await this.gameRepository.find({relations: relationObject})
+			: await this.gameRepository.findOne({
+					where: {id: id},
+					relations: relationObject
+				});
+		return (tmpRoom);
+	}
+
 
 	async	findGameRoom(
 		room: string | undefined,
@@ -94,6 +178,14 @@ export class GameService {
 			throw (new Error("Password is WRONG!!!"));
 		if (singleRoom.players.length > 2)
 			throw (new Error("Game Room is full!"));
+		// const	oldRoom = await this.findGameRoomWId(user.cure)
+		const	userGameRoom = await this.usersService.getUserRelation({
+			user: {id: user.id},
+			relation: {currentRoom: true},
+			primary: false
+		});
+		console.log("user'in oldugu game rom:", userGameRoom);
+		// if (userGameRoom) // Burada kaldin burayi yap
 		singleRoom.players.push(user);
 		singleRoom.pRightId = user.id;
 		return (this.gameRepository.save(singleRoom));

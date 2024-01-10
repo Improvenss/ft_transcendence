@@ -67,7 +67,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect
 		try
 		{
 			console.log("Socket'in Game Room'a joinlenme kismi - joinRoom -");
-			const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
+			const responseUser = await this.usersService.getUserPrimary({socketId: socket.id});
 			if (responseUser === null)
 				throw (new NotFoundException("User not found for join Game Room!"));
 			const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
@@ -125,7 +125,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect
 	){
 		try {
 
-			const responseUser = await this.usersService.getUserPrimay({socketId: socket.id});
+			const responseUser = await this.usersService.getUserPrimary({socketId: socket.id});
 			if (responseUser === null){
 				throw (new NotFoundException("User not found!"));
 			}

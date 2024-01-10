@@ -9,7 +9,8 @@ import { formatDaytamp, formatTimestamp, isDifferentDay } from '../utils/dateUti
 import MessageInput from './MessageInput';
 
 function ActiveChannel({userId}:{userId:number}){
-	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
+	console.log("-->Active Channel<---");
+	const {channels, activeChannel, setActiveChannel,channelInfo, setChannelInfo } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 

@@ -259,10 +259,18 @@ export class ChatService {
 			throw new NotFoundException('Channel does not exist!');
 		}
 
-		if (relation === 'members')
+		if (relation === 'members'){
+			if (tmpChannel.members.some((member) => member.id === user.id)){
+				throw new Error(`user[${user.login}] already member in this channel[${tmpChannel.name}]!`);
+			}
 			tmpChannel.members.push(user);
-		else if (relation === 'bannedUsers')
+		}
+		else if (relation === 'bannedUsers'){
+			if (tmpChannel.bannedUsers.some((member) => member.id === user.id)){
+				throw new Error(`user[${user.login}] already banned in this channel[${tmpChannel.name}]!`);
+			}
 			tmpChannel.bannedUsers.push(user);
+		}
 		else
 			throw (new NotFoundException('Relation not found!'));
 
