@@ -183,36 +183,18 @@
         }
       }
     },
-    "/chat/channel/leave": {
-      "delete": {
-        "operationId": "ChatController_leaveChannel",
-        "parameters": [
-          {
-            "name": "channel",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+    "/chat/channel/create": {
+      "post": {
+        "operationId": "ChatController_createChannel",
+        "parameters": [],
         "responses": {
-          "200": {
+          "201": {
             "description": ""
           }
         }
       }
     },
     "/chat/channel": {
-      "delete": {
-        "operationId": "ChatController_deleteChannel",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
       "patch": {
         "operationId": "ChatController_patchChannel",
         "parameters": [],
@@ -221,14 +203,23 @@
             "description": ""
           }
         }
-      }
-    },
-    "/chat/channel/create": {
-      "post": {
-        "operationId": "ChatController_createChannel",
+      },
+      "delete": {
+        "operationId": "ChatController_deleteChannel",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/chat/channel/leave": {
+      "delete": {
+        "operationId": "ChatController_leaveChannel",
+        "parameters": [],
+        "responses": {
+          "200": {
             "description": ""
           }
         }

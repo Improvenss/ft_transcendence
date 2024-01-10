@@ -15,6 +15,7 @@ import { multerConfig } from './channel.handler';
 import { ChatAdminGuard } from './admin.guard';
 import { FindOptionsRelations } from 'typeorm';
 import { Channel, ChannelType } from './entities/chat.entity';
+import { ChatGuard } from './chat.guard';
 
 /**
  * Bu @UseGuard()'i buraya koyarsan icerisindeki
@@ -80,10 +81,10 @@ export class ChatController {
 		}
 	}
 
-	@Post('/channel/register')
+	@Post('/channel/register') //OK
 	async registerChannel(
 		@Req() {user}: {user: User},
-		@Body() body: {channel: string, password: string} //joiin channel ile giriş yapıldığı için id'sini fend'den getiremem
+		@Body() body: {channel: string, password: string}
 	){
 		try {
 			console.log(`${C.B_YELLOW}POST: /channel/register: user: [${user.login}] channel: [${body.channel}]${C.END}`);
@@ -95,10 +96,10 @@ export class ChatController {
 			if (!tmpChannel)
 				throw new NotFoundException('Channel not found!');
 
-			if (tmpChannel.bannedUsers.some((channelUser) => {channelUser.id === user.id}))
+			if (tmpChannel.bannedUsers.find((member) => member.id === user.id))
 				throw (new Error(`${user.login} banned in this Channel: ${body.channel}.`));
 
-			if (tmpChannel.members.some((channelUser) => {channelUser.id === user.id}))
+			if (tmpChannel.members.find((member) => member.id === user.id))
 				throw (new Error(`${user.login} already in this Channel: ${body.channel}.`));
 
 			if (tmpChannel.password && !bcrypt.compareSync(body.password, tmpChannel.password))
@@ -109,6 +110,12 @@ export class ChatController {
 			const channelResponse = await this.chatService.saveChannel(tmpChannel);
 			delete channelResponse.password;
 			channelResponse['status'] = 'involved';
+
+			this.chatGateway.server.to(tmpChannel.id.toString()).emit('channelListener', {
+				action: 'join',
+				channelId: tmpChannel.id,
+				data: user
+			});
 
 			const userSocket = this.chatGateway.getUserSocket(user.id);
 			userSocket.join(tmpChannel.id.toString());
@@ -122,67 +129,7 @@ export class ChatController {
 		}
 	}
 
-	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
-	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
-	@Delete('/channel/leave')
-	async leaveChannel(
-		@Req() {user}: {user: User},
-		@Query ('channel') name: string,
-	){
-		try {
-			console.log(`${C.B_YELLOW}POST: /channel/leave: user: [${user.login}] channel: [${name}]${C.END}`);
-
-			const userSocket = this.chatGateway.getUserSocket(user.id);
-			userSocket.leave(name);
-			const channelId = await this.chatService.removeUser(name, 'members', user.id);
-			console.log(`${C.B_RED}Channel Leave: ${name} - ${user.login}${C.END}`);
-
-			this.chatGateway.server.to(name).emit('channelListener', {
-				action: 'leave',
-				channelId: channelId,
-				data: {
-					userId: user.id,
-					login: user.login,
-				}
-			});
-			return { success: true };
-		} catch(err){
-			return ({ success: false, err: err.message});
-		}
-	}
-
-	// ---------- Delete ---------
-	@Delete('/channel')
-	@UseGuards(ChatAdminGuard)
-	async deleteChannel(
-		@Req() {user}: {user: User},
-		@Req() {channel}: {channel: Channel},
-	){
-		try {
-			console.log(`${C.B_RED}DELETE: Channel: ${channel.name}${C.END}`);
-			
-			if (channel.type === 'public'){
-				this.chatGateway.server.emit('channelListener', {
-					action: 'delete',
-					channelId: channel.id
-				});
-			} else if (channel.type === 'private'){
-				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
-					action: 'delete',
-					channelId: channel.id
-				});
-			}
-
-			this.chatGateway.forceLeaveChannel(channel.name);
-			await this.chatService.removeChannel(channel);
-			return ({ success: true });
-		} catch (err) {
-			console.error("@Delete('/channel'): deleteChannel():", err.message);
-			return ({ success: false, err: err.message});
-		}
-	}
-
-	@Post('/channel/create')
+	@Post('/channel/create') //OK
 	@UseInterceptors(FileInterceptor('image', multerConfig))
 	async createChannel(
 		@Req() {user}: {user: User},
@@ -251,7 +198,7 @@ export class ChatController {
 	// --------------- ADMIN -------------------------
 	// channel settings kısmında güncelleme yapıyoruz, yaparken tek tek gerçekleştiriyoruz.
 	// Güncellemediğimiz ayar undefined olarak geliyor.
-	@Patch('/channel')
+	@Patch('/channel') //OK
 	@UseGuards(ChatAdminGuard)
 	@UseInterceptors(FileInterceptor('channelImage', multerConfig))
 	async patchChannel(
@@ -306,6 +253,74 @@ export class ChatController {
 		}
 	}
 
+	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
+	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
+	@Delete('/channel/leave') //OK
+	@UseGuards(ChatGuard)
+	async leaveChannel(
+		@Req() {user}: {user: User},
+		@Req() {channel}: {channel: Channel}
+	){
+		try {
+			console.log(`${C.B_YELLOW}POST: /channel/leave: user: [${user.login}] channel: [${channel.name}]${C.END}`);
+
+			const channelId = await this.chatService.removeUser(channel.name, 'members', user.id);
+			console.log(`${C.B_RED}Channel Leave: ${channel.name} - ${user.login}${C.END}`);
+
+			this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+				action: 'leave',
+				channelId: channelId,
+				data: {
+					userId: user.id,
+					login: user.login,
+					type: channel.type
+				}
+			});
+			const userSocket = this.chatGateway.getUserSocket(user.id);
+			userSocket.leave(channel.id.toString());
+			return { success: true }; 
+		} catch(err){
+			return ({ success: false, err: err.message});
+		}
+	}
+
+	// ---------- Delete ---------
+	@Delete('/channel') //OK
+	@UseGuards(ChatAdminGuard)
+	async deleteChannel(
+		@Req() {user}: {user: User},
+		@Req() {channel}: {channel: Channel},
+	){
+		try {
+			console.log(`${C.B_RED}DELETE: Channel: ${channel.name}${C.END}`);
+			
+			if (channel.type === 'public'){
+				this.chatGateway.server.emit('channelListener', {
+					action: 'delete',
+					channelId: channel.id
+				});
+			} else if (channel.type === 'private'){
+				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+					action: 'delete',
+					channelId: channel.id
+				});
+			}
+
+			this.chatGateway.forceLeaveChannel(channel.name);
+			await this.chatService.removeChannel(channel);
+			return ({ success: true });
+		} catch (err) {
+			console.error("@Delete('/channel'): deleteChannel():", err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
+
+	/*
+		Delete -> public ve private silinecek Herkeste çıkacak, activeChannel ise null olacak.
+		Leave -> kanaldaki herkesten kullanıcı olarak çıkması gerek. Çıkan kişinden kanalın silinmesi gerekiyor, public ise public yapı olmalı, private ise dümdüz sil.
+	
+	*/
 	@Post('/channel/:action/:userId')
 	@UseGuards(ChatAdminGuard)
 	async channelAction(
@@ -331,28 +346,37 @@ export class ChatController {
 				await this.chatService.setPermission(channel, targetUser, action);
 			}
 			
-			console.log(`${C.B_RED}Channel ${action}: ${channel.name} - ${targetUser.login}${C.END}`);
-			this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
-				action: action,
-				channelId: channel.id,
-				data: {
-					id: userId
-				}
-			});
-
 			if (action === 'kick' || action === 'ban'){
 				const userSocket = this.chatGateway.getUserSocket(userId);
 				if (userSocket.rooms.has(channel.id.toString())){
 					userSocket.emit('channelListener', {
-						action: 'delete',
+						action: 'leave',
 						channelId: channel.id,
 						data: {
 							userId: targetUser.id,
 							login: targetUser.login,
+							type: channel.type
 						}
 					})
 					userSocket.leave(channel.id.toString())
 				}
+			}
+
+			console.log(`${C.B_RED}Channel ${action}: ${channel.name} - ${targetUser.login}${C.END}`);
+			if (action === 'setAdmin' || action === 'ban' || action === 'unban'){
+				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+					action: action,
+					channelId: channel.id,
+					data: targetUser
+				});
+			} else {
+				this.chatGateway.server.to(channel.id.toString()).emit('channelListener', {
+					action: action,
+					channelId: channel.id,
+					data: {
+						id: targetUser.id
+					}
+				});
 			}
 			//Channel'daki herkese bildirim atama ekle
 			return ({ success: true });

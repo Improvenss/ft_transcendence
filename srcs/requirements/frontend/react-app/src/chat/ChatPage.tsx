@@ -84,7 +84,7 @@ function ChatPage () {
 			}) => {
 				console.log(`handleListenChannel: action[${action}] channelId[${channelId}]`);
 				switch (action) {
-					case ActionType.Create: //OK // ---------------------------------------------------------------------//
+					case ActionType.Create: // OK ---------------------------------------------------------------------//
 						console.log("Channel Recived:", data);
 						setChannels(prevChannels => {
 							if (!prevChannels) return prevChannels;
@@ -100,103 +100,181 @@ function ChatPage () {
 							}
 						});
 						break;
-					case ActionType.Delete: // ---------------------------------------------------------------------//
-						if (activeChannel?.id === channelId) {
-							setActiveChannel(null);
-						}
-						setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
-						break;
-					case ActionType.Leave: // ---------------------------------------------------------------------//
-						if (data.type === 'private'){
-							setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
-						} else {
-							setChannels((prevChannels) => {
-								if (prevChannels) {
-									return prevChannels.map((channel) => {
-										if (channel.id === activeChannel?.id) {
-											return {
-												...channel,
-												members: [],
-												admins: [],
-												messages: [],
-												bannedUsers: [],
-												status: 'public',
-											};
-										}
-										return channel;
-									});
-								}
-								return prevChannels;
-							});
-						}
-						if (activeChannel?.id === channelId)
-							setActiveChannel(null);
-						break;
-					case ActionType.NewMessage: //OK // ---------------------------------------------------------------------//
+					case ActionType.Join: //OK ---------------------------------------------------------------------//
 						setChannels((prevChannels) => {
 							if (!prevChannels) return prevChannels;
 
 							const updatedChannels = prevChannels.map((channel) => {
-							if (channel.id === channelId) {
-								const updatedMessages = [...channel.messages, data];;
-								return { ...channel, messages: updatedMessages };
-							} else {
-								return channel;
-							}
+								if (channel.id === channelId) {
+									const updatedMembers = [...channel.members, data];;
+									return { ...channel, members: updatedMembers };
+								} else {
+									return channel;
+								}
 							});
 							return updatedChannels;
 						});
 						break;
-					case ActionType.Update: //OK // ---------------------------------------------------------------------//
+					case ActionType.Delete: //OK ---------------------------------------------------------------------//
+						setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
+						if (activeChannel?.id === channelId) {
+							setActiveChannel(null);
+						}
+						break;
+					case ActionType.Leave://OK ---------------------------------------------------------------------//
+						if (data.userId === userInfo.id){ //--> 2. durum çıkan kişiyi güncelle
+							console.log("------->", "Leave", data.userId);
+								if (data.type === 'private'){
+									setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
+								} else {
+									setChannels((prevChannels) => {
+										if (prevChannels) {
+											return prevChannels.map((channel) => {
+												if (channel.id === activeChannel?.id) {
+													return {
+														...channel,
+														members: [],
+														admins: [],
+													messages: [],
+													bannedUsers: [],
+													status: 'public',
+												};
+											}
+											return channel;
+										});
+									}
+									return prevChannels;
+								});
+							}
+							if (activeChannel?.id === channelId)
+								setActiveChannel(null);
+						} else { //--> 1. durum başka biri çıkıyor, membersi güncelle
+							setChannels((prevChannels) => {
+								if (!prevChannels) return prevChannels;
+							  
+								const updatedChannels = prevChannels.map((channel) => {
+									if (channel.id === channelId) {
+										const updatedMembers = channel.members.filter((user) => user.id !== data.userId);
+										return { ...channel, members: updatedMembers };
+									} else {
+										return channel;
+									}
+								});
+							  
+								return updatedChannels;
+							});
+						}
+						break;
+					case ActionType.NewMessage: //OK ---------------------------------------------------------------------//
 						setChannels((prevChannels) => {
 							if (!prevChannels) return prevChannels;
 
 							const updatedChannels = prevChannels.map((channel) => {
-							if (channel.id === channelId) {
-								const updatedChannel = {
-									...channel,
-									...data
-								};
-								return (updatedChannel);
-							} else {
-								return channel;
-							}
+								if (channel.id === channelId) {
+									const updatedMessages = [...channel.messages, data];;
+									return { ...channel, messages: updatedMessages };
+								} else {
+									return channel;
+								}
+							});
+							return updatedChannels;
+						});
+						break;
+					case ActionType.Update: //OK ---------------------------------------------------------------------//
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+
+							const updatedChannels = prevChannels.map((channel) => {
+								if (channel.id === channelId) {
+									const updatedChannel = {
+										...channel,
+										...data
+									};
+									return (updatedChannel);
+								} else {
+									return channel;
+								}
 							});
 						
 							return updatedChannels;
 						});
 						break;
-					case ActionType.RemoveAdmin: //OK // ---------------------------------------------------------------------//
+					case ActionType.RemoveAdmin: //OK ---------------------------------------------------------------------//
 						setChannels((prevChannels) => {
 							if (!prevChannels) return prevChannels;
 						  
 							const updatedChannels = prevChannels.map((channel) => {
-							  if (channel.id === channelId) {
-								const updatedAdmins = channel.admins.filter((admin) => admin.id !== data.id);
-								return { ...channel, admins: updatedAdmins };
-							  } else {
-								return channel;
-							  }
+								if (channel.id === channelId) {
+									const updatedAdmins = channel.admins.filter((admin) => admin.id !== data.id);
+									return { ...channel, admins: updatedAdmins };
+								} else {
+									return channel;
+								}
 							});
 						  
 							return updatedChannels;
 						  });
 						break;
-					case ActionType.Kick: // ---------------------------------------------------------------------//
-						if (userInfo.id !== data.id){
-							setChannels((prevChannels) => {
-								if (!prevChannels) return prevChannels;
-								const updatedChannels = prevChannels.map((channel) => {
-									if (channel.id === channelId) {
-										const updatedUsers = channel.members.filter((user) => user.id !== data.id);
-										return { ...channel, members: updatedUsers };
-									} else {
-										return channel;
-									}
-								});
-								return updatedChannels;
+					case ActionType.Kick: //OK ---------------------------------------------------------------------//
+						setChannels((prevChannels) => { //diğer kullanıcılar için
+							if (!prevChannels) return prevChannels;
+							const updatedChannels = prevChannels.map((channel) => {
+								if (channel.id === channelId) {
+									const updatedUsers = channel.members.filter((user) => user.id !== data.id);
+									return { ...channel, members: updatedUsers };
+								} else {
+									return channel;
+								}
 							});
-						}
+							return updatedChannels;
+						});
+						break;
+					case ActionType.SetAdmin: //OK ---------------------------------------------------------------------//
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+
+							const updatedChannels = prevChannels.map((channel) => {
+								if (channel.id === channelId) {
+									const updatedAdmins = [...channel.admins, data];;
+									return { ...channel, admins: updatedAdmins };
+								} else {
+									return channel;
+								}
+							});
+							return updatedChannels;
+						});
+						break;
+					case ActionType.Ban: //OK ---------------------------------------------------------------------//
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+
+							const updatedChannels = prevChannels.map((channel) => {
+								if (channel.id === channelId) {
+									const updateMembers = channel.members.filter((user) => user.id !== data.id);
+									const updatedbannedUsers = [...channel.bannedUsers, data];;
+									return { ...channel, bannedUsers: updatedbannedUsers, members: updateMembers };
+								} else {
+									return channel;
+								}
+							});
+							return updatedChannels;
+						});
+						break;
+					case ActionType.UnBan: //OK ---------------------------------------------------------------------//
+						setChannels((prevChannels) => {
+							if (!prevChannels) return prevChannels;
+						
+							const updatedChannels = prevChannels.map((channel) => {
+								if (channel.id === channelId) {
+									const updatedbannedUsers = channel.bannedUsers.filter((member) => member.id !== data.id);
+									return { ...channel, bannedUsers: updatedbannedUsers };
+								} else {
+									return channel;
+								}
+							});
+						
+							return updatedChannels;
+						});
 						break;
 				}
 			}
@@ -240,3 +318,5 @@ function ChatPage () {
 }
 
 export default ChatPage;
+
+

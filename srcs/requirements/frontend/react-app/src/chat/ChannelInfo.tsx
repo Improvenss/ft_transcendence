@@ -49,7 +49,7 @@ function InfoChannel() {
 			headers: {
 				'channel': selectedChannel.toString(),
 			},
-			url: `/chat/channel/leave?channel=${selectedChannel}`
+			url: `/chat/channel/leave`
 		});
 		//if (response.ok){
 		//	const data = await response.json();

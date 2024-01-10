@@ -178,7 +178,7 @@ export class GameService {
 			throw (new Error("Password is WRONG!!!"));
 		if (singleRoom.players.length > 2)
 			throw (new Error("Game Room is full!"));
-		// const	oldRoom = await this.findGameRoomWId(user.curre)
+		// const	oldRoom = await this.findGameRoomWId(user.cure)
 		const	userGameRoom = await this.usersService.getUserRelation({
 			user: {id: user.id},
 			relation: {currentRoom: true},
