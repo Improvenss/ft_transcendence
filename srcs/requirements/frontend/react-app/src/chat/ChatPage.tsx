@@ -59,7 +59,6 @@ function ChatPage () {
 		}
 	}, [isAuth]);
 
-
 	useEffect(() => {
 		if (isAuth && socket && userInfo){
 

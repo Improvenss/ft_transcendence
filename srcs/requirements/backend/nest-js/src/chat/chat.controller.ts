@@ -56,6 +56,18 @@ export class ChatController {
 		}
 	}*/
 
+	@Post('/dm/:user')
+	async createDm(
+		@Req() {user}: {user: User},
+		@Param('user', ParseIntPipe) targetId: number,
+	){
+		console.log(`${C.B_GREEN}POST: /dm/:${targetId}: source[${user.login}]${C.END}`);
+		const targetUser = await this.usersService.getUserPrimary({id: targetId});
+
+		
+		
+	}
+
 	/*
 		Kullanıcının kayıt olduğu ve public olan kanalları çekiyor.
 		Burada sadece default bilgiler çekilmektedir.
