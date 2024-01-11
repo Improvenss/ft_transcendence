@@ -69,9 +69,10 @@ export class ChatController {
 			
 			const createDmDto: CreateDmDto = {
 				name: targetUser.login,
+				displayname: targetUser.displayname,
 				image: targetUser.imageUrl,
 				members: [user],
-				messages: []
+				messages: [],
 			}
 			
 			await this.chatService.createDm(createDmDto);

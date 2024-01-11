@@ -10,6 +10,10 @@ export class CreateDmDto {
 
 	@IsString()
 	@IsNotEmpty()
+	displayname: string;
+
+	@IsString()
+	@IsNotEmpty()
 	image: string;
 
 	@IsArray()

@@ -1,9 +1,79 @@
-
+import React, { useEffect } from "react";
+import { useRef, useState } from "react";
+import { formatDaytamp, formatTimestamp, isDifferentDay } from "../utils/dateUtils";
+import { useChannelContext } from "./ChatPage";
+import { IMessage } from "./iChannel";
+import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
+import { ReactComponent as IconLeave } from '../assets/chat/iconLeave.svg';
+import MessageInput from "./MessageInput";
+import './ActiveDm.css';
 
 function ActiveDm({userId}:{userId:number}){
+	console.log("-->Active DirectMessage<---");
+	const { dms, setDms, activeDm, setActiveDm } = useChannelContext();
+	const [messages, setMessages] = useState<IMessage[]>([]);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+
+	function formatMessageContent(content: string) {
+	// Mesaj içeriğindeki '\n' karakterini <br> tag'ine dönüştür
+		return content.split('\n').map((line, index) => (
+			<React.Fragment key={index}>
+			{line}
+			{index < content.length - 1 && <br />}
+			</React.Fragment>
+		));
+	}
+
+	useEffect(() => {
+		if (activeDm){
+			setMessages(activeDm.messages.sort((a, b) => a.id - b.id));
+		}
+		const messageInput = document.getElementById("messageTextarea");
+		if (messageInput) {
+			messageInput.focus();
+		}
+	}, [activeDm]);
+	
+	useEffect(() => {
+	// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.
+		const messagesContainer = document.getElementById("message-container");
+		if (messagesContainer)
+				messagesContainer.scrollTop = messagesContainer?.scrollHeight;
+	}, [messages]);
 
 	return (
 		<>
+			{activeDm && (
+				<div id="activeDm">
+					<div id="dm-header">
+						<img src={activeDm.image} alt={activeDm.image} />
+						<h2>{activeDm.name} | {activeDm.displayname}</h2>
+						<button >
+							<IconLeave />
+						</button>
+					</div>
+					<div id="message-container">
+						{messages.map((message, index) => (
+							<React.Fragment key={index}>
+								{index === 0 || isDifferentDay(message.sentAt, messages[index - 1].sentAt) ? (
+									<div className="day-sticky">
+										<span className="daystamp">{formatDaytamp(message.sentAt)}</span>
+									</div>
+								) : null}
+								<div className={`message ${(message.author.id !== userId) ? 'taken' : 'sent'}`} >
+										{(index === 0 || message.author.id !== messages[index - 1].author.id) && (
+											<span className="icon-span"><IconMessage /></span>
+										)}
+										<p>{formatMessageContent(message.content)}</p>
+										<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
+								</div>
+							</React.Fragment>
+						))}
+						<div ref={messagesEndRef} />
+					</div>
+					<MessageInput channelId={activeDm.id} userId={userId} />
+				</div>
+			)}
 		</>
 	)
 }

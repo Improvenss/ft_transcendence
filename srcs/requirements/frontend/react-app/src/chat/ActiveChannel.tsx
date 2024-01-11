@@ -14,7 +14,7 @@ function ActiveChannel({userId}:{userId:number}){
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
-	const handleAdditionalMenuClick = () => {
+	const handleAdditionalMenuClick = () => { 
 		setChannelInfo(!channelInfo); // InfoChannel'ı etkinleştirmek/devre dışı bırakmak için durumu değiştirin
 	};
 
@@ -70,7 +70,6 @@ function ActiveChannel({userId}:{userId:number}){
 										<span className="daystamp">{formatDaytamp(message.sentAt)}</span>
 									</div>
 								) : null}
-							<div key={index} className={`message-content`}>
 								{(message.author.id !== userId) ? (
 									<div className='message taken'>
 										{(index === 0 || message.author.id !== messages[index - 1].author.id) ? (
@@ -99,7 +98,6 @@ function ActiveChannel({userId}:{userId:number}){
 										<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
 									</div>
 								)}
-							</div>
 							</React.Fragment>
 						))}
 						<div ref={messagesEndRef} />

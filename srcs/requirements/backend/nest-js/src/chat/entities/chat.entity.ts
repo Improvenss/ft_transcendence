@@ -95,6 +95,10 @@ export class Dm {
 	@IsNotEmpty()
 	public name: string; //Karşı kullanıcı login adı
 
+	@Column({ unique: true })
+	@IsNotEmpty()
+	public displayname: string; //ad-soyad
+
 	@Column()
 	@IsNotEmpty()
 	public image: string; //Karşı kullanıcı resmi
