@@ -292,7 +292,7 @@ function ChatPage () {
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [isAuth, socket, activeChannel]);
+	}, [isAuth, socket, activeChannel, activeDm]);
 
 	useEffect(() => {
 		if (activeChannel && channels) {
@@ -315,13 +315,15 @@ function ChatPage () {
 		<div id="chat-page">
 			<ChannelContext.Provider value={{ dms, setDms, activeDm, setActiveDm, channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
 				<Channel />	
-				{userInfo && activeChannel && (
+				{activeChannel && userInfo && (
 					<ActiveChannel userId={userInfo.id}/>
 				)}
-				{userInfo && activeDm && (
+				{activeChannel && channelInfo && (
+					<ChannelInfo />
+				)}
+				{activeDm && userInfo && (
 					<ActiveDm userId={userInfo.id}/>
 				)}
-				<ChannelInfo />
 			</ChannelContext.Provider>
 		</div>
 	)

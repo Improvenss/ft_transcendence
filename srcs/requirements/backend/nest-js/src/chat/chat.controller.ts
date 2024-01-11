@@ -81,7 +81,6 @@ export class ChatController {
 			console.error(`@Post('/dm/:${targetId}'): `, err.message);
 			return ({ success: false, err: err.message});
 		}
-		
 	}
 
 	/*

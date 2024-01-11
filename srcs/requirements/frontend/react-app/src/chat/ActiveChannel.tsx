@@ -10,7 +10,7 @@ import MessageInput from './MessageInput';
 
 function ActiveChannel({userId}:{userId:number}){
 	console.log("-->Active Channel<---");
-	const {channels, activeChannel, setActiveChannel,channelInfo, setChannelInfo } = useChannelContext();
+	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -102,7 +102,7 @@ function ActiveChannel({userId}:{userId:number}){
 						))}
 						<div ref={messagesEndRef} />
 					</div>
-					<MessageInput channelId={activeChannel.id} userId={userId} />
+					<MessageInput channel={{id: activeChannel.id, socketName: "createMessage"}} userId={userId}/>
 				</div>
 			)}
 		</>

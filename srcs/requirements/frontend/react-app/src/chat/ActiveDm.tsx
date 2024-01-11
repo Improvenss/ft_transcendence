@@ -7,12 +7,14 @@ import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
 import { ReactComponent as IconLeave } from '../assets/chat/iconLeave.svg';
 import MessageInput from "./MessageInput";
 import './ActiveDm.css';
+import { useNavigate } from "react-router-dom";
 
 function ActiveDm({userId}:{userId:number}){
 	console.log("-->Active DirectMessage<---");
-	const { dms, setDms, activeDm, setActiveDm } = useChannelContext();
+	const { activeDm } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const navigate = useNavigate();
 
 	function formatMessageContent(content: string) {
 	// Mesaj içeriğindeki '\n' karakterini <br> tag'ine dönüştür
@@ -46,7 +48,7 @@ function ActiveDm({userId}:{userId:number}){
 			{activeDm && (
 				<div id="activeDm">
 					<div id="dm-header">
-						<img src={activeDm.image} alt={activeDm.image} />
+						<img src={activeDm.image} alt={activeDm.image} onClick={() => navigate('/profile/' + activeDm.name)}/>
 						<h2>{activeDm.name} | {activeDm.displayname}</h2>
 						<button >
 							<IconLeave />
@@ -71,7 +73,8 @@ function ActiveDm({userId}:{userId:number}){
 						))}
 						<div ref={messagesEndRef} />
 					</div>
-					<MessageInput channelId={activeDm.id} userId={userId} />
+					{/*<MessageInput channelId={activeDm.id} userId={userId} />*/}
+					<MessageInput dm={{id: activeDm.id, socketName: "createDmMessage"}} userId={userId}/>
 				</div>
 			)}
 		</>

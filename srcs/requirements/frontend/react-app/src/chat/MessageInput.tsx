@@ -3,7 +3,14 @@ import { useSocket } from "../hooks/SocketHook";
 
 const MAX_CHARACTERS = 1000; // İstenilen maksimum karakter sayısı
 
-const MessageInput = ({channelId, userId}: {channelId: number, userId: number}) => {
+const MessageInput: React.FC<{
+	channel?: { id: number; socketName: string };
+	dm?: { id: number; socketName: string };
+	userId: number
+}> = ({
+	channel, dm, userId
+}) => {
+
 	const [messageInput, setMessageInput] = useState('');
 	const socket = useSocket();
 
@@ -26,8 +33,9 @@ const MessageInput = ({channelId, userId}: {channelId: number, userId: number}) 
 	// Mesajı gönderme işlemini gerçekleştir
 		if (messageInput.length > 0 && messageInput.length <= MAX_CHARACTERS) {
 			if (socket) {
-				socket.emit("createMessage", {
-					channel: channelId,
+				socket.emit(`${channel ? channel.socketName : dm?.socketName}`,{
+					...(channel && {channel: channel.id}),
+					...(dm && {dm: dm.id}),
 					author: userId,
 					content: messageInput
 				});

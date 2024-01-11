@@ -19,7 +19,8 @@ import handleRequest from '../utils/handleRequest';
 import fetchRequest from "../utils/fetchRequest";
 
 function InfoChannel() {
-	const { setChannels, activeChannel, setActiveChannel, channelInfo } = useChannelContext();
+	console.log("-->Channel Info<---");
+	const { activeChannel, channelInfo } = useChannelContext();
 	const { userInfo } = useUser();
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -29,6 +30,7 @@ function InfoChannel() {
 	const inputRefDescription = useRef<HTMLInputElement>(null);
 	const inputRefImage = useRef<HTMLInputElement>(null);
 	const inputRefPassword = useRef<HTMLInputElement>(null);
+	
 	const [showUserInfo, setShowUserInfo] = useState<IUser | null>(null);
 	const [selectedImage, setSelectedImage] = useState<File | null>(null);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -142,17 +144,17 @@ function InfoChannel() {
 			body: formData,
 			url: `/chat/channel`
 		});
-		if (response.ok){
-			const data = await response.json();
-			console.log(`Update channel: [${activeChannel.name}]`,data);
-			if (!data.err){
-				///boş
-			} else {
-				console.log("handleUpdate err:", data.err);
-			}
-		} else {
-			console.log("---Backend Connection '❌'---");
-		}
+		//if (response.ok){
+		//	const data = await response.json();
+		//	console.log(`Update channel: [${activeChannel.name}]`,data);
+		//	if (!data.err){
+		//		///boş
+		//	} else {
+		//		console.log("handleUpdate err:", data.err);
+		//	}
+		//} else {
+		//	console.log("---Backend Connection '❌'---");
+		//}
 
 		if (errorMessage != null)
 			setErrorMessage('');
