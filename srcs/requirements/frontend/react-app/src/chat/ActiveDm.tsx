@@ -20,8 +20,8 @@ function ActiveDm({userId}:{userId:number}){
 	// Mesaj içeriğindeki '\n' karakterini <br> tag'ine dönüştür
 		return content.split('\n').map((line, index) => (
 			<React.Fragment key={index}>
-			{line}
-			{index < content.length - 1 && <br />}
+				{line}
+				{index < content.length - 1 && <br />}
 			</React.Fragment>
 		));
 	}
@@ -40,44 +40,49 @@ function ActiveDm({userId}:{userId:number}){
 	// Yeni mesaj geldiginde yumusak bir sekilde ekrani mesaja kaydirmak icin.
 		const messagesContainer = document.getElementById("message-container");
 		if (messagesContainer)
-				messagesContainer.scrollTop = messagesContainer?.scrollHeight;
+			messagesContainer.scrollTop = messagesContainer?.scrollHeight;
 	}, [messages]);
+
+
+    const otherUser = activeDm?.usersData.find(userData => userData.id !== userId);
+    if (!otherUser) {
+        return null;
+    }
 
 	return (
 		<>
-			{activeDm && (
-				<div id="activeDm">
-					<div id="dm-header">
-						<img src={activeDm.image} alt={activeDm.image} onClick={() => navigate('/profile/' + activeDm.name)}/>
-						<h2>{activeDm.name} | {activeDm.displayname}</h2>
-						<button >
-							<IconLeave />
-						</button>
-					</div>
-					<div id="message-container">
-						{messages.map((message, index) => (
-							<React.Fragment key={index}>
-								{index === 0 || isDifferentDay(message.sentAt, messages[index - 1].sentAt) ? (
-									<div className="day-sticky">
-										<span className="daystamp">{formatDaytamp(message.sentAt)}</span>
-									</div>
-								) : null}
-								<div className={`message ${(message.author.id !== userId) ? 'taken' : 'sent'}`} >
-										{(index === 0 || message.author.id !== messages[index - 1].author.id) && (
-											<span className="icon-span"><IconMessage /></span>
-										)}
-										<p>{formatMessageContent(message.content)}</p>
-										<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
-								</div>
-							</React.Fragment>
-						))}
-						<div ref={messagesEndRef} />
-					</div>
-					{/*<MessageInput channelId={activeDm.id} userId={userId} />*/}
-					<MessageInput dm={{id: activeDm.id, socketName: "createDmMessage"}} userId={userId}/>
+		{activeDm && (
+			<div id="activeDm">
+				<div id="dm-header">
+					<img src={otherUser.imageUrl} alt={otherUser.imageUrl} onClick={() => navigate('/profile/' + otherUser.login)}/>
+					<h2>{otherUser.login} | {otherUser.displayname}</h2>
+					<button >
+						<IconLeave />
+					</button>
 				</div>
-			)}
-		</>
+				<div id="message-container">
+					{messages.map((message, index) => (
+						<React.Fragment key={index}>
+							{index === 0 || isDifferentDay(message.sentAt, messages[index - 1].sentAt) ? (
+								<div className="day-sticky">
+									<span className="daystamp">{formatDaytamp(message.sentAt)}</span>
+								</div>
+							) : null}
+							<div className={`message ${(message.author.id !== userId) ? 'taken' : 'sent'}`} >
+									{(index === 0 || message.author.id !== messages[index - 1].author.id) && (
+										<span className="icon-span"><IconMessage /></span>
+										)}
+									<p>{formatMessageContent(message.content)}</p>
+									<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
+							</div>
+						</React.Fragment>
+					))}
+					<div ref={messagesEndRef} />
+				</div>
+				<MessageInput dm={{id: activeDm.id, socketName: "createDm"}} userId={userId}/>
+			</div>
+		)}
+	</>
 	)
 }
 

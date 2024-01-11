@@ -91,17 +91,27 @@ export class Dm {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column({ unique: true })
-	@IsNotEmpty()
-	public name: string; //Karşı kullanıcı login adı
+	@Column('text') // "text" türünde sakla
+	private _usersData: string;
 
-	@Column({ unique: true })
-	@IsNotEmpty()
-	public displayname: string; //ad-soyad
+	// "usersData" alanını çözmek için bir metod ekleyebilirsiniz
+	get usersData(): {
+		id: number, login: string, displayname: string, imageUrl: string
+	}[] {
+		return JSON.parse(this._usersData);
+	}
 
-	@Column()
-	@IsNotEmpty()
-	public image: string; //Karşı kullanıcı resmi
+	set usersData(data: { id: number, login: string, displayname: string, imageUrl: string }[]) {
+		this._usersData = JSON.stringify(data); //kaydetme işlemi için
+	}
+
+	//@Column()
+	//public usersData: {
+	//	id: number,
+	//	login: string,
+	//	displayname: string,
+	//	imageUrl: string
+	//}[];
 
 	@ManyToMany(() => User, user => user.dm, {nullable: true, onDelete: 'CASCADE'})
 	public members: User[];
@@ -109,6 +119,15 @@ export class Dm {
 	@OneToMany(() => DmMessage, dmMessage => dmMessage.dm, { cascade: true, onDelete: 'CASCADE' })
 	public messages: DmMessage[];
 
+	toJSON() {
+        return {
+			id: this.id,
+			members: this.members,
+			messages: this.messages,
+            usersData: this.usersData,
+            // Include any other properties you want to expose
+        };
+    }
 }
 
 @Entity('dm_message')

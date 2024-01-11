@@ -68,14 +68,15 @@ export class ChatController {
 			const targetUser = await this.usersService.getUserPrimary({id: targetId});
 			
 			const createDmDto: CreateDmDto = {
-				name: targetUser.login,
-				displayname: targetUser.displayname,
-				image: targetUser.imageUrl,
-				members: [user],
+				usersData: [user, targetUser], //kalıcı -> unrelation
+				members: [user], //geçici -> relation
 				messages: [],
 			}
 			
-			await this.chatService.createDm(createDmDto);
+			const response = await this.chatService.createDm(createDmDto);
+			const userSocket = this.chatGateway.getUserSocket(user.id);
+			userSocket.join(`dm-${response.id}`);
+
 			return { success: true };
 		} catch (err) {
 			console.error(`@Post('/dm/:${targetId}'): `, err.message);
@@ -102,9 +103,10 @@ export class ChatController {
 					console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
 				});
 			
-			
-			
 			const dms = await this.chatService.getDms(user.id);
+			//const formattedDms = dms.map(dm => ({
+			//	...dm.toJSON(), // Use toJSON method to control the serialization
+			//}));
 			dms.forEach((dm) => {
 				userSocket.join(`dm-${dm.id}`);
 				console.log(`Dm: [${user.login}] Joined: [${user.socketId}]`);

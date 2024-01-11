@@ -2,11 +2,12 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateChannelDto, UpdateChannelDto } from './dto/chat-channel.dto';
 import { CreateMessageDto, UpdateMessageDto } from './dto/chat-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel, ChannelType, Dm, Message } from './entities/chat.entity';
+import { Channel, ChannelType, Dm, DmMessage, Message } from './entities/chat.entity';
 import { FindOptionsRelations, EntityManager, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { CreateDmDto } from './dto/chat-dm.dto';
+import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 
 @Injectable()
 export class ChatService {
@@ -19,6 +20,8 @@ export class ChatService {
 		private readonly	userRepository: Repository<User>,
 		@InjectRepository(Dm)
 		private readonly	dmRepository: Repository<Dm>,
+		@InjectRepository(DmMessage)
+		private readonly	dmMessageRepository: Repository<DmMessage>,
 		private readonly	usersService: UsersService,
 		private readonly	entityManager: EntityManager,
 	) {}
@@ -42,10 +45,16 @@ export class ChatService {
 		console.log(`New Message created: #${newMessage.content}`);
 		return (await this.messageRepository.save(newMessage));
 	}
+
+	async createDmMessage(createDmMessageDto: CreateDmMessageDto) {
+		const	newMessage = new Message(createDmMessageDto);
+		console.log(`New Dm Message created: #${newMessage.content}`);
+		return (await this.dmMessageRepository.save(newMessage));
+	}
 	
 	async createDm(createDmDto: CreateDmDto) {
 		const newDm = new Dm(createDmDto);
-		console.log(`New Direct Message created: #${newDm.name}`);
+		console.log(`New Direct Message created: #${newDm.usersData[0].login} - ${newDm.usersData[1].login}`);
 		return (await this.dmRepository.save(newDm));
 	}
 
@@ -88,6 +97,10 @@ export class ChatService {
 		};
 		
 		return (await this.channelRepository.findOne({where: whereClause}));
+	}
+
+	async getDmPrimary(id: number){
+		return (await this.dmRepository.findOne({where: {id: id}}));
 	}
 
 	/* channel'ın default ve relation verilerini döndürür, 

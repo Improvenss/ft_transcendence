@@ -15,6 +15,20 @@ import fetchRequest from "../utils/fetchRequest";
 import { useUser } from "../hooks/UserHook";
 import ActiveDm from "./ActiveDm";
 
+enum ActionType {
+	Create = 'create',
+	Delete = 'delete',
+	NewMessage = 'newMessage',
+	Join = 'join',
+	Leave = 'leave',
+	Kick = 'kick',
+	Ban = 'ban',
+	UnBan = 'unban',
+	SetAdmin = 'setAdmin',
+	RemoveAdmin = 'removeAdmin',
+	Update = 'update',
+}
+
 export const ChannelContext = createContext<IChannelContext>({
 	dms: undefined,
 	setDms: () => {},
@@ -68,21 +82,25 @@ function ChatPage () {
 	}, [isAuth]);
 
 	useEffect(() => {
-		if (isAuth && socket && userInfo){
+		if (isAuth && socket){
 
-			enum ActionType {
-				Create = 'create',
-				Delete = 'delete',
-				NewMessage = 'newMessage',
-				Join = 'join',
-				Leave = 'leave',
-				Kick = 'kick',
-				Ban = 'ban',
-				UnBan = 'unban',
-				SetAdmin = 'setAdmin',
-				RemoveAdmin = 'removeAdmin',
-				Update = 'update',
+			const handleListenDm = ({action, dmId, data}: {
+				action: ActionType,
+				dmId: number,
+				data?: any
+			}) => {
+				console.log("--->", action, dmId, data);
 			}
+
+			socket.on('dmListener', handleListenDm);
+			return () => {
+				socket.off(`dmListener`, handleListenDm);
+			}
+		}
+	}, [isAuth, socket, activeDm]);
+
+	useEffect(() => {
+		if (isAuth && socket && userInfo){
 
 			const	handleListenChannel = ({action, channelId, data}: {
 				action: ActionType,
@@ -292,7 +310,7 @@ function ChatPage () {
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [isAuth, socket, activeChannel, activeDm]);
+	}, [isAuth, socket, activeChannel]);
 
 	useEffect(() => {
 		if (activeChannel && channels) {
@@ -314,7 +332,9 @@ function ChatPage () {
 	return (
 		<div id="chat-page">
 			<ChannelContext.Provider value={{ dms, setDms, activeDm, setActiveDm, channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
-				<Channel />	
+				{userInfo && (
+					<Channel userId={userInfo.id} />
+				)}
 				{activeChannel && userInfo && (
 					<ActiveChannel userId={userInfo.id}/>
 				)}

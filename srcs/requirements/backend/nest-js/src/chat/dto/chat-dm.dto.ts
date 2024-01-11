@@ -4,17 +4,10 @@ import { User } from 'src/users/entities/user.entity';
 import { DmMessage, Message } from '../entities/chat.entity';
 
 export class CreateDmDto {
-	@IsString()
-	@IsNotEmpty()
-	name: string;
 
-	@IsString()
+	@IsArray()
 	@IsNotEmpty()
-	displayname: string;
-
-	@IsString()
-	@IsNotEmpty()
-	image: string;
+	usersData: User[];
 
 	@IsArray()
 	@IsNotEmpty()
