@@ -211,6 +211,22 @@ export class ChatService {
 		// return mergedChannelsWithoutPassword;
 	}
 
+	async getDm(
+		userOne: number,
+		userTwo: number
+	){
+		const key = [{id: userOne}, {id: userTwo}];
+		//const dm = await this.dmRepository
+		//	.createQueryBuilder('dm')
+		//	.where('dm.usersData @> :key', { key })
+		//	.getOne();
+		const dm = await this.dmRepository
+			.createQueryBuilder('dm')
+			.where('dm.usersData @> :key', { key: JSON.stringify(key) })
+			.getOne();
+		return (dm);
+	}
+
 	async getDms(
 		userId: number,
 	){

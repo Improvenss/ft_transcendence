@@ -63,19 +63,29 @@ export class ChatController {
 		@Param('user', ParseIntPipe) targetId: number,
 	){
 		try {
-
 			console.log(`${C.B_GREEN}POST: /dm/:${targetId}: source[${user.login}]${C.END}`);
+			const userSocket = this.chatGateway.getUserSocket(user.id);
 			const targetUser = await this.usersService.getUserPrimary({id: targetId});
 			
-			const createDmDto: CreateDmDto = {
-				usersData: [user, targetUser], //kalıcı -> unrelation
-				members: [user], //geçici -> relation
-				messages: [],
+			const responseDm = await this.chatService.getDm(user.id, targetId);
+			if (responseDm){
+				//const	updateDto: Partial<CreateChannelDto> = Object.entries(data)
+				//.filter(([_, value]) => value !== undefined)
+				//.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+				//await this.chatService.patchDm(responseDm.id, );
+				//--> update ile dm'nin members'ına kendisini ekleyecek.
+				userSocket.join(`dm-${responseDm.id}`);
+			} else {
+				const createDmDto: CreateDmDto = {
+					usersData: [user, targetUser], //kalıcı -> unrelation
+					members: [user], //geçici -> relation
+					messages: [],
+				}
+
+				const response = await this.chatService.createDm(createDmDto);
+				userSocket.join(`dm-${response.id}`);
 			}
-			
-			const response = await this.chatService.createDm(createDmDto);
-			const userSocket = this.chatGateway.getUserSocket(user.id);
-			userSocket.join(`dm-${response.id}`);
 
 			return { success: true };
 		} catch (err) {

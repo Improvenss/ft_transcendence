@@ -7,7 +7,12 @@ export class CreateDmDto {
 
 	@IsArray()
 	@IsNotEmpty()
-	usersData: User[];
+	usersData: {
+		id: number,
+		login: string,
+		displayname: string,
+		imageUrl: string
+	}[];
 
 	@IsArray()
 	@IsNotEmpty()

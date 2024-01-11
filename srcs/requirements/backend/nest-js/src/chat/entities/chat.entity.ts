@@ -91,19 +91,25 @@ export class Dm {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column('text') // "text" türünde sakla
-	private _usersData: string;
+	@Column({ type: 'jsonb' })
+	//private _usersData: string; //boş vaktinde bunu string'ten arraye çevir, JSON'ı sil.!
+	public usersData: {
+		id: number,
+		login: string,
+		displayname: string,
+		imageUrl: string
+	}[];
 
 	// "usersData" alanını çözmek için bir metod ekleyebilirsiniz
-	get usersData(): {
-		id: number, login: string, displayname: string, imageUrl: string
-	}[] {
-		return JSON.parse(this._usersData);
-	}
+	//get usersData(): {
+	//	id: number, login: string, displayname: string, imageUrl: string
+	//}[] {
+	//	return JSON.parse(this._usersData);
+	//}
 
-	set usersData(data: { id: number, login: string, displayname: string, imageUrl: string }[]) {
-		this._usersData = JSON.stringify(data); //kaydetme işlemi için
-	}
+	//set usersData(data: { id: number, login: string, displayname: string, imageUrl: string }[]) {
+	//	this._usersData = JSON.stringify(data); //kaydetme işlemi için
+	//}
 
 	//@Column()
 	//public usersData: {
@@ -119,15 +125,15 @@ export class Dm {
 	@OneToMany(() => DmMessage, dmMessage => dmMessage.dm, { cascade: true, onDelete: 'CASCADE' })
 	public messages: DmMessage[];
 
-	toJSON() {
-        return {
-			id: this.id,
-			members: this.members,
-			messages: this.messages,
-            usersData: this.usersData,
-            // Include any other properties you want to expose
-        };
-    }
+	//toJSON() {
+    //    return {
+	//		id: this.id,
+	//		members: this.members,
+	//		messages: this.messages,
+    //        usersData: this.usersData,
+    //        // Include any other properties you want to expose
+    //    };
+    //}
 }
 
 @Entity('dm_message')

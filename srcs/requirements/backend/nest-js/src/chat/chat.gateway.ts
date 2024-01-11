@@ -127,10 +127,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 			const returnMessage = await this.chatService.createDmMessage(createDmMessageDto);
 			delete returnMessage.dm;
-			console.log(`Message recived: dm[${returnMessage.id}] user[${returnMessage.author.login}] content[${returnMessage.content}]`);
+			console.log(`Message recived: dm[${dm}] user[${messageUser.login}] content[${content}]`);
 			this.server.to(`dm-${messageDm.id}`).emit(`dmListener`, {
 				action: 'newMessage',
-				dmId: messageDm.id,
+				dmId: dm,
 				data: returnMessage,
 			});
 		} catch(err) {
