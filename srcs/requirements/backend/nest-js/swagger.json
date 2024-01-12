@@ -76,12 +76,32 @@
         }
       }
     },
+    "/users/verify/2fa/{code}": {
+      "post": {
+        "operationId": "UsersController_verify2fa",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/set/2fa": {
-      "patch": {
+      "post": {
         "operationId": "UsersController_set2fa",
         "parameters": [],
         "responses": {
-          "200": {
+          "201": {
             "description": ""
           }
         }

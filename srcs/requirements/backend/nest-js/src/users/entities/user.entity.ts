@@ -36,7 +36,7 @@ export class User {
 	public twoFactorAuthIsEnabled: boolean; // 2fa is on
 
 	@Column({ unique: true, nullable: true, default: null})
-	public twoFactorAuthCode: string; // 2fa code
+	public twoFactorAuthSecret: string; // 2fa secret
 
 	@Column({ unique: true })
 	public displayname: string; // Intra ad-soyad
@@ -136,6 +136,10 @@ export enum NotificationType {
 
 @Entity('notification')
 export class Notif {
+	constructor(notification: Partial<Notif>) {
+		Object.assign(this, notification);
+	}
+
 	@PrimaryGeneratedColumn()
 	public id: number;
 
@@ -157,10 +161,6 @@ export class Notif {
 
 	@Column()
 	public from: string; // Gönderen kişinin logini
-
-	constructor(notification: Partial<Notif>) {
-		Object.assign(this, notification);
-	}
 }
 
 /**

@@ -80,6 +80,7 @@ export class ApiController {
 
 			const token = await this.jwtService.signAsync(cookieDatas, {expiresIn: '1h'});
 			console.log("User Jwt Token(for postman):", token);
+
 			return ({ success: true, cookie: token });
 		} catch (err) {
 			console.log("Api:", err.message);

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsOptional, IsNumber, IsEnum, IsBoolean } from 'class-validator';
 import { PartialType } from "@nestjs/swagger";
 import { Channel } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
@@ -13,6 +13,12 @@ export class CreateUserDto {
 	@IsNotEmpty({ message: 'Login cannot be empty' })
 	@IsString({ message: 'Login must be a string' })
 	login: string;
+
+	@IsBoolean({message: '2FA must be boolean' })
+	twoFactorAuthIsEnabled?: boolean;
+
+	@IsString({message: '2FA secret must be string' })
+	twoFactorAuthSecret?: string;
 
 	@IsNotEmpty({ message: 'Display name cannot be empty' })
 	@IsString({ message: 'Display name must be a string' })
