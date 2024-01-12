@@ -57,6 +57,32 @@ export class ChatController {
 		}
 	}*/
 
+	@Delete('/dm/leave/:dmId')
+	async leaveDm(
+		@Req() {user}: {user: User},
+		@Param('dmId', ParseIntPipe) dmId: number 
+	){
+		try {
+			console.log(`${C.B_GREEN}DELETE: /dm/leave/:${dmId}: who[${user.login}]${C.END}`);
+			const tmpDm = await this.chatService.getDmPrimary(dmId);
+			if (!tmpDm)
+				throw new NotFoundException('Dm not found!');
+
+			await this.chatService.removeUserDm(dmId, user.id);
+			const userSocket = this.chatGateway.getUserSocket(user.id);
+			userSocket.emit('dmListener', {
+				action: 'leave',
+				dmId: tmpDm.id,
+			})
+			userSocket.leave(`dm-${tmpDm.id}`);
+
+			return { success: true };
+		} catch (err) {
+			console.error(`@Delete('/dm/leave:${dmId}'): `, err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
 	@Post('/dm/:user')
 	async createDm(
 		@Req() {user}: {user: User},
@@ -69,13 +95,9 @@ export class ChatController {
 			
 			const responseDm = await this.chatService.getDm(user.id, targetId);
 			if (responseDm){
-				//const	updateDto: Partial<CreateChannelDto> = Object.entries(data)
-				//.filter(([_, value]) => value !== undefined)
-				//.reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
-
-				//await this.chatService.patchDm(responseDm.id, );
-				//--> update ile dm'nin members'ına kendisini ekleyecek.
+				await this.chatService.addUserDm(responseDm.id, user);
 				userSocket.join(`dm-${responseDm.id}`);
+				console.log(`DM: user[${user.login}] joined dm[${responseDm.id}]`);
 			} else {
 				const createDmDto: CreateDmDto = {
 					usersData: [user, targetUser], //kalıcı -> unrelation
@@ -85,8 +107,8 @@ export class ChatController {
 
 				const response = await this.chatService.createDm(createDmDto);
 				userSocket.join(`dm-${response.id}`);
+				console.log(`DM: user[${user.login}] joined dm[${response.id}]`);
 			}
-
 			return { success: true };
 		} catch (err) {
 			console.error(`@Post('/dm/:${targetId}'): `, err.message);

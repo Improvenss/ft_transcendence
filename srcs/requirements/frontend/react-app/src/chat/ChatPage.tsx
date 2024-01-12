@@ -90,6 +90,38 @@ function ChatPage () {
 				data?: any
 			}) => {
 				console.log("--->", action, dmId, data);
+				switch (action) {
+					case ActionType.NewMessage:
+						setDms((prevDms) => {
+							if (!prevDms) return prevDms;
+
+							const updatedDms = prevDms.map((dm) => {
+								if (dm.id === dmId) {
+									const updatedMessages = [...dm.messages, data];;
+									return { ...dm, messages: updatedMessages };
+								} else {
+									return dm;
+								}
+							});
+							return updatedDms;
+						});
+						break;
+					case ActionType.Join:
+						setDms(prevDms => {
+							if (!prevDms) return prevDms;
+	
+							return [...prevDms, data];
+						});
+						break;
+					case ActionType.Leave:
+						setDms((prevDms) => prevDms?.filter((dm) => dm.id !== dmId));
+						if (activeDm?.id === dmId) {
+							setActiveDm(null);
+						}
+						break;
+					default:
+						break;
+				}
 			}
 
 			socket.on('dmListener', handleListenDm);
@@ -320,6 +352,15 @@ function ChatPage () {
 			}
 		}
 	}, [channels]);
+
+	useEffect(() => {
+		if (activeDm && dms){
+			const updatedActiveDm = dms.find((channel) => channel.id === activeDm.id);
+			if (updatedActiveDm) {
+				setActiveDm(updatedActiveDm);
+			}
+		}
+	}, [dms]);
 
 
 	if (!isAuth)

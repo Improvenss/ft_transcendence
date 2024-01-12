@@ -8,6 +8,7 @@ import { ReactComponent as IconLeave } from '../assets/chat/iconLeave.svg';
 import MessageInput from "./MessageInput";
 import './ActiveDm.css';
 import { useNavigate } from "react-router-dom";
+import fetchRequest from "../utils/fetchRequest";
 
 function ActiveDm({userId}:{userId:number}){
 	console.log("-->Active DirectMessage<---");
@@ -43,6 +44,13 @@ function ActiveDm({userId}:{userId:number}){
 			messagesContainer.scrollTop = messagesContainer?.scrollHeight;
 	}, [messages]);
 
+	const leaveDm = (dmId: number) => {
+		fetchRequest({
+			method: 'DELETE',
+			url: `/chat/dm/leave/${dmId}`
+		});
+	}
+
 
     const otherUser = activeDm?.usersData.find(userData => userData.id !== userId);
     if (!otherUser) {
@@ -56,7 +64,7 @@ function ActiveDm({userId}:{userId:number}){
 				<div id="dm-header">
 					<img src={otherUser.imageUrl} alt={otherUser.imageUrl} onClick={() => navigate('/profile/' + otherUser.login)}/>
 					<h2>{otherUser.login} | {otherUser.displayname}</h2>
-					<button >
+					<button onClick={() => leaveDm(activeDm.id)}>
 						<IconLeave />
 					</button>
 				</div>

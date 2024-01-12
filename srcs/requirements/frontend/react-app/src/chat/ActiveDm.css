@@ -56,33 +56,11 @@
 
 /* -------Message Container------- */
 
-/*#message-container {
-	font-size: 15px;
-	flex: 1;
-	overflow: auto;
-	padding: 10px;
-	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
-	border-radius: 10px;
-	margin: 5px;
+#activeDm .taken {
+	border-radius: 0px 5px 5px 5px;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #ccc;
+	margin-left: 10px;
+	margin-bottom: 10px;
 }
-
-.day-sticky {
-	clear: both;
-	text-align: center;
-	position: sticky;
-	top: 0;
-	border-radius: 5px;
-	width: 100%;
-	margin-bottom: 5px;
-	background-color: darkred;
-}
-
-.message {
-	clear: both;
-	max-width: 85%;
-	word-break: break-all;
-	word-wrap: break-word;
-}*/
-
-

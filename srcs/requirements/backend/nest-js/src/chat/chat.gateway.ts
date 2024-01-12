@@ -109,7 +109,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const messageUser = await this.usersService.getUserPrimary({id: author});
 			if (!messageUser)
 				throw new NotFoundException('User not found!');
-			const messageDm = await this.chatService.getDmPrimary(dm);
+			//const messageDm = await this.chatService.getDmPrimary(dm);
+			const messageDm = await this.chatService.getDmRelation(dm, {members: true, messages: true});
 			if (!messageDm)
 				throw new NotFoundException('Dm not found!');
 
@@ -117,7 +118,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this dm(${dm})!`);
 				throw new Error(`user[${messageUser.login}] not in this dm(${dm})!`);
 			}
-			
+
 			const createDmMessageDto: CreateDmMessageDto = {
 				author: messageUser,
 				dm: messageDm,
@@ -128,6 +129,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const returnMessage = await this.chatService.createDmMessage(createDmMessageDto);
 			delete returnMessage.dm;
 			console.log(`Message recived: dm[${dm}] user[${messageUser.login}] content[${content}]`);
+
+			const {id} = messageDm.usersData.find((member) => member.id !== author);
+			if (!messageDm.members.find((member) => member.id === id)){
+				await this.chatService.addUserDm(messageDm.id, await this.usersService.getUserPrimary({id: id}));
+				const userSocket = this.getUserSocket(id);
+				userSocket.join(`dm-${messageDm.id}`);
+				userSocket.emit('dmListener', {
+					action: 'join',
+					dmId: messageDm.id,
+					data: messageDm
+				})
+			}
+
 			this.server.to(`dm-${messageDm.id}`).emit(`dmListener`, {
 				action: 'newMessage',
 				dmId: dm,

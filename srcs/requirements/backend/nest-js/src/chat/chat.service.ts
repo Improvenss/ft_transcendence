@@ -103,6 +103,11 @@ export class ChatService {
 		return (await this.dmRepository.findOne({where: {id: id}}));
 	}
 
+	async getDmRelation(id: number, relation: FindOptionsRelations<Dm>){
+		const data = await this.dmRepository.findOne({where: {id: id}, relations: relation});
+		return (data);
+	}
+
 	/* channel'ın default ve relation verilerini döndürür, 
 		channel name + relation(full) + primary(false) -> relation
 		channel name + relation(full) + primary(true) -> default + relation
@@ -332,6 +337,30 @@ export class ChatService {
 
 		await this.channelRepository.save(tmpChannel);
 		return (tmpChannel.id);
+	}
+
+	async addUserDm(
+		dmId: number,
+		user: User,
+	){
+		const tmpDm = await this.dmRepository.findOne({where: {id: dmId}, relations: ['members'] });
+		if (!tmpDm)
+			throw new NotFoundException('Dm does not exitst!');
+
+		tmpDm.members.push(user);
+		await this.dmRepository.save(tmpDm);
+	}
+
+	async removeUserDm(
+		dmId: number,
+		userId: number, 
+	){
+		const tmpDm = await this.dmRepository.findOne({where: {id: dmId}, relations: ['members'] });
+		if (!tmpDm)
+			throw new NotFoundException('Dm does not exitst!');
+
+		tmpDm.members = tmpDm.members.filter(m => m.id !== userId);
+		await this.dmRepository.save(tmpDm);
 	}
 
 	async setPermission(

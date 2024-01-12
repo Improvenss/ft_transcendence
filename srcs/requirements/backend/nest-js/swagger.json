@@ -161,6 +161,26 @@
         }
       }
     },
+    "/chat/dm/leave/{dmId}": {
+      "delete": {
+        "operationId": "ChatController_leaveDm",
+        "parameters": [
+          {
+            "name": "dmId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/dm/{user}": {
       "post": {
         "operationId": "ChatController_createDm",
