@@ -14,6 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { User, UserStatus } from 'src/users/entities/user.entity';
 import { Channel } from './entities/chat.entity';
 import { CreateMessageDto } from './dto/chat-message.dto';
+import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { UpdateUserDto } from 'src/users/dto/create-user.dto';
 import { GameService } from 'src/game/game.service';
 
@@ -97,6 +98,62 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
+	@SubscribeMessage('createDm')
+	async handleDm(
+		@MessageBody() 
+		{ dm, author, content }:
+			{ dm: number, author: number, content: string },
+		@ConnectedSocket() socket: Socket, //Eğer burada yine mesaj yazarı null olursa socket var mı yok mu kontrol ettir.
+	){
+		try {
+			const messageUser = await this.usersService.getUserPrimary({id: author});
+			if (!messageUser)
+				throw new NotFoundException('User not found!');
+			//const messageDm = await this.chatService.getDmPrimary(dm);
+			const messageDm = await this.chatService.getDmRelation(dm, {members: true, messages: true});
+			if (!messageDm)
+				throw new NotFoundException('Dm not found!');
+
+			if (!socket.rooms.has(`dm-${dm}`)) {
+				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this dm(${dm})!`);
+				throw new Error(`user[${messageUser.login}] not in this dm(${dm})!`);
+			}
+
+			const createDmMessageDto: CreateDmMessageDto = {
+				author: messageUser,
+				dm: messageDm,
+				content: content,
+				sentAt: new Date()
+			};
+
+			const returnMessage = await this.chatService.createDmMessage(createDmMessageDto);
+			delete returnMessage.dm;
+			console.log(`Message recived: dm[${dm}] user[${messageUser.login}] content[${content}]`);
+
+			const {id} = messageDm.usersData.find((member) => member.id !== author);
+			if (!messageDm.members.find((member) => member.id === id)){
+				await this.chatService.addUserDm(messageDm.id, await this.usersService.getUserPrimary({id: id}));
+				const userSocket = this.getUserSocket(id);
+				userSocket.join(`dm-${messageDm.id}`);
+				userSocket.emit('dmListener', {
+					action: 'join',
+					dmId: messageDm.id,
+					data: messageDm
+				})
+			}
+
+			this.server.to(`dm-${messageDm.id}`).emit(`dmListener`, {
+				action: 'newMessage',
+				dmId: dm,
+				data: returnMessage,
+			});
+		} catch(err) {
+			console.log("CreateDmMessage Err: ", err.message);
+			const notif = await this.usersService.createNotif(author, author, 'text', err.message);
+			this.server.emit(`user-notif:${author}`, notif);
+		}
+	}
+
 	/**
 	 * https://<project_ip>:3000/chat'e baglanan socket'in;
 	 *  .emit() fonksiyonu ile 'createMessage' istegi attiginda calistigi yer.
@@ -130,25 +187,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!messageChannel)
 				throw new NotFoundException('Channel not found!');
 
-			if (!socket.rooms.has(messageChannel.id.toString())) {
+			if (!socket.rooms.has(`${messageChannel.id}`)) {
 				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this channel(${messageChannel.name})!`);
 				throw new Error(`user[${messageUser.login}] not in this channel(${messageChannel.name})!`);
 			}
+		
 			const createMessageDto: CreateMessageDto = {
 				author: messageUser,
 				channel: messageChannel,
 				content: content,
 				sentAt: new Date(),
 			};
+
 			const returnMessage = await this.chatService.createMessage(createMessageDto);
 			delete returnMessage.channel;
 			console.log(`Message recived: channel[${messageChannel.name}] user[${messageUser.login}] id[${returnMessage.id}]: content[${returnMessage.content}]`);
-			this.server.to(messageChannel.id.toString()).emit(`channelListener`,{
+			this.server.to(`${messageChannel.id}`).emit(`channelListener`,{
 				action: 'newMessage',
 				channelId: channel,
 				data: returnMessage,
 			});
-			this.server.to(messageChannel.id.toString()).emit(`listenChannelMessage:${messageChannel.id}`, returnMessage);
+			//this.server.to(`${messageChannel.id}`).emit(`listenChannelMessage:${messageChannel.id}`, returnMessage);
 		} catch (err){
 			console.log("CreateMessage Err: ", err.message);
 			const notif = await this.usersService.createNotif(author, author, 'text', err.message);

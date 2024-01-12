@@ -1,0 +1,66 @@
+#activeDm {
+	display: flex;
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	flex: 4;
+	/* overflow: hidden; */
+	flex-direction: column;
+}
+
+/* ------Header------ */
+
+#dm-header {
+	display: flex;
+	align-items: center;
+	padding: 7px;
+	border-bottom: 1px solid #ccc;
+	user-select: none;
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
+}
+
+#dm-header img {
+	cursor: pointer;
+	width: 30px;
+	height: 30px;
+	transform: scale(1.2);
+	margin-right: 10px;
+	border-radius: 20%;
+	object-fit: cover; /* Resmin orantılı olarak kaplanması */
+}
+
+#dm-header svg {
+	width: 20px;
+	height: 20px;
+	transform: scale(1.2);
+	margin-right: 2px;
+}
+
+#dm-header > button {
+	border-radius: 5px;
+	margin-right: 5px;
+	background-color: darkred;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-left: auto;
+	cursor: pointer;
+}
+
+#dm-header > button:hover {
+	transform: scale(1.1);
+	background-color: #45a049;
+}
+
+/* -------Message Container------- */
+
+#activeDm .taken {
+	border-radius: 0px 5px 5px 5px;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #ccc;
+	margin-left: 10px;
+	margin-bottom: 10px;
+}

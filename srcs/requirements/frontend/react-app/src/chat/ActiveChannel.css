@@ -16,6 +16,10 @@
 	border-bottom: 1px solid #ccc;
 	/*position: relative;*/
 	user-select: none;
+	content: '';
+	background-color: rgba(30, 97, 45, 0.758);
+	border-radius: 10px;
+	margin: 5px;
 }
 
 #channel-header h2 + h2 {
@@ -35,12 +39,6 @@
 	margin: 0;
 }
 
-#channel-header {
-	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
-	border-radius: 10px;
-	margin: 5px;
-}
 
 #channel-header svg {
 	width: 20px;

@@ -91,13 +91,33 @@ export class Dm {
 	@PrimaryGeneratedColumn()
 	public id: number;
 
-	@Column({ unique: true })
-	@IsNotEmpty()
-	public name: string; //Karşı kullanıcı login adı
+	@Column({ type: 'jsonb' })
+	//private _usersData: string; //boş vaktinde bunu string'ten arraye çevir, JSON'ı sil.!
+	public usersData: {
+		id: number,
+		login: string,
+		displayname: string,
+		imageUrl: string
+	}[];
 
-	@Column()
-	@IsNotEmpty()
-	public image: string; //Karşı kullanıcı resmi
+	// "usersData" alanını çözmek için bir metod ekleyebilirsiniz
+	//get usersData(): {
+	//	id: number, login: string, displayname: string, imageUrl: string
+	//}[] {
+	//	return JSON.parse(this._usersData);
+	//}
+
+	//set usersData(data: { id: number, login: string, displayname: string, imageUrl: string }[]) {
+	//	this._usersData = JSON.stringify(data); //kaydetme işlemi için
+	//}
+
+	//@Column()
+	//public usersData: {
+	//	id: number,
+	//	login: string,
+	//	displayname: string,
+	//	imageUrl: string
+	//}[];
 
 	@ManyToMany(() => User, user => user.dm, {nullable: true, onDelete: 'CASCADE'})
 	public members: User[];
@@ -105,6 +125,15 @@ export class Dm {
 	@OneToMany(() => DmMessage, dmMessage => dmMessage.dm, { cascade: true, onDelete: 'CASCADE' })
 	public messages: DmMessage[];
 
+	//toJSON() {
+    //    return {
+	//		id: this.id,
+	//		members: this.members,
+	//		messages: this.messages,
+    //        usersData: this.usersData,
+    //        // Include any other properties you want to expose
+    //    };
+    //}
 }
 
 @Entity('dm_message')

@@ -8,7 +8,7 @@ import { useChannelContext } from './ChatPage';
 import ChannelJoin from './ChannelJoin';
 import fetchRequest from '../utils/fetchRequest';
 
-function Channel() {
+function Channel({userId}: {userId:number}) {
 	console.log("---------CHAT-CHANNELS---------");
 	const { dms, channels, activeDm, setActiveDm, setChannels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
@@ -94,25 +94,30 @@ function Channel() {
 							placeholder="Search channels..."
 						/>
 						{dms && activeTab === 'involved' && dms
-							.map((dm) => (
-								<div
-									key={dm.name}
-									className={activeDm && activeDm.name === dm.name ? 'active' : 'inactive'}
-									id={activeTab === 'involved' ? 'involved-channel' : ''}
-									onClick={() => {
-										if (activeDm?.name === dm.name)
-											setActiveDm(null);
-										else {
-											if (activeChannel)
-												setActiveChannel(null);
-											setActiveDm(dm);
-										}
-									}}
-								>
-									<img src={dm.image} alt={dm.image}/>
-									<span>{dm.name} {' | Direct Message'}</span>
-								</div>
-							))
+							.map((dm) => {
+								const otherUser = dm.usersData.find(userData => userData.id !== userId);
+								if (!otherUser)
+									return (<></>);
+								return (
+									<div
+										key={dm.id}
+										className={activeDm?.id === dm.id ? 'active' : 'inactive'}
+										id={activeTab === 'involved' ? 'involved-channel' : ''}
+										onClick={() => {
+											if (activeDm?.id === dm.id)
+												setActiveDm(null);
+											else {
+												if (activeChannel)
+													setActiveChannel(null);
+												setActiveDm(dm);
+											}
+										}}
+									>
+										<img src={otherUser.imageUrl} alt={otherUser.imageUrl}/>
+										<span>{otherUser.login} {' | Direct Message'}</span>
+									</div>
+								)
+							})
 						}
 						{channels && channels
 							.filter((channel) => channel.status === activeTab && channel.name.toLowerCase().includes(searchTerm.toLowerCase()))

@@ -15,6 +15,20 @@ import fetchRequest from "../utils/fetchRequest";
 import { useUser } from "../hooks/UserHook";
 import ActiveDm from "./ActiveDm";
 
+enum ActionType {
+	Create = 'create',
+	Delete = 'delete',
+	NewMessage = 'newMessage',
+	Join = 'join',
+	Leave = 'leave',
+	Kick = 'kick',
+	Ban = 'ban',
+	UnBan = 'unban',
+	SetAdmin = 'setAdmin',
+	RemoveAdmin = 'removeAdmin',
+	Update = 'update',
+}
+
 export const ChannelContext = createContext<IChannelContext>({
 	dms: undefined,
 	setDms: () => {},
@@ -68,21 +82,57 @@ function ChatPage () {
 	}, [isAuth]);
 
 	useEffect(() => {
-		if (isAuth && socket && userInfo){
+		if (isAuth && socket){
 
-			enum ActionType {
-				Create = 'create',
-				Delete = 'delete',
-				NewMessage = 'newMessage',
-				Join = 'join',
-				Leave = 'leave',
-				Kick = 'kick',
-				Ban = 'ban',
-				UnBan = 'unban',
-				SetAdmin = 'setAdmin',
-				RemoveAdmin = 'removeAdmin',
-				Update = 'update',
+			const handleListenDm = ({action, dmId, data}: {
+				action: ActionType,
+				dmId: number,
+				data?: any
+			}) => {
+				console.log("--->", action, dmId, data);
+				switch (action) {
+					case ActionType.NewMessage:
+						setDms((prevDms) => {
+							if (!prevDms) return prevDms;
+
+							const updatedDms = prevDms.map((dm) => {
+								if (dm.id === dmId) {
+									const updatedMessages = [...dm.messages, data];;
+									return { ...dm, messages: updatedMessages };
+								} else {
+									return dm;
+								}
+							});
+							return updatedDms;
+						});
+						break;
+					case ActionType.Join:
+						setDms(prevDms => {
+							if (!prevDms) return prevDms;
+	
+							return [...prevDms, data];
+						});
+						break;
+					case ActionType.Leave:
+						setDms((prevDms) => prevDms?.filter((dm) => dm.id !== dmId));
+						if (activeDm?.id === dmId) {
+							setActiveDm(null);
+						}
+						break;
+					default:
+						break;
+				}
 			}
+
+			socket.on('dmListener', handleListenDm);
+			return () => {
+				socket.off(`dmListener`, handleListenDm);
+			}
+		}
+	}, [isAuth, socket, activeDm]);
+
+	useEffect(() => {
+		if (isAuth && socket && userInfo){
 
 			const	handleListenChannel = ({action, channelId, data}: {
 				action: ActionType,
@@ -303,6 +353,15 @@ function ChatPage () {
 		}
 	}, [channels]);
 
+	useEffect(() => {
+		if (activeDm && dms){
+			const updatedActiveDm = dms.find((channel) => channel.id === activeDm.id);
+			if (updatedActiveDm) {
+				setActiveDm(updatedActiveDm);
+			}
+		}
+	}, [dms]);
+
 
 	if (!isAuth)
 		return (<Navigate to='/login' replace />);
@@ -314,14 +373,18 @@ function ChatPage () {
 	return (
 		<div id="chat-page">
 			<ChannelContext.Provider value={{ dms, setDms, activeDm, setActiveDm, channels, setChannels, activeChannel, setActiveChannel, channelInfo, setChannelInfo }}>
-				<Channel />	
-				{userInfo && activeChannel && (
+				{userInfo && (
+					<Channel userId={userInfo.id} />
+				)}
+				{activeChannel && userInfo && (
 					<ActiveChannel userId={userInfo.id}/>
 				)}
-				{userInfo && activeDm && (
+				{activeChannel && channelInfo && (
+					<ChannelInfo />
+				)}
+				{activeDm && userInfo && (
 					<ActiveDm userId={userInfo.id}/>
 				)}
-				<ChannelInfo />
 			</ChannelContext.Provider>
 		</div>
 	)

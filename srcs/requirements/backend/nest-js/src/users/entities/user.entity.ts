@@ -39,7 +39,7 @@ export class User {
 	public imageUrl: string; // Intra resim linki
 
 	@Column({ unique: true, nullable: true })
-	public socketId: string;; // Websocket
+	public socketId: string; // Websocket
 
 	//----------------------Status----------------------------//
 

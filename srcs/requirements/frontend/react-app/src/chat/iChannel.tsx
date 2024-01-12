@@ -75,8 +75,12 @@ export interface IChannelCreateForm {
 
 export interface IDms {
 	id: number,
-	name: string,
-	image: string,
 	members: IUser[],
-	messages: IMessage[], //kesin değil, kontrol et
+	messages: IMessage[],
+	usersData: {
+		id: number,
+		login: string,
+		displayname: string,
+		imageUrl: string
+	}[],
 }

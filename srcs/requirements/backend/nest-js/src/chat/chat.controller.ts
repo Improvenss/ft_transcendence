@@ -57,30 +57,63 @@ export class ChatController {
 		}
 	}*/
 
+	@Delete('/dm/leave/:dmId')
+	async leaveDm(
+		@Req() {user}: {user: User},
+		@Param('dmId', ParseIntPipe) dmId: number 
+	){
+		try {
+			console.log(`${C.B_GREEN}DELETE: /dm/leave/:${dmId}: who[${user.login}]${C.END}`);
+			const tmpDm = await this.chatService.getDmPrimary(dmId);
+			if (!tmpDm)
+				throw new NotFoundException('Dm not found!');
+
+			await this.chatService.removeUserDm(dmId, user.id);
+			const userSocket = this.chatGateway.getUserSocket(user.id);
+			userSocket.emit('dmListener', {
+				action: 'leave',
+				dmId: tmpDm.id,
+			})
+			userSocket.leave(`dm-${tmpDm.id}`);
+
+			return { success: true };
+		} catch (err) {
+			console.error(`@Delete('/dm/leave:${dmId}'): `, err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
 	@Post('/dm/:user')
 	async createDm(
 		@Req() {user}: {user: User},
 		@Param('user', ParseIntPipe) targetId: number,
 	){
 		try {
-
 			console.log(`${C.B_GREEN}POST: /dm/:${targetId}: source[${user.login}]${C.END}`);
+			const userSocket = this.chatGateway.getUserSocket(user.id);
 			const targetUser = await this.usersService.getUserPrimary({id: targetId});
 			
-			const createDmDto: CreateDmDto = {
-				name: targetUser.login,
-				image: targetUser.imageUrl,
-				members: [user],
-				messages: []
+			const responseDm = await this.chatService.getDm(user.id, targetId);
+			if (responseDm){
+				await this.chatService.addUserDm(responseDm.id, user);
+				userSocket.join(`dm-${responseDm.id}`);
+				console.log(`DM: user[${user.login}] joined dm[${responseDm.id}]`);
+			} else {
+				const createDmDto: CreateDmDto = {
+					usersData: [user, targetUser], //kalıcı -> unrelation
+					members: [user], //geçici -> relation
+					messages: [],
+				}
+
+				const response = await this.chatService.createDm(createDmDto);
+				userSocket.join(`dm-${response.id}`);
+				console.log(`DM: user[${user.login}] joined dm[${response.id}]`);
 			}
-			
-			await this.chatService.createDm(createDmDto);
 			return { success: true };
 		} catch (err) {
 			console.error(`@Post('/dm/:${targetId}'): `, err.message);
 			return ({ success: false, err: err.message});
 		}
-		
 	}
 
 	/*
@@ -102,9 +135,10 @@ export class ChatController {
 					console.log(`Channel: [${channel.name}] Joined: [${user.socketId}]`);
 				});
 			
-			
-			
 			const dms = await this.chatService.getDms(user.id);
+			//const formattedDms = dms.map(dm => ({
+			//	...dm.toJSON(), // Use toJSON method to control the serialization
+			//}));
 			dms.forEach((dm) => {
 				userSocket.join(`dm-${dm.id}`);
 				console.log(`Dm: [${user.login}] Joined: [${user.socketId}]`);
