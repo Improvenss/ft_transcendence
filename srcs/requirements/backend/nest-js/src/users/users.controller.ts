@@ -10,6 +10,7 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { Notif, User } from './entities/user.entity';
+import { TwoFactorAuthService } from 'src/auth/2fa.service';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -17,6 +18,7 @@ export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
+		private readonly twoFactorAuthService: TwoFactorAuthService,
 	) {}
 
 	@Put('/notif')
@@ -90,6 +92,15 @@ export class UsersController {
 	// 		return ({err: err.message});
 	// 	}
 	// }
+
+	@Patch('/set/2fa')
+	async	set2fa(
+		@Req() {user}: {user: User},
+	){
+		const	qrCode = await this.twoFactorAuthService.createQrCode(user.login);
+		console.log("qr code'miz", qrCode);
+		return ({qrCode: qrCode});
+	}
 
 	// OK
 	@Patch('/user')

@@ -32,6 +32,12 @@ export class User {
 	@Column({ unique: true })
 	public login: string; // Intra login
 
+	@Column({ nullable: true, default: false })
+	public twoFactorAuthIsEnabled: boolean; // 2fa is on
+
+	@Column({ unique: true, nullable: true, default: null})
+	public twoFactorAuthCode: string; // 2fa code
+
 	@Column({ unique: true })
 	public displayname: string; // Intra ad-soyad
 

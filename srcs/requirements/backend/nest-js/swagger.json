@@ -76,6 +76,17 @@
         }
       }
     },
+    "/users/set/2fa": {
+      "patch": {
+        "operationId": "UsersController_set2fa",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/user": {
       "patch": {
         "operationId": "UsersController_patchUser",
