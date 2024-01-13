@@ -15,6 +15,10 @@
 	max-height: 40px;
 }
 
+#icon-notifs:hover * {
+	color: gray;
+}
+
 .notifs-count{
 	position: fixed;
 	background-color: red;

@@ -18,47 +18,8 @@ function ProfilePage() {
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
 	const	navigate = useNavigate();
-	const	[qrCodeImageUrl, setQrCodeImageUrl] = useState('');
-	const	[qrCode, setQrCode] = useState('');
-
-	const handle2FA = async (userLogin: string) => {
-		try {
-			const response = await fetchRequest({
-				method: "POST",
-				url: `/users/set/2fa`,
-			});
-			const data = await response.json();
-			// QR kodunu al
-			console.log("qrcode", data.qrCode);
-			setQrCodeImageUrl(data.qrCode);
-		} catch (err) {
-			console.error("Error setting up 2FA:", err);
-			return (err);
-		}
-	}
-
-	const handleVerify2FA = async (sixDigitCode: string) => {
-		try {
-			const response = await fetchRequest({
-				method: "POST",
-				url: `/users/verify/2fa/${sixDigitCode}`,
-			});
-			const data = await response.json();
-			console.log("Is verified???? ->>>>", data);
-		} catch (err) {
-			console.error("Error verifying 2FA:", err);
-			return (err);
-		}
-	}
 
 	const handleMessage = async (userId: number) => {
-		//--> 1. backend'de mesajı gönderene özel kanal oluşturulacak. alan kişide olmayacak.
-		//--> 2. backend'den fend'e socket bilgisi gitcek, kanala focuslan diye
-		//--> 3. chat'e yönlendir 
-		//--> 4. gönderen mesajı yazana kadar, alan kişide kanal gözükmeyecek
-		//--> 5. kanal tek taraflı silinecek
-		//--> info yapısı yok, sadece leave channel olacak.
-
 		navigate('/chat');
 		const response = await fetchRequest({
 			method: 'POST',
@@ -150,10 +111,7 @@ function ProfilePage() {
 					</div>
 					<p>Login Name {userPanel.nickname ? "- Nickname:": ":"}</p>
 					<span>{userPanel.login} {userPanel.nickname ? "- " + userPanel.nickname : ""}</span> 
-					<div className="xp-bar">
-						<div className="xp" style={{ width: `${"75"}%` }} />
-						<div className="level" >55</div>
-					</div>
+
 					<p>Real Name:</p>
 					<span>{userPanel.displayname}</span>
 					<p>Email:</p>
@@ -167,16 +125,6 @@ function ProfilePage() {
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
-								<button id="2fa" onClick={() => handle2FA(userInfo.login)}>Set 2FA</button>
-								<img id="qrCodeImage" src={qrCodeImageUrl} alt="QR Code" />
-								<input
-									id="verify2fa"
-									type="text"
-									value={qrCode}
-									onChange={(e) => setQrCode(e.target.value)}
-									placeholder="Write 6 digit code."
-								/>
-								<button id="verify2fa" onClick={() => handleVerify2FA(qrCode)}>Send 6 Digit Code</button>
  								{userPanel.friends && userPanel.friends
  									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
@@ -208,6 +156,11 @@ function ProfilePage() {
 							<div id="Win">Win 5</div>
 							<div id="Lose">Lose 5</div>
 							<div id="Rate">Rate 50%</div>
+						</div>
+						<div className="xp-bar">
+							<div className="xp" style={{ width: `${"75"}%` }} />
+							<div className="level" >55 lv </div>
+							<div className="rate">(%75)</div>
 						</div>
 						<div id="achievements-container">
 							{achievements.map((achievement, index) => (

@@ -37,6 +37,7 @@ export interface IUserProps{
 	avatar?: string,
 	friends: IUserProps[],
 	notifications: INotif[],
+	twoFactorAuthIsEnabled: boolean,
 }
 
 export interface IChannel {

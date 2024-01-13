@@ -3,7 +3,6 @@
 	gap: 10px;
 	justify-content: flex-end;
 	font-size: 3vw;
-	padding-right: 5%;
 	user-select: none;
 	align-items: center;
 }
@@ -12,16 +11,15 @@
 	cursor: pointer;
 }
 
-#app-header
-	*:not(#site-name):not(#notification):not(#notification *):hover {
+#app-header > .link:hover {
 	color: red;
-	text-shadow: darkred;
+	/* text-shadow: darkred; */
 	/* text-shadow:
 		2px 2px blue,
 		-2px -2px green; */
 }
 
-#app-header img {
+#app-header .link > img {
 	height: 80px;
 	width: 80px;
 	border-radius: 50%;

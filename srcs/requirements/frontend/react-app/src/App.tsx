@@ -14,6 +14,7 @@ import ProfilePage from "./user/ProfilePage";
 import GamePage from './game/GamePage';
 import GameLobby from './game/GameLobby';
 import Notification from './Notification';
+import Settings from './Settings';
 
 function App() {
 	console.log("---------APP-PAGE---------");
@@ -35,23 +36,24 @@ function App() {
 			{/* {isAuth && <FallingChars />} */}
 			<header>
 				{isAuth ? (
-					<>
-					<ul id='app-header'>
-						<Link to='/' id="site-name">TRANSCENDENCE</Link>
-						<Link to="/">Home</Link>
-						<Link to="/chat">Chat</Link>
-						<Link to="/game">Game</Link>
-						<span onClick={logOut}>Logout</span>
-						<Link to={`/profile/${userInfo?.login}`}>
+					<nav id='app-header'>
+						<Link to='/' id="site-name" className='link'>TRANSCENDENCE</Link>
+						<Link to="/" className='link'>Home</Link>
+						<Link to="/chat" className='link'>Chat</Link>
+						<Link to="/game" className='link'>Game</Link>
+						<span onClick={logOut} className='link'>Logout</span>
+						<Link to={`/profile/${userInfo?.login}`} className='link'>
 							{userInfo?.avatar ? (
 								<img src={userInfo.avatar} alt="Profile" />
-							) : (
+								) : (
 								<img src={userInfo?.imageUrl} alt="Profile" />
 							)}
 						</Link>
 						<Notification />
-					</ul>
-					</>
+						{userInfo && (
+							<Settings userInfo={userInfo}/>
+						)}
+					</nav>
 				) : (
 					<nav>
 						<a href="https://github.com/Improvenss/ft_transcendence">

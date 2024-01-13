@@ -123,6 +123,16 @@
 	font-weight: bold; /* Seviye metni kalınlığı */
 }
 
+.rate {
+	position: absolute;
+	top: 50%;
+	left: 95%;
+	transform: translate(-50%, -50%);
+	color: black;
+	font-size: 16px;
+	font-weight: bold;
+}
+
 
 #user button {
 	background-color: darkred;
@@ -223,7 +233,7 @@
 
 #history-container {
 	margin-top: 10px;
-	max-height: calc(100% - 170px); /* Set a maximum height for the container */
+	max-height: calc(100% - 200px); /* Set a maximum height for the container */
 	overflow-y: auto; /* Enable vertical scrolling */
 }
 

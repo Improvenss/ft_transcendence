@@ -28,9 +28,7 @@ function Api(){
 					console.log("III: ---API Token Backend Response '✅'---");
 					localStorage.setItem("user", data.cookie);
 					Cookies.set("user", data.cookie);
-					localStorage.setItem("userLoginPage", "true");
 					setAuth(true);
-					
 					navigate('/', {replace: true});
 				} else {
 					console.log("III: ---API Token Backend Response '❌'---");
