@@ -1,11 +1,10 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import Modal from "./utils/Modal";
 import { ReactComponent as IconSettings } from './assets/iconSettings.svg';
-import "./Settings.css";
 import { isValidImage } from './utils/fileValidation';
 import fetchRequest from './utils/fetchRequest';
-import { useUser } from './hooks/UserHook';
 import { IUserProps } from './chat/iChannel';
+import "./Settings.css";
 
 interface IUserUpdateForm {
 	nickname: string;
@@ -69,6 +68,7 @@ function Settings({userInfo}: {userInfo: IUserProps }) {
 			const data = await response.json();
 			if (!data.err){
 				formElement.reset();
+				setUserData(prevData => ({ ...prevData, image: null }));
 			}
 		} else {
 			console.log("User not updated!");
@@ -77,40 +77,35 @@ function Settings({userInfo}: {userInfo: IUserProps }) {
 
 	const handleTabClick = (tab: Tab) => {
 		setActiveTab(tab);
+		if (errorMessage)
+			setErrorMessage(null);
 	};
 
-	const handle2FA = async (userLogin: string) => {
-		try {
-			const response = await fetchRequest({
-				method: "POST",
-				url: `/users/set/2fa`,
-			});
-			const data = await response.json();
-			// QR kodunu al
-			console.log("qrcode", data.qrCode);
-			setQrCodeImageUrl(data.qrCode);
-		} catch (err) {
-			console.error("Error setting up 2FA:", err);
-			return (err);
+	const handle2FAAction = async (action: 'create' | 'enable' | 'disable') => {
+		if (action === 'enable' || action === 'disable') {
+			if (qrCode.length !== 6) {
+				setErrorMessage('QR Code must be 6 digits long.');
+				return;
+			}
 		}
-	}
-
-	const handleEnable2FA = async (sixDigitCode: string) => {
-		try {
-			const response = await fetchRequest({
-				method: "POST",
-				url: `/users/verify/2fa/${sixDigitCode}`,
-			});
+		const response = await fetchRequest({
+			method: 'POST',
+			body: (action === 'create' ? undefined : JSON.stringify({code: qrCode})),
+			url:  `/users/2fa/${action}`,
+		});
+		if (response.ok){
 			const data = await response.json();
-			console.log("Is verified???? ->>>>", data);
-		} catch (err) {
-			console.error("Error verifying 2FA:", err);
-			return (err);
+			console.log("handle2FAAction:", data);
+			if (!data.err){
+				if (action === 'create')
+					setQrCodeImageUrl(data.qrCode);
+			} else {
+				console.log("handle2FAAction err:", data.err);
+				setErrorMessage(data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
 		}
-	}
-
-	const handleDisable2FA = async (code: string) => {
-		
 	}
 
 	return (
@@ -145,6 +140,7 @@ function Settings({userInfo}: {userInfo: IUserProps }) {
 					</div>
 
 					<div id={Tab.UserCustomize} className={`tabcontent ${activeTab === Tab.UserCustomize ? 'active' : ''}`}>
+						<h3>User optional customize</h3>
 						<form onSubmit={handleSubmit}>
 							{errorMessage && <p className="error-message">{errorMessage}</p>}
 							<label htmlFor="nickname">Set Nickname:</label>
@@ -174,32 +170,37 @@ function Settings({userInfo}: {userInfo: IUserProps }) {
 						</form>
 					</div>
 					<div id={Tab.TwoFactorAuth} className={`tabcontent ${activeTab === Tab.TwoFactorAuth ? 'active' : ''}`}>
-						<h3>Set Two-Factor Authentication (2FA)</h3>
-						{/*
-							//--> QR kodu bir defaya mahsus verilmelidir.
-							//--> Verilen QR koddaki kodu 2FA etkinleştirmek için girerse eğer artık kullanıcın her girişinde 2FA çalışacaktır.
-							//--> Bu QR kod kullanıcıya kayıt edilir. 
-							//--> 2FA'yı kapatmak için ayarlardan elindeki kodu 2FA kapatma yerine girip kapatmalıdır.
-							//--> QR kod kapatıldığında kullanıcıdan silinir.
-							//--> Her etkinleştirip kapatmada yeni bir QR kod sunulur.
-						*/}
-						{!userInfo.twoFactorAuthIsEnabled && (
-							<>
-								<button id="create-2FA" onClick={() => handle2FA(userInfo.login)}>Create new QR Code</button>
-								<img id="qrCodeImage" src={qrCodeImageUrl} alt="QR Code" />
-							</>
-						)}
-						<input
-							id="2FAcode"
-							type="text"
-							value={qrCode}
-							onChange={(e) => setQrCode(e.target.value)}
-							placeholder="Enter 6 digit code..."
-						/>
+						<h3>Set Two-Factor Authentication (2FA) status</h3>
+						{errorMessage && <p className="error-message">{errorMessage}</p>}
 						{userInfo.twoFactorAuthIsEnabled ? (
-							<button id='disable-2FA' onClick={() => handleDisable2FA(qrCode)}>Disable</button>
+							<>
+								<input
+									id="two-FAcode"
+									type="text"
+									value={qrCode}
+									onChange={(e) => setQrCode(e.target.value)}
+									placeholder="Enter 6 digit code for disable..."
+								/>
+								<button id='disable-2FA' onClick={() => handle2FAAction("disable")}>Disable 2FA</button>
+							</>
 						) : (
-							<button id='enable-2FA' onClick={() => handleEnable2FA(qrCode)}>Enable</button>
+							<>
+								<h3 className="info-text">Generate a new QR code for 2FA. Warning: Any previously created QR code structure will be removed.</h3>
+								<button id="create-2FA" onClick={() => handle2FAAction("create")}>Create new QR Code</button>
+								{qrCodeImageUrl ? (
+									<img id="qrCodeImage" src={qrCodeImageUrl} alt="QR Code" />
+								) : (
+									<h3 className="info-text">If you have previously created and saved a QR code, you can use that code.</h3>
+								)}
+								<input
+									id="two-FAcode"
+									type="text"
+									value={qrCode}
+									onChange={(e) => setQrCode(e.target.value)}
+									placeholder="Enter 6 digit code for enable..."
+								/>
+								<button id='enable-2FA' onClick={() => handle2FAAction("enable")}>Enable 2FA</button>
+							</>
 						)}
 					</div>
 					<div id={Tab.Contact} className={`tabcontent ${activeTab === Tab.Contact ? 'active' : ''}`}>

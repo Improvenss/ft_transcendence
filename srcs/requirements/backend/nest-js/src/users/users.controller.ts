@@ -93,38 +93,37 @@ export class UsersController {
 	// 	}
 	// }
 
-	@Post('/verify/2fa/:code')
-	async	verify2fa(
+	@Post('/2fa/:action')
+	async twoFAAction(
 		@Req() {user}: {user: User},
-		@Param("code") code: string,
+		@Param('action') action: string,
+		@Body() body: {code: string},
 	){
 		try {
-			console.log(`${C.B_YELLOW}POST: /verify/2fa/:token: @Req() user: [${user.login}]${C.END}`);
-			const	response2FA = this.twoFactorAuthService.verifyToken(user.twoFactorAuthSecret, code);
-			console.log("response2FA", response2FA); // true || false
-			if (!response2FA)
-				throw (new Error("2FA error!"));
-			await this.usersService.updateUser({id: user.id, twoFactorAuthIsEnabled: true});
-			return ({ success: true, response: response2FA, user: user.twoFactorAuthIsEnabled});
+			console.log(`${C.B_YELLOW}Post: /2fa/${action}: @Req() user: [${user.login}]${C.END}`);
+			if (action === 'create'){
+				const responseSecret = await this.twoFactorAuthService.generateSecret2FA(user.login);
+				const qrCode = await this.twoFactorAuthService.createQrCode(responseSecret);
+				if (!qrCode)
+					throw new Error('qrCode not generated!');
+				await this.usersService.updateUser({
+					id: user.id,
+					twoFactorAuthSecret: responseSecret.ascii
+				});
+				return { success: true, qrCode: qrCode };
+			} else if (action === 'enable' || action === 'disable') {
+				this.twoFactorAuthService.verifyToken(user.twoFactorAuthSecret, body.code);
+				await this.usersService.updateUser({
+					id: user.id,
+					twoFactorAuthIsEnabled: (action === 'enable' ? true : false)
+				});
+				return ({ success: true });
+			} else {
+				throw new NotFoundException(`action[${action}] not found!`);
+			}
 		} catch (err) {
-			console.log("@Post('/verify/2fa/:token'): ", err.message);
+			console.log(`@Post('/2fa/${action}'): `, err.message);
 			return ({ success: false, err: err.message});
-		}
-	}
-
-	@Post('/set/2fa')
-	async	set2fa(
-		@Req() {user}: {user: User},
-	){
-		try {
-			console.log(`${C.B_YELLOW}POST: /set/2fa: @Req() user: [${user.login}]${C.END}`);
-			const	responseSecret = await this.twoFactorAuthService.generateSecret2FA(user.login);
-			await this.usersService.updateUser({id: user.id ,twoFactorAuthSecret: responseSecret.ascii});
-			const	qrCode = await this.twoFactorAuthService.createQrCode(responseSecret);
-			console.log("qr code'miz", qrCode);
-			return ({qrCode: qrCode});
-		} catch (err) {
-			console.log("@Post('/set/2fa'): ", err.message);
 		}
 	}
 

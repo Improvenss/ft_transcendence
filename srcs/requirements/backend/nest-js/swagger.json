@@ -76,12 +76,12 @@
         }
       }
     },
-    "/users/verify/2fa/{code}": {
+    "/users/2fa/{action}": {
       "post": {
-        "operationId": "UsersController_verify2fa",
+        "operationId": "UsersController_twoFAAction",
         "parameters": [
           {
-            "name": "code",
+            "name": "action",
             "required": true,
             "in": "path",
             "schema": {
@@ -89,17 +89,6 @@
             }
           }
         ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/set/2fa": {
-      "post": {
-        "operationId": "UsersController_set2fa",
-        "parameters": [],
         "responses": {
           "201": {
             "description": ""

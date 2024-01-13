@@ -18,19 +18,14 @@ export interface ISecretCode2FA {
 @Injectable()
 export class TwoFactorAuthService {
 	generateSecret2FA(user: string): Promise<ISecretCode2FA> {
-		const	secretCode = speakeasy.generateSecret({
+		const secretCode = speakeasy.generateSecret({
 			name: `ft_transcendence(${user})`,
 		});
 		return (secretCode);
 	}
 
 	createQrCode(secretCode: ISecretCode2FA): Promise<string> {
-		console.log("secretCode", secretCode);
-		// qrcode.toDataURL(secretCode.otpauth_url, function(err, data){
-		// 	console.log(data);
-		// 	return (data);
-		// });
-		const	dataUrl = qrcode.toDataURL(secretCode.otpauth_url);
+		const dataUrl = qrcode.toDataURL(secretCode.otpauth_url);
 		return (dataUrl);
 	}
 
@@ -38,14 +33,14 @@ export class TwoFactorAuthService {
 		secret: string,
 		token: string, // sixDigitCode
 	): Promise<boolean> {
-		console.log("secret gelen", secret);
-		console.log("token gelen", token);
 		speakeasy.totp.verify({})
-		const	verified = speakeasy.totp.verify({
+		const verified = speakeasy.totp.verify({
 			secret,
 			encoding: 'ascii',
 			token
 		});
+		if (!verified)
+			throw new Error('2FA Error!');
 		return (verified); // verify edilip edilmedigini donduruyor.
 	}
 }
