@@ -12,7 +12,7 @@ const MessageInput: React.FC<{
 }) => {
 
 	const [messageInput, setMessageInput] = useState('');
-	const socket = useSocket();
+	const {socket} = useSocket();
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 	// Kullanıcının daha fazla karakter girmesini engelle

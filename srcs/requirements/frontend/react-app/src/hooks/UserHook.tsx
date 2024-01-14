@@ -6,18 +6,17 @@ import fetchRequest from '../utils/fetchRequest';
 import { IUserProps } from '../chat/iChannel';
 
 const UserContext = createContext<{
-	userInfo: IUserProps | undefined;
+	userInfo: IUserProps,
   }>({
-	userInfo: undefined,
+	userInfo: {} as IUserProps,
   });
 
 export function UserProvider({children}: {children: React.ReactNode}) {
 	console.log("---------USERHOOK-PAGE---------");
-	const {isAuth, setAuth} = useAuth();
-	const [userInfo, setUserInfo] = useState<IUserProps | undefined>(undefined);
+	const {setAuth} = useAuth();
+	const [userInfo, setUserInfo] = useState<IUserProps>();
 
 	useEffect(() => {
-		if (isAuth){
 			const checkUser = async () => {
 				console.log("IV: ---User Checking---");
 				const response = await fetchRequest({
@@ -43,12 +42,12 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 				}
 			}
 			checkUser();
-		}
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, []);
 
-	if ((isAuth && userInfo === undefined))
+	if ((userInfo === undefined)){
 		return (<LoadingPage />);
+	}
 
 	return (
 		<>

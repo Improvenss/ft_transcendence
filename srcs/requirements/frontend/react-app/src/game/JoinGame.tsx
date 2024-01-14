@@ -14,7 +14,7 @@ export interface IGameJoinForm {
 function JoinGame(){
 	console.log("---------JOIN-GAME---------");
 	const [searchTerm, setSearchTerm] = useState('');
-	const socket = useSocket();
+	const {socket} = useSocket();
 	const [rooms, setRooms] = useState<IGame[]>([]);
 	const navigate = useNavigate();
 	const password = useRef<HTMLInputElement>(null);
@@ -46,9 +46,9 @@ function JoinGame(){
 			console.log("Game'nin Room listesi guncelleniyor cunku degisiklik oldu.");
 			fetchRooms();
 		}
-		socket?.on("roomListener", roomListener);
+		socket.on("roomListener", roomListener);
 		return () => {
-			socket?.off("roomListener", roomListener);
+			socket.off("roomListener", roomListener);
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [socket]);

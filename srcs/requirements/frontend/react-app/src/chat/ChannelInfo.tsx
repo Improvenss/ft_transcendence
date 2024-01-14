@@ -46,45 +46,23 @@ function InfoChannel() {
  	};
 
 	const	handleChannelLeave = async (selectedChannel: number) => {
-		const response = await fetchRequest({
+		fetchRequest({
 			method: 'DELETE',
 			headers: {
 				'channel': selectedChannel.toString(),
 			},
 			url: `/chat/channel/leave`
 		});
-		//if (response.ok){
-		//	const data = await response.json();
-		//	console.log(`Leave channel: [${selectedChannel}]`,data);
-		//	if (!data.err){
-		//		//boş
-		//	} else {
-		//		console.log("handleChannelLeave err:", data.err);
-		//	}
-		//} else {
-		//	console.log("---Backend Connection '❌'---");
-		//}
 	}
 
 	const	handleChannelDelete = async (selectedChannel: number) => {
-		const response = await fetchRequest({
+		fetchRequest({
 			method: 'DELETE',
 			headers: {
 				'channel': selectedChannel.toString(),
 			},
 			url: `/chat/channel`,
 		});
-		//if (response.ok){
-		//	const data = await response.json();
-		//	console.log(`Delete channel: [${selectedChannel}]`,data);
-		//	if (!data.err){
-		//		///boş
-		//	} else {
-		//		console.log("handleChannelDelete err:", data.err);
-		//	}
-		//} else {
-		//	console.log("---Backend Connection '❌'---");
-		//}
 	}
 
 	const handleUpdate = async (fieldName: string) => {
@@ -136,7 +114,7 @@ function InfoChannel() {
 			break;
 		}
 
-		const response = await fetchRequest({
+		fetchRequest({
 			method: 'PATCH',
 			headers: {
 				"channel": activeChannel.id.toString(),
@@ -144,17 +122,6 @@ function InfoChannel() {
 			body: formData,
 			url: `/chat/channel`
 		});
-		//if (response.ok){
-		//	const data = await response.json();
-		//	console.log(`Update channel: [${activeChannel.name}]`,data);
-		//	if (!data.err){
-		//		///boş
-		//	} else {
-		//		console.log("handleUpdate err:", data.err);
-		//	}
-		//} else {
-		//	console.log("---Backend Connection '❌'---");
-		//}
 
 		if (errorMessage != null)
 			setErrorMessage('');

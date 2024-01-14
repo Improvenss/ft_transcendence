@@ -12,7 +12,7 @@ import './Notification.css';
 function Notification() {
 	console.log("---------NOTIFICATION---------");
 	const { isAuth } = useAuth();
-	const socket = useSocket();
+	const {socket} = useSocket();
 	const { userInfo } = useUser();
 	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
 	const [notifications, setNotifications] = useState<INotif[]>([]);

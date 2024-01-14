@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../hooks/AuthHook";
 import { useUser } from "../hooks/UserHook";
 import NoMatchPage from "../utils/NoMatchPage";
 import LoadingPage from "../utils/LoadingPage";
@@ -13,7 +11,6 @@ import { IUserProps } from "../chat/iChannel";
 function ProfilePage() {
 	console.log("---------PROFILE-PAGE---------");
 	const	{ userInfo } = useUser();
-	const	isAuth = useAuth().isAuth;
 	const	{ username } = useParams(); //profile/akaraca'daki akaraca'yı ele alıyor.
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
@@ -28,36 +25,30 @@ function ProfilePage() {
 	}
 
 	useEffect(() => {
-		if (isAuth){
-			const checkUser = async () => {
-				const	response = await fetchRequest({
-					method: 'GET',
-					url: `/users/user?who=${username}`,
-				});
-				if (response.ok){
-					console.log("---User Profile Backend Connection '✅'---");
-					const data = await response.json();
-					console.log("ProfilePage:", data);
-					if (!data.err){
-						console.log("---User Profile Response '✅'---");
-						setUserPanel(data);
-					} else {
-						console.log("---User Profile Response '❌'---");
-						setUserPanel(null);
-					}
+		const checkUser = async () => {
+			const	response = await fetchRequest({
+				method: 'GET',
+				url: `/users/user?who=${username}`,
+			});
+			if (response.ok){
+				console.log("---User Profile Backend Connection '✅'---");
+				const data = await response.json();
+				console.log("ProfilePage:", data);
+				if (!data.err){
+					console.log("---User Profile Response '✅'---");
+					setUserPanel(data);
 				} else {
-					console.log("---User Profile Backend Connection '❌'---");
+					console.log("---User Profile Response '❌'---");
 					setUserPanel(null);
 				}
+			} else {
+				console.log("---User Profile Backend Connection '❌'---");
+				setUserPanel(null);
 			}
-			checkUser();
 		}
+		checkUser();
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [username]);
-
-	if (!isAuth || !userInfo) { //!userInfo sadece userInfo'nun varlığını kesinleştiriyor.
-		return (<Navigate to='/login' replace />);
-	}
 
 	if ((userPanel === undefined))
 		return (<LoadingPage />);

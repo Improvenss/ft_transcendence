@@ -18,11 +18,6 @@ function App() {
 	const { setAuth } = useAuth();
 	const { userInfo } = useUser();
 
-	if (!userInfo){
-		setAuth(false);
-		return (<></>)
-	}
-
 	function logOut() {
 		localStorage.clear();
 		Cookies.remove('user');
@@ -40,15 +35,17 @@ function App() {
 					<Link to="/game" className='link'>Game</Link>
 					<span onClick={logOut} className='link'>Logout</span>
 					<Link to={`/profile/${userInfo.login}`} className='link'>
-						<img src={userInfo.avatar ? userInfo.avatar : userInfo.imageUrl} alt='profile image' />
+						<img
+							src={userInfo.avatar ? userInfo.avatar : userInfo.imageUrl}
+							alt={userInfo.avatar ? 'avatar' : 'intra-image'}
+						/>
 					</Link>
 					<Notification />
-					<Settings userInfo={userInfo}/>
+					<Settings />
 				</nav>
 			</header>
 			<Routes>
 				<Route path='/' element={<HomePage />} />
-				<Route path='/profile' element={<ProfilePage />} />
 				<Route path='/profile/:username' element={<ProfilePage />} />
 				<Route path='/chat' element={<ChatPage />} />
 				<Route path='/game' element={<GamePage />} />

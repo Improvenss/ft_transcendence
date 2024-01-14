@@ -1,54 +1,58 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
-import { useAuth } from './AuthHook';
 import LoadingPage from '../utils/LoadingPage';
 import { useUser } from './UserHook';
+import { useAuth } from './AuthHook';
 
 // SocketContext'i oluştur
-const SocketContext = createContext<Socket | undefined>(undefined);
+const SocketContext = createContext<{
+	socket: Socket,
+}>({
+	socket: {} as Socket,
+});
 
 // Provider component'ini oluştur
 export function SocketProvider({ children }: { children: React.ReactNode }) {
 	console.log("---------SOCKETHOOK-PAGE---------");
-	const {isAuth} = useAuth();
+	const [socket, setSocket] = useState<Socket>();
 	const {userInfo} = useUser();
-	const [socket, setSocket] = useState<Socket | undefined>(undefined);
+	const {setAuth} = useAuth();
 
 	useEffect(() => {
-		if (isAuth && userInfo && socket === undefined) {
-			const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string, {
-				query: {
-					id: userInfo.id,
-				},
-			});
-			newSocket.on('connect', () => {
-				console.log('Client connected to Server. ✅');
-				setSocket(newSocket);
-			});
-			newSocket.on('disconnect', (reason) => {
-				console.log(`Client connection lost. 💔 Reason: ${reason}`);
-				setSocket(undefined);
-			});
-			// newSocket.on('error', (error) => {
-			// 	console.error('WebSocket Error:', error);
-			// });
-			// newSocket.on(`userId-${userInfo.id}`, handleListenAction);
-			return () => {
-				// newSocket.off(`userId-${userInfo.id}`, handleListenAction);
-				if (newSocket.connected){
-					newSocket.disconnect();
-				}
-			};
-		}
+		const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string, {
+			query: {
+				id: userInfo.id,
+			},
+		});
+		newSocket.on('connect', () => {
+			console.log('Client connected to Server. ✅');
+			setSocket(newSocket);
+			//--> bağlı iken backend kopup tekrar bağlanıldığında login sayfasında kalıyor, otomatik yönlendirmiyor.
+		});
+		newSocket.on('disconnect', (reason) => {
+			console.log(`Client connection lost. 💔 Reason: ${reason}`);
+			setSocket(undefined);
+			setAuth(false); // giriş yapılı haldeyken backend'in bağlantısı koparsa login'e yönlendirmek için kullanıyorum.
+		});
+		// newSocket.on('error', (error) => {
+		// 	console.error('WebSocket Error:', error);
+		// });
+		// newSocket.on(`userId-${userInfo.id}`, handleListenAction);
+		return () => {
+			// newSocket.off(`userId-${userInfo.id}`, handleListenAction);
+			if (newSocket.connected){
+				newSocket.disconnect();
+			}
+		};
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [isAuth]); //isAuth'un güncellenmesini bekliyor, eğer güncellenmesse olmassa loadingPage görüntülenir sürekli
+	}, []);
 
-	if ((isAuth && socket === undefined) || (!isAuth && socket)) {
+	if ((socket === undefined)) {
 		return (<LoadingPage />);
 	}
 
 	return (
-		<SocketContext.Provider value={socket}>
+		<SocketContext.Provider value={{socket}}>
 			{children}
 		</SocketContext.Provider>
 	);

@@ -28,7 +28,7 @@ interface Lobby {
 
 const GameLobby = () => {
 	const { roomName } = useParams();
-	const socket = useSocket();
+	const {socket} = useSocket();
 	const my = useUser().userInfo;
 	const [lobby, setLobby] = useState<Lobby | undefined>(undefined);
 	const navigate = useNavigate();
