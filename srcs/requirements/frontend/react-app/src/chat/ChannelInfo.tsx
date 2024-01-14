@@ -14,7 +14,6 @@ import './ChannelInfo.css';
 import { useChannelContext } from "./ChatPage";
 import { useUser } from "../hooks/UserHook";
 import { useNavigate } from "react-router-dom";
-import handleChannelRequest from '../utils/handleChannelRequest';
 import handleRequest from '../utils/handleRequest';
 import fetchRequest from "../utils/fetchRequest";
 
@@ -44,6 +43,32 @@ function InfoChannel() {
 			console.log(`Switched to channel ${tabId}`);
 		}
  	};
+
+	const handleChannelRequest = async (
+		action: string,
+		targetId: number,
+		channelId: number,
+	) => {
+		console.log(`User[${targetId}] ${action} from channel[${channelId}]`);
+	
+		const response = await fetchRequest({
+			method: 'POST',
+			headers: {
+				'channel': channelId.toString()
+			},
+			url: `/chat/channel/${action}/${targetId}`
+		})
+		if (response.ok){
+			const data = await response.json();
+			if (!data.err){
+				console.log("handleChannelRequest:", data);
+			} else {
+				console.log("handleChannelRequest err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
+	}
 
 	const	handleChannelLeave = async (selectedChannel: number) => {
 		fetchRequest({
