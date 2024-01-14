@@ -34,13 +34,6 @@
 	letter-spacing: 0.2em;
 }
 
-#icon-github {
-	position: fixed;
-	right: 20px;
-	bottom: 20px;
-	width: 3vw;
-}
-
   *:focus {
 	outline: none;
   }

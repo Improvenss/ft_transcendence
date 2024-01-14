@@ -3,7 +3,7 @@ import { Navigate } from "react-router";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/AuthHook";
 import { useUser } from "../hooks/UserHook";
-import NoMatchPage from "../main/NoMatchPage";
+import NoMatchPage from "../utils/NoMatchPage";
 import LoadingPage from "../utils/LoadingPage";
 import "./ProfilePage.css";
 import handleRequest from '../utils/handleRequest'
@@ -21,7 +21,7 @@ function ProfilePage() {
 
 	const handleMessage = async (userId: number) => {
 		navigate('/chat');
-		const response = await fetchRequest({
+		fetchRequest({
 			method: 'POST',
 			url: `/chat/dm/${userId}`
 		});

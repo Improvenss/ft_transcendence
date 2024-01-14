@@ -2,11 +2,12 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './hooks/AuthHook';
+import { AuthProvider, useAuth } from './hooks/AuthHook';
 import { SocketProvider } from './hooks/SocketHook';
 import { UserProvider } from './hooks/UserHook';
 import { FontLoadedProvider } from './hooks/LoadHook';
 import { StatusProvider } from './hooks/StatusHook';
+import LoginApp from './LoginApp';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -42,23 +43,40 @@ import { StatusProvider } from './hooks/StatusHook';
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
-root.render(
-	<FontLoadedProvider>
-		<AuthProvider>
+
+const AuthComponent = () => {
+	const { isAuth } = useAuth();
+	return (
+	<BrowserRouter>
+		{isAuth ? (
 			<UserProvider>
 				<SocketProvider>
-						{/*<React.StrictMode>*/}
-							<BrowserRouter>
-								<StatusProvider>
-									<App />
-								</StatusProvider>
-							</BrowserRouter>
-						{/*</React.StrictMode>*/}
+					{/*<React.StrictMode>*/}
+						<StatusProvider>
+							<App />
+						</StatusProvider>
+					{/*</React.StrictMode>*/}
 				</SocketProvider>
 			</UserProvider>
+		):(
+			<LoginApp />
+		)}
+	</BrowserRouter>
+	);
+}
+
+const RootComponent = () => {
+
+	return (
+	<FontLoadedProvider>
+		<AuthProvider>
+			<AuthComponent />
 		</AuthProvider>
 	</FontLoadedProvider>
-);
+	);
+}
+
+root.render(<RootComponent />);
 
 /**
  * Kurulan paketler sirasiyla;

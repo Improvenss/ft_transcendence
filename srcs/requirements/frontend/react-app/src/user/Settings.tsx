@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
-import Modal from "./utils/Modal";
-import { ReactComponent as IconSettings } from './assets/iconSettings.svg';
-import { isValidImage } from './utils/fileValidation';
-import fetchRequest from './utils/fetchRequest';
-import { IUserProps } from './chat/iChannel';
+import Modal from "../utils/Modal";
+import { ReactComponent as IconSettings } from '../assets/iconSettings.svg';
+import { isValidImage } from '../utils/fileValidation';
+import fetchRequest from '../utils/fetchRequest';
+import { IUserProps } from '../chat/iChannel';
 import "./Settings.css";
 
 interface IUserUpdateForm {

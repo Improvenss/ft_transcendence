@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					const data = await response.json();
 					if (!data.err){
 						console.log("AuthHook:", data);
-						setAuth((!data.err));
+						setAuth(true);
 					} else {
 						throw new Error(data.err);
 					}

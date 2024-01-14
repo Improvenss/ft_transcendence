@@ -13,7 +13,7 @@ const UserContext = createContext<{
 
 export function UserProvider({children}: {children: React.ReactNode}) {
 	console.log("---------USERHOOK-PAGE---------");
-	const {isAuth} = useAuth();
+	const {isAuth, setAuth} = useAuth();
 	const [userInfo, setUserInfo] = useState<IUserProps | undefined>(undefined);
 
 	useEffect(() => {
@@ -35,15 +35,17 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 						console.log("IV: ---User Response '❌'---");
 						console.log("UserHook Error:", data.err);
 						Cookies.remove('user');
+						setAuth(false);
 					}
 				} else {
 					console.log("IV: ---User Backend Connection '❌'---");
+					setAuth(false);
 				}
 			}
 			checkUser();
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [isAuth]);
+	}, []);
 
 	if ((isAuth && userInfo === undefined))
 		return (<LoadingPage />);
