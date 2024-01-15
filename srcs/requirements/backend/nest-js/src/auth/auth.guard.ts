@@ -1,16 +1,13 @@
 /**
  * LINK: https://www.youtube.com/watch?v=w_ASqSZKhMQ
  */
-import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { TwoFactorAuthService } from './2fa.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 	constructor(
-		@Inject(TwoFactorAuthService)
-		private readonly twoFactorAuthService: TwoFactorAuthService,
 		private readonly jwtService: JwtService,
 		private readonly usersService: UsersService,
 	) {}
@@ -29,8 +26,6 @@ export class AuthGuard implements CanActivate {
 			const decodedUser = this.jwtService.verify(token);
 			const tmpUser = await this.usersService.getUserPrimary({id: decodedUser.id });
 			request.user = tmpUser;
-			// this.twoFactorAuthService.createQrCode(tmpUser.login);
-
 			return (request);
 		}
 		catch (err)

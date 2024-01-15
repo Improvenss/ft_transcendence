@@ -76,6 +76,17 @@
         }
       }
     },
+    "/users/2fa/check": {
+      "post": {
+        "operationId": "UsersController_twoFACheck",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/2fa/{action}": {
       "post": {
         "operationId": "UsersController_twoFAAction",

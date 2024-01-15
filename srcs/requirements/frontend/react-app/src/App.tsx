@@ -19,8 +19,9 @@ function App() {
 	const { userInfo } = useUser();
 
 	function logOut() {
-		localStorage.clear();
+		//localStorage.clear();
 		Cookies.remove('user');
+		Cookies.remove('twoFA');
 		setAuth(false);
 	}
 

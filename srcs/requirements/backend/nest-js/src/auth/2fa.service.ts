@@ -33,7 +33,6 @@ export class TwoFactorAuthService {
 		secret: string,
 		token: string, // sixDigitCode
 	): Promise<boolean> {
-		speakeasy.totp.verify({})
 		const verified = speakeasy.totp.verify({
 			secret,
 			encoding: 'ascii',

@@ -23,7 +23,7 @@ function Api(){
 			if (response.ok) {
 				const data = await response.json();
 				if (!data.err){
-					localStorage.setItem("user", data.cookie);
+					//localStorage.setItem("user", data.cookie);
 					Cookies.set("user", data.cookie);
 					navigate('/', { replace: true }); //mecburi değil sadece url'yi temizlemek için var
 					setAuth(true);

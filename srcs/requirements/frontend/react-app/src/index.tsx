@@ -8,6 +8,7 @@ import { UserProvider } from './hooks/UserHook';
 import { FontLoadedProvider } from './hooks/LoadHook';
 import { StatusProvider } from './hooks/StatusHook';
 import LoginApp from './LoginApp';
+import { TwoFAProvider } from './hooks/TwoFAHook';
 
 /**
  * Burasi ana function olarak geciyor.
@@ -27,13 +28,10 @@ import LoginApp from './LoginApp';
  * ----------------------------------------------------
  * TODO: profilePage'de friends bölümüne arkadaşlıktan çıkar ekle, başka birinin profiline gidincede buton olarak ekle
  * TODO: profilePage'de avatar olmasada null olarak gözüküyor
- * TODO: DM'yi yap
  * TODO: 2 adımlı doğrulamayı ekle
  * TODO: Game'den sonra profilePage'yi güncelle
  * TODO: Game için model/mod eklenecek
  * TODO: Oyun için level ladder ekle
- * TODO: Dm için activeChannel yapısı gibi bir şey yap, ama info channels vs olmasın (yani menü yok, yerine leave dm butonu koy), 
- * 			ActiveChannel varken, Dm'ye tıklanırsa, ActiveChannelı null yap Dm'yi bastır, diğer durum tam tersi yap.
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();
@@ -50,13 +48,15 @@ const AuthComponent = () => {
 	<BrowserRouter>
 		{isAuth ? (
 			<UserProvider>
-				<SocketProvider>
-					{/*<React.StrictMode>*/}
-						<StatusProvider>
-							<App />
-						</StatusProvider>
-					{/*</React.StrictMode>*/}
-				</SocketProvider>
+				<TwoFAProvider>
+					<SocketProvider>
+						{/*<React.StrictMode>*/}
+							<StatusProvider>
+								<App />
+							</StatusProvider>
+						{/*</React.StrictMode>*/}
+					</SocketProvider>
+				</TwoFAProvider>
 			</UserProvider>
 		):(
 			<LoginApp />
