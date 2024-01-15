@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../hooks/AuthHook";
 import { useUser } from "../hooks/UserHook";
-import NoMatchPage from "../main/NoMatchPage";
+import NoMatchPage from "../utils/NoMatchPage";
 import LoadingPage from "../utils/LoadingPage";
 import "./ProfilePage.css";
 import handleRequest from '../utils/handleRequest'
@@ -13,58 +11,44 @@ import { IUserProps } from "../chat/iChannel";
 function ProfilePage() {
 	console.log("---------PROFILE-PAGE---------");
 	const	{ userInfo } = useUser();
-	const	isAuth = useAuth().isAuth;
 	const	{ username } = useParams(); //profile/akaraca'daki akaraca'yı ele alıyor.
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);
 	const	[friendSearchTerm, setFriendSearchTerm] = useState('');
-	const navigate = useNavigate();
+	const	navigate = useNavigate();
 
 	const handleMessage = async (userId: number) => {
-		//--> 1. backend'de mesajı gönderene özel kanal oluşturulacak. alan kişide olmayacak.
-		//--> 2. backend'den fend'e socket bilgisi gitcek, kanala focuslan diye
-		//--> 3. chat'e yönlendir 
-		//--> 4. gönderen mesajı yazana kadar, alan kişide kanal gözükmeyecek
-		//--> 5. kanal tek taraflı silinecek
-		//--> info yapısı yok, sadece leave channel olacak.
-
 		navigate('/chat');
-		const response = await fetchRequest({
+		fetchRequest({
 			method: 'POST',
 			url: `/chat/dm/${userId}`
 		});
 	}
 
 	useEffect(() => {
-		if (isAuth){
-			const checkUser = async () => {
-				const	response = await fetchRequest({
-					method: 'GET',
-					url: `/users/user?who=${username}`,
-				});
-				if (response.ok){
-					console.log("---User Profile Backend Connection '✅'---");
-					const data = await response.json();
-					console.log("ProfilePage:", data);
-					if (!data.err){
-						console.log("---User Profile Response '✅'---");
-						setUserPanel(data);
-					} else {
-						console.log("---User Profile Response '❌'---");
-						setUserPanel(null);
-					}
+		const checkUser = async () => {
+			const	response = await fetchRequest({
+				method: 'GET',
+				url: `/users/user?who=${username}`,
+			});
+			if (response.ok){
+				console.log("---User Profile Backend Connection '✅'---");
+				const data = await response.json();
+				console.log("ProfilePage:", data);
+				if (!data.err){
+					console.log("---User Profile Response '✅'---");
+					setUserPanel(data);
 				} else {
-					console.log("---User Profile Backend Connection '❌'---");
+					console.log("---User Profile Response '❌'---");
 					setUserPanel(null);
 				}
+			} else {
+				console.log("---User Profile Backend Connection '❌'---");
+				setUserPanel(null);
 			}
-			checkUser();
 		}
+		checkUser();
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [username]);
-
-	if (!isAuth || !userInfo) { //!userInfo sadece userInfo'nun varlığını kesinleştiriyor.
-		return (<Navigate to='/login' replace />);
-	}
 
 	if ((userPanel === undefined))
 		return (<LoadingPage />);
@@ -118,10 +102,7 @@ function ProfilePage() {
 					</div>
 					<p>Login Name {userPanel.nickname ? "- Nickname:": ":"}</p>
 					<span>{userPanel.login} {userPanel.nickname ? "- " + userPanel.nickname : ""}</span> 
-					<div className="xp-bar">
-						<div className="xp" style={{ width: `${"75"}%` }} />
-						<div className="level" >55</div>
-					</div>
+
 					<p>Real Name:</p>
 					<span>{userPanel.displayname}</span>
 					<p>Email:</p>
@@ -166,6 +147,11 @@ function ProfilePage() {
 							<div id="Win">Win 5</div>
 							<div id="Lose">Lose 5</div>
 							<div id="Rate">Rate 50%</div>
+						</div>
+						<div className="xp-bar">
+							<div className="xp" style={{ width: `${"75"}%` }} />
+							<div className="level" >55 lv </div>
+							<div className="rate">(%75)</div>
 						</div>
 						<div id="achievements-container">
 							{achievements.map((achievement, index) => (

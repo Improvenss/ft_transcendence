@@ -1,48 +1,42 @@
-import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import { useAuth } from "../hooks/AuthHook";
-import LoadingPage from "../utils/LoadingPage";
 import fetchRequest from "../utils/fetchRequest";
+import LoadingPage from "../utils/LoadingPage";
 
 function Api(){
 	console.log("---------API-PAGE---------");
-	const	{isAuth, setAuth} = useAuth();
-	const	[isLoading, setLoading] = useState<boolean>(true);
+	const	{setAuth} = useAuth();
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	uriCode = urlParams.get('code');
 	const	navigate = useNavigate();
 
 	useEffect(() => {
 		async function sendCode() {
-			console.log("III: ---API Token Connection---");
+			console.log("---API Token Connection---");
 			const	response = await fetchRequest({
 				method: 'POST',
 				body: JSON.stringify({ code: uriCode as string}),
 				url: '/api/token',
 			}, false);
 			if (response.ok) {
-				console.log("III: ---API Token Connection '✅'---");
 				const data = await response.json();
 				if (!data.err){
-					console.log("III: ---API Token Backend Response '✅'---");
-					localStorage.setItem("user", data.cookie);
+					//localStorage.setItem("user", data.cookie);
 					Cookies.set("user", data.cookie);
-					localStorage.setItem("userLoginPage", "true");
+					navigate('/', { replace: true }); //mecburi değil sadece url'yi temizlemek için var
 					setAuth(true);
-					
-					navigate('/', {replace: true});
 				} else {
-					console.log("III: ---API Token Backend Response '❌'---");
+					console.log("---API Token Backend Response '❌'---");
 					navigate('/404');
 				}
 			} else {
-				console.log("III: ---API Token Connection '❌'---");
+				console.log("---API Token Connection '❌'---");
 				navigate('/404');
 			}
-			setLoading(false);
 		}
-		if (!window.opener && !isAuth)
+		if (!window.opener)
 			sendCode()
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, []);
@@ -53,14 +47,8 @@ function Api(){
 		return (<></>);
 	}
 
-	if (isAuth){
-		return (<Navigate to='/' replace />);
-	}
-
 	return (
-		<>
-			{ isLoading ? <LoadingPage /> : <Navigate to='/login' replace/>}
-		</>
+		<LoadingPage />
 	);
 };
 

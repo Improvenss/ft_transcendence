@@ -4,15 +4,16 @@ import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Notif, User } from './entities/user.entity';
 import { ChatModule } from 'src/chat/chat.module';
+import { TwoFactorAuthService } from 'src/auth/2fa.service';
 
 @Module({
 	imports: [
 		ChatModule,
 		TypeOrmModule.forFeature([User, Notif]),
-	], // Burasi da User CRUD'unu kullanabilmemizi sagliyor.
+	],
 	controllers: [UsersController],
-	providers: [UsersService],
-	exports: [UsersService] // api.service.ts dosyasinin icerisinde kullandigimiz icin bunu export ediyoruz. Sonra da api.module.ts dosyasinda da import edecegiz.
+	providers: [UsersService, TwoFactorAuthService],
+	exports: [UsersService]
 })
 export class UsersModule {}
 

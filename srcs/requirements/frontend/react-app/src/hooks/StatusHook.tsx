@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { useAuth } from './AuthHook';
 import { useSocket } from './SocketHook';
 import { useLocation } from 'react-router-dom';
 import LoadingPage from '../utils/LoadingPage';
@@ -14,14 +13,12 @@ const StatusContext = createContext<{
 
 export function StatusProvider({children}: {children: React.ReactNode}) {
 	console.log("---------STATUSHOOK-PAGE---------");
-	const isAuth = useAuth().isAuth;
-	const socket = useSocket();
 	const [status, setStatus] = useState<UserStatus>(undefined);
+	const {socket} = useSocket();
 	const location = useLocation();
 	const statusRef = useRef<UserStatus>('online');
 
 	useEffect(() => {
-		if (isAuth) {
 			let idleTimer: number;
 
 			const handleVisibilityChange = () => {
@@ -60,13 +57,10 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 				document.removeEventListener('keydown', handleInputActivity);
 				document.removeEventListener('mousemove', handleInputActivity);
 			};
-		}
-		/* eslint-disable react-hooks/exhaustive-deps */
 	}, []);
 
 	useEffect(() => {
-		if (isAuth && status !== undefined && socket) {
-
+		if (status !== undefined) {
 			if (status === 'online' && location.pathname.includes('/chat')) {
 				setStatus('in-chat');
 			} else if (status === 'online' && location.pathname.includes('/game')) {
@@ -77,22 +71,20 @@ export function StatusProvider({children}: {children: React.ReactNode}) {
 			}
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [status, socket]);
+	}, [status]);
 
 	useEffect(() => {
-		if (isAuth){
-			if (location.pathname.includes('/chat')){
-				setStatus('in-chat');
-			} else if (location.pathname.includes('/game')){
-				setStatus('in-game');
-			} else if (status !== 'online') {
-				setStatus('online');
-			}
+		if (location.pathname.includes('/chat')){
+			setStatus('in-chat');
+		} else if (location.pathname.includes('/game')){
+			setStatus('in-game');
+		} else if (status !== 'online') {
+			setStatus('online');
 		}
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [location.pathname])
 
-	if (isAuth && status === undefined){
+	if (status === undefined){
 		return (<LoadingPage />);
 	}
 

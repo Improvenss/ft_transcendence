@@ -10,6 +10,8 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { Notif, User } from './entities/user.entity';
+import { TwoFactorAuthService } from 'src/auth/2fa.service';
+import { JwtService } from '@nestjs/jwt';
 
 @UseGuards(AuthGuard)
 @Controller('/users')
@@ -17,6 +19,8 @@ export class UsersController {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
+		private readonly twoFactorAuthService: TwoFactorAuthService,
+		private readonly jwtService: JwtService
 	) {}
 
 	@Put('/notif')
@@ -44,52 +48,60 @@ export class UsersController {
 		}
 	}
 
-	// OK
-	// @Patch('/socket')
-	// async	patchSocket(
-	// 	@Req() {user},
-	// 	@Body() body: {socketId: string}
-	// ){
-	// 	try
-	// 	{
-	// 		const	tmpUser = await this.usersService.updateSocketLogin(user.login, body.socketId);
-	// 		return ({message: `Socket updated successfully. login[${tmpUser.login}], socket.id[${tmpUser.socketId}]`});
-	// 	} catch(err) {
-	// 		console.error("@Patch('/socket'): ", err.message);
-	// 		return ({err: err.message});
-	// 	}
-	// }
+	@Post('/2fa/check')
+	async twoFACheck(
+		@Req() {user}: {user: User},
+		@Body() body: {token: string},
+	){
+		try {
+			console.log(`${C.B_YELLOW}Get: /2fa/check: @Req() user: [${user.login}]${C.END}`);
+			const decodedTwoFA = this.jwtService.verify(body.token);
+			if (!decodedTwoFA)
+				throw new Error('TwoFA is invalid!');
+			return ({ success: true });
+		} catch (err) {
+			return ({ success: false, err: err.message});
+		}
+	}
 
-	// @Put('/user/upload')
-	// @UseInterceptors(FileInterceptor('image', multerConfig))
-	// async	putFile(
-	// 	@Req() {user},
-	// 	@UploadedFile() image: any,
-	// ){
-	// 	try
-	// 	{
-	// 		console.log(`${C.B_BLUE}PUT: /user/upload: @UploadedFile(): ${C.END}`, image);
-	// 		if (!image)
-	// 			throw (new Error(`File not found!: File Name:${image.filename}`));
-	// 		const imgUrl =  process.env.B_IMAGE_REPO + image.filename;
-	// 		if (!fs.existsSync(image.path))
-	// 			throw (new Error(`File path is not valid. ${image.path}`));
-	// 		return ({imgUrl});
-	// 	}
-	// 	catch (err)
-	// 	{
-	// 		if (image) {
-	// 			try {
-	// 				await promisify(fs.promises.unlink)(image.path);
-	// 				console.log(`File successfully deleted. ✅: image.path: ${image.path}`);
-	// 			} catch (unlinkErr) {
-	// 				console.error('Error occurred while deleting file.:', unlinkErr);
-	// 			}
-	// 		}
-	// 		console.error("@Put('/user/upload'): ", err.message);
-	// 		return ({err: err.message});
-	// 	}
-	// }
+	@Post('/2fa/:action')
+	async twoFAAction(
+		@Req() {user}: {user: User},
+		@Param('action') action: string,
+		@Body() body: {code: string},
+	){
+		try {
+			console.log(`${C.B_YELLOW}Post: /2fa/${action}: @Req() user: [${user.login}]${C.END}`);
+			if (action === 'create'){
+				const responseSecret = await this.twoFactorAuthService.generateSecret2FA(user.login);
+				const qrCode = await this.twoFactorAuthService.createQrCode(responseSecret);
+				if (!qrCode)
+					throw new Error('qrCode not generated!');
+				await this.usersService.updateUser({
+					id: user.id,
+					twoFactorAuthSecret: responseSecret.ascii
+				});
+				return { success: true, qrCode: qrCode };
+			} else if (action === 'enable' || action === 'disable') {
+				this.twoFactorAuthService.verifyToken(user.twoFactorAuthSecret, body.code);
+				await this.usersService.updateUser({
+					id: user.id,
+					twoFactorAuthIsEnabled: (action === 'enable' ? true : false)
+				});
+				return ({ success: true });
+			} else if (action === 'login') {
+				this.twoFactorAuthService.verifyToken(user.twoFactorAuthSecret, body.code);
+				const twoFAToken = await this.jwtService.signAsync({ id: user.id }, {expiresIn: '1h'}); // 2FA ile giriş yaptığında, sürdürebilirlik yapısı
+
+				return ({ success: true, token: twoFAToken });
+			} else {
+				throw new NotFoundException(`action[${action}] not found!`);
+			}
+		} catch (err) {
+			console.log(`@Post('/2fa/${action}'): `, err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
 
 	// OK
 	@Patch('/user')

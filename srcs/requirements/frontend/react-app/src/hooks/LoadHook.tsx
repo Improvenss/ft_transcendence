@@ -3,10 +3,6 @@ import LoadingPage from '../utils/LoadingPage';
 
 const FontLoadedContext = createContext<boolean>(false);
 
-export const useFontLoaded = () => {
-	return useContext(FontLoadedContext);
-};
-
 export function FontLoadedProvider({children}: {children: React.ReactNode}) {
 	const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -22,4 +18,8 @@ export function FontLoadedProvider({children}: {children: React.ReactNode}) {
 			{fontsLoaded ? children : <LoadingPage />}
 		</FontLoadedContext.Provider>
 	);
+};
+
+export const useFontLoaded = () => {
+	return useContext(FontLoadedContext);
 };

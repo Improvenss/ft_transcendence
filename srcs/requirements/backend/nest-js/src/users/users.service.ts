@@ -358,17 +358,19 @@ export class UsersService {
 		}
 	}
 
-	async updateUser({id, avatar, nickname, socketId, status}: {
+	async updateUser({id, avatar, nickname, socketId, status, twoFactorAuthSecret, twoFactorAuthIsEnabled}: {
 		id: number,
 		avatar?: string,
 		nickname?: string,
 		socketId?: string,
 		status?: string,
+		twoFactorAuthSecret?: string,
+		twoFactorAuthIsEnabled?: boolean,
 	}){
 		const user = await this.usersRepository.findOne({where: {id: id}});
 		if (user){
 			const tmpUser = await this.getUserPrimary({id: id});
-			Object.assign(tmpUser, { avatar, nickname, socketId, status });
+			Object.assign(tmpUser, { avatar, nickname, socketId, status, twoFactorAuthSecret, twoFactorAuthIsEnabled });
 			await this.usersRepository.save(tmpUser);
 		}
 	}

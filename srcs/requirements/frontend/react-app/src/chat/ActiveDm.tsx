@@ -51,7 +51,6 @@ function ActiveDm({userId}:{userId:number}){
 		});
 	}
 
-
     const otherUser = activeDm?.usersData.find(userData => userData.id !== userId);
     if (!otherUser) {
         return null;
