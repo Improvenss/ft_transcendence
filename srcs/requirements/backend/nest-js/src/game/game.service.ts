@@ -16,7 +16,39 @@ export class GameService {
 		private readonly	usersService: UsersService,
 	) {}
 
-	async	createGameRoom(login: string, createGameDto: CreateGameDto) {
+	async	transferPlayer(
+		{user, }
+		: { user: User }
+	){
+		console.log("relatinon names", await this.getRelationNames(true));
+		const	userGameRoom = await this.usersService.getUserGameRelationDetails(
+			user.id,
+			await this.getRelationNames(true)
+		);
+		if (!userGameRoom)
+			return ;
+		if (userGameRoom.players[0] && userGameRoom.players[1])
+		{ // odada 2 kisi varsa
+			if (userGameRoom.pLeftId === user.id) // cikan kisi soldaysa; sagdaki sola gececek
+			{
+				userGameRoom.pLeftId = userGameRoom.pRightId; // sagdan sola gececek.
+				userGameRoom.adminId = userGameRoom.pRightId; // adminligi devredecek
+				userGameRoom.pRightId = null; // kendi yerini bosaltacak.
+			}
+			else if (userGameRoom.pRightId === user.id) // cikan kisi sagdaysa; sadece cikacak
+				userGameRoom.pRightId = null;
+			await this.gameRepository.save(userGameRoom); // eski guncellenmis odayi kaydet.
+		}
+		else if (userGameRoom.players.length <= 1)
+		{ // odada 1 kisi var kanal silinecek.
+			await this.deleteGameRoom(userGameRoom.name);
+		}
+	}
+
+	async	createGameRoom(
+		login: string,
+		createGameDto: CreateGameDto
+	){
 		const	tmpUser = await this.usersService.getUserPrimary({login: login});
 		if (!tmpUser)
 			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
@@ -31,14 +63,16 @@ export class GameService {
 				createGameDto.password,
 				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 		})
+		await this.transferPlayer({user: tmpUser});
+	// eski oyun odasi
+//  ----------------------
+	// olusturulan yeni oyun odasi
 		createGameDto.players = [tmpUser];
 		createGameDto.pLeftId = tmpUser.id;
 		createGameDto.pRightId = null;
 		createGameDto.adminId = tmpUser.id;
 		const	newRoom = new Game(createGameDto);
-		console.log("newRoom", newRoom);
 		const	response = await this.gameRepository.save(newRoom);
-		console.log("OYUN ODASI KAYITTAN SONRAAA RSPONESE", response);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 	}
@@ -47,17 +81,17 @@ export class GameService {
 		if (!room || !user)
 			throw (new NotFoundException(`game.service.ts: findRoomUser: room: ${room.name} || user: ${user.login} not found!`));
 		const foundUser = room.players.find((roomUser) => roomUser.login === user.login);
-		// const isLeftPlayer = room.pLeftId && room.pLeftId === user.id;
-		// const isRightPlayer = room.pRightId && room.pRightId === user.id;
-		// return (isLeftPlayer || isRightPlayer);
 		if (!foundUser)
 			return (false);
 		return (true);
 	}
 
-	async getRelationNames(): Promise<string[]> {
+	async getRelationNames(prefix: boolean = false): Promise<string[]> {
+		const pre = prefix ? 'currentRoom.' : '';
 		const metadata = this.gameRepository.metadata;
-		const relationNames = metadata.relations.map((relation) => (relation.propertyName));
+		const relationNames = metadata.relations.map((relation) => (pre + relation.propertyName));
+		if (prefix)
+			relationNames.push('currentRoom');
 		return relationNames;
 	}
 
@@ -71,7 +105,6 @@ export class GameService {
 			id: id,
 			name: name,
 		};
-		
 		return (await this.gameRepository.findOne({where: whereClause}));
 	}
 
@@ -127,7 +160,7 @@ export class GameService {
 			: (typeof(relations) === 'string'
 				? { [relations]: true }
 				: null));
-		// console.log(`GameService: findGameRoomWId(): relationsObject(${typeof(relationObject)}):`, relationObject);
+		console.log(`GameService: findGameRoomWId(): ${id} relationsObject(${typeof(relationObject)}):`, relationObject);
 		const tmpRoom = (id === undefined)
 			? await this.gameRepository.find({relations: relationObject})
 			: await this.gameRepository.findOne({
@@ -171,23 +204,22 @@ export class GameService {
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
 			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
-
 		if (await this.isRoomUser(singleRoom, user))
 			throw (new Error(`User '${user.login}' already in this room[${singleRoom.name}].`));
 		if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
 			throw (new Error("Password is WRONG!!!"));
-		if (singleRoom.players.length > 2)
+		if (singleRoom.players.length >= 2)
 			throw (new Error("Game Room is full!"));
-		// const	oldRoom = await this.findGameRoomWId(user.cure)
-		const	userGameRoom = await this.usersService.getUserRelation({
-			user: {id: user.id},
-			relation: {currentRoom: true},
-			primary: false
-		});
-		console.log("user'in oldugu game rom:", userGameRoom);
-		// if (userGameRoom) // Burada kaldin burayi yap
+		await this.transferPlayer({user: user});
+	// eski oyun odasi
+//  --------------- 
+	// yeni oyun odasi
+		if (singleRoom.players[0] && singleRoom.players[1])
+			return ({msg: `yeni oyun odasi dolu kardes 2 kisi de var.`});
+		else if (singleRoom.players.length <= 1)
+			if (singleRoom.players[0])
+				singleRoom.pRightId = user.id;
 		singleRoom.players.push(user);
-		singleRoom.pRightId = user.id;
 		return (this.gameRepository.save(singleRoom));
 	}
 
@@ -210,8 +242,7 @@ export class GameService {
 		{ // Game[] seklinde gelirse hepsini tek tek guncellemek icin.
 			Object.assign(room, body);
 			await this.gameRepository.save(room);
-		}
-		return (tmpGameRooms);
+		} return (tmpGameRooms);
 	}
 
 	/**

@@ -85,6 +85,7 @@ export class GameController {
 		{
 			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
 			const	responseRoom = await this.gameService.addGameRoomUser(user, body);
+			console.log("responseRoom yani yeni kaydeedildigi oda", responseRoom);
 			
 			this.chatGateway.server.emit('roomListener', responseRoom);
 

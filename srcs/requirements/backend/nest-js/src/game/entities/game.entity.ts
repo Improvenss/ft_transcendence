@@ -88,6 +88,7 @@ export class Game {
 	@OneToMany(() => User, (user) => user.currentRoom, {
 		nullable: true,
 		cascade: true,
+		onDelete: 'CASCADE'
 	})
 	public players: User[];
 }

@@ -122,7 +122,7 @@ export class User {
 	@Column({ nullable: true })
 	public currentRoomId: number;
 
-	@ManyToOne(() => Game, game => game.players)
+	@ManyToOne(() => Game, game => game.players, {onDelete: 'SET NULL'})
 	@JoinColumn({ name: 'currentRoomId' })
 	public currentRoom: Game;
 }
