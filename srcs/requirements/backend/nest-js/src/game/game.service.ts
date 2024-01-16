@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateGameDto, UpdateGameDto } from './dto/create-game.dto';
+import { CreateGameDto, EGameMode, UpdateGameDto } from './dto/create-game.dto';
 import { Repository } from 'typeorm';
 import { Game } from './entities/game.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -66,12 +66,31 @@ export class GameService {
 		await this.transferPlayer({user: tmpUser});
 	// eski oyun odasi
 //  ----------------------
+
+
+//  POST: /room: @Body():  {
+// 	  name: 'b',
+// 	  password: null,
+// 	  mode: 'fast-mode',
+// 	  winScore: 10,
+// 	  duration: 40,
+// 	  description: 'modlu',
+// 	  type: 'public'
+// 	}
 	// olusturulan yeni oyun odasi
+	console.log("cretate Game DTO", createGameDto);
+	if (createGameDto.mode === EGameMode.fastMode)
+	{
+		console.log("odanin tipi fast mode olmasi lazim yani 1", createGameDto.mode);
+		// createGameDto.
+	}
 		createGameDto.players = [tmpUser];
 		createGameDto.pLeftId = tmpUser.id;
 		createGameDto.pRightId = null;
 		createGameDto.adminId = tmpUser.id;
+		Object.assign(createGameDto)
 		const	newRoom = new Game(createGameDto);
+	console.log("newROOOOOOOM", newRoom);
 		const	response = await this.gameRepository.save(newRoom);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
@@ -232,7 +251,7 @@ export class GameService {
 	){
 		const	tmpGameRooms = await this.findGameRoom(room, 'all');
 		if (!tmpGameRooms)
-			return (`GameRoom '${room}' not found.`);
+			throw (new NotFoundException(`GameRoom '${room}' not found.`));
 		if (!Array.isArray(tmpGameRooms))
 		{ // Game seklinde gelirse alttaki for()'un kafasi karismasin diye.
 			Object.assign(tmpGameRooms, body);
@@ -242,7 +261,8 @@ export class GameService {
 		{ // Game[] seklinde gelirse hepsini tek tek guncellemek icin.
 			Object.assign(room, body);
 			await this.gameRepository.save(room);
-		} return (tmpGameRooms);
+		}
+		return (tmpGameRooms);
 	}
 
 	/**

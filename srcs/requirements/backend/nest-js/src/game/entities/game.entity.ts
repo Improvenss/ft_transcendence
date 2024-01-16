@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { IsEnum, IsInt, IsNumber, IsString, Max, Min, min } from 'class-validator';
-import { GameMode } from '../dto/create-game.dto';
+import { IsBoolean, IsEnum, IsInt, IsNumber, IsString, Max, Min, min } from 'class-validator';
+import { EGameMode } from '../dto/create-game.dto';
 
 @Entity('game')
 export class Game {
@@ -28,8 +28,11 @@ export class Game {
 	@Column({ type: 'enum', enum: ['public', 'private']})
 	public type: string;
 
-	@IsEnum(GameMode, { message: 'Invalid game mode' })
-	@Column({ type: 'enum', enum: ['classic', 'teamBattle'], nullable: false })
+	// @IsEnum(GameMode, { message: 'Invalid game mode' })
+	// @Column({ type: 'enum', enum: ['classic', 'fast-mode'], nullable: false })
+	@IsEnum(EGameMode, { message: 'Invalid Game mode' })
+	@Column({ type: 'enum', enum: EGameMode, nullable: false, default: EGameMode.classic })
+	// public mode: EGameMode;
 	public mode: string;
 
 	@IsNumber()
@@ -44,23 +47,39 @@ export class Game {
 	@Column({ default: 30, nullable: false })
 	public duration: number;
 
+	@IsBoolean()
+	@Column({ nullable: true, default: false })
+	public isGameStarted: boolean;
+
 	//----------------------Game Details----------------------------//
 
 	@IsNumber()
-	@Column({ default: 10})
-	public ballSpeed: number;
+	@Column({ nullable: true, default: 500 })
+	public ballLocationX: number;
 
-	@IsString()
-	@Column({ nullable: true })
-	public ballLocation: string;
+	@IsNumber()
+	@Column({ nullable: true, default: 400 })
+	public ballLocationY: number;
 
-	@IsString()
-	@Column({ nullable: true })
-	public pLeftLocation: string;
+	@IsNumber()
+	@Column({ nullable: true, default: 3 })
+	public ballSpeedX: number;
 
-	@IsString()
-	@Column({ nullable: true })
-	public pRightLocation: string;
+	@IsNumber()
+	@Column({ nullable: true, default: 4 })
+	public ballSpeedY: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 340 })
+	public pLeftLocation: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 340 })
+	public pRightLocation: number;
+
+	// @IsNumber()
+	// @Column({ nullable: true, default: 4 })
+	// public pSpeed: number;
 
 	@IsInt()
 	@IsNumber()

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe, Param, ParseBoolPipe } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -16,11 +16,11 @@ export class GameController {
 		private readonly chatGateway: ChatGateway,
 	) {}
 
-
-	@Get('/lobby/:name')
-	async getGameLobby(
+	@Get('/room/:name/:lobby')
+	async getGameRoom(
 		@Req() {user}:{user: User},
 		@Param('name') name: string,
+		@Param('lobby', ParseBoolPipe) lobby: boolean,
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /room/:${name}: user[${user.login}]${C.END}`);
@@ -35,15 +35,44 @@ export class GameController {
 			if (!game.players.some((player) => player.id === user.id)) {
 				throw new NotFoundException(`User not found in game[${name}]`);
 			}
+			if (game.isGameStarted && lobby)
+				throw (new Error(`Game started. You can't enter lobby(${name})!`));
 			delete game.password;
-			// game['playerLeft'] = game.players[0];
-			// game['playerRight'] = game.players[1];
 			return (game);
 		} catch (err){
-			console.log(`@Get('/lobby/:${name}`, err.message);
+			console.log(`@Get('/room/:${name}`, err.message);
 			return ({ success: false, err: err.message});
 		}
 	}
+
+	// @Get('/lobby/:name')
+	// async getGameLobby(
+	// 	@Req() {user}:{user: User},
+	// 	@Param('name') name: string,
+	// ){
+	// 	try {
+	// 		console.log(`${C.B_GREEN}GET: /lobby/:${name}: user[${user.login}]${C.END}`);
+	// 		const game = await this.gameService.getGameRelation({
+	// 			name: name,
+	// 			relation: {},
+	// 			primary: true
+	// 		});
+	// 		if (!game)
+	// 			throw new NotFoundException(`Game[${name}] not found!`);
+
+	// 		if (!game.players.some((player) => player.id === user.id)) {
+	// 			throw new NotFoundException(`User not found in game[${name}]`);
+	// 		}
+	// 		// if (!(user.id === game.pLeftId || user.id === game.pRightId)
+	// 			if (game.isGameStarted)
+	// 			throw (new Error(`Game started. You can't enter lobby(${name})!`));
+	// 		delete game.password;
+	// 		return (game);
+	// 	} catch (err){
+	// 		console.log(`@Get('/lobby/:${name}`, err.message);
+	// 		return ({ success: false, err: err.message});
+	// 	}
+	// }
 
 	// Get Game Room
 	@Get('/room')
@@ -85,8 +114,6 @@ export class GameController {
 		{
 			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
 			const	responseRoom = await this.gameService.addGameRoomUser(user, body);
-			console.log("responseRoom yani yeni kaydeedildigi oda", responseRoom);
-			
 			this.chatGateway.server.emit('roomListener', responseRoom);
 
 			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
@@ -102,7 +129,7 @@ export class GameController {
 
 	// Create Game Room
 	@Post('/room')
-	@UsePipes(new ValidationPipe())
+	// @UsePipes(new ValidationPipe())
 	async	createGameRoom(
 		@Req() {user},
 		@Body() body: CreateGameDto,
@@ -129,9 +156,15 @@ export class GameController {
 	){
 		try
 		{
+			// Admin harici bir seyleri degistirmeyi engelleme yapilabilinir. Yani admin kontrolu. (user)
 			console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
 			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
-			return (responseGameRoom);
+			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
+			if (singleRoom.isGameStarted)
+				this.chatGateway.server.emit(`lobbyListener:${room}`, {action: 'startGame'});
+			else
+				this.chatGateway.server.emit(`lobbyListener:${room}`, singleRoom);
+			return (singleRoom);
 		}
 		catch (err)
 		{

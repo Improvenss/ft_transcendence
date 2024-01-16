@@ -74,6 +74,7 @@ const GamePage: React.FC = () => {
 			name: "fast-room-" + user.userInfo.login,
 			password: null,
 			mode: 'classic',
+			// mode: 0,
 			winScore: 5,
 			duration: 180,
 			description: '',

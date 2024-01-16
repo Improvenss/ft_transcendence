@@ -324,9 +324,9 @@
         }
       }
     },
-    "/game/lobby/{name}": {
+    "/game/room/{name}/{lobby}": {
       "get": {
-        "operationId": "GameController_getGameLobby",
+        "operationId": "GameController_getGameRoom",
         "parameters": [
           {
             "name": "name",
@@ -334,6 +334,14 @@
             "in": "path",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "lobby",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
