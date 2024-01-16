@@ -1,0 +1,103 @@
+/* html, */
+body {
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+  }
+  
+  .Pong {
+	font-family: sans-serif;
+	text-align: center;
+  }
+
+.gameField {
+	position: absolute;
+	border: 8px solid #ccc;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	border-radius: 5px;
+	background-color: black;
+	display: flex;
+	height: 800px;
+	width: 1000px;
+
+	border-style: solid;
+	margin: 10px;
+}
+
+.gameField:before {
+	position: absolute;
+	left: 50%;
+	content:'';
+	width: 10px;
+	height: 100%;
+	border-left: 8px dashed #ccc;
+	transform: translate(-20%, 0);
+}
+
+  .ball {
+	position: absolute;
+	background-color: #ccc;
+	width: 42px;
+	height: 42px;
+	border-radius: 100%;
+	/* left: 500px; */
+	/* top: 400px; */
+	box-shadow: 0px 0px 50px 10px rgb(0, 0, 255);
+  }
+  
+  .player1
+  {
+	position: absolute;
+	border:1px solid #ccc;
+	background-color: #ccc;
+	/* top: 345px; */
+	width: 10px;
+	height: 120px;
+	margin-left: 10px;
+	/* margin-top: 10px; */
+	box-shadow: 0px 0px 50px 10px rgb(0, 255, 0);
+}
+
+  .player2 {
+	position: absolute;
+	border:1px solid #ccc;
+	background-color: #ccc;
+	width: 10px;
+	height: 120px;
+	left: 100%;
+	margin-left: -20px;
+	/* margin-top: 10px; */
+	box-shadow: 0px 0px 50px 10px rgb(255, 0, 0);
+}
+  
+  /* .SCORE {
+	display: inline;
+	font-size: 50px;
+	left: 55%;
+	transform: translate(-50%, 0);
+	position: absolute;
+  } */
+
+  .PlayerName {
+	font-size: 32px;
+	margin-top: 0px;
+}
+
+  .left-score{
+	display: inline;
+	font-size: 50px;
+	left: 45%;
+	transform: translate(-50%, 0);
+	position: absolute;
+	transition: width 1s ease; /* Genişleme animasyonu */
+  }
+  .right-score {
+	display: inline;
+	font-size: 50px;
+	left: 55%;
+	transform: translate(-50%, 0);
+	position: absolute;
+	transition: width 1s ease;
+  }

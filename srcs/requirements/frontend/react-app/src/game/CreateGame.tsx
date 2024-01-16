@@ -3,6 +3,7 @@ import "./CreateGame.css";
 import { IGameRoom } from './IGame';
 import { useNavigate } from 'react-router-dom';
 import fetchRequest from '../utils/fetchRequest';
+import GameLobby from "./GameLobby";
 
 const configs = {
 	winningScore: {

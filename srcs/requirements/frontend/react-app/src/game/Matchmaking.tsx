@@ -2,6 +2,7 @@
 function Matchmaking(){
 	return(
 		<>
+			Searching available game. . .
 		</>
 	);
 }

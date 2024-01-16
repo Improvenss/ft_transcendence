@@ -21,6 +21,10 @@ export class Game {
 	@Column({ length: 100, nullable: true })
 	public password: string;
 
+	@IsString()
+	@Column({ length: 30, nullable: true })
+	public description: string;
+
 	@Column({ type: 'enum', enum: ['public', 'private']})
 	public type: string;
 
@@ -40,15 +44,7 @@ export class Game {
 	@Column({ default: 30, nullable: false })
 	public duration: number;
 
-	@IsString()
-	@Column({ length: 30, nullable: true })
-	public description: string;
-
 	//----------------------Game Details----------------------------//
-
-	@IsString()
-	@Column({ nullable: true })
-	public ballLocation: string;
 
 	@IsNumber()
 	@Column({ default: 10})
@@ -56,25 +52,32 @@ export class Game {
 
 	@IsString()
 	@Column({ nullable: true })
-	public playerLeftLocation: string;
+	public ballLocation: string;
 
 	@IsString()
 	@Column({ nullable: true })
-	public playerRightLocation: string;
+	public pLeftLocation: string;
+
+	@IsString()
+	@Column({ nullable: true })
+	public pRightLocation: string;
 
 	@IsInt()
 	@IsNumber()
 	@Min(0, { message: 'Player score must be at least 0' })
 	@Column({ default: 0 })
-	public playerLeftScore: number;
+	public pLeftScore: number;
 
 	@IsInt()
 	@IsNumber()
 	@Min(0, { message: 'Player score must be at least 0' })
 	@Column({ default: 0 })
-	public playerRightScore: number;
+	public pRightScore: number;
 
 	//----------------------User----------------------------//
+
+	@Column({ nullable: true, default: false })
+	public pRightIsReady: boolean;
 
 	@Column({ nullable: true, default: 0 })
 	public pLeftId: number;

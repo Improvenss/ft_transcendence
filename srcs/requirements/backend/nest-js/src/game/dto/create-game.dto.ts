@@ -1,5 +1,5 @@
 import { PartialType } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber, IsEnum, Max, IsPositive } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber, IsEnum, Max, IsPositive, IsBoolean } from "class-validator";
 import { User } from "src/users/entities/user.entity";
 
 export enum GameMode {
@@ -49,23 +49,27 @@ export class CreateGameDto {
 
 	@IsString()
 	@IsOptional()
-	playerLeftLocation?: string;
+	pLeftLocation?: string;
 
 	@IsString()
 	@IsOptional()
-	playerRightLocation?: string;
+	pRightLocation?: string;
 
 	@IsNumber()
 	@IsInt()
 	@Min(0)
 	@IsOptional()
-	playerLeftScore?: number;
+	pLeftScore?: number;
 
 	@IsInt()
 	@IsNumber()
 	@Min(0)
 	@IsOptional()
-	playerRightScore?: number;
+	pRightScore?: number;
+
+	@IsBoolean()
+	@IsOptional()
+	public pRightIsReady?: boolean;
 
 	@IsNumber()
 	@IsOptional()

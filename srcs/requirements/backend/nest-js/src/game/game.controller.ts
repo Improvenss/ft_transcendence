@@ -129,7 +129,7 @@ export class GameController {
 	){
 		try
 		{
-			console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${body}]${C.END}`);
+			console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
 			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
 			return (responseGameRoom);
 		}

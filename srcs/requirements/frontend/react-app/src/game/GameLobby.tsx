@@ -9,6 +9,7 @@ import { ReactComponent as Map } from '../assets/map/iconMap1.svg';
 import fetchRequest from '../utils/fetchRequest';
 import { useAuth } from '../hooks/AuthHook';
 import { IUser } from '../chat/iChannel';
+import { userInfo } from 'os';
 
 interface Lobby {
 	id: number,
@@ -34,6 +35,7 @@ const GameLobby = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const {isAuth} = useAuth();
+	const [pRightIsReady, setPRightIsReady] = useState(false);
 	
 	useEffect(() => {
 		if (isAuth){
@@ -51,6 +53,8 @@ const GameLobby = () => {
 						console.log("playerLeft:", playerLeft);
 						console.log("playerRight:", playerRight);
 						setLobby({...data, playerLeft, playerRight});
+						console.log("setPRightIsReady", data.pRightIsReady);
+						setPRightIsReady(data.pRightIsReady);
 					} else {
 						navigate('/404', {replace: true});
 					}
@@ -77,24 +81,50 @@ const GameLobby = () => {
 	},[location.pathname])
 		
 	if (!isAuth)
-	{
 		return (
 			<Navigate to='/login' replace />
 		);
-	}
 
 	if (lobby === undefined){
 		return (<LoadingPage />);
 	}
 
-	const	LoadPongGame = () =>{
-		// const _game = new PongGame({});
-
-		// if (lobby.playerRight)
-		// {
-			navigate(`/game/${roomName}`, {replace: true});
-		// }
+	const	readyForGame = async () =>{
+		// socket?.emit('readyForGame', {roomName: roomName, login: my.login});
+		console.log("oncesi", pRightIsReady);
+		setPRightIsReady(!pRightIsReady);
+		console.log("sonrasi", pRightIsReady);
+		const response = await fetchRequest({
+			method: 'PATCH',
+			body: JSON.stringify({
+				pRightIsReady: pRightIsReady,
+			}),
+			url: `/game/room?room=${lobby.name}`,
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log("fetchGameRoom:", data);
+			if (!data.err){
+			} else {
+				console.log("fetchGameRoom error:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
+	const	LoadPongGame = () =>{
+		socket?.emit('startForGame', {roomName: roomName, login: my.login});
+		// navigate(`/game/${roomName}`, {replace: true});
+	}
+	socket?.on('loadGame', () => {
+		if (lobby.playerRight && lobby.playerLeft)
+		{
+			navigate(`/game/${roomName}`, {replace: true});
+		}
+	});
+	socket?.on('otherPlayerNotReady', () => {
+		console.log("The other player is not ready!");
+	});
 
 	// Lobbye katılan kişinin admin veya user olma durumuna göre hazırım / oyunu başlat gibi yapılara sahip olması gerekmektedir.
 	return (
@@ -129,9 +159,9 @@ const GameLobby = () => {
 			</div>
 			<Map className='map'/>
 			{(lobby.adminId === my?.id) ? (
-				<button className='start' onClick={LoadPongGame} >Start Game</button>
+				<button className='start' onClick={LoadPongGame} >{pRightIsReady ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}</button>
 			) : (
-				<button className='ready'>Ready</button>
+				<button className='ready'onClick={readyForGame}>{pRightIsReady ? `Player Is Ready ✅` : `Player Is Unready ❌`}</button>
 			)}
 		</div>
 	);
