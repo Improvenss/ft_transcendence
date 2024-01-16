@@ -104,6 +104,7 @@ const GameLobby = () => {
 			const data = await response.json();
 			console.log("fetchGameRoom:", data);
 			if (!data.err){
+				// socket.emit('startGame', {login: user.userInfo?.login, roomName: roomName});
 			} else {
 				console.log("fetchGameRoom error:", data.err);
 			}

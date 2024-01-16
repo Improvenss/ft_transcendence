@@ -75,20 +75,16 @@ function PongGamePage() {
 		gameListener();
 	}, [])
 
-	useEffect(() => {
-		console.log("liveData", liveData);
-	}, [liveData])
-
-	const	handleLiveData = ({action}: {action: ILiveData}) => {
-		console.log("socketen gelen veri ILiveData tipindekiler", action)
-	}
 
 	useEffect(() => {
-		console.log("sokete veri geldi olacak");
+		const	handleLiveData = ({action}: {action: ILiveData}) => {
+			console.log("socketen gelen veri ILiveData tipindekiler", action)
+		}
+
 		socket.on(`updateGameData:${roomName}`, handleLiveData);
 
 		return () => {
-			// socket.off("", );
+			socket.off(`updateGameData:${roomName}`, handleLiveData);
 		};
 	}, [socket])
 

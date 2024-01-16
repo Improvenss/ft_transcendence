@@ -32,6 +32,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	public connectedIds: Map<number, Socket> = new Map();
 	public connectedSockets: Map<string, number> = new Map(); //returned user id
+	private gameRooms: Map<string, number> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -239,6 +240,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 //------------------------------------------------------------------------
+
+	@SubscribeMessage(`joinGameRoom`)
+	async handleJoinGameRoom(
+		@ConnectedSocket() socket: Socket,
+		data: { gameRoom: string }
+	){
+		const intervalID = setInterval(() => {
+		}, 16);
+	}
+
+	// @SubscribeMessage(`startGameRoom:${}`)
+
 
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
