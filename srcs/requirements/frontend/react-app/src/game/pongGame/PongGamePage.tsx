@@ -40,7 +40,7 @@ function PongGamePage() {
 	const navigate = useNavigate();
 	const [liveRoom, setLiveRoom] = useState<IRoom | undefined>(undefined);
 	const [liveData, setLiveData] = useState<ILiveData>();
-	const { socket }= useSocket();
+	const { socket } = useSocket();
 
 	useEffect(() => {
 		// const	gameListener = async ({action}:{action: string}) => {
@@ -65,6 +65,9 @@ function PongGamePage() {
 						pLeftScore: data.pLeftScore,
 						pRightScore: data.pRightScore,
 					});
+					socket.emit('joinGameRoom', {
+						gameRoom: roomName,
+					})
 				} else {
 					navigate('/404', {replace: true});
 				}
@@ -78,7 +81,8 @@ function PongGamePage() {
 
 	useEffect(() => {
 		const	handleLiveData = ({action}: {action: ILiveData}) => {
-			console.log("socketen gelen veri ILiveData tipindekiler", action)
+			// console.log("socketen gelen veri ILiveData tipindekiler", action)
+			setLiveData(action);
 		}
 
 		socket.on(`updateGameData:${roomName}`, handleLiveData);
@@ -88,9 +92,51 @@ function PongGamePage() {
 		};
 	}, [socket])
 
+	useEffect(() => {
+		let	isUpPressed: boolean = false;
+		let	isDownPressed: boolean = false;
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (!isUpPressed && (event.key === 'w' || event.key === 'ArrowUp')) {
+				console.log("w ve arrow case'sine girdik aslanim");
+				socket.emit('commandGameRoom', {
+					gameRoom: roomName,
+					command: event.key,
+				})
+				isUpPressed = true;
+			} else if (!isDownPressed && (event.key === 's' || event.key === 'ArrowDown')) {
+				console.log("s case'sine girdik aslanim");
+				isDownPressed = true;
+			}
+		};
+		const handleKeyUp = (event: KeyboardEvent) => {
+			if (event.key === 'w' || event.key === 'ArrowUp') {
+				console.log("w'dan elini cektin sictin");
+				isUpPressed = false;
+			} else if (event.key === 's' || event.key === 'ArrowDown') {
+				console.log("s'den elini cektin sictin");
+				isDownPressed = false;
+			}
+		}
+		// window.addEventListener('keypress', handleKeyDown);
+		window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keyup', handleKeyUp);
+		return () => {
+			// window.removeEventListener('keypress', handleKeyDown);
+			window.removeEventListener('keydown', handleKeyDown);
+			window.removeEventListener('keyup', handleKeyUp);
+		}
+	}, [])
+
+	const	leaveRoom = () => {
+		socket.emit('leaveGameRoom', {
+			gameRoom: roomName,
+		});
+	}
+
 	return (
 		<div>
-			{/* <button onClick={LeaveRoom}>leaveGameRoom</button> */}
+			<button onClick={leaveRoom}>Leave Game Room BRUH</button>
 			<div className="Pong">
 				<div className="container">
 					<div className="gameField">

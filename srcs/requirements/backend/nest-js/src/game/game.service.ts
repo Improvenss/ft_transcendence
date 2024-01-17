@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateGameDto, EGameMode, UpdateGameDto } from './dto/create-game.dto';
+import { CreateGameDto, EGameMode, ILiveData, UpdateGameDto } from './dto/create-game.dto';
 import { Repository } from 'typeorm';
 import { Game } from './entities/game.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +15,31 @@ export class GameService {
 		private readonly	gameRepository: Repository<Game>,
 		private readonly	usersService: UsersService,
 	) {}
+
+	async	calcGameLoop(
+		{ gameRoomData, }
+		: { gameRoomData: Game }
+	){
+		if (gameRoomData.ballLocationX >= 1000
+				|| gameRoomData.ballLocationX <= 0)
+			gameRoomData.ballSpeedX *= -1;
+		if (gameRoomData.ballLocationY >= 800
+				|| gameRoomData.ballLocationY <= 0)
+			gameRoomData.ballSpeedY *= -1;
+		gameRoomData.ballLocationX += gameRoomData.ballSpeedX;
+		gameRoomData.ballLocationY += gameRoomData.ballSpeedY;
+
+		const	returnData: ILiveData = {
+			ballLocationX: gameRoomData.ballLocationX,
+			ballLocationY: gameRoomData.ballLocationY,
+			pLeftLocation: gameRoomData.pLeftLocation,
+			pRightLocation: gameRoomData.pRightLocation,
+			pLeftScore: gameRoomData.pLeftScore,
+			pRightScore: gameRoomData.pRightScore,
+			duration: gameRoomData.duration,
+		};
+		return (returnData);
+	}
 
 	async	transferPlayer(
 		{user, }
@@ -66,8 +91,6 @@ export class GameService {
 		await this.transferPlayer({user: tmpUser});
 	// eski oyun odasi
 //  ----------------------
-
-
 //  POST: /room: @Body():  {
 // 	  name: 'b',
 // 	  password: null,
@@ -127,22 +150,22 @@ export class GameService {
 		return (await this.gameRepository.findOne({where: whereClause}));
 	}
 
-	async getGameRelation({id, name, relation, primary}: {
-		id?: number,
-		name?: string,
-		relation: FindOptionsRelations<Game>,
-		primary: boolean,
-	}){
+	async getGameRelation(
+		{id, name, relation, primary}: {
+			id?: number,
+			name?: string,
+			relation: FindOptionsRelations<Game>,
+			primary: boolean,
+		}
+	){
 		const inputSize = [id, name].filter(Boolean).length;
 		if (inputSize !== 1){
 			throw new Error('Provide exactly one of id or name.');
 		}
-
 		const whereClause: Record<string, any> = {
 			id: id,
 			name: name,
 		};
-
 		if (Object.keys(relation).length === 0){
 			const allChannelRelation = await this.getRelationNames();
 			relation = allChannelRelation.reduce((acc, rel) => {
@@ -150,21 +173,17 @@ export class GameService {
 				return acc;
 			}, {} as FindOptionsRelations<Game>);
 		}
-
 		const data = await this.gameRepository.findOne({where: whereClause, relations: relation});
 		if (!data)
 			return (null);
-
 		if (primary === true){ // default + relation
 			return (data);
 		}
-
 		const result: Partial<Game> = {};
 		// Sadece ilişkileri döndür
 		Object.keys(relation).forEach((rel) => {
 			result[rel] = data[rel];
 		});
-
 		return result as Game;
 	}
 
@@ -188,7 +207,6 @@ export class GameService {
 				});
 		return (tmpRoom);
 	}
-
 
 	async	findGameRoom(
 		room: string | undefined,
@@ -218,7 +236,6 @@ export class GameService {
 
 		if (!user)
 			throw (new NotFoundException("'User' not found for register Game Room!"));
-
 		const	tmpRoom = await this.findGameRoom(body.room, ['players']);
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
@@ -229,10 +246,7 @@ export class GameService {
 			throw (new Error("Password is WRONG!!!"));
 		if (singleRoom.players.length >= 2)
 			throw (new Error("Game Room is full!"));
-		await this.transferPlayer({user: user});
-	// eski oyun odasi
-//  --------------- 
-	// yeni oyun odasi
+		await this.transferPlayer({user: user}); // old - new game room
 		if (singleRoom.players[0] && singleRoom.players[1])
 			return ({msg: `yeni oyun odasi dolu kardes 2 kisi de var.`});
 		else if (singleRoom.players.length <= 1)

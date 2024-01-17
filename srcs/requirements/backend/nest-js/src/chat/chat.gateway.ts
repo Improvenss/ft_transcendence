@@ -14,6 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
+import { Game } from 'src/game/entities/game.entity';
 
 var count: number = 0;
 
@@ -32,7 +33,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	public connectedIds: Map<number, Socket> = new Map();
 	public connectedSockets: Map<string, number> = new Map(); //returned user id
-	private gameRooms: Map<string, number> = new Map();
+	// private gameRooms: Map<string, number> = new Map();
+	private gameRoomData: Map<string, Game> = new Map();
+	private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -241,17 +244,49 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 //------------------------------------------------------------------------
 
+	// Buradaki kontrolleri socket uzerinden user bilgisinin game odasi iliskisini alip oradan kontrol etmek lazim.
 	@SubscribeMessage(`joinGameRoom`)
 	async handleJoinGameRoom(
 		@ConnectedSocket() socket: Socket,
-		data: { gameRoom: string }
+		@MessageBody() data: { gameRoom: string },
 	){
-		const intervalID = setInterval(() => {
-		}, 16);
+		console.log("joinGameRoom'a geldi data -> ", data);
+
+		if (!this.gameRoomData.has(data.gameRoom))
+		{
+			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
+			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
+			this.gameRoomData.set(data.gameRoom, singleGameData);
+			console.log("Odayi backend'e aldik artik buradan islem yapacagiz");
+		}
+		if (!this.gameRoomIntervals.has(data.gameRoom))
+		{
+			console.log("Boyle bir oyun odasi olmadigi icin su an olmadi if'ine girdik");
+			const	denemeData = this.gameRoomData.get(data.gameRoom);
+			const intervalID = setInterval(async () => {
+				const nextPosData = await this.gameService.calcGameLoop({
+					gameRoomData: denemeData,
+					// gameRoomData: this.gameRoomData.get(data.gameRoom),
+				});
+				// console.log("nextPosData", nextPosData);
+				this.server.to(data.gameRoom).emit(`updateGameData:${data.gameRoom}`, {
+					action: nextPosData
+				});
+			}, 16);
+			this.gameRoomIntervals.set(data.gameRoom, intervalID);
+		}
+
+		if (!socket.rooms.has(data.gameRoom))
+		{
+			console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
+			socket.join(data.gameRoom);
+		}
+
+		// {
+			// clearInterval(this.gameRoomIntervals.get(data.gameRoom));
+			// return ;
+		// }
 	}
-
-	// @SubscribeMessage(`startGameRoom:${}`)
-
 
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
@@ -260,33 +295,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	 */
 	@SubscribeMessage('commandGameRoom')
 	async handleCommandGameRoom(
+		@ConnectedSocket() socket: Socket,
 		@MessageBody() 
 		{ gameRoom, command }:
 			{ gameRoom: string, command: string })
 	{
-		console.log(`GAME ROOM: gelen command[${count++}]:`, command);
-		console.log('GAME ROOM: MessageBody():', {gameRoom, command});
-		this.server.to(gameRoom).emit("gameRoomCommandListener", command);
+		// const	denemeData = this.gameRoomData.get(gameRoom);
+		// denemeData.p
+		// console.log('GAME ROOM: MessageBody():', {gameRoom, command});
+		// this.server.to(gameRoom).emit(`updateGameData:${gameRoom}`, command);
 	}
 
 	/**
 	 * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
-	 * @param roomData 
+	 * @param gameRoom 
 	 * @param socket 
 	 */
 	@SubscribeMessage('leaveGameRoom')
-	async handleLeaveGameRoom(@Body() roomData: any,
-		@ConnectedSocket() socket: Socket)
-	{
-		if (socket.rooms.has(roomData.name))
+	async handleLeaveGameRoom(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() data: { gameRoom: string },
+	){
+		if (socket.rooms.has(data.gameRoom))
 		{
 			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
-			socket.leave(roomData.name)
-			console.log(`${roomData.name} odasindan cikti: ${socket.id}`);
+			socket.leave(data.gameRoom)
+			console.log(`${data.gameRoom} odasindan cikti: ${socket.id}`);
 		}
 		else {
 
-			console.log(`${socket.id} zaten ${roomData.name} oyun odasinda degil! :D?`);
+			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 		}
 	}
 

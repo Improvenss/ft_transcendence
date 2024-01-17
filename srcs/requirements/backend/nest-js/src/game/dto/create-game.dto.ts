@@ -7,6 +7,16 @@ export enum EGameMode {
 	fastMode = 'fast-mode',
 }
 
+export interface ILiveData {
+	ballLocationX?: number;
+	ballLocationY?: number;
+	pLeftLocation?: number;
+	pRightLocation?: number;
+	pLeftScore?: number;
+	pRightScore?: number;
+	duration?: number;
+}
+
 export class CreateGameDto {
 	@IsString()
 	@IsNotEmpty()
