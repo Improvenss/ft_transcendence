@@ -7,6 +7,7 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { FindOptionsRelations } from 'typeorm';
+import { Server, Socket } from 'socket.io';
 
 @Injectable()
 export class GameService {
@@ -16,10 +17,33 @@ export class GameService {
 		private readonly	usersService: UsersService,
 	) {}
 
+	// async	gameLoop(
+	// 	{ gameRoom, gameRoomData, server }: {
+	// 		gameRoom: string,
+	// 		gameRoomData: Map<string, Game>,
+	// 		server: Server,
+	// 	}
+	// ){
+	// 	const	denemeData = gameRoomData.get(gameRoom);
+	// 	const intervalID = setInterval(async () => {
+	// 		const nextPosData = await this.calcGameLoop({
+	// 			gameRoomData: denemeData,
+	// 		});
+	// 		server.to(gameRoom).emit(`updateGameData`, {
+	// 			action: nextPosData
+	// 		});
+	// 	}, 20);
+	// 	return (intervalID);
+	// }
+
 	async	calcGameLoop(
-		{ gameRoomData, }
-		: { gameRoomData: Game }
+		// { gameRoomData, }
+		// : { gameRoomData: Game }
+		gameRoomData: Game
 	){
+		if (!gameRoomData)
+			return ;
+		// top hareketi
 		if (gameRoomData.ballLocationX >= 1000
 				|| gameRoomData.ballLocationX <= 0)
 			gameRoomData.ballSpeedX *= -1;
@@ -28,6 +52,22 @@ export class GameService {
 			gameRoomData.ballSpeedY *= -1;
 		gameRoomData.ballLocationX += gameRoomData.ballSpeedX;
 		gameRoomData.ballLocationY += gameRoomData.ballSpeedY;
+		
+		// sol oyuncu hareketi
+		if (gameRoomData.pLeftLocation + gameRoomData.pLeftSpeed <= 0)
+			gameRoomData.pLeftLocation = 0;
+		else if (gameRoomData.pLeftLocation + gameRoomData.pLeftSpeed + 120 >= 800)
+			gameRoomData.pLeftLocation = 800 - 120;
+		else
+			gameRoomData.pLeftLocation += gameRoomData.pLeftSpeed;
+
+		// sag oyuncu hareketi
+		if (gameRoomData.pRightLocation + gameRoomData.pRightSpeed <= 0)
+			gameRoomData.pRightLocation = 0;
+		else if (gameRoomData.pRightLocation + gameRoomData.pRightSpeed + 120>= 800)
+			gameRoomData.pRightLocation = 800 - 120;
+		else
+			gameRoomData.pRightLocation += gameRoomData.pRightSpeed;
 
 		const	returnData: ILiveData = {
 			ballLocationX: gameRoomData.ballLocationX,
@@ -39,6 +79,14 @@ export class GameService {
 			duration: gameRoomData.duration,
 		};
 		return (returnData);
+	}
+
+	async	finishGameRoom(
+		{ socket, gameRoom, }
+		: { socket: Socket, gameRoom: string }
+	){
+		console.log(`Oyun Bitti! Room -> (${gameRoom})`);
+		// if (socket.id === )
 	}
 
 	async	transferPlayer(
@@ -109,12 +157,13 @@ export class GameService {
 	}
 		createGameDto.players = [tmpUser];
 		createGameDto.pLeftId = tmpUser.id;
+		createGameDto.pLeftSocketId = tmpUser.socketId;
 		createGameDto.pRightId = null;
 		createGameDto.adminId = tmpUser.id;
 		Object.assign(createGameDto)
 		const	newRoom = new Game(createGameDto);
-	console.log("newROOOOOOOM", newRoom);
 		const	response = await this.gameRepository.save(newRoom);
+		console.log("~~~~~~~~~~~~~~~ response", response);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 	}

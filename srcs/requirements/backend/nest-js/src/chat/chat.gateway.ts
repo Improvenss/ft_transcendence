@@ -15,6 +15,7 @@ import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
 import { Game } from 'src/game/entities/game.entity';
+import { ILiveData } from 'src/game/dto/create-game.dto';
 
 var count: number = 0;
 
@@ -35,7 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	public connectedSockets: Map<string, number> = new Map(); //returned user id
 	// private gameRooms: Map<string, number> = new Map();
 	private gameRoomData: Map<string, Game> = new Map();
-	private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
+	// private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -257,24 +258,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
 			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
 			this.gameRoomData.set(data.gameRoom, singleGameData);
-			console.log("Odayi backend'e aldik artik buradan islem yapacagiz");
+			console.log("Odayi backend'e aldik artik odamizin verileri backendde");
 		}
-		if (!this.gameRoomIntervals.has(data.gameRoom))
-		{
-			console.log("Boyle bir oyun odasi olmadigi icin su an olmadi if'ine girdik");
-			const	denemeData = this.gameRoomData.get(data.gameRoom);
-			const intervalID = setInterval(async () => {
-				const nextPosData = await this.gameService.calcGameLoop({
-					gameRoomData: denemeData,
-					// gameRoomData: this.gameRoomData.get(data.gameRoom),
-				});
-				// console.log("nextPosData", nextPosData);
-				this.server.to(data.gameRoom).emit(`updateGameData:${data.gameRoom}`, {
-					action: nextPosData
-				});
-			}, 16);
-			this.gameRoomIntervals.set(data.gameRoom, intervalID);
-		}
+		// if (!this.gameRoomIntervals.has(data.gameRoom))
+		// {
+		// 	console.log("Boyle bir oyun odasi olmadigi icin su an olmadi if'ine girdik");
+		// 	// const	intervalID = await this.gameService.gameLoop({
+		// 	// 	gameRoom: data.gameRoom,
+		// 	// 	gameRoomData: this.gameRoomData,
+		// 	// 	server: this.server
+		// 	// })
+		// 	// this.gameRoomIntervals.set(data.gameRoom, intervalID)
+		// }
 
 		if (!socket.rooms.has(data.gameRoom))
 		{
@@ -288,6 +283,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// }
 	}
 
+	@SubscribeMessage('calcGameData')
+	async handleCalcGameData(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody()
+		{ gameRoom }:
+			{ gameRoom: string, }
+	){
+		const	denemeData = this.gameRoomData.get(gameRoom);
+		// console.log("denmeData", denemeData);
+		const	returnData = await this.gameService.calcGameLoop(denemeData);
+		// console.log("retunrDATA", returnData);
+		this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+	}
+
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
 	 *  ele aliyouz.
@@ -297,13 +306,44 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleCommandGameRoom(
 		@ConnectedSocket() socket: Socket,
 		@MessageBody() 
-		{ gameRoom, command }:
-			{ gameRoom: string, command: string })
+		{ gameRoom, way, isKeyPress }:
+			{ gameRoom: string, way: string, isKeyPress: boolean})
 	{
-		// const	denemeData = this.gameRoomData.get(gameRoom);
-		// denemeData.p
-		// console.log('GAME ROOM: MessageBody():', {gameRoom, command});
-		// this.server.to(gameRoom).emit(`updateGameData:${gameRoom}`, command);
+		const	denemeData = this.gameRoomData.get(gameRoom);
+		if (socket.id === denemeData.pLeftSocketId)
+		{
+			console.log("--------------- SOL OYUNCU ----------------");
+			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
+			{
+				denemeData.pLeftSpeed = -10;
+				if (way === 'DOWN')
+					denemeData.pLeftSpeed *= -1;
+			}
+			else // false -> tustan parmagini cektiginde
+				denemeData.pLeftSpeed = 0;
+		}
+		else
+		{
+			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
+			{
+				denemeData.pRightSpeed = -10;
+				if (way === 'DOWN')
+					denemeData.pRightSpeed *= -1;
+			}
+			else // false -> tustan parmagini cektiginde
+				denemeData.pRightSpeed = 0;
+		}
+		// const	returnData: ILiveData = {
+			// pLeftLocation: denemeData.pLeftLocation + denemeData.pLeftSpeed,
+			// pRightLocation: denemeData.pRightLocation + denemeData.pRightSpeed,
+			// pLeftSpeed: denemeData.pLeftSpeed,
+			// pRightSpeed: denemeData.pRightSpeed,
+		// };
+		// const nextPosData = await this.gameService.calcGameLoop({
+		// 	gameRoomData: denemeData,
+		// });
+		// console.log("TUSA BASILDI -> returnData", returnData);
+		// this.server.to(gameRoom).emit(`updateGameData:${gameRoom}`, returnData);
 	}
 
 	/**
@@ -319,6 +359,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (socket.rooms.has(data.gameRoom))
 		{
 			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
+			const	responseFinish = await this.gameService.finishGameRoom({
+				socket: socket,
+				gameRoom: data.gameRoom,
+			});
 			socket.leave(data.gameRoom)
 			console.log(`${data.gameRoom} odasindan cikti: ${socket.id}`);
 		}

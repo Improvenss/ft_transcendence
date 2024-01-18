@@ -77,9 +77,13 @@ export class Game {
 	@Column({ nullable: true, default: 340 })
 	public pRightLocation: number;
 
-	// @IsNumber()
-	// @Column({ nullable: true, default: 4 })
-	// public pSpeed: number;
+	@IsNumber()
+	@Column({ nullable: true, default: 0 })
+	public pLeftSpeed: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 0 })
+	public pRightSpeed: number;
 
 	@IsInt()
 	@IsNumber()
@@ -102,7 +106,13 @@ export class Game {
 	public pLeftId: number;
 
 	@Column({ nullable: true, default: 0 })
+	public pLeftSocketId: string;
+
+	@Column({ nullable: true, default: 0 })
 	public pRightId: number;
+
+	@Column({ nullable: true, default: 0 })
+	public pRightSocketId: string;
 
 	@Column({ nullable: true, default: 0 })
 	public adminId: number;

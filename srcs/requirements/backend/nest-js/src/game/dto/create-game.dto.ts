@@ -12,6 +12,8 @@ export interface ILiveData {
 	ballLocationY?: number;
 	pLeftLocation?: number;
 	pRightLocation?: number;
+	pLeftSpeed?: number;
+	pRightSpeed?: number;
 	pLeftScore?: number;
 	pRightScore?: number;
 	duration?: number;
@@ -79,6 +81,14 @@ export class CreateGameDto {
 	pRightLocation?: number;
 
 	@IsNumber()
+	@IsOptional()
+	pLeftSpeed?: number;
+
+	@IsNumber()
+	@IsOptional()
+	pRightSpeed?: number;
+
+	@IsNumber()
 	@IsInt()
 	@Min(0)
 	@IsOptional()
@@ -98,9 +108,17 @@ export class CreateGameDto {
 	@IsOptional()
 	public pLeftId: number;
 
+	@IsString()
+	@IsOptional()
+	public pLeftSocketId: string;
+
 	@IsNumber()
 	@IsOptional()
 	public pRightId: number;
+
+	@IsString()
+	@IsOptional()
+	public pRightSocketId: string;
 
 	@IsNumber()
 	@IsOptional()

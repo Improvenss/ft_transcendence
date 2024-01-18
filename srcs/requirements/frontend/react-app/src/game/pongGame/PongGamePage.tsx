@@ -14,6 +14,10 @@ interface IRoom {
 	players: IUser, // belki
 	pLeft: IUser, // yes
 	pRight: IUser, // yes
+	ballLocationX: number,
+	ballLocationY: number,
+	ballSpeedX: number,
+	ballSpeedY: number,
 }
 
 interface ILiveData {
@@ -21,9 +25,16 @@ interface ILiveData {
 	ballLocationY?: number;
 	pLeftLocation?: number;
 	pRightLocation?: number;
+	// pLeftSpeed?: number;
+	// pRightSpeed?: number;
 	pLeftScore?: number;
 	pRightScore?: number;
 	duration?: number;
+}
+
+interface IFinishData {
+	winner: number,
+	looser: number,
 }
 
 /**
@@ -67,7 +78,7 @@ function PongGamePage() {
 					});
 					socket.emit('joinGameRoom', {
 						gameRoom: roomName,
-					})
+					});
 				} else {
 					navigate('/404', {replace: true});
 				}
@@ -78,43 +89,61 @@ function PongGamePage() {
 		gameListener();
 	}, [])
 
-
 	useEffect(() => {
+		const	intervalId = setInterval(async() => {
+			socket.emit('calcGameData', { gameRoom: roomName });
+		}, 16)
 		const	handleLiveData = ({action}: {action: ILiveData}) => {
-			// console.log("socketen gelen veri ILiveData tipindekiler", action)
 			setLiveData(action);
 		}
+		const	finishGameData = ({action}: {action: IFinishData}) => {
 
-		socket.on(`updateGameData:${roomName}`, handleLiveData);
-
+		}
+		socket.on('updateGameData', handleLiveData);
+		socket.on('finishGameData', finishGameData);
 		return () => {
-			socket.off(`updateGameData:${roomName}`, handleLiveData);
-		};
+			clearInterval(intervalId);
+			socket.off('updateGameData', handleLiveData);
+			socket.off('finishGameData', finishGameData);
+		}
 	}, [socket])
 
+
+	// key press
 	useEffect(() => {
 		let	isUpPressed: boolean = false;
 		let	isDownPressed: boolean = false;
-
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (!isUpPressed && (event.key === 'w' || event.key === 'ArrowUp')) {
-				console.log("w ve arrow case'sine girdik aslanim");
 				socket.emit('commandGameRoom', {
 					gameRoom: roomName,
-					command: event.key,
+					way: 'UP',
+					isKeyPress: true
 				})
 				isUpPressed = true;
 			} else if (!isDownPressed && (event.key === 's' || event.key === 'ArrowDown')) {
-				console.log("s case'sine girdik aslanim");
+				socket.emit('commandGameRoom', {
+					gameRoom: roomName,
+					way: 'DOWN',
+					isKeyPress: true
+				})
 				isDownPressed = true;
 			}
 		};
 		const handleKeyUp = (event: KeyboardEvent) => {
 			if (event.key === 'w' || event.key === 'ArrowUp') {
-				console.log("w'dan elini cektin sictin");
+				socket.emit('commandGameRoom', {
+					gameRoom: roomName,
+					way: 'UP',
+					isKeyPress: false
+				})
 				isUpPressed = false;
 			} else if (event.key === 's' || event.key === 'ArrowDown') {
-				console.log("s'den elini cektin sictin");
+				socket.emit('commandGameRoom', {
+					gameRoom: roomName,
+					way: 'DOWN',
+					isKeyPress: false
+				})
 				isDownPressed = false;
 			}
 		}
@@ -139,6 +168,7 @@ function PongGamePage() {
 			<button onClick={leaveRoom}>Leave Game Room BRUH</button>
 			<div className="Pong">
 				<div className="container">
+					
 					<div className="gameField">
 						<p className="PlayerName" id="leftPlayerName">{liveRoom?.pLeft.login}</p>
 						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom?.pRight.login}</p>
