@@ -15,9 +15,6 @@ import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
 import { Game } from 'src/game/entities/game.entity';
-import { ILiveData } from 'src/game/dto/create-game.dto';
-
-var count: number = 0;
 
 @WebSocketGateway({ 
 	cors: {
@@ -60,6 +57,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		await this.handleUserStatus({status: 'offline'}, client);
 		console.log(`Client disconnected 💔: socket.id[${clientId}]`);
 		const userId = this.connectedSockets.get(clientId);
+		const userData = await this.usersService.getUserRelation({
+			user: { socketId: client.id },
+			relation: { currentRoom: true },
+			primary: false,
+		});
+		if (userData.currentRoom)
+			await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
 		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
 		this.connectedSockets.delete(clientId);
 		client.disconnect(true);
@@ -312,7 +316,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const	denemeData = this.gameRoomData.get(gameRoom);
 		if (socket.id === denemeData.pLeftSocketId)
 		{
-			console.log("--------------- SOL OYUNCU ----------------");
 			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
 			{
 				denemeData.pLeftSpeed = -10;
@@ -356,18 +359,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket,
 		@MessageBody() data: { gameRoom: string },
 	){
-		if (socket.rooms.has(data.gameRoom))
+		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
 		{
 			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
-			const	responseFinish = await this.gameService.finishGameRoom({
+			const	gameData = this.gameRoomData.get(data.gameRoom);
+			if (!gameData)
+				return ;
+			const	responseFinishData = await this.gameService.finishGameRoom({
 				socket: socket,
-				gameRoom: data.gameRoom,
+				gameData: gameData,
 			});
+			this.server.to(data.gameRoom).emit('finishGameData', { action: responseFinishData.winner });
 			socket.leave(data.gameRoom)
-			console.log(`${data.gameRoom} odasindan cikti: ${socket.id}`);
+			const	deleteGameRoomDB = await this.gameService.deleteGameRoom(data.gameRoom);
+			const	deleteGameData = this.gameRoomData.delete(data.gameRoom);
 		}
 		else {
-
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 		}
 	}

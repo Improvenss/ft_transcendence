@@ -32,10 +32,10 @@ interface ILiveData {
 	duration?: number;
 }
 
-interface IFinishData {
-	winner: number,
-	looser: number,
-}
+// interface IFinishData {
+// 	winner: number,
+// 	looser: number,
+// }
 
 /**
  * pLeftLocation number
@@ -52,7 +52,7 @@ function PongGamePage() {
 	const [liveRoom, setLiveRoom] = useState<IRoom | undefined>(undefined);
 	const [liveData, setLiveData] = useState<ILiveData>();
 	const { socket } = useSocket();
-
+	const delay = 16;
 	useEffect(() => {
 		// const	gameListener = async ({action}:{action: string}) => {
 		const	gameListener = async () => {
@@ -92,12 +92,13 @@ function PongGamePage() {
 	useEffect(() => {
 		const	intervalId = setInterval(async() => {
 			socket.emit('calcGameData', { gameRoom: roomName });
-		}, 16)
+		}, delay);
 		const	handleLiveData = ({action}: {action: ILiveData}) => {
 			setLiveData(action);
 		}
-		const	finishGameData = ({action}: {action: IFinishData}) => {
-
+		const	finishGameData = ({action}: {action: number}) => {
+			console.log("OYUN BITTI USTAM kazanan ID -> ", action);
+			navigate('/', {replace: true});
 		}
 		socket.on('updateGameData', handleLiveData);
 		socket.on('finishGameData', finishGameData);
@@ -168,7 +169,7 @@ function PongGamePage() {
 			<button onClick={leaveRoom}>Leave Game Room BRUH</button>
 			<div className="Pong">
 				<div className="container">
-					
+
 					<div className="gameField">
 						<p className="PlayerName" id="leftPlayerName">{liveRoom?.pLeft.login}</p>
 						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom?.pRight.login}</p>

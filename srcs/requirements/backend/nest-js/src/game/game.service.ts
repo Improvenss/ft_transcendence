@@ -36,20 +36,78 @@ export class GameService {
 	// 	return (intervalID);
 	// }
 
+	restartBall(
+		gameRoomData: Game
+	)
+	{
+		const newPos = Math.floor(Math.random() * 2);
+		const moves = [
+			{ x: -4, y: -2 },
+			{ x: -3, y: -4 },
+			{ x: -3, y: 3 },
+			{ x: -3, y: 2 },
+			{ x: 4, y: -2 },
+			{ x: 2, y: -4 },
+		];
+		const initialMove = moves[Math.floor(Math.random() * moves.length)];
+		gameRoomData.ballSpeedX = initialMove.x;
+		gameRoomData.ballSpeedY = initialMove.y;
+		gameRoomData.ballLocationX = 479;
+		if (newPos == 0)
+			gameRoomData.ballLocationY = 22;
+		else
+			gameRoomData.ballLocationY = 757;
+	}
+
 	async	calcGameLoop(
 		// { gameRoomData, }
 		// : { gameRoomData: Game }
 		gameRoomData: Game
+
 	){
 		if (!gameRoomData)
 			return ;
 		// top hareketi
-		if (gameRoomData.ballLocationX >= 1000
-				|| gameRoomData.ballLocationX <= 0)
-			gameRoomData.ballSpeedX *= -1;
-		if (gameRoomData.ballLocationY >= 800
-				|| gameRoomData.ballLocationY <= 0)
+		if (gameRoomData.ballLocationY + 42 >= 800
+			|| gameRoomData.ballLocationY <= 0)
 			gameRoomData.ballSpeedY *= -1;
+	
+		if (gameRoomData.ballLocationY + 21 >= gameRoomData.pLeftLocation
+			&& gameRoomData.ballLocationY + 21 <= gameRoomData.pLeftLocation + 120)
+		{ //Left Player Collision
+			if (gameRoomData.ballLocationX <= 10)
+				{
+					gameRoomData.ballSpeedX *= -1;
+					gameRoomData.ballSpeedY += gameRoomData.pLeftSpeed / 10;
+					gameRoomData.ballLocationX += 3;
+					console.log("left touchteed");
+				}
+		}
+		else if (gameRoomData.ballLocationY + 21 >= gameRoomData.pRightLocation
+			&& gameRoomData.ballLocationY + 21 <= gameRoomData.pRightLocation + 120)
+		{ //Right Player Collision
+			if (gameRoomData.ballLocationX + 42 >= 990)
+			{
+				gameRoomData.ballSpeedX *= -1;
+				gameRoomData.ballSpeedY += gameRoomData.pRightSpeed / 10;
+				gameRoomData.ballLocationX -= 3;
+				console.log("right toucheed");
+			}
+		}
+
+		//add score to left
+		if (gameRoomData.ballLocationX + 42 >= 1000)
+		{
+			gameRoomData.pLeftScore += 1;
+			this.restartBall(gameRoomData);
+		}
+		//add score to right
+		else if (gameRoomData.ballLocationX <= 0)
+		{
+			gameRoomData.pRightScore += 1;
+			this.restartBall(gameRoomData);
+		}
+
 		gameRoomData.ballLocationX += gameRoomData.ballSpeedX;
 		gameRoomData.ballLocationY += gameRoomData.ballSpeedY;
 		
@@ -82,11 +140,16 @@ export class GameService {
 	}
 
 	async	finishGameRoom(
-		{ socket, gameRoom, }
-		: { socket: Socket, gameRoom: string }
+		{ socket, gameData, }
+		: { socket: Socket, gameData: Game }
 	){
-		console.log(`Oyun Bitti! Room -> (${gameRoom})`);
-		// if (socket.id === )
+		if (!gameData)
+			return ;
+		console.log(`Oyun Bitti! Room -> (${gameData.name})`);
+		if (socket.id === gameData.pLeftSocketId)
+			return ({ winner: gameData.pRightId });
+		else
+			return ({ winner: gameData.pLeftId });
 	}
 
 	async	transferPlayer(
@@ -149,7 +212,6 @@ export class GameService {
 // 	  type: 'public'
 // 	}
 	// olusturulan yeni oyun odasi
-	console.log("cretate Game DTO", createGameDto);
 	if (createGameDto.mode === EGameMode.fastMode)
 	{
 		console.log("odanin tipi fast mode olmasi lazim yani 1", createGameDto.mode);
@@ -163,7 +225,6 @@ export class GameService {
 		Object.assign(createGameDto)
 		const	newRoom = new Game(createGameDto);
 		const	response = await this.gameRepository.save(newRoom);
-		console.log("~~~~~~~~~~~~~~~ response", response);
 		console.log(`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 		return (`New GameRoom created ✅: #${newRoom.name}:[${newRoom.id}]`);
 	}
