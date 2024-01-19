@@ -34,6 +34,7 @@ function InfoChannel() {
 	const [selectedImage, setSelectedImage] = useState<File | null>(null);
 	const [errorMessage, setErrorMessage] = useState('');
 	const navigate = useNavigate();
+	const isAdmin = activeChannel?.admins.some((admin) => admin.login === userInfo.login);
 
 	const handleTabInfoClick = (tabId: string) => {
 		if (selectedImage != null)
@@ -206,16 +207,16 @@ function InfoChannel() {
 										{(showUserInfo && showUserInfo.login === user.login) && (
 											<div id="channel-user-info">
 												<button onClick={() => navigate('/profile/' + user.login)}> <IconProfile /> </button>
-												{user.login !== userInfo?.login && (
+												{user.login !== userInfo.login && (
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
 														<button onClick={() => handleSendMessage(user.id)}> <IconDM /> </button>
 														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
-												{activeChannel.admins.some((admin) => admin.login === userInfo?.login) && (
+												{isAdmin && (
 													<>
-														{user.login !== userInfo?.login && (
+														{user.login !== userInfo.login && (
 															<>
 																<button onClick={() => handleChannelRequest('kick', user.id, activeChannel.id)}> <IconKick /> </button>
 																<button onClick={() => handleChannelRequest('ban', user.id, activeChannel.id)}> <IconBan /> </button>
@@ -232,14 +233,16 @@ function InfoChannel() {
 										)}
  									</div>
  								))}
- 								<button id="userAdd" onClick={() => setActiveTabInfo('infoFriends')}> <IconAddUser /> </button>
+								{isAdmin && (
+ 									<button id="userAdd" onClick={() => setActiveTabInfo('infoFriends')}> <IconAddUser /> </button>
+								)}
  								<button id="userBanList" onClick={() => setActiveTabInfo('banList')}> <IconBanList /> </button>
  							</div>
  						)}
 
 						{ activeTabInfo === 'infoChannel' && (
  							<div className="settings">
-								{activeChannel.admins.some((admin) => admin.login === userInfo?.login) && (
+								{isAdmin && (
 									<>
 										{errorMessage && <p className="error-message">{errorMessage}</p>}
 										<label htmlFor="channelName">Channel Name:</label>
@@ -306,7 +309,7 @@ function InfoChannel() {
  							</div>
  						)}
 
- 						{ activeTabInfo === 'infoFriends' && (
+ 						{isAdmin && activeTabInfo === 'infoFriends' && (
  							<div>
  								<input
  									id="friendSearch"
@@ -315,12 +318,13 @@ function InfoChannel() {
  									onChange={(e) => setFriendSearchTerm(e.target.value)}
  									placeholder="Search friends..."
  								/>
- 								{userInfo?.friends
+ 								{userInfo.friends
  									.filter((user) => user.login.toLowerCase().includes(friendSearchTerm.toLowerCase()))
  									.map((user) => (
  										<div
  											key={user.login}
  											id='friend-users'
+											onClick={() => handleChannelRequest('invite', user.id, activeChannel.id)}
  										>
  											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
  											<div id='friend-users-table'>

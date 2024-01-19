@@ -50,20 +50,6 @@ function ProfilePage() {
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [username]); //kendi profilime tıkladığımda single-page olduğundan dolayı sayfa güncellenmiyor
 
-
-const getRandomDate = () => {
-const date = new Date(+(new Date()) - Math.floor(Math.random() * 10000000000));
-return date.toISOString().split('T')[0];
-};
-
-// Rastgele oyun, rakip ve durum bilgileri
-const historyData = Array.from({ length: 20 }, (_, index) => ({
-date: getRandomDate(),
-game: `Game ${index + 1}`,
-rival: `Rival ${index + 1}`,
-status: Math.random() < 0.5 ? 'Win' : 'Lose',
-}));
-
 	if ((userPanel === undefined)){
 		return (<LoadingPage />);
 	}
@@ -135,15 +121,26 @@ status: Math.random() < 0.5 ? 'Win' : 'Lose',
 			<div id="user-board">
 				<div id="user-info">
 					<div id="gameStatus">
-						<div id="Total">Total 10</div>
-						<div id="Win">Win 5</div>
-						<div id="Lose">Lose 5</div>
-						<div id="Rate">Rate 50%</div>
+						{(() => {
+							const totalGames = userPanel.gameHistory.length;
+							const winCount = userPanel.gameHistory.filter(item => item.result === 'win').length;
+							const loseCount = userPanel.gameHistory.filter(item => item.result === 'lose').length;
+							const winRate = totalGames > 0 ? (winCount / totalGames) * 100 : 0;
+
+							return (
+								<>
+									<div id="Total">Total {totalGames}</div>
+									<div id="Win">Win {winCount}</div>
+									<div id="Lose">Lose {loseCount}</div>
+									<div id="Rate">Win Rate {winRate.toFixed(2)}%</div>
+								</>
+							)
+						})()}
 					</div>
 					<div className="xp-bar">
-						<div className="xp" style={{ width: `${"75"}%` }} />
-						<div className="level" >55 lv </div>
-						<div className="rate">(%75)</div>
+						<div className="xp" style={{ width: `${userPanel.progression.percentage}%` }} />
+						<div className="level" >{userPanel.progression.level} lv </div>
+						<div className="rate">(%{userPanel.progression.percentage.toFixed(3)})</div>
 					</div>
 					<div id="achievements-container">
 						{userPanel.achivments.map((achievement, index) => (
@@ -164,12 +161,12 @@ status: Math.random() < 0.5 ? 'Win' : 'Lose',
 						<p>Rival</p>
 						<p>Status</p>
 					</div>
-					{historyData.map((item, index) => (
+					{userPanel.gameHistory.map((item, index) => (
 						<div key={index} className="history-item">
 							<p>{item.date}</p>
-							<p>{item.game}</p>
+							<p>{item.name}</p>
 							<p>{item.rival}</p>
-							<p>{item.status}</p>
+							<p>{item.result}</p>
 						</div>
 					))}
 				</div>

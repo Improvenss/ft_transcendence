@@ -246,17 +246,20 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /user: who: [${who}]${C.END}`);
-			if (user.login !== who){
-				return (await this.usersService.getUserPrimary({login: who}));
-			}
 
 			const data = await this.usersService.getUserRelation({
-				user: { login: who },
-				relation: { friends: true },
-				primary: true,
-			});
-			delete data.socketId;
-			return (data);
+				user: {login: who},
+				relation: {friends: true, gameHistory: true},
+				primary: true
+			})
+			const progression = data.xp;
+			const newData = { ...data, progression };
+			delete newData.socketId;
+	
+			if (user.login !== who){
+				delete newData.friends;
+			}
+			return (newData);
 		} catch (err) {
 			console.log("@Get('/user'): ", err.message);
 			return ({ success: false, err: err.message});

@@ -430,6 +430,12 @@ export class ChatController {
 			console.log(`${C.B_YELLOW}POST: /channel/:${action}: @Req() user: [${user.login}] channel: [${channel.name}]${C.END}`);
 			const targetUser = await this.usersService.getUserPrimary({id: userId});
 
+			if (action === 'invite'){
+				const notif = await this.usersService.createNotif(user.id, userId, 'invite', `${user.login} invited you to the ${channel.name} channel.`);
+				this.chatGateway.server.emit(`user-notif:${userId}`, notif);
+				return ({ success: true });
+			}
+
 			if (action === 'kick' || action === 'ban'){
 				await this.chatService.removeUser(channel.name, 'members', userId);
 			}

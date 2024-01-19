@@ -1,6 +1,12 @@
-import { IsNumber, Max, Min } from 'class-validator';
+import { IsNumber } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+
+export enum GameStatus {
+	WIN = 'win',
+	LOSE = 'lose',
+	TIE = 'tie',
+}
 
 @Entity('game_history')
 export class GameHistory {
@@ -13,19 +19,19 @@ export class GameHistory {
 	public id: number;
 
 	@ManyToOne(() => User, user => user.gameHistory)
-	user: User;
+	public user: User;
 
 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 	public date: Date;
 
 	@Column()
-	name: string;
+	public name: string;
 	
 	@Column()
-	rival: string;
+	public rival: string;
 
-	@Column({ type: 'enum', enum: ['win', 'lose']})
-	result: 'win' | 'lose';
+	@Column({ type: 'enum', enum: GameStatus})
+	public result: GameStatus;
 
 	//@IsNumber()
 	//@Min(0, { message: 'Game history score must be at least 0' })
@@ -60,4 +66,3 @@ export class GameHistory {
 // 	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
 // 	date: Date;
 // }
-

@@ -131,6 +131,16 @@ function Notification() {
 									</button>
 								</div>
 							)}
+							{ notification.type === 'invite' && (
+								<div>
+									<button onClick={() => handleRequest('acceptInvite', notification.from, removeNotif(notification.id))}>
+										Accept
+									</button>
+									<button onClick={() => handleRequest('declineInvite', notification.from, removeNotif(notification.id))}>
+										Decline
+									</button>
+								</div>
+							)}
 							<p className="notification-date">
 								{formatTimeAgo(notification.date)}
 							</p>

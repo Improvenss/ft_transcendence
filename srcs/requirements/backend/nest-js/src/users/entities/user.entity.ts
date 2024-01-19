@@ -151,66 +151,42 @@ export class User {
 
 	//----------------------Game-------------------------------//
 
-	//@Column({ default: 0 })
-	//public gamesWon: number;
+	@Column({ type: 'integer', default: 0 })
+	public _xp: number;
 
-	//@Column({ default: 0 })
-	//public gamesLost: number;
-
-	@Column({default: 0})
-	public xp: number; //34324567890xp
-
-	//->get() method -> xp / .... -> kalan(progress - 1milyon xp), bölüm(level - 43lv)
-	// lv1-> 10xp, lv2->50xp, lv3-> 140xp 
-
-	/*
-	#include <iostream>
-	#include <cmath>
-
-	int nextLevel(int level);
-
-	int calculateLevel(int totalXP) {
-		int level = 1;
-		int nextLevelXP = nextLevel(level);
-
-		while (totalXP >= nextLevelXP) {
-			level++;
-			nextLevelXP = nextLevel(level);
-		}
-
-		return level - 1; // Bir önceki seviyeyi döndür
-	}
-
-	double calculatePercentage(int totalXP, int level) {
-		int currentLevelXP = nextLevel(level);
-		int nextLevelXP = nextLevel(level + 1);
-
-		double percentage = static_cast<double>(totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP) * 100;
-
-		return percentage;
-	}
-
-	// nextLevel fonksiyonunun tanımı
-	int nextLevel(int level) {
+	private nextLevel(level: number): number {
 		//return round((4 * pow(level, 3)) / 5);
-		return 500 * (pow(level, 2)) - (500 * level);
+        return 500 * (Math.pow(level, 2)) - (500 * level);
+    }
+
+	get xp(): {
+		level: number,
+		percentage: number,
+	}{
+		let currentXP = this._xp;
+
+		let level = 1;
+        let nextLevelXP = this.nextLevel(level);
+
+        while (currentXP >= nextLevelXP) {
+            level++;
+            nextLevelXP = this.nextLevel(level);
+        }
+
+        const currentLevelXP = this.nextLevel(level - 1);
+        nextLevelXP = this.nextLevel(level);
+
+        const percentage = (currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP) * 100;
+
+        return {
+            level: level - 1,
+            percentage: percentage
+        };
+    }
+
+	set xp(value: number){
+		this._xp = value;
 	}
-
-	int main() {
-		// Örnek kullanım:
-		int totalXP = 0;
-
-		int level = calculateLevel(totalXP);
-		double percentage = calculatePercentage(totalXP, level);
-
-		std::cout << "Toplam XP: " << totalXP << std::endl;
-		std::cout << "Level: " << level << std::endl;
-		std::cout << "Yüzde: " << percentage << "%" << std::endl;
-
-		return 0;
-	}
-	
-	*/
 
 	@OneToMany(() => GameHistory, history => history.user, {
 		nullable: true,
@@ -234,6 +210,7 @@ export enum NotificationType {
 	ACCEPT_FRIEND_REQUEST = 'acceptFriendRequest',
 	DECLINE_FRIEND_REQUEST = 'declineFriendRequest',
 	UNFRIEND = 'unFriend',
+	INVITE = 'invite',
 }
 
 @Entity('notification')
