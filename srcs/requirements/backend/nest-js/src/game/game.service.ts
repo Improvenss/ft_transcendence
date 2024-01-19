@@ -8,6 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { FindOptionsRelations } from 'typeorm';
 import { Server, Socket } from 'socket.io';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class GameService {
@@ -15,26 +16,8 @@ export class GameService {
 		@InjectRepository(Game)
 		private readonly	gameRepository: Repository<Game>,
 		private readonly	usersService: UsersService,
+		// private readonly	chatGateway: ChatGateway,
 	) {}
-
-	// async	gameLoop(
-	// 	{ gameRoom, gameRoomData, server }: {
-	// 		gameRoom: string,
-	// 		gameRoomData: Map<string, Game>,
-	// 		server: Server,
-	// 	}
-	// ){
-	// 	const	denemeData = gameRoomData.get(gameRoom);
-	// 	const intervalID = setInterval(async () => {
-	// 		const nextPosData = await this.calcGameLoop({
-	// 			gameRoomData: denemeData,
-	// 		});
-	// 		server.to(gameRoom).emit(`updateGameData`, {
-	// 			action: nextPosData
-	// 		});
-	// 	}, 20);
-	// 	return (intervalID);
-	// }
 
 	restartBall(
 		gameRoomData: Game
@@ -59,6 +42,7 @@ export class GameService {
 			gameRoomData.ballLocationY = 757;
 	}
 
+
 	async	calcGameLoop(
 		// { gameRoomData, }
 		// : { gameRoomData: Game }
@@ -67,6 +51,17 @@ export class GameService {
 	){
 		if (!gameRoomData)
 			return ;
+
+		if (gameRoomData.duration <= 0)
+		{
+			if (gameRoomData.pLeftScore > gameRoomData.pRightScore)
+				return ({ winner: gameRoomData.pLeftId });
+			else if (gameRoomData.pLeftScore < gameRoomData.pRightScore)
+				return ({ winner: gameRoomData.pRightId });
+			else
+				return ({ winner: gameRoomData.pLeftId, isTie: true });
+		}
+
 		// top hareketi
 		if (gameRoomData.ballLocationY + 42 >= 800
 			|| gameRoomData.ballLocationY <= 0)
@@ -80,7 +75,6 @@ export class GameService {
 					gameRoomData.ballSpeedX *= -1;
 					gameRoomData.ballSpeedY += gameRoomData.pLeftSpeed / 10;
 					gameRoomData.ballLocationX += 3;
-					console.log("left touchteed");
 				}
 		}
 		else if (gameRoomData.ballLocationY + 21 >= gameRoomData.pRightLocation
@@ -91,7 +85,6 @@ export class GameService {
 				gameRoomData.ballSpeedX *= -1;
 				gameRoomData.ballSpeedY += gameRoomData.pRightSpeed / 10;
 				gameRoomData.ballLocationX -= 3;
-				console.log("right toucheed");
 			}
 		}
 
@@ -99,12 +92,16 @@ export class GameService {
 		if (gameRoomData.ballLocationX + 42 >= 1000)
 		{
 			gameRoomData.pLeftScore += 1;
+			if (gameRoomData.pLeftScore >= gameRoomData.winScore)
+				return ({ winner: gameRoomData.pLeftId });
 			this.restartBall(gameRoomData);
 		}
 		//add score to right
 		else if (gameRoomData.ballLocationX <= 0)
 		{
 			gameRoomData.pRightScore += 1;
+			if (gameRoomData.pRightScore >= gameRoomData.winScore)
+				return ({ winner: gameRoomData.pRightId });
 			this.restartBall(gameRoomData);
 		}
 
@@ -140,12 +137,14 @@ export class GameService {
 	}
 
 	async	finishGameRoom(
-		{ socket, gameData, }
-		: { socket: Socket, gameData: Game }
+		{ socket, gameData, isTie }
+		: { socket: Socket, gameData: Game, isTie: boolean }
 	){
 		if (!gameData)
 			return ;
 		console.log(`Oyun Bitti! Room -> (${gameData.name})`);
+		if (isTie)
+			return ({ winner: 0, isTie: true });
 		if (socket.id === gameData.pLeftSocketId)
 			return ({ winner: gameData.pRightId });
 		else

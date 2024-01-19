@@ -17,6 +17,8 @@ export interface ILiveData {
 	pLeftScore?: number;
 	pRightScore?: number;
 	duration?: number;
+	winner?: number;
+	isTie?: boolean;
 }
 
 export class CreateGameDto {
