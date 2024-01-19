@@ -29,11 +29,13 @@
 }
 
 #user {
+	display: flex;
 	padding: 20px;
 	border: 1px solid #ccc;
 	border-radius: 10px;
 	margin: 5px;
 	margin-right: 0;
+	flex-direction: column;
 }
 
 #user-image {
@@ -61,6 +63,10 @@
 	border-radius: 5px;
 	color: #fff;
 	font-weight: bold;
+}
+
+#user > p {
+	margin-bottom: 0;
 }
 
 #user-image .status-indicator {
@@ -138,6 +144,7 @@
 	background-color: darkred;
 	cursor: pointer;
 	border-radius: 5px;
+	margin-top: 5px;
 }
 
 #user button:hover {
@@ -146,7 +153,6 @@
 
 #user > span {
 	display: flex;
-	margin-bottom: 5px;
     justify-content: center; /* Yatayda merkezleme */
     align-items: center; /* Dikeyde merkezleme */
 }
@@ -204,21 +210,26 @@
 
 .achievement {
 	min-width: 100px;
-	height: 80px;
+	height: 100px;
 	border: 1px solid white;
 	border-radius: 10px;
 	color: white;
-	margin-right: 10px;
+	margin-right: 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
-.icon {
-	font-size: 30px;
-	text-align: center;
+.achievement > .icon {
+	height: 50px;
+	width: 50px;
 }
 
 .title {
 	text-align: center;
-	font-size: 20px;
+	font-size: 15px;
+	white-space: normal;
 }
 
 .progress-bar {

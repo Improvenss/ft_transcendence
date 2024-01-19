@@ -77,50 +77,71 @@ function ChatPage () {
 	}, []);
 
 	useEffect(() => {
-			const handleListenDm = ({action, dmId, data}: {
-				action: ActionType,
-				dmId: number,
-				data?: any
-			}) => {
-				console.log("--->", action, dmId, data);
-				switch (action) {
-					case ActionType.NewMessage:
-						setDms((prevDms) => {
-							if (!prevDms) return prevDms;
-
-							const updatedDms = prevDms.map((dm) => {
-								if (dm.id === dmId) {
-									const updatedMessages = [...dm.messages, data];;
-									return { ...dm, messages: updatedMessages };
+		const handleListenDm = async ({action, dmId, data}: {
+			action: ActionType,
+			dmId: number,
+			data?: any
+		}) => {
+			switch (action) {
+				case ActionType.Create:
+					const response = await fetchRequest({
+						method: 'GET',
+						url: `/chat/dmpull/${dmId}`
+					});
+					if (response.ok){
+						const data = await response.json();
+						if (!data.err){
+							setDms(prevDms => {
+								if (!prevDms) return prevDms;
+								const existingDmIndex = prevDms.findIndex(dm => dm.id === dmId) ;
+								if (existingDmIndex === -1){
+									return [...prevDms, data.dm];
 								} else {
-									return dm;
+									return prevDms;
 								}
 							});
-							return updatedDms;
-						});
-						break;
-					case ActionType.Join:
-						setDms(prevDms => {
-							if (!prevDms) return prevDms;
-	
-							return [...prevDms, data];
-						});
-						break;
-					case ActionType.Leave:
-						setDms((prevDms) => prevDms?.filter((dm) => dm.id !== dmId));
-						if (activeDm?.id === dmId) {
-							setActiveDm(null);
 						}
-						break;
-					default:
-						break;
-				}
-			}
+					}
 
-			socket.on('dmListener', handleListenDm);
-			return () => {
-				socket.off(`dmListener`, handleListenDm);
+					break;
+				case ActionType.NewMessage:
+					setDms((prevDms) => {
+						if (!prevDms) return prevDms;
+
+						const updatedDms = prevDms.map((dm) => {
+							if (dm.id === dmId) {
+								const updatedMessages = [...dm.messages, data];;
+								return { ...dm, messages: updatedMessages };
+							} else {
+								return dm;
+							}
+						});
+						return updatedDms;
+					});
+					break;
+				case ActionType.Join:
+					setDms(prevDms => {
+						if (!prevDms) return prevDms;
+
+						return [...prevDms, data];
+					});
+					break;
+				case ActionType.Leave:
+					setDms((prevDms) => prevDms?.filter((dm) => dm.id !== dmId));
+					if (activeDm?.id === dmId) {
+						setActiveDm(null);
+					}
+					break;
+				default:
+					break;
 			}
+		}
+
+		socket.on('dmListener', handleListenDm);
+		return () => {
+			socket.off(`dmListener`, handleListenDm);
+		}
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [activeDm]);
 
 	useEffect(() => {
@@ -374,5 +395,4 @@ function ChatPage () {
 }
 
 export default ChatPage;
-
 

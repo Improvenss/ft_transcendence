@@ -186,8 +186,6 @@ export class GameService {
 		createGameDto: CreateGameDto
 	){
 		const	tmpUser = await this.usersService.getUserPrimary({login: login});
-		if (!tmpUser)
-			return (new NotFoundException(`User not found for GameRoom create: ${login}`));
 		const	tmpGameRoom = await this.findGameRoom(createGameDto.name);
 		const	singleRoom = Array.isArray(tmpGameRoom) ? tmpGameRoom[0] : tmpGameRoom;
 		if (singleRoom)

@@ -21,17 +21,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				console.log("I: ---Cookie Checking---");
 				const userCookie = Cookies.get("user");
 				// const userLStore = localStorage.getItem("user");
 				if (userCookie === undefined)
-					throw new Error("I: ---Cookie Not Found '❌'---");
+					throw new Error("---Cookie Not Found '❌'---");
 				const response = await fetchRequest({
 					method: 'GET',
 					url: '/users/cookie',
 				});
 				if (response.ok) {
-					console.log("I: ---Cookie Backend Connection '✅'---");
 					const data = await response.json();
 					if (!data.err){
 						console.log("AuthHook:", data);
@@ -40,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 						throw new Error(data.err);
 					}
 				} else {
-					throw new Error("I: ---Cookie Backend Connection '❌'---");
+					throw new Error("---Cookie Backend Connection '❌'---");
 				}
 			} catch (err) {
 				if (err instanceof Error) {

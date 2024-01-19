@@ -12,12 +12,44 @@ export enum UserStatus {
 	AFK = 'afk',
 }
 
+export enum AchivmentName {
+	FIRST_WIN = 'First Win',
+	FIRST_TIE = 'First Tie',
+	FIRST_LOSE = 'First Lose',
+	WIN_AGANIST_YOUR_FRIEND = 'Win Against Your Friend',
+	LEADERBOARD_CHAMPION = 'Leaderboard Champion',
+	LOSE_STREAK = 'Lose Streak',
+	WIN_STREAK = 'Win Streak'
+}
+
+const achivmentIcons: Record<AchivmentName, string> = {
+	[AchivmentName.FIRST_WIN]: 'iconFirstWin.svg',
+	[AchivmentName.FIRST_TIE]: 'iconFirstTie.svg',
+	[AchivmentName.FIRST_LOSE]: 'iconFirstLose.svg',
+	[AchivmentName.WIN_AGANIST_YOUR_FRIEND]: 'iconWinAgainstYourFriend.svg',
+	[AchivmentName.LEADERBOARD_CHAMPION]: 'iconLeaderboardChampion.svg',
+	[AchivmentName.LOSE_STREAK]: 'icon5LoserStreak.svg',
+	[AchivmentName.WIN_STREAK]: 'icon5WinStreak.svg'
+};
+
+
 // Public olarak belirtilmese dahi public olarak ele alınmaktadır.
 // @Entity({name: 'user'})
 @Entity('user')
 export class User {
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);
+
+		if (!this.achivments) {
+			this.achivments = [
+				...Object.values(AchivmentName).map(name => ({
+					name,
+					progress: 0,
+					icon: achivmentIcons[name],
+					achievedDate: null
+				})),
+			];
+		}
 	}
 
 	@PrimaryGeneratedColumn()
@@ -67,10 +99,26 @@ export class User {
 	@JoinTable()
 	public friends: User[];
 
+	//----------------------BlockUsers----------------------------//
+
+	@ManyToMany(() => User, user => user.blockUsers)
+	@JoinTable()
+	public blockUsers: User[];
+
 	//----------------------Notfis----------------------------//
 
 	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
 	public notifications: Notif[];
+
+	//----------------------Achivments----------------------------//
+
+	@Column('jsonb', { nullable: true })
+	public achivments: {
+		name: AchivmentName,
+		progress: number,
+		icon: string,
+		achievedDate?: Date
+	}[];
 
 	//----------------------Channel&Messages----------------------------//
 
@@ -103,11 +151,66 @@ export class User {
 
 	//----------------------Game-------------------------------//
 
-	@Column({ default: 0 })
-	public gamesWon: number;
+	//@Column({ default: 0 })
+	//public gamesWon: number;
 
-	@Column({ default: 0 })
-	public gamesLost: number;
+	//@Column({ default: 0 })
+	//public gamesLost: number;
+
+	@Column({default: 0})
+	public xp: number; //34324567890xp
+
+	//->get() method -> xp / .... -> kalan(progress - 1milyon xp), bölüm(level - 43lv)
+	// lv1-> 10xp, lv2->50xp, lv3-> 140xp 
+
+	/*
+	#include <iostream>
+	#include <cmath>
+
+	int nextLevel(int level);
+
+	int calculateLevel(int totalXP) {
+		int level = 1;
+		int nextLevelXP = nextLevel(level);
+
+		while (totalXP >= nextLevelXP) {
+			level++;
+			nextLevelXP = nextLevel(level);
+		}
+
+		return level - 1; // Bir önceki seviyeyi döndür
+	}
+
+	double calculatePercentage(int totalXP, int level) {
+		int currentLevelXP = nextLevel(level);
+		int nextLevelXP = nextLevel(level + 1);
+
+		double percentage = static_cast<double>(totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP) * 100;
+
+		return percentage;
+	}
+
+	// nextLevel fonksiyonunun tanımı
+	int nextLevel(int level) {
+		//return round((4 * pow(level, 3)) / 5);
+		return 500 * (pow(level, 2)) - (500 * level);
+	}
+
+	int main() {
+		// Örnek kullanım:
+		int totalXP = 0;
+
+		int level = calculateLevel(totalXP);
+		double percentage = calculatePercentage(totalXP, level);
+
+		std::cout << "Toplam XP: " << totalXP << std::endl;
+		std::cout << "Level: " << level << std::endl;
+		std::cout << "Yüzde: " << percentage << "%" << std::endl;
+
+		return 0;
+	}
+	
+	*/
 
 	@OneToMany(() => GameHistory, history => history.user, {
 		nullable: true,
@@ -116,8 +219,6 @@ export class User {
 	@JoinTable()
 	public gameHistory: GameHistory[];
 
-	// game achievementler
-	
 	// Aktif oldugu oyun odasi.
 	@Column({ nullable: true })
 	public currentRoomId: number;
@@ -132,6 +233,7 @@ export enum NotificationType {
 	SEND_FRIEND_REQUEST = 'sendFriendRequest',
 	ACCEPT_FRIEND_REQUEST = 'acceptFriendRequest',
 	DECLINE_FRIEND_REQUEST = 'declineFriendRequest',
+	UNFRIEND = 'unFriend',
 }
 
 @Entity('notification')

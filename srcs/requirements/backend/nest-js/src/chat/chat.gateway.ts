@@ -107,9 +107,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		try {
 			const messageUser = await this.usersService.getUserPrimary({id: author});
-			if (!messageUser)
-				throw new NotFoundException('User not found!');
-			//const messageDm = await this.chatService.getDmPrimary(dm);
 			const messageDm = await this.chatService.getDmRelation(dm, {members: true, messages: true});
 			if (!messageDm)
 				throw new NotFoundException('Dm not found!');
@@ -117,6 +114,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!socket.rooms.has(`dm-${dm}`)) {
 				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this dm(${dm})!`);
 				throw new Error(`user[${messageUser.login}] not in this dm(${dm})!`);
+			}
+
+			const {id, login} = messageDm.usersData.find((member) => member.id !== author);
+
+			const sourceUser = await this.usersService.getUserRelation({
+				user: {id: author},
+				relation: {blockUsers: true},
+				primary: false,
+			})
+
+			if (sourceUser.blockUsers.some((user) => user.id === id)){
+				throw new Error(`You blocked user[${login}], can't send message!`);
+			}
+			const targetUser = await this.usersService.getUserRelation({
+				user: {id: id},
+				relation: {blockUsers: true},
+				primary: false,
+			});
+			if (targetUser.blockUsers.some((user) => user.id === user.id)){
+				throw new Error(`user[${login}] blocked you, can't send message!`);
 			}
 
 			const createDmMessageDto: CreateDmMessageDto = {
@@ -130,7 +147,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			delete returnMessage.dm;
 			console.log(`Message recived: dm[${dm}] user[${messageUser.login}] content[${content}]`);
 
-			const {id} = messageDm.usersData.find((member) => member.id !== author);
 			if (!messageDm.members.find((member) => member.id === id)){
 				await this.chatService.addUserDm(messageDm.id, await this.usersService.getUserPrimary({id: id}));
 				const userSocket = this.getUserSocket(id);
@@ -181,8 +197,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		try {
 			const messageUser = await this.usersService.getUserPrimary({id: author});
-			if (!messageUser)
-				throw new NotFoundException('User not found!');
 			const messageChannel = await this.chatService.getChannelPrimary({id: channel});
 			if (!messageChannel)
 				throw new NotFoundException('Channel not found!');

@@ -18,26 +18,23 @@ export function UserProvider({children}: {children: React.ReactNode}) {
 
 	useEffect(() => {
 			const checkUser = async () => {
-				console.log("IV: ---User Checking---");
 				const response = await fetchRequest({
 					method: 'GET',
-					url: `/users?relation=notifications&relation=friends&primary=true`,
+					url: `/users?relation=notifications&relation=friends&relation=blockUsers&primary=true`,
 				});
 				if (response.ok){
-					console.log("IV: ---User Backend Connection '✅'---");
 					const data = await response.json();
 					console.log("UserHook:", data);
 					if (!data.err){
-						console.log("IV: ---User Response '✅'---");
 						setUserInfo(data);
 					} else {
-						console.log("IV: ---User Response '❌'---");
+						console.log("---User Response '❌'---");
 						console.log("UserHook Error:", data.err);
 						Cookies.remove('user');
 						setAuth(false);
 					}
 				} else {
-					console.log("IV: ---User Backend Connection '❌'---");
+					console.log("---User Backend Connection '❌'---");
 					setAuth(false);
 				}
 			}

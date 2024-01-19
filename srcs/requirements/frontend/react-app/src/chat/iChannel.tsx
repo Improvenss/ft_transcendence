@@ -36,7 +36,14 @@ export interface IUserProps{
 	nickname?: string,
 	avatar?: string,
 	friends: IUserProps[],
+	blockUsers: IUserProps[],
 	notifications: INotif[],
+	achivments: {
+		name: string,
+		progress: number,
+		icon: string,
+		achievedDate: Date,
+	}[],
 	twoFactorAuthIsEnabled: boolean,
 }
 

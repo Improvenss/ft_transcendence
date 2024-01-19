@@ -1,11 +1,8 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { Notif, NotificationType, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Socket } from 'socket.io';
-import * as fs from 'fs';
-import * as path from 'path';
 import { CreateNotifDto } from './dto/create-notifs.dto';
 import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
@@ -19,7 +16,7 @@ export class UsersService {
 	) {}
 
 	async friendRequest(
-		action: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
+		action: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
 		sourceUser: User,
 		destId: number,
 	){
@@ -34,7 +31,7 @@ export class UsersService {
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
 
-		if (targetUser.friends.some(friend => friend.id === sourceUser.id))
+		if (action !== 'unFriend' && targetUser.friends.some(friend => friend.id === sourceUser.id))
 			throw new Error('Users are already friends.');
 
 		let message = '';
@@ -62,10 +59,58 @@ export class UsersService {
 			case 'declineFriendRequest':
 				message = `${sourceUser.displayname}(${sourceUser.login}) rejected the friend request!`;
 				break;
+			case 'unFriend':
+				message = `${sourceUser.displayname}(${sourceUser.login}) is no longer friends with you.!`;
+				const requesterUser = await this.getUserRelation({
+					user: { login: sourceUser.login },
+					relation: { friends: true },
+					primary: true,
+				})
+				if (!requesterUser)
+					throw new NotFoundException('User not found!');
+
+				targetUser.friends = targetUser.friends.filter((user) => user.id !== sourceUser.id);
+				requesterUser.friends = requesterUser.friends.filter((user) => user.id !== targetUser.id);
+				await this.usersRepository.save([requesterUser, targetUser]);
+				break;
 			default:
 				break;
 		}
 		return (await this.createNotif(sourceUser.id, destId, action, message));
+	}
+
+	async blockAction(
+		action: 'block' | 'unblock',
+		sourceId: number,
+		destId: number,
+	){
+		if (sourceId === destId)
+			throw new Error("You can't perform block actions on yourself.");
+
+		const sourceUser = await this.getUserRelation({
+			user: { id: sourceId },
+			relation: { blockUsers: true },
+			primary: true,
+		})
+		if (!sourceUser)
+			throw new NotFoundException('User not found!');
+
+		const targetUser = await this.getUserPrimary({ id: destId })
+		if (!targetUser)
+			throw new NotFoundException('User not found!');
+
+		let message = '';
+		if (action === 'block'){
+			sourceUser.blockUsers = [...sourceUser.blockUsers, targetUser];
+			await this.usersRepository.save([sourceUser]);
+			message = `${sourceUser.displayname}(${sourceUser.login}) is blocked you.!`;
+		} else {
+			sourceUser.blockUsers = sourceUser.blockUsers.filter((user) => user.id !== destId);
+			await this.usersRepository.save([sourceUser]);
+			message = `${sourceUser.displayname}(${sourceUser.login}) unblocked you.!`;
+		}
+
+		return (await this.createNotif(sourceId, destId, 'text', message));
 	}
 
 	async notifsMarkRead(
@@ -91,12 +136,7 @@ export class UsersService {
 		}
 
 		const source = await this.getUserPrimary({id: sourceId});
-		if (!source)
-			throw new NotFoundException('Source user not found!');
-
 		const destination = await this.getUserPrimary({id: destId});
-		if (!destination)
-			throw new NotFoundException('Destination user not found!');
 
 		const createNotfiDto: CreateNotifDto = {
 			type: action as NotificationType,
@@ -190,25 +230,6 @@ export class UsersService {
 		return (data['currentRoom']);
 	}
 
-	// async getUserChannelRelationDetails(login: string, additionalRelations: string[] = []){
-	// 	const userRelationDetails = this.usersRepository
-	// 		.createQueryBuilder('user')
-	// 		.innerJoinAndSelect(`user.channels`, 'relation')
-
-	// 	additionalRelations.forEach((rel) => {
-	// 		userRelationDetails.leftJoinAndSelect(`relation.${rel}`, rel);
-	// 	});
-
-	// 	userRelationDetails.where('user.login = :login', { login });
-	// 	const result = await userRelationDetails.getOne();
-
-	// 	if (!result) {
-	// 		throw new NotFoundException(`User with login ${login} not found.`);
-	// 	}
-			
-	// 	return result['channels'];
-	// }
-
 	parsedRelation(relation: string[] | string): FindOptionsRelations<User> {
 		if (Array.isArray(relation)) {
 			const parsedRelation: FindOptionsRelations<User> = {};
@@ -232,7 +253,7 @@ export class UsersService {
 		id?: number,
 		login?: string,
 		socketId?: string,
-	}){
+	}, exception: boolean = true){
 		const inputSize = [id, login, socketId].filter(Boolean).length;
 		if (inputSize !== 1){
 			throw new Error('Provide exactly one of id, login, or socketId.');
@@ -245,7 +266,7 @@ export class UsersService {
 		};
 		
 		const user = await this.usersRepository.findOne({where: whereClause});
-		if (!user)
+		if (!user && exception)
 			throw new NotFoundException('User not found!');
 		return (user);
 	}
@@ -297,64 +318,6 @@ export class UsersService {
 
 		return result as User;
 	}
-
-	// async getData(
-	// 	who: {userLogin?: string, socketId?: string},
-	// 	relation?: string[] | string,
-	// 	primary?: 'true',
-	// ){
-	// 	if (!who.userLogin && !who.socketId) {
-	// 		throw new Error('Either login or socketId must be provided.');
-	// 	}
-
-	// 	if (who.userLogin && who.socketId) {
-	// 		throw new Error('Provide only one of userLogin or socketId, not both.');
-	// 	}
-
-	// 	if (typeof relation === 'string') {
-	// 		relation = [relation];
-	// 	}
-
-	// 	const whereClause = who.userLogin ? { login: who.userLogin } : { socketId: who.socketId };
-	// 	const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
-	// 	if (!data)
-	// 		throw new NotFoundException('User not found!');
-
-	// 	if (relation === undefined || primary === 'true'){
-	// 		return (data);
-	// 	}
-
-	// 	const result: Partial<User> = {};
-	// 	relation.forEach(rel => {
-	// 		if (data && data.hasOwnProperty(rel)) {
-	// 			result[rel] = data[rel];
-	// 		}
-	// 	});
-	// 	return (result as User);
-	// }
-
-	// async	findUser(
-	// 	user: string | undefined,
-	// 	socket?: Socket,
-	// 	relations?: string[] | 'all' | null,
-	// ){
-	// 	// console.log(`UserService: findUser(): relations(${typeof(relations)}): [${relations}]`);
-	// 	const relationObject = (relations === 'all')
-	// 	? {notifications: true, friends: true, channels: true, adminChannels: true, messages: true, bannedChannels: true, gameRooms: true, gameRoomsAdmin: true, gameRoomsWatcher: true} // relations all ise hepsini ata.
-	// 	: (Array.isArray(relations) // eger relations[] yani array ise hangi array'ler tanimlanmis onu ata.
-	// 		? relations.reduce((obj, relation) => ({ ...obj, [relation]: true }), {}) // burada atama gerceklesiyor.
-	// 		: (typeof(relations) === 'string' // relations array degilse sadece 1 tane string ise,
-	// 			? { [relations]: true } // sadece bunu ata.
-	// 			: null)); // hicbiri degilse null ata.
-	// 	// console.log(`UserService: findUser(): relationsObject(${typeof(relationObject)}):`, relationObject);
-	// 	const tmpUser = (user === undefined)
-	// 		? await this.usersRepository.find({relations: relationObject})
-	// 		: await this.usersRepository.findOne({
-	// 				where: {login: user, socketId: socket?.id},
-	// 				relations: relationObject
-	// 			});
-	// 	return (tmpUser);
-	// }
 
 	async	createUser(createUserDto: CreateUserDto) {
 		const user = await this.usersRepository.findOne({where: {login: createUserDto.login}});

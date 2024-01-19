@@ -40,10 +40,6 @@ export class CreateUserDto {
 	@IsString({ message: 'Avatar must be a string' })
 	avatar?: string;
 
-	// @IsOptional()
-	// @IsString({ message: 'Status must be a string' })
-	// status?: 'online' | 'offline' | 'in-chat' | 'in-game' | 'afk'
-
 	@IsOptional()
 	@IsEnum(UserStatus, { message: 'Invalid status' })
 	status?: UserStatus = UserStatus.OFFLINE;

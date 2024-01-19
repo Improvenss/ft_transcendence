@@ -28,11 +28,9 @@ export class ChatGuard implements CanActivate {
 
 			const decodedUser = this.jwtService.verify(token);
 			const tmpUser = await this.usersService.getUserPrimary({id: decodedUser.id});
-			if (!tmpUser)
-				throw (new UnauthorizedException("User not found!"));
 			const tmpChannel = await this.chatService.getChannelRelation({
 				id: request.headers.channel,
-				relation: { members: true },
+				relation: { members: true, admins: true },
 				primary: true,
 			});
 			if (!tmpChannel)

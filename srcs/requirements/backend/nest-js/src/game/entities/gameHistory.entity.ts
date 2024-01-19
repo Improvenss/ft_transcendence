@@ -15,17 +15,23 @@ export class GameHistory {
 	@ManyToOne(() => User, user => user.gameHistory)
 	user: User;
 
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	public date: Date;
+
+	@Column()
+	name: string;
+	
+	@Column()
+	rival: string;
+
 	@Column({ type: 'enum', enum: ['win', 'lose']})
 	result: 'win' | 'lose';
 
-	@IsNumber()
-	@Min(0, { message: 'Game history score must be at least 0' })
-	@Max(999, { message: 'Game history score cannot be greater than 999' })
-	@Column({ default: 0, nullable: false })
-	public score: number;
-
-	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-	public date: Date;
+	//@IsNumber()
+	//@Min(0, { message: 'Game history score must be at least 0' })
+	//@Max(999, { message: 'Game history score cannot be greater than 999' })
+	//@Column({ default: 0, nullable: false })
+	//public score: number;
 }
 
 

@@ -44,6 +44,13 @@ function InfoChannel() {
 		}
  	};
 
+	const handleSendMessage = async (userId: number) => {
+		fetchRequest({
+			method: 'POST',
+			url: `/chat/dm/${userId}`
+		});
+	}
+
 	const handleChannelRequest = async (
 		action: string,
 		targetId: number,
@@ -202,7 +209,7 @@ function InfoChannel() {
 												{user.login !== userInfo?.login && (
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
-														<button onClick={() => console.log("dm yok yaz")}> <IconDM /> </button>
+														<button onClick={() => handleSendMessage(user.id)}> <IconDM /> </button>
 														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
 													</>
 												)}
