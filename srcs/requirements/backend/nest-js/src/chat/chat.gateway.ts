@@ -279,7 +279,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		gameRoomData.duration--;
 	}
 
-	// Buradaki kontrolleri socket uzerinden user bilgisinin game odasi iliskisini alip oradan kontrol etmek lazim.
 	@SubscribeMessage(`joinGameRoom`)
 	async handleJoinGameRoom(
 		@ConnectedSocket() socket: Socket,
@@ -347,6 +346,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			{ gameRoom: string, way: string, isKeyPress: boolean})
 	{
 		const	denemeData = this.gameRoomData.get(gameRoom);
+		if (!denemeData || denemeData.pLeftSocketId || denemeData.pRightSocketId)
+			return ;
 		if (socket.id === denemeData.pLeftSocketId)
 		{
 			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
@@ -369,17 +370,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			else // false -> tustan parmagini cektiginde
 				denemeData.pRightSpeed = 0;
 		}
-		// const	returnData: ILiveData = {
-			// pLeftLocation: denemeData.pLeftLocation + denemeData.pLeftSpeed,
-			// pRightLocation: denemeData.pRightLocation + denemeData.pRightSpeed,
-			// pLeftSpeed: denemeData.pLeftSpeed,
-			// pRightSpeed: denemeData.pRightSpeed,
-		// };
-		// const nextPosData = await this.gameService.calcGameLoop({
-		// 	gameRoomData: denemeData,
-		// });
-		// console.log("TUSA BASILDI -> returnData", returnData);
-		// this.server.to(gameRoom).emit(`updateGameData:${gameRoom}`, returnData);
 	}
 
 	/**

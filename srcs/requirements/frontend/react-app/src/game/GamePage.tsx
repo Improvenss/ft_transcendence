@@ -37,11 +37,16 @@ const GamePage: React.FC = () => {
 		setModalOpen(true);
 	};
 
+	function generateUniqueRoomName(length: number) {
+		const randomNumber = Math.random().toString(36).substring(2, length + 2);
+		return (randomNumber);
+	}
+
 	const closeModal = async () => {
 		setModalOpen(false);
 		if (isModalMatching)
 		{
-			const roomName = "fast-room-" + user.userInfo.login;
+			const roomName = generateUniqueRoomName(5) + user.userInfo.login;
 			const response = await fetchRequest({
 				method: 'DELETE',
 				url: `/game/room/${roomName}`,
@@ -71,7 +76,7 @@ const GamePage: React.FC = () => {
 
 	const findMatch = async () => {
 		const	createRoomObject: IGameRoom = {
-			name: "fast-room-" + user.userInfo.login,
+			name: generateUniqueRoomName(5) + user.userInfo.login,
 			password: null,
 			mode: 'classic',
 			// mode: 0,
