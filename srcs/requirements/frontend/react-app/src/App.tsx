@@ -12,6 +12,7 @@ import GameLobby from './game/GameLobby';
 import Notification from './user/Notification';
 import Settings from './user/Settings';
 import './App.css';
+import PongGamePage from './game/pongGame/PongGamePage';
 
 function App() {
 	console.log("---------APP-PAGE---------");
@@ -50,6 +51,7 @@ function App() {
 				<Route path='/profile/:username' element={<ProfilePage />} />
 				<Route path='/chat' element={<ChatPage />} />
 				<Route path='/game' element={<GamePage />} />
+				<Route path='/game/:roomName' element={<PongGamePage />} />
 				<Route path='/game/lobby/:roomName' element={<GameLobby />} />
 				<Route path='*' element={<NoMatchPage />} />
 			</Routes>

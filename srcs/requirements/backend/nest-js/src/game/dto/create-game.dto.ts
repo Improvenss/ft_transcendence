@@ -1,10 +1,22 @@
 import { PartialType } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber, IsEnum, Max, IsPositive } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber, IsEnum, Max, IsPositive, IsBoolean, isNumber } from "class-validator";
 import { User } from "src/users/entities/user.entity";
 
-export enum GameMode {
-	classic = 'Classic',
-	teamBattle = 'Team Battle',
+export enum EGameMode {
+	classic = 'classic',
+	fastMode = 'fast-mode',
+}
+
+export interface ILiveData {
+	ballLocationX?: number;
+	ballLocationY?: number;
+	pLeftLocation?: number;
+	pRightLocation?: number;
+	pLeftSpeed?: number;
+	pRightSpeed?: number;
+	pLeftScore?: number;
+	pRightScore?: number;
+	duration?: number;
 }
 
 export class CreateGameDto {
@@ -19,8 +31,9 @@ export class CreateGameDto {
 	@IsEnum(['public', 'private'])
 	type: string;
 
-	// @IsEnum(GameMode, { message: 'Invalid game mode' })
+	@IsEnum(EGameMode, { message: 'Invalid game mode' })
 	mode: string;
+	// mode: EGameMode;
 
 	@IsNumber()
 	@IsPositive()
@@ -35,45 +48,77 @@ export class CreateGameDto {
 	@IsOptional()
 	duration?: number;
 
+	@IsBoolean()
+	@IsOptional()
+	isGameStarted?: boolean;
+
 	@IsString()
 	@IsOptional()
 	description?: string;
 
-	@IsString()
+	@IsNumber()
 	@IsOptional()
-	ballLocation?: string;
+	ballLocationX?: number;
 
 	@IsNumber()
 	@IsOptional()
-	ballSpeed?: number;
+	ballLocationY?: number;
 
-	@IsString()
+	@IsNumber()
 	@IsOptional()
-	playerLeftLocation?: string;
+	ballSpeedX?: number;
 
-	@IsString()
+	@IsNumber()
 	@IsOptional()
-	playerRightLocation?: string;
+	ballSpeedY?: number;
+
+	@IsNumber()
+	@IsOptional()
+	pLeftLocation?: number;
+
+	@IsNumber()
+	@IsOptional()
+	pRightLocation?: number;
+
+	@IsNumber()
+	@IsOptional()
+	pLeftSpeed?: number;
+
+	@IsNumber()
+	@IsOptional()
+	pRightSpeed?: number;
 
 	@IsNumber()
 	@IsInt()
 	@Min(0)
 	@IsOptional()
-	playerLeftScore?: number;
+	pLeftScore?: number;
 
 	@IsInt()
 	@IsNumber()
 	@Min(0)
 	@IsOptional()
-	playerRightScore?: number;
+	pRightScore?: number;
+
+	@IsBoolean()
+	@IsOptional()
+	public pRightIsReady?: boolean;
 
 	@IsNumber()
 	@IsOptional()
 	public pLeftId: number;
 
+	@IsString()
+	@IsOptional()
+	public pLeftSocketId: string;
+
 	@IsNumber()
 	@IsOptional()
 	public pRightId: number;
+
+	@IsString()
+	@IsOptional()
+	public pRightSocketId: string;
 
 	@IsNumber()
 	@IsOptional()

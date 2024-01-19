@@ -19,6 +19,7 @@ function CreateGame() {
 	console.log("---------CREATE-GAME---------");
 	const [roomName, setRoomName] = useState('');
 	const [gameMode, setGameMode] = useState('classic');
+	// const [gameMode, setGameMode] = useState(0); // classic
 	// const [map, setMap] = useState('classic');
 	const [winningScore, setWinningScore] = useState(configs.winningScore.default);
 	const [gameDuration, setGameDuration] = useState(configs.gameDuration.default);
@@ -61,6 +62,7 @@ function CreateGame() {
 			description: description,
 			type: password === '' ? 'public' : 'private'
 		}
+		console.log("createRoomObjrct", createRoomObject);
 		const response = await fetchRequest({
 			method: 'POST',
 			body: JSON.stringify(createRoomObject),
@@ -98,11 +100,13 @@ function CreateGame() {
 			<label htmlFor='game-mode'>Game Mode:</label>
 			<select
 				id='game-mode'
-				value={gameMode} 
+				value={gameMode}
+				// value={gameMode === 0 ? 'classic' : 'fast-mode'}
 				onChange={(e) => setGameMode(e.target.value)}
+				// onChange={(e) => setGameMode(e.target.value === 'classic' ? 0 : 1)}
 			>
 				<option value="classic">Classic</option>
-				<option value="teamBattle">Team Battle</option>
+				<option value="fast-mode">Fast Mode</option>
 			</select>
 
 			<label htmlFor='winning-score'>Winning Score:</label>

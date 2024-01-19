@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { IsEnum, IsInt, IsNumber, IsString, Max, Min, min } from 'class-validator';
-import { GameMode } from '../dto/create-game.dto';
+import { IsBoolean, IsEnum, IsInt, IsNumber, IsString, Max, Min, min } from 'class-validator';
+import { EGameMode } from '../dto/create-game.dto';
 
 @Entity('game')
 export class Game {
@@ -21,11 +21,18 @@ export class Game {
 	@Column({ length: 100, nullable: true })
 	public password: string;
 
+	@IsString()
+	@Column({ length: 30, nullable: true })
+	public description: string;
+
 	@Column({ type: 'enum', enum: ['public', 'private']})
 	public type: string;
 
-	@IsEnum(GameMode, { message: 'Invalid game mode' })
-	@Column({ type: 'enum', enum: ['classic', 'teamBattle'], nullable: false })
+	// @IsEnum(GameMode, { message: 'Invalid game mode' })
+	// @Column({ type: 'enum', enum: ['classic', 'fast-mode'], nullable: false })
+	@IsEnum(EGameMode, { message: 'Invalid Game mode' })
+	@Column({ type: 'enum', enum: EGameMode, nullable: false, default: EGameMode.classic })
+	// public mode: EGameMode;
 	public mode: string;
 
 	@IsNumber()
@@ -40,47 +47,72 @@ export class Game {
 	@Column({ default: 30, nullable: false })
 	public duration: number;
 
-	@IsString()
-	@Column({ length: 30, nullable: true })
-	public description: string;
+	@IsBoolean()
+	@Column({ nullable: true, default: false })
+	public isGameStarted: boolean;
 
 	//----------------------Game Details----------------------------//
 
-	@IsString()
-	@Column({ nullable: true })
-	public ballLocation: string;
+	@IsNumber()
+	@Column({ nullable: true, default: 500 })
+	public ballLocationX: number;
 
 	@IsNumber()
-	@Column({ default: 10})
-	public ballSpeed: number;
+	@Column({ nullable: true, default: 400 })
+	public ballLocationY: number;
 
-	@IsString()
-	@Column({ nullable: true })
-	public playerLeftLocation: string;
+	@IsNumber()
+	@Column({ nullable: true, default: 3 })
+	public ballSpeedX: number;
 
-	@IsString()
-	@Column({ nullable: true })
-	public playerRightLocation: string;
+	@IsNumber()
+	@Column({ nullable: true, default: 4 })
+	public ballSpeedY: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 340 })
+	public pLeftLocation: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 340 })
+	public pRightLocation: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 0 })
+	public pLeftSpeed: number;
+
+	@IsNumber()
+	@Column({ nullable: true, default: 0 })
+	public pRightSpeed: number;
 
 	@IsInt()
 	@IsNumber()
 	@Min(0, { message: 'Player score must be at least 0' })
 	@Column({ default: 0 })
-	public playerLeftScore: number;
+	public pLeftScore: number;
 
 	@IsInt()
 	@IsNumber()
 	@Min(0, { message: 'Player score must be at least 0' })
 	@Column({ default: 0 })
-	public playerRightScore: number;
+	public pRightScore: number;
 
 	//----------------------User----------------------------//
+
+	@Column({ nullable: true, default: false })
+	public pRightIsReady: boolean;
 
 	@Column({ nullable: true, default: 0 })
 	public pLeftId: number;
 
 	@Column({ nullable: true, default: 0 })
+	public pLeftSocketId: string;
+
+	@Column({ nullable: true, default: 0 })
 	public pRightId: number;
+
+	@Column({ nullable: true, default: 0 })
+	public pRightSocketId: string;
 
 	@Column({ nullable: true, default: 0 })
 	public adminId: number;
@@ -88,6 +120,7 @@ export class Game {
 	@OneToMany(() => User, (user) => user.currentRoom, {
 		nullable: true,
 		cascade: true,
+		onDelete: 'CASCADE'
 	})
 	public players: User[];
 }

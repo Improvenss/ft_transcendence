@@ -49,8 +49,8 @@ export class User {
 
 	//----------------------Status----------------------------//
 
+	@IsEnum(UserStatus, { message: 'Invalid User status' })
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.OFFLINE })
-	@IsEnum(UserStatus)
 	public status: UserStatus;
 
 	//----------------------Optional----------------------------//
@@ -122,7 +122,7 @@ export class User {
 	@Column({ nullable: true })
 	public currentRoomId: number;
 
-	@ManyToOne(() => Game, game => game.players)
+	@ManyToOne(() => Game, game => game.players, {onDelete: 'SET NULL'})
 	@JoinColumn({ name: 'currentRoomId' })
 	public currentRoom: Game;
 }

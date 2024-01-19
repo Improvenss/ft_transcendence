@@ -11,20 +11,10 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { Body, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { User, UserStatus } from 'src/users/entities/user.entity';
-import { Channel } from './entities/chat.entity';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
-import { UpdateUserDto } from 'src/users/dto/create-user.dto';
 import { GameService } from 'src/game/game.service';
-
-var count: number = 0;
-
-/**
- * NOTES: Sol taraftaki channel'lere tikladigimizda;
- *  https://localhost:3000/chat/#channel1 urlsine gidecek ve soket bagli degilse baglantisi yapilacak
- *  yani; joinChannel istegi.
- */
+import { Game } from 'src/game/entities/game.entity';
 
 @WebSocketGateway({ 
 	cors: {
@@ -41,6 +31,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	public connectedIds: Map<number, Socket> = new Map();
 	public connectedSockets: Map<string, number> = new Map(); //returned user id
+	// private gameRooms: Map<string, number> = new Map();
+	private gameRoomData: Map<string, Game> = new Map();
+	// private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -64,6 +57,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		await this.handleUserStatus({status: 'offline'}, client);
 		console.log(`Client disconnected 💔: socket.id[${clientId}]`);
 		const userId = this.connectedSockets.get(clientId);
+		const userData = await this.usersService.getUserRelation({
+			user: { socketId: client.id },
+			relation: { currentRoom: true },
+			primary: false,
+		});
+		if (userData.currentRoom)
+			await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
 		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
 		this.connectedSockets.delete(clientId);
 		client.disconnect(true);
@@ -249,21 +249,57 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 //------------------------------------------------------------------------
 
+	// Buradaki kontrolleri socket uzerinden user bilgisinin game odasi iliskisini alip oradan kontrol etmek lazim.
+	@SubscribeMessage(`joinGameRoom`)
+	async handleJoinGameRoom(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() data: { gameRoom: string },
+	){
+		console.log("joinGameRoom'a geldi data -> ", data);
 
-	// @SubscribeMessage('socketUpdate')
-	// handleSocketUpdate(
-	// 	@MessageBody() {userLogin, socketId}: {
-	// 		userLogin: string,
-	// 		socketId: string,
-	// 	}
-	// ){
-	// 	try {
-	// 		this.usersService.updateSocketLogin(userLogin, socketId);
-	// 		console.log(`Socket updated successfully. login[${userLogin}], socket.id[${socketId}]`);
-	// 	} catch (err) {
-	// 		console.error("@SubscribeMessage('socketUpdate'): ", err.message);
-	// 	}
-	// }
+		if (!this.gameRoomData.has(data.gameRoom))
+		{
+			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
+			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
+			this.gameRoomData.set(data.gameRoom, singleGameData);
+			console.log("Odayi backend'e aldik artik odamizin verileri backendde");
+		}
+		// if (!this.gameRoomIntervals.has(data.gameRoom))
+		// {
+		// 	console.log("Boyle bir oyun odasi olmadigi icin su an olmadi if'ine girdik");
+		// 	// const	intervalID = await this.gameService.gameLoop({
+		// 	// 	gameRoom: data.gameRoom,
+		// 	// 	gameRoomData: this.gameRoomData,
+		// 	// 	server: this.server
+		// 	// })
+		// 	// this.gameRoomIntervals.set(data.gameRoom, intervalID)
+		// }
+
+		if (!socket.rooms.has(data.gameRoom))
+		{
+			console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
+			socket.join(data.gameRoom);
+		}
+
+		// {
+			// clearInterval(this.gameRoomIntervals.get(data.gameRoom));
+			// return ;
+		// }
+	}
+
+	@SubscribeMessage('calcGameData')
+	async handleCalcGameData(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody()
+		{ gameRoom }:
+			{ gameRoom: string, }
+	){
+		const	denemeData = this.gameRoomData.get(gameRoom);
+		// console.log("denmeData", denemeData);
+		const	returnData = await this.gameService.calcGameLoop(denemeData);
+		// console.log("retunrDATA", returnData);
+		this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+	}
 
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
@@ -272,156 +308,78 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	 */
 	@SubscribeMessage('commandGameRoom')
 	async handleCommandGameRoom(
+		@ConnectedSocket() socket: Socket,
 		@MessageBody() 
-		{ gameRoom, command }:
-			{ gameRoom: string, command: string })
+		{ gameRoom, way, isKeyPress }:
+			{ gameRoom: string, way: string, isKeyPress: boolean})
 	{
-		console.log(`GAME ROOM: gelen command[${count++}]:`, command);
-		console.log('GAME ROOM: MessageBody():', {gameRoom, command});
-		this.server.to(gameRoom).emit("gameRoomCommandListener", command);
+		const	denemeData = this.gameRoomData.get(gameRoom);
+		if (socket.id === denemeData.pLeftSocketId)
+		{
+			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
+			{
+				denemeData.pLeftSpeed = -10;
+				if (way === 'DOWN')
+					denemeData.pLeftSpeed *= -1;
+			}
+			else // false -> tustan parmagini cektiginde
+				denemeData.pLeftSpeed = 0;
+		}
+		else
+		{
+			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
+			{
+				denemeData.pRightSpeed = -10;
+				if (way === 'DOWN')
+					denemeData.pRightSpeed *= -1;
+			}
+			else // false -> tustan parmagini cektiginde
+				denemeData.pRightSpeed = 0;
+		}
+		// const	returnData: ILiveData = {
+			// pLeftLocation: denemeData.pLeftLocation + denemeData.pLeftSpeed,
+			// pRightLocation: denemeData.pRightLocation + denemeData.pRightSpeed,
+			// pLeftSpeed: denemeData.pLeftSpeed,
+			// pRightSpeed: denemeData.pRightSpeed,
+		// };
+		// const nextPosData = await this.gameService.calcGameLoop({
+		// 	gameRoomData: denemeData,
+		// });
+		// console.log("TUSA BASILDI -> returnData", returnData);
+		// this.server.to(gameRoom).emit(`updateGameData:${gameRoom}`, returnData);
 	}
-
-	/**
-	 * Oyun odasini burada olusturuyoruz.
-	 * @param roomData 
-	 * @param socket 
-	 * @returns 
-	 */
-	//@SubscribeMessage('joinGameRoom')
-	//async handleJoinGameRoom(
-	//	@Body() roomData: {
-	//		name: string,
-	//	},
-	//	@ConnectedSocket() socket: Socket)
-	//{
-	//	try
-	//	{
-	//		console.log("Socket'in Game Room'a joinlenme kismi - joinRoom -");
-	//		const responseUser = await this.usersService.findUser(null, socket);
-	//		if (responseUser === null)
-	//			throw (new NotFoundException("User not found for join Game Room!"));
-	//		const singleUser = Array.isArray(responseUser) ? responseUser[0] : responseUser;
-	//		const responseRoom = await this.gameService.findGameRoom(roomData.name, ['members']);
-	//		const singleRoom = Array.isArray(responseRoom) ? responseRoom[0] : responseRoom;
-	//		if (Array.isArray(responseRoom) ? responseRoom.length === 0 : responseRoom === null)
-	//			throw (new NotFoundException("Game Room not found!"));
-	//		const	ifUserInRoom = await this.gameService.findRoomUser(singleRoom, singleUser);
-	//		if (!ifUserInRoom)
-	//			throw (new NotFoundException("User is not in Game Room!"));
-	//		else if (singleRoom !== null
-	//			&& singleRoom.name === roomData.name)
-	//		{
-	//			if (socket.rooms.has(roomData.name))
-	//				return (console.log(`[${socket.id}] alredy '${roomData.name}' room.! :)`));
-	//			socket.join(roomData.name);
-	//			if (singleUser.socketId === socket.id) {
-	//				console.log(`Room: '${roomData.name}' Joined: [${socket.id}]`);
-	//				this.server.to(roomData.name).emit('BURAYA ROOMUN MESAJ KISMINA BASTIRACAGIZ', `Room(${roomData.name}): ${socket.id} joined!`);
-	//			}
-	//		}
-	//		else
-	//			throw (new Error("Socket: 'joinGameRoom': Unexpected error!"));
-	//	}
-	//	catch (err)
-	//	{
-	//		console.error("@SubscribMessage('joinGameRoom'):", err);
-	//	}
-	//}
 
 	/**
 	 * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
-	 * @param roomData 
+	 * @param gameRoom 
 	 * @param socket 
 	 */
 	@SubscribeMessage('leaveGameRoom')
-	async handleLeaveGameRoom(@Body() roomData: any,
-		@ConnectedSocket() socket: Socket)
-	{
-		if (socket.rooms.has(roomData.name))
+	async handleLeaveGameRoom(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() data: { gameRoom: string },
+	){
+		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
 		{
 			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
-			socket.leave(roomData.name)
-			console.log(`${roomData.name} odasindan cikti: ${socket.id}`);
+			const	gameData = this.gameRoomData.get(data.gameRoom);
+			if (!gameData)
+				return ;
+			const	responseFinishData = await this.gameService.finishGameRoom({
+				socket: socket,
+				gameData: gameData,
+			});
+			this.server.to(data.gameRoom).emit('finishGameData', { action: responseFinishData.winner });
+			socket.leave(data.gameRoom)
+			const	deleteGameRoomDB = await this.gameService.deleteGameRoom(data.gameRoom);
+			const	deleteGameData = this.gameRoomData.delete(data.gameRoom);
 		}
 		else {
-
-			console.log(`${socket.id} zaten ${roomData.name} oyun odasinda degil! :D?`);
+			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 		}
 	}
 
 
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// @SubscribeMessage('leaveChannel')
-	// async handleLeaveChannel(
-	// 	@Body() channel: {
-	// 		name: string
-	// 	},
-	// 	@ConnectedSocket() socket: Socket)
-	// {
-	// 	try {
-	// 		const user = await this.usersService.getData({socketId: socket.id});
-	// 		if (socket.rooms.has(channel.name)){
-	// 			socket.leave(channel.name);
-	// 			console.log(`Channel: [${channel.name}] Leaved: [${socket.id}]`);
-	// 		}
-	// 	} catch (err) {
-	// 		console.error("@SubscribMessage('leaveChannel'):", err.message);
-	// 	}
-	// }
-
-	// @SubscribeMessage('joinChannel')
-	// async handleJoinChannel(
-	// 	@Body() channel: {
-	// 		name: string
-	// 	},
-	// 	@ConnectedSocket() socket: Socket)
-	// {
-	// 	try
-	// 	{
-	// 		// const user = await this.usersService.getData({socketId: socket.id});
-	// 		const user = await this.usersService.getUserPrimary({socketId: socket.id});
-	// 		// const tmpChannel = await this.chatService.getChannel({name: channel.name, relation: 'members'});
-	// 		const tmpChannel = await this.chatService.getChannelRelation({
-	// 			channelName: channel.name,
-	// 			relation: {
-	// 				members: true,
-	// 			},
-	// 			primary: false,
-	// 		});
-	// 		if (!tmpChannel)
-	// 			throw (new NotFoundException("Channel not found!"));
-
-	// 		if (tmpChannel.members.some((channelUser) => {channelUser.id === user.id}))
-	// 			throw (new NotFoundException("User is not in Channel!"));
-	// 		if (socket.rooms.has(channel.name))
-	// 			return (console.log(`[${socket.id}] already '${channel.name}' channel! :)`));
-	// 		socket.join(channel.name);
-	// 		if (user.socketId === socket.id) {
-	// 			console.log(`Channel: [${channel.name}] Joined: [${socket.id}]`);
-	// 			// this.server.to(channel.name).emit('BURAYA CHANNELIN MESAJ KISMINA BASTIRACAGIZ', `Channel(${channel.name}): ${socket.id} joined!`);
-	// 		}
-	// 	}
-	// 	catch (err) {
-	// 		console.error("@SubscribMessage('joinChannel'):", err.message);
-	// 	}
-	// }
-	
-
-
-	// @SubscribeMessage('markAllNotifsAsRead')
-	// async handleNotifsStatus(
-	// 	@ConnectedSocket() socket: Socket
-	// ){
-	// 	try {
-	// 		// const responseUser = await this.usersService.getData({socketId: socket.id})
-	// 		const responseUser = await this.usersService.getUserPrimary({socketId: socket.id});
-	// 		if (responseUser === null){
-	// 			throw (new NotFoundException("User not found!"));
-	// 		}
-
-	// 		await this.usersService.notifsMarkRead(responseUser.login);
-	// 	} catch (err) {
-	// 		console.error("@SubscribMessage(markAllNotifsAsRead):", err);
-	// 	}
-	// }
 }

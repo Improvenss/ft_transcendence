@@ -179,6 +179,17 @@ export class UsersService {
 		return (data['dm']);
 	}
 
+	async getUserGameRelationDetails(
+		id: number,
+		nestedRelations: string[],
+	){
+		const data = await this.usersRepository.findOne({
+			where: {id: id},
+			relations: nestedRelations, // currentRoom, currentRoom.players ...
+		});
+		return (data['currentRoom']);
+	}
+
 	// async getUserChannelRelationDetails(login: string, additionalRelations: string[] = []){
 	// 	const userRelationDetails = this.usersRepository
 	// 		.createQueryBuilder('user')

@@ -27,12 +27,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 		newSocket.on('connect', () => {
 			console.log('Client connected to Server. ✅');
 			setSocket(newSocket);
-			//--> bağlı iken backend kopup tekrar bağlanıldığında login sayfasında kalıyor, otomatik yönlendirmiyor.
 		});
 		newSocket.on('disconnect', (reason) => {
 			console.log(`Client connection lost. 💔 Reason: ${reason}`);
 			setSocket(undefined);
-			setAuth(false); // giriş yapılı haldeyken backend'in bağlantısı koparsa login'e yönlendirmek için kullanıyorum.
 		});
 		// newSocket.on('error', (error) => {
 		// 	console.error('WebSocket Error:', error);
