@@ -15,6 +15,8 @@ import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
 import { Game } from 'src/game/entities/game.entity';
+import { Cron, Interval } from '@nestjs/schedule';
+
 
 @WebSocketGateway({ 
 	cors: {
@@ -33,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	public connectedSockets: Map<string, number> = new Map(); //returned user id
 	// private gameRooms: Map<string, number> = new Map();
 	private gameRoomData: Map<string, Game> = new Map();
-	// private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
+	private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -107,9 +109,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		try {
 			const messageUser = await this.usersService.getUserPrimary({id: author});
-			if (!messageUser)
-				throw new NotFoundException('User not found!');
-			//const messageDm = await this.chatService.getDmPrimary(dm);
 			const messageDm = await this.chatService.getDmRelation(dm, {members: true, messages: true});
 			if (!messageDm)
 				throw new NotFoundException('Dm not found!');
@@ -117,6 +116,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (!socket.rooms.has(`dm-${dm}`)) {
 				console.log(`Socket[${socket.id}] - user[${messageUser.login}] not in this dm(${dm})!`);
 				throw new Error(`user[${messageUser.login}] not in this dm(${dm})!`);
+			}
+
+			const {id, login} = messageDm.usersData.find((member) => member.id !== author);
+
+			const sourceUser = await this.usersService.getUserRelation({
+				user: {id: author},
+				relation: {blockUsers: true},
+				primary: false,
+			})
+
+			if (sourceUser.blockUsers.some((user) => user.id === id)){
+				throw new Error(`You blocked user[${login}], can't send message!`);
+			}
+			const targetUser = await this.usersService.getUserRelation({
+				user: {id: id},
+				relation: {blockUsers: true},
+				primary: false,
+			});
+			if (targetUser.blockUsers.some((user) => user.id === user.id)){
+				throw new Error(`user[${login}] blocked you, can't send message!`);
 			}
 
 			const createDmMessageDto: CreateDmMessageDto = {
@@ -130,7 +149,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			delete returnMessage.dm;
 			console.log(`Message recived: dm[${dm}] user[${messageUser.login}] content[${content}]`);
 
-			const {id} = messageDm.usersData.find((member) => member.id !== author);
 			if (!messageDm.members.find((member) => member.id === id)){
 				await this.chatService.addUserDm(messageDm.id, await this.usersService.getUserPrimary({id: id}));
 				const userSocket = this.getUserSocket(id);
@@ -181,8 +199,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		try {
 			const messageUser = await this.usersService.getUserPrimary({id: author});
-			if (!messageUser)
-				throw new NotFoundException('User not found!');
 			const messageChannel = await this.chatService.getChannelPrimary({id: channel});
 			if (!messageChannel)
 				throw new NotFoundException('Channel not found!');
@@ -249,42 +265,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 //------------------------------------------------------------------------
 
-	// Buradaki kontrolleri socket uzerinden user bilgisinin game odasi iliskisini alip oradan kontrol etmek lazim.
+	// @Interval(1000)
+	async	startDuration(
+		gameRoomData: Game
+	){
+		if (!gameRoomData)
+			return ;
+		if (gameRoomData.duration <= 0)
+		{
+			clearInterval(this.gameRoomIntervals.get(gameRoomData.name));
+			return ;
+		}
+		gameRoomData.duration--;
+	}
+
 	@SubscribeMessage(`joinGameRoom`)
 	async handleJoinGameRoom(
 		@ConnectedSocket() socket: Socket,
 		@MessageBody() data: { gameRoom: string },
 	){
-		console.log("joinGameRoom'a geldi data -> ", data);
-
-		if (!this.gameRoomData.has(data.gameRoom))
-		{
-			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
-			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
-			this.gameRoomData.set(data.gameRoom, singleGameData);
-			console.log("Odayi backend'e aldik artik odamizin verileri backendde");
-		}
-		// if (!this.gameRoomIntervals.has(data.gameRoom))
-		// {
-		// 	console.log("Boyle bir oyun odasi olmadigi icin su an olmadi if'ine girdik");
-		// 	// const	intervalID = await this.gameService.gameLoop({
-		// 	// 	gameRoom: data.gameRoom,
-		// 	// 	gameRoomData: this.gameRoomData,
-		// 	// 	server: this.server
-		// 	// })
-		// 	// this.gameRoomIntervals.set(data.gameRoom, intervalID)
-		// }
-
 		if (!socket.rooms.has(data.gameRoom))
 		{
 			console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
 			socket.join(data.gameRoom);
 		}
-
-		// {
-			// clearInterval(this.gameRoomIntervals.get(data.gameRoom));
-			// return ;
-		// }
+		if (!this.gameRoomData.has(data.gameRoom))
+		{
+			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
+			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
+			this.gameRoomData.set(data.gameRoom, singleGameData);
+			if (this.gameRoomIntervals.get(data.gameRoom))
+				return ;
+			const intervalId = setInterval(() => {
+				this.startDuration(this.gameRoomData.get(data.gameRoom));
+			}, 1000);
+			this.gameRoomIntervals.set(data.gameRoom, intervalId);
+		}
 	}
 
 	@SubscribeMessage('calcGameData')
@@ -292,13 +308,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket,
 		@MessageBody()
 		{ gameRoom }:
-			{ gameRoom: string, }
+			{ gameRoom: string }
 	){
 		const	denemeData = this.gameRoomData.get(gameRoom);
-		// console.log("denmeData", denemeData);
 		const	returnData = await this.gameService.calcGameLoop(denemeData);
-		// console.log("retunrDATA", returnData);
-		this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+		if (!returnData || !returnData.winner)
+			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+		else
+		{
+			const	winnerSocket = this.connectedIds.get(returnData.winner);
+			let looserId = denemeData.pLeftId;
+			if (winnerSocket.id === denemeData.pLeftSocketId)
+				looserId = denemeData.pRightId;
+			const userData = await this.usersService.getUserRelation({
+				user: { id: looserId },
+				relation: { currentRoom: true },
+				primary: false,
+			});
+			if (userData.currentRoom)
+				await this.handleLeaveGameRoom(this.connectedIds.get(looserId), { 
+					gameRoom: userData.currentRoom.name,
+					isTie: returnData.isTie,
+				});
+		}
 	}
 
 	/**
@@ -314,6 +346,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			{ gameRoom: string, way: string, isKeyPress: boolean})
 	{
 		const	denemeData = this.gameRoomData.get(gameRoom);
+		if (!denemeData || denemeData.pLeftSocketId || denemeData.pRightSocketId)
+			return ;
 		if (socket.id === denemeData.pLeftSocketId)
 		{
 			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
@@ -336,17 +370,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			else // false -> tustan parmagini cektiginde
 				denemeData.pRightSpeed = 0;
 		}
-		// const	returnData: ILiveData = {
-			// pLeftLocation: denemeData.pLeftLocation + denemeData.pLeftSpeed,
-			// pRightLocation: denemeData.pRightLocation + denemeData.pRightSpeed,
-			// pLeftSpeed: denemeData.pLeftSpeed,
-			// pRightSpeed: denemeData.pRightSpeed,
-		// };
-		// const nextPosData = await this.gameService.calcGameLoop({
-		// 	gameRoomData: denemeData,
-		// });
-		// console.log("TUSA BASILDI -> returnData", returnData);
-		// this.server.to(gameRoom).emit(`updateGameData:${gameRoom}`, returnData);
 	}
 
 	/**
@@ -357,19 +380,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('leaveGameRoom')
 	async handleLeaveGameRoom(
 		@ConnectedSocket() socket: Socket,
-		@MessageBody() data: { gameRoom: string },
+		@MessageBody() data: { gameRoom: string, isTie?: boolean },
 	){
 		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
 		{
-			// this.server.to(roomData.name).emit('messageToClient', `Channel(${roomData.name}): ${socket.id} left the channel!`);
 			const	gameData = this.gameRoomData.get(data.gameRoom);
 			if (!gameData)
 				return ;
 			const	responseFinishData = await this.gameService.finishGameRoom({
 				socket: socket,
 				gameData: gameData,
+				isTie: data.isTie,
 			});
-			this.server.to(data.gameRoom).emit('finishGameData', { action: responseFinishData.winner });
+			this.server.to(data.gameRoom).emit('finishGameData', {
+				action: responseFinishData.winner,
+				isTie: data.isTie,
+			});
 			socket.leave(data.gameRoom)
 			const	deleteGameRoomDB = await this.gameService.deleteGameRoom(data.gameRoom);
 			const	deleteGameData = this.gameRoomData.delete(data.gameRoom);

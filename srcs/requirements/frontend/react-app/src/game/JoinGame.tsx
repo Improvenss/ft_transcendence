@@ -71,6 +71,7 @@ function JoinGame(){
 					setErrorMessage('');
 			} else {
 				console.log("Join-game:", data.err);
+				console.log("Buraya ya oyun odasindan cikmissa onu isletecegiz ya da tekrardan oyun odasina girebilme olarak yapacaagiz...");
 				setErrorMessage(data.err);
 			}
 		} else {

@@ -16,7 +16,7 @@ export interface IUser {
 
 export interface INotif {
 	id: number,
-	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest',
+	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'invite',
 	// type: string,
 	text: string,
 	date: string,
@@ -36,7 +36,26 @@ export interface IUserProps{
 	nickname?: string,
 	avatar?: string,
 	friends: IUserProps[],
+	blockUsers: IUserProps[],
 	notifications: INotif[],
+	achivments: {
+		name: string,
+		progress: number,
+		icon: string,
+		achievedDate: Date,
+	}[],
+	progression: {
+		level: number,
+		percentage: number,
+	},
+	gameHistory: {
+		id: number,
+		user: IUser,
+		date: string,
+		name: string,
+		rival: string,
+		result: 'win' | 'lose' | 'tie',
+	}[],
 	twoFactorAuthIsEnabled: boolean,
 }
 

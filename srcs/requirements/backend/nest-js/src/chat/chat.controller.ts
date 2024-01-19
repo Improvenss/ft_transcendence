@@ -83,6 +83,25 @@ export class ChatController {
 		}
 	}
 
+	@Get('/dmpull/:dmId')
+	async getDm(
+		@Req() {user}: {user: User},
+		@Param('dmId', ParseIntPipe) dmId: number,
+	){
+		try {
+			const responseDm = await this.chatService.getDmRelation(dmId, {
+				members: true,
+				messages: true,
+			});
+			if (!responseDm)
+				throw new NotFoundException('Dm not found!');
+			return { success: true, dm: responseDm };
+		} catch (err) {
+			console.error(`@Get('/dmpull/:${dmId}'): `, err.message);
+			return ({ success: false, err: err.message});
+		}
+	}
+
 	@Post('/dm/:user')
 	async createDm(
 		@Req() {user}: {user: User},
@@ -92,12 +111,16 @@ export class ChatController {
 			console.log(`${C.B_GREEN}POST: /dm/:${targetId}: source[${user.login}]${C.END}`);
 			const userSocket = this.chatGateway.getUserSocket(user.id);
 			const targetUser = await this.usersService.getUserPrimary({id: targetId});
-			
+
 			const responseDm = await this.chatService.getDm(user.id, targetId);
 			if (responseDm){
 				await this.chatService.addUserDm(responseDm.id, user);
 				userSocket.join(`dm-${responseDm.id}`);
 				console.log(`DM: user[${user.login}] joined dm[${responseDm.id}]`);
+				userSocket.emit('dmListener', {
+					action: 'create',
+					dmId: responseDm.id,
+				})
 			} else {
 				const createDmDto: CreateDmDto = {
 					usersData: [user, targetUser], //kalıcı -> unrelation
@@ -108,6 +131,10 @@ export class ChatController {
 				const response = await this.chatService.createDm(createDmDto);
 				userSocket.join(`dm-${response.id}`);
 				console.log(`DM: user[${user.login}] joined dm[${response.id}]`);
+				userSocket.emit('dmListener', {
+					action: 'create',
+					dmId: response.id,
+				})
 			}
 			return { success: true };
 		} catch (err) {
@@ -322,8 +349,6 @@ export class ChatController {
 		}
 	}
 
-	//kanaldan ayrılmak isteyen olursa, user ile userName birbirini tutuyorsa ayrılır,
-	// eğerki birisi channeldan kickliyorsa user kanalın admini olmalı ve userName ise channel'da bulunmalıdır.
 	@Delete('/channel/leave') //OK
 	@UseGuards(ChatGuard)
 	async leaveChannel(
@@ -335,6 +360,9 @@ export class ChatController {
 
 			const channelId = await this.chatService.removeUser(channel.name, 'members', user.id);
 			console.log(`${C.B_RED}Channel Leave: ${channel.name} - ${user.login}${C.END}`);
+
+			if (channel.admins.some((admin) => admin.id === user.id))
+				await this.chatService.removeUser(channel.name, 'admins', user.id);
 
 			this.chatGateway.server.to(`${channel.id}`).emit('channelListener', {
 				action: 'leave',
@@ -401,6 +429,12 @@ export class ChatController {
 		try {
 			console.log(`${C.B_YELLOW}POST: /channel/:${action}: @Req() user: [${user.login}] channel: [${channel.name}]${C.END}`);
 			const targetUser = await this.usersService.getUserPrimary({id: userId});
+
+			if (action === 'invite'){
+				const notif = await this.usersService.createNotif(user.id, userId, 'invite', `${user.login} invited you to the ${channel.name} channel.`);
+				this.chatGateway.server.emit(`user-notif:${userId}`, notif);
+				return ({ success: true });
+			}
 
 			if (action === 'kick' || action === 'ban'){
 				await this.chatService.removeUser(channel.name, 'members', userId);

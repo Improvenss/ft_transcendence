@@ -22,8 +22,8 @@ export class ApiController {
 		const origin = request.headers['origin']; //env'deki domainden başka bir url buraya erişemiyor.
 		if (origin === process.env.DOMAIN) {
 			const	URL = `https://api.intra.42.fr/oauth/authorize?client_id=\
-			${process.env.API_UID}&redirect_uri=\
-			${process.env.API_REDIR_URI}&response_type=code`;
+${process.env.API_UID}&redirect_uri=\
+${process.env.API_REDIR_URI}&response_type=code`;
 			return ({requestLogin: URL});
 		} else {
 			return { err: 'Invalid origin' };
@@ -53,13 +53,6 @@ export class ApiController {
 
 			// Burada 3/3 user(dataClient) verisini aliyoruz.
 			const dataClient = await this.apiService.fetchAccessToken(dataToken);
-
-			// 42 API'sinden alinan butun veriyi dosyaya kaydet.(opsiyonel)
-			// const path = require('path');
-			// const filename = "me_data.json";
-			// const filepath = path.join(process.cwd(), filename);
-			// console.log(`File saved this location: ${filepath}`);
-			// fs.writeFileSync(filename, JSON.stringify(dataClient, null, "\t"), 'utf-8');
 
 			const createUserDto: CreateUserDto = {
 				login: dataClient.login,

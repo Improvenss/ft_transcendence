@@ -25,13 +25,16 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: Her hata durumu için kullanıcıya bildiri gönder
  * TODO: Channel'daki veya game'deki eventleri kullancılara bildiri olarak gönder
  * TODO: eğer kullanıcı arkadaşlık isteği attıysa birdaha gönderemessin
+ * TODO: twoFA'nın css'ini düzelt.
+ * TODO: twoFA'ya enter dinleme ekle.
+ * TODO: consoldaki gereksiz çıktıları sil.
  * ----------------------------------------------------
- * TODO: profilePage'de friends bölümüne arkadaşlıktan çıkar ekle, başka birinin profiline gidincede buton olarak ekle
- * TODO: profilePage'de avatar olmasada null olarak gözüküyor
- * TODO: 2 adımlı doğrulamayı ekle
  * TODO: Game'den sonra profilePage'yi güncelle
  * TODO: Game için model/mod eklenecek
  * TODO: Oyun için level ladder ekle
+ * TODO: Settingsdeki contact ve about kısmını ekle/güncelle.
+ * TODO: game history - oynanılan oyun sayısı - kazanılan oyun sayısı - kaybedilen oyun sayısı - xp bar
+ * TODO: achivment bar
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

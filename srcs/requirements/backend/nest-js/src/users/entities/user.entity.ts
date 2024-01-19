@@ -12,12 +12,44 @@ export enum UserStatus {
 	AFK = 'afk',
 }
 
+export enum AchivmentName {
+	FIRST_WIN = 'First Win',
+	FIRST_TIE = 'First Tie',
+	FIRST_LOSE = 'First Lose',
+	WIN_AGANIST_YOUR_FRIEND = 'Win Against Your Friend',
+	LEADERBOARD_CHAMPION = 'Leaderboard Champion',
+	LOSE_STREAK = 'Lose Streak',
+	WIN_STREAK = 'Win Streak'
+}
+
+const achivmentIcons: Record<AchivmentName, string> = {
+	[AchivmentName.FIRST_WIN]: 'iconFirstWin.svg',
+	[AchivmentName.FIRST_TIE]: 'iconFirstTie.svg',
+	[AchivmentName.FIRST_LOSE]: 'iconFirstLose.svg',
+	[AchivmentName.WIN_AGANIST_YOUR_FRIEND]: 'iconWinAgainstYourFriend.svg',
+	[AchivmentName.LEADERBOARD_CHAMPION]: 'iconLeaderboardChampion.svg',
+	[AchivmentName.LOSE_STREAK]: 'icon5LoserStreak.svg',
+	[AchivmentName.WIN_STREAK]: 'icon5WinStreak.svg'
+};
+
+
 // Public olarak belirtilmese dahi public olarak ele alınmaktadır.
 // @Entity({name: 'user'})
 @Entity('user')
 export class User {
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);
+
+		if (!this.achivments) {
+			this.achivments = [
+				...Object.values(AchivmentName).map(name => ({
+					name,
+					progress: 0,
+					icon: achivmentIcons[name],
+					achievedDate: null
+				})),
+			];
+		}
 	}
 
 	@PrimaryGeneratedColumn()
@@ -67,10 +99,26 @@ export class User {
 	@JoinTable()
 	public friends: User[];
 
+	//----------------------BlockUsers----------------------------//
+
+	@ManyToMany(() => User, user => user.blockUsers)
+	@JoinTable()
+	public blockUsers: User[];
+
 	//----------------------Notfis----------------------------//
 
 	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
 	public notifications: Notif[];
+
+	//----------------------Achivments----------------------------//
+
+	@Column('jsonb', { nullable: true })
+	public achivments: {
+		name: AchivmentName,
+		progress: number,
+		icon: string,
+		achievedDate?: Date
+	}[];
 
 	//----------------------Channel&Messages----------------------------//
 
@@ -103,11 +151,42 @@ export class User {
 
 	//----------------------Game-------------------------------//
 
-	@Column({ default: 0 })
-	public gamesWon: number;
+	@Column({ type: 'integer', default: 0 })
+	public _xp: number;
 
-	@Column({ default: 0 })
-	public gamesLost: number;
+	private nextLevel(level: number): number {
+		//return round((4 * pow(level, 3)) / 5);
+        return 500 * (Math.pow(level, 2)) - (500 * level);
+    }
+
+	get xp(): {
+		level: number,
+		percentage: number,
+	}{
+		let currentXP = this._xp;
+
+		let level = 1;
+        let nextLevelXP = this.nextLevel(level);
+
+        while (currentXP >= nextLevelXP) {
+            level++;
+            nextLevelXP = this.nextLevel(level);
+        }
+
+        const currentLevelXP = this.nextLevel(level - 1);
+        nextLevelXP = this.nextLevel(level);
+
+        const percentage = (currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP) * 100;
+
+        return {
+            level: level - 1,
+            percentage: percentage
+        };
+    }
+
+	set xp(value: number){
+		this._xp = value;
+	}
 
 	@OneToMany(() => GameHistory, history => history.user, {
 		nullable: true,
@@ -116,8 +195,6 @@ export class User {
 	@JoinTable()
 	public gameHistory: GameHistory[];
 
-	// game achievementler
-	
 	// Aktif oldugu oyun odasi.
 	@Column({ nullable: true })
 	public currentRoomId: number;
@@ -132,6 +209,8 @@ export enum NotificationType {
 	SEND_FRIEND_REQUEST = 'sendFriendRequest',
 	ACCEPT_FRIEND_REQUEST = 'acceptFriendRequest',
 	DECLINE_FRIEND_REQUEST = 'declineFriendRequest',
+	UNFRIEND = 'unFriend',
+	INVITE = 'invite',
 }
 
 @Entity('notification')

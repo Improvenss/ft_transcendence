@@ -287,7 +287,7 @@ export class ChatService {
 
 	async removeUser(
 		channel: string,
-		relation: 'members' | 'bannedUsers',
+		relation: 'members' | 'bannedUsers' | 'admins',
 		userId: number
 	){
 		const tmpChannel = await this.channelRepository.findOne({ where: { name: channel }, relations: [relation]});
@@ -299,6 +299,8 @@ export class ChatService {
 			tmpChannel.members = tmpChannel.members.filter(m => m.id !== userId);
 		else if (relation === 'bannedUsers')
 			tmpChannel.bannedUsers = tmpChannel.bannedUsers.filter(m => m.id !== userId);
+		else if (relation === 'admins')
+			tmpChannel.admins = tmpChannel.admins.filter(m => m.id !== userId);
 		else
 			throw (new NotFoundException('Relation not found!'));
 

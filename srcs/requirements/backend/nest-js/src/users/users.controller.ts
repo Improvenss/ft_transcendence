@@ -179,8 +179,6 @@ export class UsersController {
 		@Param('action') action: string,
 		@Param('user') target: string,
 		@Query('notifID', ParseIntPipe) sourceNotif: number, // undefined gelmiyor bu yüzden 0 gönderiyorum
-		//@Query('action') action: 'poke' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
-		//@Query('id') sourceNotif?: number, //silmek istediğimiz notifID, onay/red sonrası arkadaşlık isteğini silmek için
 	){
 		try {
 			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${sourceNotif}]${C.END}`);
@@ -189,9 +187,6 @@ export class UsersController {
 			if (sourceNotif)
 				await this.usersService.deleteNotif(user.id, sourceNotif);
 			const targetUser = await this.usersService.getUserPrimary({login: target});
-			if (!targetUser){
-				throw new NotFoundException('User not found!');
-			}
 
 			let result : Notif;
 
@@ -199,8 +194,11 @@ export class UsersController {
 				result = await this.usersService.createNotif(user.id, targetUser.id, 'text', `${user.displayname} poked you!`);
 			else if (action === 'sendFriendRequest' ||
 					action === 'acceptFriendRequest' ||
-					action === 'declineFriendRequest')
+					action === 'declineFriendRequest' ||
+					action === 'unFriend')
 				result = await this.usersService.friendRequest(action, user, targetUser.id);
+			else if (action === 'block' || action === 'unblock')
+				result = await this.usersService.blockAction(action, user.id, targetUser.id);
 			else
 				throw new Error('Invalid action values!');
 
@@ -248,17 +246,20 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /user: who: [${who}]${C.END}`);
-			if (user.login !== who){
-				return (await this.usersService.getUserPrimary({login: who}));
-			}
 
 			const data = await this.usersService.getUserRelation({
-				user: { login: who },
-				relation: { friends: true },
-				primary: true,
-			});
-			delete data.socketId;
-			return (data);
+				user: {login: who},
+				relation: {friends: true, gameHistory: true},
+				primary: true
+			})
+			const progression = data.xp;
+			const newData = { ...data, progression };
+			delete newData.socketId;
+	
+			if (user.login !== who){
+				delete newData.friends;
+			}
+			return (newData);
 		} catch (err) {
 			console.log("@Get('/user'): ", err.message);
 			return ({ success: false, err: err.message});

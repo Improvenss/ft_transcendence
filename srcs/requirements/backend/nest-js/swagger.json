@@ -212,6 +212,26 @@
         }
       }
     },
+    "/chat/dmpull/{dmId}": {
+      "get": {
+        "operationId": "ChatController_getDm",
+        "parameters": [
+          {
+            "name": "dmId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/chat/dm/{user}": {
       "post": {
         "operationId": "ChatController_createDm",

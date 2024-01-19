@@ -30,6 +30,8 @@ interface ILiveData {
 	pLeftScore?: number;
 	pRightScore?: number;
 	duration?: number;
+	winner?: number;
+	looser?: number;
 }
 
 // interface IFinishData {
@@ -52,7 +54,9 @@ function PongGamePage() {
 	const [liveRoom, setLiveRoom] = useState<IRoom | undefined>(undefined);
 	const [liveData, setLiveData] = useState<ILiveData>();
 	const { socket } = useSocket();
+	const [winner, setWinner] = useState<number | string | undefined>(undefined);
 	const delay = 16;
+
 	useEffect(() => {
 		// const	gameListener = async ({action}:{action: string}) => {
 		const	gameListener = async () => {
@@ -94,11 +98,16 @@ function PongGamePage() {
 			socket.emit('calcGameData', { gameRoom: roomName });
 		}, delay);
 		const	handleLiveData = ({action}: {action: ILiveData}) => {
+			if (!action)
+				return ;
 			setLiveData(action);
 		}
-		const	finishGameData = ({action}: {action: number}) => {
-			console.log("OYUN BITTI USTAM kazanan ID -> ", action);
-			navigate('/', {replace: true});
+		const	finishGameData = ({action, isTie}: {action: number, isTie: boolean}) => {
+			clearInterval(intervalId);
+			setWinner(isTie ? 'tie' : action);
+			setTimeout(() => { // 5 saniye sonra /game 'ye yonlendirilecek.
+				navigate('/game', {replace: true});
+			}, 5000);
 		}
 		socket.on('updateGameData', handleLiveData);
 		socket.on('finishGameData', finishGameData);
@@ -167,9 +176,20 @@ function PongGamePage() {
 	return (
 		<div>
 			<button onClick={leaveRoom}>Leave Game Room BRUH</button>
+			<h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+				{winner === undefined
+					? `TIME: ${liveData?.duration}`
+					: winner === 'tie'
+						? 'TIME IS UP! TIE'
+						: `Winner Player ${
+							liveRoom?.pLeft.id === winner
+								? liveRoom.pLeft.login
+								: liveRoom?.pRight.login
+							}`
+				}
+			</h1>
 			<div className="Pong">
 				<div className="container">
-
 					<div className="gameField">
 						<p className="PlayerName" id="leftPlayerName">{liveRoom?.pLeft.login}</p>
 						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom?.pRight.login}</p>

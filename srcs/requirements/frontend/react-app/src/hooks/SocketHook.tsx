@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import LoadingPage from '../utils/LoadingPage';
 import { useUser } from './UserHook';
-import { useAuth } from './AuthHook';
 
 // SocketContext'i oluştur
 const SocketContext = createContext<{
@@ -16,7 +15,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 	console.log("---------SOCKETHOOK-PAGE---------");
 	const [socket, setSocket] = useState<Socket>();
 	const {userInfo} = useUser();
-	const {setAuth} = useAuth();
 
 	useEffect(() => {
 		const newSocket = io(process.env.REACT_APP_SOCKET_HOST as string, {
