@@ -63,8 +63,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			user: { socketId: client.id },
 			relation: { currentRoom: true },
 			primary: false,
-		});
-		if (userData.currentRoom)
+		}, false);
+		if (userData && userData.currentRoom)
 			await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
 		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
 		this.connectedSockets.delete(clientId);

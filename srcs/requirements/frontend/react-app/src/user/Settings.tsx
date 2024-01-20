@@ -124,6 +124,7 @@ function Settings() {
 				modalClassName='settings-modal'
 				closeButtonClassName='settings-close-button'
 			>
+				<div id='settings-modal-header'>Settings</div>
 				<div id='settings-content'>
 					<div className='settings-content-tab'>
 						<button className={`tablink ${activeTab === Tab.UserCustomize ? 'active' : ''}`} onClick={() => handleTabClick(Tab.UserCustomize)}>
@@ -210,111 +211,110 @@ function Settings() {
 					</div>
 					<div id={Tab.About} className={`tabcontent ${activeTab === Tab.About ? 'active' : ''}`}>
 						<h3>About</h3>
-						<p>Structures implemented in the project:
+						<p>Structures implemented in the project:</p>
+						<ul>
+							<li>Chat</li>
 							<ul>
-								<li>Chat</li>
-								<ul>
-									<li>Public Channels</li>
+								<li>Public Channels</li>
+									<ul>
+										<li>Every user can see this channel.</li>
+										<li>You can subscribe to the channel from the "Public Channels" tab.</li>
+									</ul>
+								<li>Private Channels</li>
+									<ul>
+										<li>You can log in only with "Join Channel".</li>
+										<li>Channel name and password must be known.</li>
+									</ul>
+								<li>Channel Create</li>
+									<ul>
+										<li>You can crate Public/Private channels.</li>
+										<li>Channel name, type and image are required.</li>
+										<li>You can determine the topic of the channel.</li>
+									</ul>
+								<li>Channel Join</li>
+									<ul>
+										<li>You can log private/public channels.</li>
+										<li>Since public channels do not require a password, you can enter the password randomly.</li>
+									</ul>
+								<li>Channel Customize</li>
+									<ul>
+										<li>You can ... users.</li>
 										<ul>
-											<li>Every user can see this channel.</li>
-											<li>You can subscribe to the channel from the "Public Channels" tab.</li>
+											<li>if admin</li>
+												<ul>
+													<li>Ban</li>
+													<li>Unban</li>
+													<li>Kick</li>
+													<li>Set Admin</li>
+													<li>Remove Admin</li>
+												</ul>
+											<li>if normal user</li>
+												<ul>
+													<li>Sending Direct Message</li>
+													<li>Sending Friend Request</li>
+													<li>Invite The Game</li>
+													<li>Go to User Profile</li>
+												</ul>
 										</ul>
-									<li>Private Channels</li>
-										<ul>
-											<li>You can log in only with "Join Channel".</li>
-											<li>Channel name and password must be known.</li>
-										</ul>
-									<li>Channel Create</li>
-										<ul>
-											<li>You can crate Public/Private channels.</li>
-											<li>Channel name, type and image are required.</li>
-											<li>You can determine the topic of the channel.</li>
-										</ul>
-									<li>Channel Join</li>
-										<ul>
-											<li>You can log private/public channels.</li>
-											<li>Since public channels do not require a password, you can enter the password randomly.</li>
-										</ul>
-									<li>Channel Customize</li>
-										<ul>
-											<li>You can ... users.</li>
+										<li>You can ... the channel.</li>
 											<ul>
 												<li>if admin</li>
 													<ul>
-														<li>Ban</li>
-														<li>Unban</li>
-														<li>Kick</li>
-														<li>Set Admin</li>
-														<li>Remove Admin</li>
+														<li>Name</li>
+														<li>Description</li>
+														<li>Image</li>
+														<li>Password</li>
+														<li>Delete</li>
 													</ul>
 												<li>if normal user</li>
 													<ul>
-														<li>Sending Direct Message</li>
-														<li>Sending Friend Request</li>
-														<li>Invite The Game</li>
-														<li>Go to User Profile</li>
+														<li>Leave</li>
 													</ul>
 											</ul>
-											<li>You can ... the channel.</li>
-												<ul>
-													<li>if admin</li>
-														<ul>
-															<li>Name</li>
-															<li>Description</li>
-															<li>Image</li>
-															<li>Password</li>
-															<li>Delete</li>
-														</ul>
-													<li>if normal user</li>
-														<ul>
-															<li>Leave</li>
-														</ul>
-												</ul>
-										</ul>
-									<li>Direct Message</li>
-										<ul>
-											<li>You can create direct message in chat-page/profile-page with "Send Message" button.</li>
-											<li>When leave the direct message, messages not removed.</li>
-										</ul>
-								</ul><br />
-								<li>Game</li>
-								<ul>
-									<li>Public Games</li>
-									<li>Private Games</li>
-									<li>Game Join</li>
-									<li>Game Customize</li>
-									<li>Matchmaking</li>
-								</ul><br />
-								<li>User</li>
-								<ul>
-									<li>Profile Page</li>
-										<ul>
-											<li>You can go to other users' and your own profile.</li>
-											<li>You can see your friends, game statistics and achievements on your profile.</li>
-											<li>You can see game statistics and achievements on other users' profiles.</li>
-											<li>You can perform friend requests, unfriends and send private messages from other users' profiles.</li>
-										</ul>
-									<li>Notification</li>
-										<ul>
-											<li>You may receive errors, inappropriate usage and informational messages.</li>
-										</ul>
-									<li>User Customize</li>
-										<ul>
-											<li>You can choose a user nickname and avatar according to your own preference.</li>
-										</ul>
-									<li>Friend List</li>
-										<ul>
-											<li>You can see your friends.</li>
-											<li>When you click on your friends, you can go to their profiles.</li>
-										</ul>
-									<li>Two-factory Authentication</li>
-										<ul>
-											<li>A two-step verification code is requested every time you log in.</li>
-											<li>It is also requested when you log out.</li>
-										</ul>
-								</ul><br />
-							</ul>
-						</p>
+									</ul>
+								<li>Direct Message</li>
+									<ul>
+										<li>You can create direct message in chat-page/profile-page with "Send Message" button.</li>
+										<li>When leave the direct message, messages not removed.</li>
+									</ul>
+							</ul><br />
+							<li>Game</li>
+							<ul>
+								<li>Public Games</li>
+								<li>Private Games</li>
+								<li>Game Join</li>
+								<li>Game Customize</li>
+								<li>Matchmaking</li>
+							</ul><br />
+							<li>User</li>
+							<ul>
+								<li>Profile Page</li>
+									<ul>
+										<li>You can go to other users' and your own profile.</li>
+										<li>You can see your friends, game statistics and achievements on your profile.</li>
+										<li>You can see game statistics and achievements on other users' profiles.</li>
+										<li>You can perform friend requests, unfriends and send private messages from other users' profiles.</li>
+									</ul>
+								<li>Notification</li>
+									<ul>
+										<li>You may receive errors, inappropriate usage and informational messages.</li>
+									</ul>
+								<li>User Customize</li>
+									<ul>
+										<li>You can choose a user nickname and avatar according to your own preference.</li>
+									</ul>
+								<li>Friend List</li>
+									<ul>
+										<li>You can see your friends.</li>
+										<li>When you click on your friends, you can go to their profiles.</li>
+									</ul>
+								<li>Two-factory Authentication</li>
+									<ul>
+										<li>A two-step verification code is requested every time you log in.</li>
+										<li>It is also requested when you log out.</li>
+									</ul>
+							</ul><br />
+						</ul>
 					</div>
 
 				</div>

@@ -281,7 +281,7 @@ export class UsersService {
 		user: {id?: number, login?: string, socketId?: string},
 		relation: FindOptionsRelations<User>,
 		primary: boolean,
-	}){
+	}, exception: boolean = true){
 		const inputSize = [user.id, user.login, user.socketId].filter(Boolean).length;
 		if (inputSize !== 1){
 			throw new Error('Provide exactly one of id, login, or socketId.');
@@ -302,7 +302,7 @@ export class UsersService {
 		};
 
 		const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
-		if (!data){
+		if (!data && exception){
 			throw new NotFoundException('User not found!');
 		}
 

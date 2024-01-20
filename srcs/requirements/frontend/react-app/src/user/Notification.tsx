@@ -112,6 +112,7 @@ function Notification() {
 				modalClassName='notif-modal'
 				closeButtonClassName='notif-close-button'
 			>
+				<div id='notifs-modal-header'>Notification</div>
 				<div id="notifs-content">
 					{notifications
 						.sort((a, b) => b.id - a.id)

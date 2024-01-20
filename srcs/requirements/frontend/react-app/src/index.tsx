@@ -33,8 +33,8 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: Game için model/mod eklenecek
  * TODO: Oyun için level ladder ekle
  * TODO: Settingsdeki contact ve about kısmını ekle/güncelle.
- * TODO: game history - oynanılan oyun sayısı - kazanılan oyun sayısı - kaybedilen oyun sayısı - xp bar
- * TODO: achivment bar
+ * TODO: lobbydeyken farklı bir yere gidince kanaldan ayrılsın
+ * TODO: loby leave'i ekle, kullanıcı kicki ekle, friend invite ekle
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

@@ -26,6 +26,15 @@
 
 /* -- Settings Content -- */
 
+#settings-modal-header {
+	text-align: center;
+	user-select: none;
+	font-size: 15px;
+	margin-bottom: -5px;
+	margin-top: -15px;
+	width: 100%;
+}
+
 #settings-content {
 	margin-top: 10px;
 	overflow-y: auto;
@@ -193,5 +202,6 @@
 	right: 10px;
 	cursor: pointer;
 	font-size: 20px;
+	z-index: 100;
 }
   

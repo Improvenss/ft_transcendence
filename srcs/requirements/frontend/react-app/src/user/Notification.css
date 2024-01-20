@@ -30,6 +30,15 @@
 
 /* -- Notif Content -- */
 
+#notifs-modal-header {
+	text-align: center;
+	user-select: none;
+	font-size: 15px;
+	margin-bottom: -5px;
+	margin-top: -15px;
+	width: 100%;
+}
+
 #notifs-content {
 	margin-top: 10px;
 	overflow-y: auto;
@@ -54,7 +63,6 @@
 
   .notification-card > p {
 	color: whitesmoke;
-
   }
 
   .notification-card > * > button:hover{
@@ -93,5 +101,6 @@
 	line-height: 0;
 	align-self: flex-end;
 	font-size: 25px;
+	z-index: 100;
   }
   
