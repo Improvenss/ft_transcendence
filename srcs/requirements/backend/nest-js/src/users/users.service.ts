@@ -1,10 +1,65 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { GameHistory, Notif, NotificationType, User } from './entities/user.entity';
+import { GameHistory, GameStatus, Notif, NotificationType, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNotifDto } from './dto/create-notifs.dto';
 import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import { CreateGameHistoryDto } from './dto/create-gameHistory.dto';
+/*
+const calculateXP = (
+	userL: {level: number, score: number},
+	userR: {level: number, score: number}
+) => {
+	let xpEarnedL: number, xpEarnedR: number;
+
+	// Skor farkını hesapla
+	let scoreDifference = Math.abs(userL.score - userR.score);
+
+	// Kazanan ve kaybedenin XP'sini hesapla
+	if (userL.score > userR.score) {
+		xpEarnedL = userL.level > userR.level ? (10 + scoreDifference) : (20 + scoreDifference);
+		xpEarnedR = 5 + scoreDifference;
+	} else if (userL.score < userR.score) {
+		xpEarnedL = 5 + scoreDifference;
+		xpEarnedR = userR.level > userL.level ? (10 + scoreDifference) : (20 + scoreDifference);
+	} else { // Beraberlik durumu
+		xpEarnedL = userL.level > userR.level ? 10 : 15;
+		xpEarnedR = userR.level > userL.level ? 10 : 15;
+	}
+
+	return ({xpEarnedL, xpEarnedR});
+};
+*/
+
+//--> Fark artınca kaybeden kişininde kazandığı xp artıyor, azalması gerek.
+const calculateXP = (
+	userL: {level: number, score: number},
+	userR: {level: number, score: number}
+) => {
+	let xpEarnedL: number, xpEarnedR: number;
+
+	// Skor ve seviye farklarını hesapla
+	let scoreDifference = Math.abs(userL.score - userR.score);
+	let levelDifference = Math.abs(userL.level - userR.level);
+
+	// Kazanan ve kaybedenin XP'sini hesapla
+	if (userL.score > userR.score) {
+		xpEarnedL = Math.max(0, userL.level > userR.level ? (10 + scoreDifference - levelDifference) : (20 + scoreDifference + levelDifference));
+		xpEarnedR = Math.max(0, 5 + scoreDifference - levelDifference);
+	} else if (userL.score < userR.score) {
+		xpEarnedL = Math.max(0, 5 + scoreDifference - levelDifference);
+		xpEarnedR = Math.max(0, userR.level > userL.level ? (10 + scoreDifference - levelDifference) : (20 + scoreDifference + levelDifference));
+	} else { // Beraberlik durumu
+		xpEarnedL = Math.max(0, userL.level > userR.level ? (10 - levelDifference) : (15 + levelDifference));
+		xpEarnedR = Math.max(0, userR.level > userL.level ? (10 - levelDifference) : (15 + levelDifference));
+	}
+	const xpFactor = 10;
+	xpEarnedL *= xpFactor;
+	xpEarnedR *= xpFactor;
+
+	return ({xpEarnedL, xpEarnedR});
+};
 
 @Injectable()
 export class UsersService {
@@ -16,6 +71,164 @@ export class UsersService {
 		@InjectRepository(GameHistory)
 		private readonly	gameHistoryRepository: Repository<GameHistory>,
 	) {}
+
+	async createGameHistory(
+		userLId: number,
+		userRId: number,
+		userLScore: number,
+		userRScore: number,
+		gameName: string,
+	){
+		const userL = await this.getUserPrimary({id: userLId});
+		const userR = await this.getUserPrimary({id: userRId});
+
+		const {xpEarnedL, xpEarnedR} = calculateXP(
+			{level: userL.xp.level, score: userLScore},
+			{level: userR.xp.level, score: userRScore}
+		);
+
+		const userLHistoryDto: CreateGameHistoryDto = {
+			user: userL,
+			date: new Date(),
+			name: gameName,
+			rival: userR.login,
+			result: ( userLScore > userRScore ? GameStatus.WIN : userLScore < userRScore ? GameStatus.LOSE : GameStatus.TIE ),
+			score: userLScore + '-' + userRScore,
+			earnedXp: xpEarnedL
+		};
+
+		const userRHistoryDto: CreateGameHistoryDto = {
+			user: userR,
+			date: new Date(),
+			name: gameName,
+			rival: userL.login,
+			result: ( userRScore > userLScore ? GameStatus.WIN : userRScore < userLScore ? GameStatus.LOSE : GameStatus.TIE ),
+			score: userRScore + '-' + userLScore,
+			earnedXp: xpEarnedR
+		};
+
+		const userLHistory = new GameHistory(userLHistoryDto);
+		const userRHistory = new GameHistory(userRHistoryDto);
+
+		//birden fazla yapı olduğu için tek bir await altında çalıştırıyoruz.
+		await Promise.all([
+			// Örnek kullanıcı güncelleme işlemi:
+			this.usersRepository.update(userL.id, { _xp: userL._xp + xpEarnedL }),
+			this.usersRepository.update(userR.id, { _xp: userR._xp + xpEarnedR }),
+			// this.usersRepository.save([userL, userR]),
+			// this.usersRepository
+			// 	.createQueryBuilder()
+			// 	.update(User)
+			// 	.set({ _xp: () => `_xp + ${xpEarnedL}` })
+			// 	.where("id IN (:...userIds)", { userIds: [userL.id, userR.id] })
+			// 	.execute(),
+			this.updateAchievements(userL, userLHistoryDto.result, userR),
+			this.updateAchievements(userR, userRHistoryDto.result, userL),
+			this.checkStreaks(userL, userLHistoryDto.result),
+			this.checkStreaks(userR, userRHistoryDto.result),
+			this.checkLeaderboardChampion(userL),
+			this.checkLeaderboardChampion(userR),
+		]);
+
+		return (await this.gameHistoryRepository.save([userLHistory, userRHistory]));
+	}
+
+	async updateAchievements(user: User, result: GameStatus, rival: User) {
+		const achievements = user.achievements;
+
+		const achievementNames = {
+			[GameStatus.WIN]: 'First Win',
+			[GameStatus.LOSE]: 'First Lose',
+			[GameStatus.TIE]: 'First Tie'
+		};
+
+		const achievement = achievements.find(a => a.name === achievementNames[result]);
+		if (achievement && achievement.achievedDate === null) {
+			achievement.progress = 100;
+			achievement.achievedDate = new Date();
+		}
+
+		const friendIds = await this.usersRepository
+			.createQueryBuilder("user")
+			.leftJoinAndSelect("user.friends", "friend")
+			.where("user.id = :id", { id: user.id })
+			.getMany()
+			.then(users => users.map(user => user.id));
+
+		if (result === GameStatus.WIN && friendIds.includes(rival.id)) {
+			const winAgainstFriendAchievement = achievements.find(a => a.name === 'Win Against Your Friend');
+			if (winAgainstFriendAchievement && winAgainstFriendAchievement.achievedDate === null) {
+				winAgainstFriendAchievement.progress = 100;
+				winAgainstFriendAchievement.achievedDate = new Date();
+			}
+		}
+
+		user.achievements = achievements;
+		await this.usersRepository.save(user);
+	}
+	
+	async checkStreaks(user: User, result: GameStatus) {
+		const achievements = user.achievements;
+	
+		// Sadece oyun id'sini ve sonucunu çeker
+		const gameHistory = await this.gameHistoryRepository.find({
+			select: ["result", "id"],
+			where: { user: { id: user.id } },
+		});
+
+		// Oyun geçmişini son oyunla başlayacak şekilde ters çevirin
+		const reversedHistory = gameHistory.reverse();
+	
+		// Ardışık kazanma veya kaybetme sayısını hesaplayın
+		let streakCount = 0;
+		for (let i = 0; i < reversedHistory.length; i++) {
+			if (reversedHistory[i].result === result) {
+				streakCount++;
+			} else {
+				break;
+			}
+		}
+	
+		// Eğer ardışık kazanma veya kaybetme sayısı belirli bir eşiği aşıyorsa, ilgili başarıyı güncelleyin
+		if (streakCount >= 5) {
+			const achievementName = result === GameStatus.WIN ? 'Win Streak' : 'Lose Streak';
+			const achievement = achievements.find(a => a.name === achievementName);
+			if (achievement && achievement.achievedDate === null) {
+				achievement.progress = 100;
+				achievement.achievedDate = new Date();
+			}
+		}
+	
+		user.achievements = achievements;
+		await this.usersRepository.save(user);
+	}
+	
+	async checkLeaderboardChampion(user: User) {
+		const achievements = user.achievements;
+	
+		// En yüksek XP'ye sahip kullanıcıyı bulun
+		const maxXPUser = await this.usersRepository
+			.createQueryBuilder("user")
+			.select(["user.id", "user._xp"])
+			.orderBy("user._xp", "DESC")
+			.getOne();
+	
+		// Eğer kullanıcı en yüksek XP'ye sahipse, ilgili başarıyı güncelleyin
+		if (user.id === maxXPUser.id) {
+			const achievement = achievements.find(a => a.name === 'Leaderboard Champion');
+			if (achievement && achievement.achievedDate === null) {
+				achievement.progress = 100;
+				achievement.achievedDate = new Date();
+			}
+		}
+	
+		user.achievements = achievements;
+		await this.usersRepository.save(user);
+	}
+
+	async gameHistorys(){
+		return (await this.gameHistoryRepository.find());
+	}
 
 	async friendRequest(
 		action: 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'unFriend',
@@ -304,8 +517,11 @@ export class UsersService {
 		};
 
 		const data = await this.usersRepository.findOne({where: whereClause, relations: relation});
-		if (!data && exception){
-			throw new NotFoundException('User not found!');
+		if (!data){
+			if (!exception)
+				return (null);
+			else
+				throw new NotFoundException('User not found!');
 		}
 
 		if (primary === true){ // default + relation
@@ -465,7 +681,6 @@ export class UsersService {
 	// }
 
 }
-
 
 /**
  * LINK: https://medium.com/@mohitu531/nestjs-7c0eb5655bde

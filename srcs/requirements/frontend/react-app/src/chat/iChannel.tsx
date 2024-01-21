@@ -38,7 +38,7 @@ export interface IUserProps{
 	friends: IUserProps[],
 	blockUsers: IUserProps[],
 	notifications: INotif[],
-	achivments: {
+	achievements: {
 		name: string,
 		progress: number,
 		icon: string,
@@ -55,6 +55,8 @@ export interface IUserProps{
 		name: string,
 		rival: string,
 		result: 'win' | 'lose' | 'tie',
+		score: string,
+		earnedXp: number,
 	}[],
 	twoFactorAuthIsEnabled: boolean,
 }

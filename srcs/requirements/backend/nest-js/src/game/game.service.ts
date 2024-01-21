@@ -23,6 +23,7 @@ export class GameService {
 		gameRoomData: Game
 	)
 	{
+		
 		const newPos = Math.floor(Math.random() * 2);
 		const moves = [
 			{ x: -4, y: -2 },

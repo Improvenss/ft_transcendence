@@ -125,7 +125,8 @@ function ProfilePage() {
 							const totalGames = userPanel.gameHistory.length;
 							const winCount = userPanel.gameHistory.filter(item => item.result === 'win').length;
 							const loseCount = userPanel.gameHistory.filter(item => item.result === 'lose').length;
-							const winRate = totalGames > 0 ? (winCount / totalGames) * 100 : 0;
+							const tieCount = userPanel.gameHistory.filter(item => item.result === 'tie').length;
+							const winRate = totalGames > 0 ? (winCount / (totalGames - tieCount || 1)) * 100 : 0;
 
 							return (
 								<>
@@ -143,7 +144,7 @@ function ProfilePage() {
 						<div className="rate">(%{userPanel.progression.percentage.toFixed(3)})</div>
 					</div>
 					<div id="achievements-container">
-						{userPanel.achivments.map((achievement, index) => (
+						{userPanel.achievements.map((achievement, index) => (
 							<div key={index} className="achievement">
 								<img className="icon" src={require('../assets/achivment/' + achievement.icon)} alt={achievement.icon}/>
 								<div className="progress-bar">
@@ -160,13 +161,20 @@ function ProfilePage() {
 						<p>Game</p>
 						<p>Rival</p>
 						<p>Status</p>
+						<p>Score</p>
+						<p>Xp</p>
 					</div>
 					{userPanel.gameHistory.map((item, index) => (
 						<div key={index} className="history-item">
-							<p>{item.date}</p>
+							<p>
+								<span>{new Date(item.date).toLocaleDateString()}</span>
+								<span>{new Date(item.date).toLocaleTimeString()}</span>
+							</p>
 							<p>{item.name}</p>
 							<p>{item.rival}</p>
 							<p>{item.result}</p>
+							<p>{item.score}</p>
+							<p>{item.earnedXp}</p>
 						</div>
 					))}
 				</div>

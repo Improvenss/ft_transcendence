@@ -39,8 +39,8 @@ export class User {
 	constructor(user: Partial<User>) {
 		Object.assign(this, user);
 
-		if (!this.achivments) {
-			this.achivments = [
+		if (!this.achievements) {
+			this.achievements = [
 				...Object.values(AchivmentName).map(name => ({
 					name,
 					progress: 0,
@@ -109,10 +109,10 @@ export class User {
 	@OneToMany(() => Notif, notification => notification.user, {cascade: true})
 	public notifications: Notif[];
 
-	//----------------------Achivments----------------------------//
+	//----------------------Achievements----------------------------//
 
 	@Column('jsonb', { nullable: true })
-	public achivments: {
+	public achievements: {
 		name: AchivmentName,
 		progress: number,
 		icon: string,
@@ -241,7 +241,6 @@ export class Notif {
 	public from: string; // Gönderen kişinin logini
 }
 
-
 export enum GameStatus {
 	WIN = 'win',
 	LOSE = 'lose',
@@ -272,6 +271,13 @@ export class GameHistory {
 
 	@Column({ type: 'enum', enum: GameStatus})
 	public result: GameStatus;
+
+	@Column()
+	public score: string;
+
+	@IsNumber()
+	@Column()
+	public earnedXp: number;
 
 	//@IsNumber()
 	//@Min(0, { message: 'Game history score must be at least 0' })
