@@ -197,9 +197,13 @@ const GameLobby = () => {
 			<h3>Duration: {lobby.duration} second</h3>
 			<Map className='map'/>
 			{(lobby.adminId === userInfo.id) ? (
-				<button className='start' onClick={() =>handleLobbyAction('start')} >{lobby.pRightIsReady ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}</button>
+				<button className='start' onClick={() =>handleLobbyAction('start')} >
+					{lobby.pRightIsReady ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}
+				</button>
 			) : (
-				<button className='ready'onClick={() => handleLobbyAction('ready')}>{lobby.pRightIsReady ? `Player Is Ready ✅` : `Player Is Unready ❌`}</button>
+				<button className='ready' onClick={() => handleLobbyAction('ready')}>
+					{lobby.pRightIsReady ? `Player Is Ready ✅` : `Player Is Unready ❌`}
+				</button>
 			)}
 		</div>
 	);

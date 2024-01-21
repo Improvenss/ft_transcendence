@@ -54,6 +54,17 @@
         }
       }
     },
+    "/users/leaderboard": {
+      "get": {
+        "operationId": "UsersController_getLeaderboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/users/notif": {
       "put": {
         "operationId": "UsersController_putNotif",

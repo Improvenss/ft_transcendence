@@ -1,8 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, JoinTable, JoinColumn, ManyToOne } from "typeorm";
 import { Channel, Dm, DmMessage, Message } from "src/chat/entities/chat.entity";
 import { Game } from "src/game/entities/game.entity";
-import { IsEmail, IsEnum } from "class-validator";
-import { GameHistory } from "src/game/entities/gameHistory.entity";
+import { IsEmail, IsEnum, IsNumber } from "class-validator";
 
 export enum UserStatus {
 	ONLINE = 'online',
@@ -241,6 +240,46 @@ export class Notif {
 	@Column()
 	public from: string; // Gönderen kişinin logini
 }
+
+
+export enum GameStatus {
+	WIN = 'win',
+	LOSE = 'lose',
+	TIE = 'tie',
+}
+
+@Entity('gameHistory')
+export class GameHistory {
+	constructor(gameHistory: Partial<GameHistory>) {
+		Object.assign(this, gameHistory);
+	}
+
+	@IsNumber()
+	@PrimaryGeneratedColumn()
+	public id: number;
+
+	@ManyToOne(() => User, user => user.gameHistory)
+	public user: User;
+
+	@Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+	public date: Date;
+
+	@Column()
+	public name: string;
+	
+	@Column()
+	public rival: string;
+
+	@Column({ type: 'enum', enum: GameStatus})
+	public result: GameStatus;
+
+	//@IsNumber()
+	//@Min(0, { message: 'Game history score must be at least 0' })
+	//@Max(999, { message: 'Game history score cannot be greater than 999' })
+	//@Column({ default: 0, nullable: false })
+	//public score: number;
+}
+
 
 /**
  * LINK: https://medium.com/@mohitu531/nestjs-7c0eb5655bde

@@ -23,6 +23,19 @@ export class UsersController {
 		private readonly jwtService: JwtService
 	) {}
 
+	@Get('/leaderboard')
+	async getLeaderboard(
+		@Req() {user}:{user: User},
+	){
+		try {
+			console.log(`${C.B_GREEN}GET: /leaderboard: user[${user.login}]${C.END}`);
+
+
+		} catch (err) {
+
+		}
+	}
+
 	@Put('/notif')
 	async putNotif(
 		@Req() {user}: {user: User},

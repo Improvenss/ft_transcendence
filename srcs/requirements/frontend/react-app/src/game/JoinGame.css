@@ -78,11 +78,21 @@
 	margin-bottom: 10px;
   }
 
+  #games > span:first-of-type {
+	background-color: #4caf50;
+	display: flex;
+	font-size: 13.3333px;
+	color: wheat;
+	border-radius: 5px 5px 0 0;
+	width: calc(100% - 5px);
+	padding-left: 5px;
+  }
+
   #game {
 	font-size: 13.3333px;
 	display: flex;
 	padding: 10px;
-	border-radius: 5px;
+	/* border-radius: 0 0 5px 5px; */
 	background-color: #4caf50;
 	color: white;
 	cursor: pointer;

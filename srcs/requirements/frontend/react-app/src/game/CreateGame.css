@@ -1,7 +1,7 @@
 /* ---- General Styling ---- */
 
 #create-game {
-	max-width: 400px;
+	width: max-content;
 	margin: 0 auto;
 	padding-top: 20px;
 	padding-bottom: 20px;

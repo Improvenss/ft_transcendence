@@ -10,7 +10,6 @@ import {useUser} from "../hooks/UserHook";
 import { IGameRoom } from './IGame';
 import fetchRequest from '../utils/fetchRequest';
 
-
 interface GameButtonProps {
 	content: string;
 	onClick: () => void;

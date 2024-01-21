@@ -15,6 +15,7 @@ import './App.css';
 import PongGamePage from './game/pongGame/PongGamePage';
 import fetchRequest from './utils/fetchRequest';
 import { useEffect } from 'react';
+import Leaderboard from './game/Leaderboard';
 
 function App() {
 	console.log("---------APP-PAGE---------");
@@ -62,7 +63,8 @@ function App() {
 			<header>
 				<nav id='app-header'>
 					<Link to='/' id="site-name" className='link'>TRANSCENDENCE</Link>
-					<Link to="/" className='link'>Home</Link>
+					{/* <Link to="/" className='link'>Home</Link> */}
+					<Link to='/leaderboard' className='link'>Leaderboard</Link>
 					<Link to="/chat" className='link'>Chat</Link>
 					<Link to="/game" className='link'>Game</Link>
 					<span onClick={logOut} className='link'>Logout</span>
@@ -78,6 +80,7 @@ function App() {
 			</header>
 			<Routes>
 				<Route path='/' element={<HomePage />} />
+				<Route path='/leaderboard' element={<Leaderboard />} />
 				<Route path='/profile/:username' element={<ProfilePage />} />
 				<Route path='/chat' element={<ChatPage />} />
 				<Route path='/game' element={<GamePage />} />

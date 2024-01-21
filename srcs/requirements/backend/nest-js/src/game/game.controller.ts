@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, UsePipes, ValidationPipe, Param, ParseBoolPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, Param, ParseBoolPipe } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -90,13 +90,13 @@ export class GameController {
 			if (relations === undefined){
 				if (Array.isArray(tmpGameRoom)) {
 					const extractedData = tmpGameRoom.map((game) => {
-						const { name, mode, type, winScore, duration } = game;
-						return { name, mode, type, winScore, duration };
+						const { name, mode, type, winScore, duration, description } = game;
+						return { name, mode, type, winScore, duration, description };
 					});
 					return extractedData;
 				}
-				const { name, mode, type, winScore, duration } = tmpGameRoom;
-				return { name, mode, type, winScore, duration };
+				const { name, mode, type, winScore, duration, description } = tmpGameRoom;
+				return { name, mode, type, winScore, duration, description };
 			}
 			return (tmpGameRoom);
 		} catch (err) {

@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Notif, NotificationType, User } from './entities/user.entity';
+import { GameHistory, Notif, NotificationType, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNotifDto } from './dto/create-notifs.dto';
@@ -13,6 +13,8 @@ export class UsersService {
 		private readonly	notifRepository: Repository<Notif>,
 		@InjectRepository(User) // Burada da Repository'i ekliyorsun buraya.
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
+		@InjectRepository(GameHistory)
+		private readonly	gameHistoryRepository: Repository<GameHistory>,
 	) {}
 
 	async friendRequest(

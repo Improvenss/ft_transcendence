@@ -33,7 +33,7 @@ function JoinGame(){
 				if (!data.err){
 					setRooms(data);
 				} else {
-
+					console.log("fecthRooms error:", data.err);
 				}
 			} else {
 				console.log("---Backend Connection '❌'---");
@@ -43,7 +43,6 @@ function JoinGame(){
 		fetchRooms();
 
 		const	roomListener = (room: IGame) => {
-			console.log("Game'nin Room listesi guncelleniyor cunku degisiklik oldu.");
 			fetchRooms();
 		}
 		socket.on("roomListener", roomListener);
@@ -114,6 +113,7 @@ function JoinGame(){
 							key={index}
 							id='games'
 						>
+							{game.description && (<span>Description: {game.description}</span>)}
 							<div
 								id="game"
 								onClick={() => {
@@ -123,6 +123,7 @@ function JoinGame(){
 										handleSubmit(game, null);
 									}
 								}}
+								style={{borderRadius: game.description ? '0 0 5px 5px' : '5px'}}
 							>
 								<span>{game.name}</span>
 								<span>{game.mode}</span>
