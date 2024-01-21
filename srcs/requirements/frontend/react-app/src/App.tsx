@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from "./home/HomePage";
 import NoMatchPage from "./utils/NoMatchPage";
 import Cookies from 'js-cookie';
@@ -13,11 +13,41 @@ import Notification from './user/Notification';
 import Settings from './user/Settings';
 import './App.css';
 import PongGamePage from './game/pongGame/PongGamePage';
+import fetchRequest from './utils/fetchRequest';
+import { useEffect } from 'react';
 
 function App() {
 	console.log("---------APP-PAGE---------");
 	const { setAuth } = useAuth();
 	const { userInfo } = useUser();
+	const location = useLocation();
+
+	useEffect(() => {
+		const handleLinkClick = async (event: any) => { 
+			const newPath = event.currentTarget.getAttribute("href");
+			const currentPath = location.pathname;
+		
+			if (currentPath.startsWith('/game/lobby/') && !newPath.startsWith('/game/lobby/')) {
+				const userConfirmed = window.confirm('Are you sure you want to leave the lobby?');
+				
+				if (!userConfirmed) {
+					event.preventDefault();
+				} else {
+					const response = await fetchRequest({
+						method: 'GET',
+						url: '/users/test'
+					});
+					console.log('Fetch Response:', response);
+				}
+			}
+		};
+
+		const navLinks = document.querySelectorAll('a.link');
+		navLinks.forEach(link => link.addEventListener('click', handleLinkClick));
+		return () => {
+		  navLinks.forEach(link => link.removeEventListener('click', handleLinkClick));
+		};
+	}, [location.pathname]);
 
 	function logOut() {
 		//localStorage.clear();

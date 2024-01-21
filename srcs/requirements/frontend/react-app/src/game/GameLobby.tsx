@@ -36,25 +36,12 @@ const GameLobby = () => {
 	const navigate = useNavigate();
 	const [isModalOpen, setModalOpen] = useState(false);
 	
-
-	// const navigationType = useNavigationType();
-	// const status = localStorage.getItem('userLoginPage');
-
-	// useEffect(() => {
-	// 	window.onbeforeunload = () => localStorage.removeItem('userLoginPage');
-	// 	return () => {
-	// 		window.onbeforeunload = null;
-	// 	};
-	// }, []);
-
-	// useEffect(() => {
-	// 	if (navigationType === 'PUSH') // Bir sayfadan diğerine "push" ile geçildi.
-	// 		localStorage.removeItem('userLoginPage');
-	// 	if (navigationType === 'REPLACE') // Bir sayfanın üzerine "replace" ile yazıldı.
-	// 		localStorage.removeItem('userLoginPage');
-	// 	if (navigationType === 'POP') // Geri düğmesine tıklandı.
-	// 		localStorage.removeItem('userLoginPage');
-	// }, [navigationType]);
+	window.onpopstate = async () => {
+		const response = await fetchRequest({
+			method: 'GET',
+			url: '/users/test'
+		});
+	}
 
 	const friends = [
 		{login: 'abc', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
@@ -62,8 +49,7 @@ const GameLobby = () => {
 		{login: 'abcdef', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
 		{login: 'abcdeff', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
 		{login: 'abcdeffd', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
-		];
-
+	];
 
 	//   if (lobby && !lobby?.playerRight) {
 	// 	lobby.playerRight = {
@@ -74,8 +60,7 @@ const GameLobby = () => {
 	// 	  imageUrl: '',
 	// 	  nickname: '',
 	// 	};
-	//   }	
-
+	//   }
 
 	useEffect(() => {
 		const lobbyListener = async ({action}: {action: string | undefined}) => {
@@ -84,7 +69,7 @@ const GameLobby = () => {
 				navigate(`/game/${roomName}`, {replace: true});
 				return ;
 			}
-// ===================================
+
 			const response = await fetchRequest({
 				method: 'GET',
 				url: `/game/room/${roomName}/true`
@@ -116,41 +101,26 @@ const GameLobby = () => {
 		return (<LoadingPage />);
 	}
 
-	const	readyForGame = async () =>{
-		const response = await fetchRequest({
-			method: 'PATCH',
-			body: JSON.stringify({
-				pRightIsReady: !lobby.pRightIsReady,
-			}),
-			url: `/game/room?room=${lobby.name}`,
-		});
-		if (response.ok){
-			const data = await response.json();
-			console.log("fetchGameRoom:", data);
-			if (!data.err){
-			} else {
-				console.log("fetchGameRoom error:", data.err);
-			}
-		} else {
-			console.log("---Backend Connection '❌'---");
-		}
-	}
-
-	const	startForGame = async () => {
-		if (!lobby.pRightIsReady)
+	const handleLobbyAction = async (action: 'ready' | 'start') => {
+		if (action === 'start' && !lobby.pRightIsReady)
 			return (console.log("You can't start right player is not ready!"));
 		const response = await fetchRequest({
 			method: 'PATCH',
-			body: JSON.stringify({
-				isGameStarted: true,
-			}),
+			body: (action === 'start' ? (
+				JSON.stringify({
+					isGameStarted: true,
+				})
+			):(
+				JSON.stringify({
+					pRightIsReady: !lobby.pRightIsReady,
+				})
+			)),
 			url: `/game/room?room=${lobby.name}`,
 		});
 		if (response.ok){
 			const data = await response.json();
 			console.log("fetchGameRoom:", data);
 			if (!data.err){
-				// socket.emit('startGame', {login: user.userInfo?.login, roomName: roomName});
 			} else {
 				console.log("fetchGameRoom error:", data.err);
 			}
@@ -159,15 +129,12 @@ const GameLobby = () => {
 		}
 	}
 
-	// Lobbye katılan kişinin admin veya user olma durumuna göre hazırım / oyunu başlat gibi yapılara sahip olması gerekmektedir.
 	return (
 		<div id='lobby'>
 			<IconLeave id='leave-lobby' title='leave' onClick={() => console.log("leave")}/>
 			<h2>Lobby #{roomName}</h2>
-			{lobby.description && (<h3>Description: {lobby.description}</h3>)}
-			<h3>Game Mode: {lobby.mode}</h3>
-			<h3>Win Score: {lobby.winScore}</h3>
-			<h3>Duration: {lobby.duration} second</h3>
+			<h2>Lobby Type: {lobby.type}</h2>
+			{lobby.description && (<h2>Description: {lobby.description}</h2>)}
 			<div className='players'>
 				{lobby.playerLeft ? (
 					<div className='leftPlayer'>
@@ -225,11 +192,14 @@ const GameLobby = () => {
 					</>
 				)}
 			</div>
+			<h3>Game Mode: {lobby.mode}</h3>
+			<h3>Win Score: {lobby.winScore}</h3>
+			<h3>Duration: {lobby.duration} second</h3>
 			<Map className='map'/>
 			{(lobby.adminId === userInfo.id) ? (
-				<button className='start' onClick={startForGame} >{lobby.pRightIsReady ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}</button>
+				<button className='start' onClick={() =>handleLobbyAction('start')} >{lobby.pRightIsReady ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}</button>
 			) : (
-				<button className='ready'onClick={readyForGame}>{lobby.pRightIsReady ? `Player Is Ready ✅` : `Player Is Unready ❌`}</button>
+				<button className='ready'onClick={() => handleLobbyAction('ready')}>{lobby.pRightIsReady ? `Player Is Ready ✅` : `Player Is Unready ❌`}</button>
 			)}
 		</div>
 	);

@@ -27,13 +27,28 @@
 	color: red;
   }
 
-  h2, h3 {
+  h2 {
+	font-size: 20px;
 	margin: 0;
 	user-select: none;
   }
 
-  h3:last-of-type {
-	margin-bottom: 30px;
+  h2:first-of-type {
+	margin-top: 10px;
+	font-size: 30px;
+  }
+
+  h2:last-of-type {
+	margin-bottom: 10px;
+  }
+
+  h3 {
+	margin: 0;
+	user-select: none;
+  }
+
+  h3:first-of-type{
+	margin-top: 30px;
   }
 
   .players {
@@ -159,7 +174,7 @@
 	border-radius: 5px;
 	position: fixed;
 	width: 96%;
-	max-height: 50%;
+	max-height: 60%;
 	display: flex;
 	flex-direction: column;
   }
@@ -178,7 +193,7 @@
 
   .map {
 	width: 200px;
-	height: 200px;
+	height: max-content;
 	user-select: none;
   }
 
