@@ -110,9 +110,12 @@ export class UsersService {
 		const userLHistory = new GameHistory(userLHistoryDto);
 		const userRHistory = new GameHistory(userRHistoryDto);
 
+		userL._xp += xpEarnedL;
+		userR._xp += xpEarnedR;
+
 		//birden fazla yapı olduğu için tek bir await altında çalıştırıyoruz.
 		await Promise.all([
-			// Örnek kullanıcı güncelleme işlemi:
+			//----------------XP save örnek--------------------------
 			this.usersRepository.update(userL.id, { _xp: userL._xp + xpEarnedL }),
 			this.usersRepository.update(userR.id, { _xp: userR._xp + xpEarnedR }),
 			// this.usersRepository.save([userL, userR]),
@@ -122,12 +125,13 @@ export class UsersService {
 			// 	.set({ _xp: () => `_xp + ${xpEarnedL}` })
 			// 	.where("id IN (:...userIds)", { userIds: [userL.id, userR.id] })
 			// 	.execute(),
+			//--------------------------------------------------------
 			this.updateAchievements(userL, userLHistoryDto.result, userR),
 			this.updateAchievements(userR, userRHistoryDto.result, userL),
-			this.checkStreaks(userL, userLHistoryDto.result),
-			this.checkStreaks(userR, userRHistoryDto.result),
-			this.checkLeaderboardChampion(userL),
-			this.checkLeaderboardChampion(userR),
+			// this.checkStreaks(userL, userLHistoryDto.result),
+			// this.checkStreaks(userR, userRHistoryDto.result),
+			// this.checkLeaderboardChampion(userL),
+			// this.checkLeaderboardChampion(userR),
 		]);
 
 		return (await this.gameHistoryRepository.save([userLHistory, userRHistory]));
@@ -148,12 +152,20 @@ export class UsersService {
 			achievement.achievedDate = new Date();
 		}
 
+		// const friendIds = await this.usersRepository
+		// 	.createQueryBuilder("user")
+		// 	.leftJoinAndSelect("user.friends", "friend")
+		// 	.where("user.id = :id", { id: user.id })
+		// 	.getMany()
+		// 	.then(users => users.flatMap(user => user.friends.map(friend => friend.id)));
+
 		const friendIds = await this.usersRepository
 			.createQueryBuilder("user")
-			.leftJoinAndSelect("user.friends", "friend")
+			.leftJoin("user.friends", "friend")
 			.where("user.id = :id", { id: user.id })
-			.getMany()
-			.then(users => users.map(user => user.id));
+			.select("friend.id", "friendId")
+			.getRawMany()
+			.then(result => result.map(row => row.friendId));
 
 		if (result === GameStatus.WIN && friendIds.includes(rival.id)) {
 			const winAgainstFriendAchievement = achievements.find(a => a.name === 'Win Against Your Friend');
@@ -162,9 +174,12 @@ export class UsersService {
 				winAgainstFriendAchievement.achievedDate = new Date();
 			}
 		}
+		await this.checkStreaks(user, result);
+		await this.checkLeaderboardChampion(user);
+		// user.achievements = achievements;
+		// await this.usersRepository.save(user);
+		await this.usersRepository.update(user.id, { achievements: achievements });
 
-		user.achievements = achievements;
-		await this.usersRepository.save(user);
 	}
 	
 	async checkStreaks(user: User, result: GameStatus) {
@@ -188,19 +203,55 @@ export class UsersService {
 				break;
 			}
 		}
-	
-		// Eğer ardışık kazanma veya kaybetme sayısı belirli bir eşiği aşıyorsa, ilgili başarıyı güncelleyin
-		if (streakCount >= 5) {
-			const achievementName = result === GameStatus.WIN ? 'Win Streak' : 'Lose Streak';
-			const achievement = achievements.find(a => a.name === achievementName);
-			if (achievement && achievement.achievedDate === null) {
-				achievement.progress = 100;
-				achievement.achievedDate = new Date();
+
+		let achievementName;
+		switch(result) {
+			case GameStatus.WIN:
+				achievementName = 'Win Streak';
+				break;
+			case GameStatus.LOSE:
+				achievementName = 'Lose Streak';
+				break;
+			case GameStatus.TIE:
+				achievementName = 'Tie Streak';
+				break;
+		}
+		const achievement = achievements.find(a => a.name === achievementName);
+		if (achievement) {
+			if (streakCount > 0) {
+				achievement.progress += 20;
+				if (achievement.progress >= 100) {
+					achievement.progress = 100;
+					achievement.achievedDate = new Date();
+				}
+			} else {
+				achievement.progress = 0;
 			}
 		}
-	
-		user.achievements = achievements;
-		await this.usersRepository.save(user);
+		
+		// if (streakCount >= 5) {
+		// 	let achievementName;
+		// 	switch(result) {
+		// 		case GameStatus.WIN:
+		// 			achievementName = 'Win Streak';
+		// 			break;
+		// 		case GameStatus.LOSE:
+		// 			achievementName = 'Lose Streak';
+		// 			break;
+		// 		case GameStatus.TIE:
+		// 			achievementName = 'Tie Streak';
+		// 			break;
+		// 	}
+		// 	const achievement = achievements.find(a => a.name === achievementName);
+		// 	if (achievement && achievement.achievedDate === null) {
+		// 		achievement.progress = 100;
+		// 		achievement.achievedDate = new Date();
+		// 	}
+		// }
+
+		// user.achievements = achievements;
+		// await this.usersRepository.save(user);
+		await this.usersRepository.update(user.id, { achievements: achievements });
 	}
 	
 	async checkLeaderboardChampion(user: User) {
@@ -222,8 +273,9 @@ export class UsersService {
 			}
 		}
 	
-		user.achievements = achievements;
-		await this.usersRepository.save(user);
+		// user.achievements = achievements;
+		// await this.usersRepository.save(user);
+		await this.usersRepository.update(user.id, { achievements: achievements });
 	}
 
 	async gameHistorys(){

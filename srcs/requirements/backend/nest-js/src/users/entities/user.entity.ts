@@ -18,7 +18,8 @@ export enum AchivmentName {
 	WIN_AGANIST_YOUR_FRIEND = 'Win Against Your Friend',
 	LEADERBOARD_CHAMPION = 'Leaderboard Champion',
 	LOSE_STREAK = 'Lose Streak',
-	WIN_STREAK = 'Win Streak'
+	WIN_STREAK = 'Win Streak',
+	TIE_STREAK = 'Tie Streak'
 }
 
 const achivmentIcons: Record<AchivmentName, string> = {
@@ -28,9 +29,9 @@ const achivmentIcons: Record<AchivmentName, string> = {
 	[AchivmentName.WIN_AGANIST_YOUR_FRIEND]: 'iconWinAgainstYourFriend.svg',
 	[AchivmentName.LEADERBOARD_CHAMPION]: 'iconLeaderboardChampion.svg',
 	[AchivmentName.LOSE_STREAK]: 'icon5LoserStreak.svg',
-	[AchivmentName.WIN_STREAK]: 'icon5WinStreak.svg'
+	[AchivmentName.WIN_STREAK]: 'icon5WinStreak.svg',
+	[AchivmentName.TIE_STREAK]: 'icon5TieStreak.svg'
 };
-
 
 // Public olarak belirtilmese dahi public olarak ele alınmaktadır.
 // @Entity({name: 'user'})

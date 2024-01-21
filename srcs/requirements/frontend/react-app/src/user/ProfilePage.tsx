@@ -164,7 +164,7 @@ function ProfilePage() {
 						<p>Score</p>
 						<p>Xp</p>
 					</div>
-					{userPanel.gameHistory.map((item, index) => (
+					{userPanel.gameHistory.slice().reverse().map((item, index) => (
 						<div key={index} className="history-item">
 							<p>
 								<span>{new Date(item.date).toLocaleDateString()}</span>

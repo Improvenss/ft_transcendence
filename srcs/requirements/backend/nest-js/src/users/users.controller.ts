@@ -29,7 +29,7 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /leaderboard: user[${user.login}]${C.END}`);
-			this.usersService.createGameHistory(user.id, user.id, 7, 5, '333');
+			// this.usersService.createGameHistory(user.id, user.id, 7, 5, '333');
 			const historys = await this.usersService.gameHistorys();
 			return ({ success: true, data: historys });
 		} catch (err) {
@@ -267,7 +267,6 @@ export class UsersController {
 				relation: {friends: true, gameHistory: true},
 				primary: true
 			})
-			console.log(data);
 			const progression = data.xp;
 			const newData = { ...data, progression };
 			delete newData.socketId;
