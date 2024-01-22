@@ -147,40 +147,36 @@ export class GameService {
 	// 		return ({ winner: gameData.pLeftId });
 	// }
 
-	// async	transferPlayer(
-	// 	{user, socket }
-	// 	: { user: User, socket: Socket }
-	// ){
-	// 	const	userGameRoom = await this.usersService.getUserGameRelationDetails(
-	// 		user.id,
-	// 		await this.getRelationNames(true)
-	// 	);
-	// 	if (!userGameRoom)
-	// 		return ;
-	// 	if (userGameRoom.players[0] && userGameRoom.players[1])
-	// 	{ // odada 2 kisi varsa
-	// 		if (userGameRoom.pLeftId === user.id) // cikan kisi soldaysa; sagdaki sola gececek
-	// 		{
-	// 			userGameRoom.pLeftId = userGameRoom.pRightId; // sagdan sola gececek.
-	// 			userGameRoom.adminId = userGameRoom.pRightId; // adminligi devredecek
-	// 			userGameRoom.pRightId = null; // kendi yerini bosaltacak.
-	// 			// userGameRoom.pLeftSocketId = socket.id; // socket.id'sini de set etmeden olmaz :D
-	// 			// userGameRoom.pRightSocketId = null;
-	// 		}
-	// 		else if (userGameRoom.pRightId === user.id) // cikan kisi sagdaysa; sadece cikacak
-	// 		{
-	// 			userGameRoom.pRightId = null;
-	// 			userGameRoom.pRightIsReady = false;
-	// 			userGameRoom.pRightSocketId = null;
-	// 		}
-	// 		userGameRoom.players = userGameRoom.players.filter(player => player.id !== user.id); // bu transfer edilen user'i de players[]'den kaldiriyoruz.
-	// 		return (await this.gameRepository.save(userGameRoom)); // eski guncellenmis odayi kaydet.
-	// 	}
-	// 	else if (userGameRoom.players.length <= 1)
-	// 	{ // odada 1 kisi var kanal silinecek.
-	// 		return (await this.deleteGameRoom(userGameRoom.name));
-	// 	}
-	// }
+	async	transferPlayer(
+		{user}
+		: { user: User }
+	){
+		const	userGameRoom = await this.usersService.getUserGameRelationDetails(
+			user.id,
+			await this.getRelationNames(true)
+		);
+		if (!userGameRoom)
+			return ;
+		if (userGameRoom.players[0] && userGameRoom.players[1])
+		{ // odada 2 kisi varsa
+			if (userGameRoom.playerL.user.id === user.id) // cikan kisi soldaysa; sagdaki sola gececek
+			{
+				userGameRoom.playerL.user = userGameRoom.playerR.user; // sagdan sola gececek.
+				userGameRoom.playerR.user = null; // kendi yerini bosaltacak.
+			}
+			else if (userGameRoom.playerR.user.id === user.id) // cikan kisi sagdaysa; sadece cikacak
+			{
+				userGameRoom.playerR.user = null;
+				userGameRoom.playerR.ready = false;
+			}
+			userGameRoom.players = userGameRoom.players.filter(player => player.id !== user.id); // bu transfer edilen user'i de players[]'den kaldiriyoruz.
+			return (await this.gameRepository.save(userGameRoom)); // eski guncellenmis odayi kaydet.
+		}
+		else if (userGameRoom.players.length <= 1)
+		{ // odada 1 kisi var kanal silinecek.
+			return (await this.deleteGameRoom(userGameRoom.name));
+		}
+	}
 
 	async	createGameRoom(
 		login: string,
@@ -344,22 +340,16 @@ export class GameService {
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
 			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
-		// if (await this.isRoomUser(singleRoom, user))
-		// 	throw (new Error(`User '${user.login}' already in this room[${singleRoom.name}].`), {
-		// 		status: 5 // 5 -> kendim salladim -> eger 5 ise lobby ekranina tekrar baglanabilsin.
-		// 	});
 		if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
 			throw (new Error("Password is WRONG!!!"));
 		if (singleRoom.players.length >= 2)
 			throw (new Error("Game Room is full!"));
-		// await this.transferPlayer({ user: user, socket: socket}); // old - new game room
-		console.log("single before:", singleRoom);
+		await this.transferPlayer({ user: user }); // old - new game room
+		if (singleRoom.players.length <= 1)
+			if (singleRoom.players[0])
+				singleRoom.playerR.user = user;
 		singleRoom.players.push(user);
-		console.log("single after:", singleRoom);	
-		// const	responseUpdateLobby = await this.gameRepository.update(singleRoom.id, { players: singleRoom.players });
-		const	responseUpdateLobby = await this.gameRepository.save(singleRoom);
-		console.log("resaponse", responseUpdateLobby);
-		return (responseUpdateLobby);
+		return (await this.gameRepository.save(singleRoom));
 	}
 
 	/**
@@ -385,19 +375,18 @@ export class GameService {
 		return (tmpGameRooms);
 	}
 
-	// async	leaveGameLobby(
-	// 	{ room, user, socket, }: {
-	// 		room: string,
-	// 		user: User,
-	// 		socket?: Socket,
-	// 	}
-	// ){
-	// 	const	gameLobby = await this.getGamePrimary({ name: room });
-	// 	if (!gameLobby)
-	// 		throw (new NotFoundException(`Game Lobby not found: ${room}`));
-	// 	const	gameLobbyAfterTransfer = await this.transferPlayer({ user: user, socket: socket });
-	// 	return (gameLobbyAfterTransfer);
-	// }
+	async	leaveGameLobby(
+		{ room, user, }: {
+			room: string,
+			user: User,
+		}
+	){
+		const	gameLobby = await this.getGamePrimary({ name: room });
+		if (!gameLobby)
+			throw (new NotFoundException(`Game Lobby not found: ${room}`));
+		const	gameLobbyAfterTransfer = await this.transferPlayer({ user: user });
+		return (gameLobbyAfterTransfer);
+	}
 
 	/**
 	 * PUT kaynagin tamamini degistirmek icin kullanilir.

@@ -52,6 +52,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.connectedIds.set(userId, client);
 		this.connectedSockets.set(clientId, userId);
 		await this.usersService.updateUser({id: userId, socketId: clientId});
+		const	userData = await this.usersService.getUserRelation({
+			user: { id: userId },
+			relation: { currentRoom: true },
+			primary: false,
+		}, false);
+		if (userData && userData.currentRoom)
+		{
+			// const	{ playerL, playerR } = { playerL: }
+			// if (userData.currentRoom.playerL.user.id === userData.id)
+			// 	await this.gameService.patchGameRoom(userData.currentRoom.name, {
+			// 		playerL: userData
+			// 	})
+
+			// burada kaldik
+		}
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -59,13 +74,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		await this.handleUserStatus({status: 'offline'}, client);
 		console.log(`Client disconnected 💔: socket.id[${clientId}]`);
 		const userId = this.connectedSockets.get(clientId);
-		// const userData = await this.usersService.getUserRelation({
-		// 	user: { socketId: client.id },
-		// 	relation: { currentRoom: true },
-		// 	primary: false,
-		// }, false);
-		// if (userData && userData.currentRoom)
-		// 	await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
+		const userData = await this.usersService.getUserRelation({
+			user: { socketId: client.id },
+			relation: { currentRoom: true },
+			primary: false,
+		}, false);
+		if (userData && userData.currentRoom)
+			await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
 		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
 		this.connectedSockets.delete(clientId);
 		client.disconnect(true);
@@ -373,38 +388,38 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	// 	}
 	// }
 
-	// /**
-	//  * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
-	//  * @param gameRoom 
-	//  * @param socket 
-	//  */
-	// @SubscribeMessage('leaveGameRoom')
-	// async handleLeaveGameRoom(
-	// 	@ConnectedSocket() socket: Socket,
-	// 	@MessageBody() data: { gameRoom: string, isTie?: boolean },
-	// ){
-	// 	if (!data || !data.gameRoom)
-	// 		return ;
-	// 	if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
-	// 	{
-	// 		const	gameData = this.gameRoomData.get(data.gameRoom);
-	// 		if (!gameData)
-	// 			return ;
-	// 		const	responseFinishData = await this.gameService.finishGameRoom({
-	// 			socket: socket,
-	// 			gameData: gameData,
-	// 			isTie: data.isTie,
-	// 		});
-	// 		this.server.to(data.gameRoom).emit('finishGameData', {
-	// 			action: responseFinishData.winner,
-	// 			isTie: data.isTie,
-	// 		});
-	// 		socket.leave(data.gameRoom)
-	// 		const	deleteGameRoomDB = await this.gameService.deleteGameRoom(data.gameRoom);
-	// 		const	deleteGameData = this.gameRoomData.delete(data.gameRoom);
-	// 	}
-	// 	else {
-	// 		console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
-	// 	}
-	// }
+	/**
+	 * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
+	 * @param gameRoom 
+	 * @param socket 
+	 */
+	@SubscribeMessage('leaveGameRoom')
+	async handleLeaveGameRoom(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() data: { gameRoom: string, isTie?: boolean },
+	){
+		if (!data || !data.gameRoom)
+			return ;
+		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
+		{
+			const	gameData = this.gameRoomData.get(data.gameRoom);
+			if (!gameData)
+				return ;
+			// const	responseFinishData = await this.gameService.finishGameRoom({
+			// 	socket: socket,
+			// 	gameData: gameData,
+			// 	isTie: data.isTie,
+			// });
+			// this.server.to(data.gameRoom).emit('finishGameData', {
+			// 	action: responseFinishData.winner,
+			// 	isTie: data.isTie,
+			// });
+			socket.leave(data.gameRoom)
+			const	deleteGameRoomDB = await this.gameService.deleteGameRoom(data.gameRoom);
+			const	deleteGameData = this.gameRoomData.delete(data.gameRoom);
+		}
+		else {
+			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
+		}
+	}
 }

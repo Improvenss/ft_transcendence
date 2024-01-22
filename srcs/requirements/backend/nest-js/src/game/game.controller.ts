@@ -24,7 +24,7 @@ export class GameController {
 		@Param('lobby', ParseBoolPipe) lobby: boolean,
 	){
 		try {
-			console.log(`${C.B_GREEN}GET: /room/:${name}: user[${user.login}]${C.END}`);
+			console.log(`${C.B_GREEN}GET: /game/room/:${name}: user[${user.login}]${C.END}`);
 			const game = await this.gameService.getGameRelation({
 				name: name,
 				relation: {},
@@ -42,49 +42,20 @@ export class GameController {
 			delete game.password;
 			return (game);
 		} catch (err){
-			console.log(`@Get('/room/:${name}`, err.message);
+			console.log(`@Get('/game/room/:${name}`, err.message);
 			return ({ success: false, err: err.message});
 		}
 	}
-
-	// @Get('/lobby/:name')
-	// async getGameLobby(
-	// 	@Req() {user}:{user: User},
-	// 	@Param('name') name: string,
-	// ){
-	// 	try {
-	// 		console.log(`${C.B_GREEN}GET: /lobby/:${name}: user[${user.login}]${C.END}`);
-	// 		const game = await this.gameService.getGameRelation({
-	// 			name: name,
-	// 			relation: {},
-	// 			primary: true
-	// 		});
-	// 		if (!game)
-	// 			throw new NotFoundException(`Game[${name}] not found!`);
-
-	// 		if (!game.players.some((player) => player.id === user.id)) {
-	// 			throw new NotFoundException(`User not found in game[${name}]`);
-	// 		}
-	// 		// if (!(user.id === game.pLeftId || user.id === game.pRightId)
-	// 			if (game.isGameStarted)
-	// 			throw (new Error(`Game started. You can't enter lobby(${name})!`));
-	// 		delete game.password;
-	// 		return (game);
-	// 	} catch (err){
-	// 		console.log(`@Get('/lobby/:${name}`, err.message);
-	// 		return ({ success: false, err: err.message});
-	// 	}
-	// }
 
 	// Get Game Room
 	@Get('/room')
 	async	getGameRooms(
 		@Req() {user}:{user: User},
 		@Query('room') room: string | undefined,
-		@Query('relations') relations: string[] | undefined | 'all', //silinecek
+		@Query('relations') relations: string[] | undefined | 'all',
 	){
 		try {
-			console.log(`${C.B_GREEN}GET: /room: @Query('room'): [${room}], @Query('relations'): [${relations}]${C.END}`);
+			console.log(`${C.B_GREEN}GET: /game/room: @Query('room'): [${room}], @Query('relations'): [${relations}]${C.END}`);
 			const	tmpGameRoom = await this.gameService.findGameRoom(room, relations);
 			if (!tmpGameRoom)
 				return (`There is no GameRoom with '${room}' name`);
@@ -102,7 +73,7 @@ export class GameController {
 			}
 			return (tmpGameRoom);
 		} catch (err) {
-			console.log("@Get('/room'): ", err);
+			console.log("@Get('/game/room'): ", err);
 			return ({ success: false, err: err});
 		}
 	}
@@ -114,7 +85,7 @@ export class GameController {
 	){
 		try
 		{
-			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
+			console.log(`${C.B_YELLOW}POST: /game/room/register: @Body(): [${body}]${C.END}`);
 			const	responseRoom = await this.gameService.addGameRoomUser(user, body);
 			this.chatGateway.server.emit(`lobbyListener:${body.room}`, responseRoom);
 			const	socket = this.chatGateway.getUserSocket(user.id);
@@ -123,7 +94,7 @@ export class GameController {
 		}
 		catch (err)
 		{
-			console.error("@Post('/channel/register'): registerChannel:", err.message);
+			console.error("@Post('/game/room/register'): registerGameRoom:", err.message);
 			return ({err: err.message, status: err.status});
 		}
 	}
@@ -137,14 +108,14 @@ export class GameController {
 	){
 		try
 		{
-			console.log(`${C.B_YELLOW}POST: /room: @Body(): ${C.END}`, body);
+			console.log(`${C.B_YELLOW}POST: /game/room: @Body(): ${C.END}`, body);
 			const	socket = this.chatGateway.getUserSocket(user.id);
 			const	newGameRoom = await this.gameService.createGameRoom(user.login, body, socket);
 			return ({response: newGameRoom});
 		}
 		catch (err)
 		{
-			console.log("@Post('/room'): ", err);
+			console.log("@Post('/game/room'): ", err);
 			return ({err: err});
 		}
 	}
@@ -159,7 +130,7 @@ export class GameController {
 		try
 		{
 			// Admin harici bir seyleri degistirmeyi engelleme yapilabilinir. Yani admin kontrolu. (user)
-			console.log(`${C.B_PURPLE}PATCH: /room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
+			console.log(`${C.B_PURPLE}PATCH: /game/room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
 			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
 			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
 			if (singleRoom.isGameStarted)
@@ -170,28 +141,28 @@ export class GameController {
 		}
 		catch (err)
 		{
-			console.log("@Patch('/room'): ", err.message);
+			console.log("@Patch('/game/room'): ", err.message);
 			return ({ err: err.message });
 		}
 	}
 
-	// @Delete('/room/leave')
-	// async	leaveGameLobby(
-	// 	@Req() { user },
-	// 	@Query('room') room: string | undefined,
-	// ){
-	// 	try {
-	// 		console.log(`${C.B_RED}DELETE: /room/leave/:room: @Query('room'): [${room}]${C.END}`);
-	// 		const	responseLeaveGameLobby = await this.gameService.leaveGameLobby({
-	// 			room: room,
-	// 			user: user,
-	// 		});
-	// 		return (responseLeaveGameLobby);
-	// 	} catch (err) {
-	// 		console.log("@Delete('/room/leave'): ", err.message);
-	// 		return ({ err: err.message });
-	// 	}
-	// }
+	@Delete('/room/leave')
+	async	leaveGameLobby(
+		@Req() { user },
+		@Query('room') room: string | undefined,
+	){
+		try {
+			console.log(`${C.B_RED}DELETE: /game/room/leave/:room: @Query('room'): [${room}]${C.END}`);
+			const	responseLeaveGameLobby = await this.gameService.leaveGameLobby({
+				room: room,
+				user: user,
+			});
+			return (responseLeaveGameLobby);
+		} catch (err) {
+			console.log("@Delete('/game/room/leave'): ", err.message);
+			return ({ err: err.message });
+		}
+	}
 
 
 	// @Put('/room')
@@ -205,13 +176,13 @@ export class GameController {
 	){
 		try
 		{
-			console.log(`${C.B_RED}DELETE: /room: @Query('room'): [${room}]${C.END}`);
+			console.log(`${C.B_RED}DELETE: /game/room: @Query('room'): [${room}]${C.END}`);
 			const	responseGameRoom = await this.gameService.deleteGameRoom(room);
 			return (responseGameRoom);
 		}
 		catch (err)
 		{
-			console.log("@Delete('/room'): ", err);
+			console.log("@Delete('/game/room'): ", err);
 			return ({err: err});
 		}
 	}

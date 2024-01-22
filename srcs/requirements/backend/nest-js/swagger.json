@@ -468,6 +468,26 @@
           }
         }
       }
+    },
+    "/game/room/leave": {
+      "delete": {
+        "operationId": "GameController_leaveGameLobby",
+        "parameters": [
+          {
+            "name": "room",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {

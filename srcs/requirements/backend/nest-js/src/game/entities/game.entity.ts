@@ -107,6 +107,12 @@ export class Game {
 
 	//----------------------User----------------------------//
 
+	@Column('jsonb', { nullable: true })
+	public	playerL: Player;
+
+	@Column('jsonb', { nullable: true })
+	public	playerR: Player;
+
 	@OneToMany(() => User, (user) => user.currentRoom, {
 		nullable: true,
 		cascade: true,
@@ -114,29 +120,21 @@ export class Game {
 	})
 	public players: User[];
 
-	@Column('jsonb', { nullable: true })
-	public	playerL: Player;
+	// // players dizisi değiştiğinde otomatik olarak çağrılacak metod
+	// @AfterUpdate()
+	// async	updateGamePlayersData(): Promise<void> {
+	// 	console.log("GAME ENTITY'SINDE DEGISIKLIK OLDU WAY AWK", this.players);
+	// 	// if (this.players.length <= 0)
+	// 	// { // odada kimse yok o yuzden Game Room'unu siliyoruz.
+	// 	// 	await this.gameRepository.remove(this);
+	// 	// }
+	// 	if (this.players[0])
+	// 		this.playerL.user = this.players[0];
 
-	@Column('jsonb', { nullable: true })
-	public	playerR: Player;
-
-	// players dizisi değiştiğinde otomatik olarak çağrılacak metod
-	@AfterUpdate()
-	async	updateGamePlayersData(): Promise<void> {
-		console.log("GAME ENTITY'SINDE DEGISIKLIK OLDU WAY AWK", this.players);
-		// if (this.players.length <= 0)
-		// { // odada kimse yok o yuzden Game Room'unu siliyoruz.
-		// 	await this.gameRepository.remove(this);
-		// }
-		if (this.players[0])
-			this.playerL.user = this.players[0];
-
-		if (this.players[1])
-			this.playerR.user = this.players[1];
-		else
-			this.playerR.user = null;
-
-		
-	}
+	// 	if (this.players[1])
+	// 		this.playerR.user = this.players[1];
+	// 	else
+	// 		this.playerR.user = null;
+	// }
 
 }
