@@ -1,42 +1,92 @@
 import { PartialType } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber, IsEnum, Max, IsPositive, IsBoolean, isNumber } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber, IsEnum, Max, IsPositive, IsBoolean, isNumber, IsInstance } from "class-validator";
 import { User } from "src/users/entities/user.entity";
 
 export enum EGameMode {
-	classic = 'classic',
-	fastMode = 'fast-mode',
+	CLASSIC = 'classic',
+	FAST_MODE = 'fast-mode',
 }
 
 export interface ILiveData {
-	ballLocationX?: number;
-	ballLocationY?: number;
-	pLeftLocation?: number;
-	pRightLocation?: number;
-	pLeftSpeed?: number;
-	pRightSpeed?: number;
-	pLeftScore?: number;
-	pRightScore?: number;
-	duration?: number;
-	winner?: number;
-	isTie?: boolean;
+	duration?: number,
+	ball?: {
+		x?: number,
+		y?: number,
+		speedX?: number,
+		speedY?: number,
+	},
+	userL?: {
+		location?: number,
+		speed?: number,
+		score?: number,
+	},
+	userR?: {
+		location?: number,
+		speed?: number,
+		score?: number,
+	},
+}
+
+export class BallDto {
+	@IsNumber()
+	@IsPositive()
+	x?: number = 500;
+   
+	@IsNumber()
+	@IsPositive()
+	y?: number = 400;
+  
+	@IsNumber()
+	@IsPositive()
+	speedX?: number = 3;
+  
+	@IsNumber()
+	@IsPositive()
+	speedY?: number = 4;
+  }
+  
+export class PlayerDto {
+
+	@IsInstance(User)
+	user?: User;
+	
+	@IsNumber()
+	@IsOptional()
+	@Min(0)
+	score?: number;
+
+	@IsNumber()
+	@IsOptional()
+	location?: number;
+
+	@IsNumber()
+	@IsOptional()
+	speed?: number;
+  
+	@IsBoolean()
+	@IsOptional()
+	ready?: boolean;
 }
 
 export class CreateGameDto {
 	@IsString()
 	@IsNotEmpty()
 	name: string;
-
+  
 	@IsString()
 	@IsOptional()
 	password?: string;
-
+  
+	@IsOptional()
+	@IsString()
+	description?: string;
+  
 	@IsEnum(['public', 'private'])
 	type: string;
 
 	@IsEnum(EGameMode, { message: 'Invalid game mode' })
-	mode: string;
-	// mode: EGameMode;
-
+	mode: EGameMode;
+  
 	@IsNumber()
 	@IsPositive()
 	@Min(1, { message: 'Win score must be at least 1' })
@@ -49,85 +99,25 @@ export class CreateGameDto {
 	@Max(999, { message: 'Duration cannot be greater than 999' })
 	@IsOptional()
 	duration?: number;
-
+  
 	@IsBoolean()
 	@IsOptional()
 	isGameStarted?: boolean;
-
-	@IsString()
+ 
+	@IsInstance(BallDto)
 	@IsOptional()
-	description?: string;
-
-	@IsNumber()
-	@IsOptional()
-	ballLocationX?: number;
-
-	@IsNumber()
-	@IsOptional()
-	ballLocationY?: number;
-
-	@IsNumber()
-	@IsOptional()
-	ballSpeedX?: number;
-
-	@IsNumber()
-	@IsOptional()
-	ballSpeedY?: number;
-
-	@IsNumber()
-	@IsOptional()
-	pLeftLocation?: number;
-
-	@IsNumber()
-	@IsOptional()
-	pRightLocation?: number;
-
-	@IsNumber()
-	@IsOptional()
-	pLeftSpeed?: number;
-
-	@IsNumber()
-	@IsOptional()
-	pRightSpeed?: number;
-
-	@IsNumber()
-	@IsInt()
-	@Min(0)
-	@IsOptional()
-	pLeftScore?: number;
-
-	@IsInt()
-	@IsNumber()
-	@Min(0)
-	@IsOptional()
-	pRightScore?: number;
-
-	@IsBoolean()
-	@IsOptional()
-	public pRightIsReady?: boolean;
-
-	@IsNumber()
-	@IsOptional()
-	public pLeftId: number;
-
-	@IsString()
-	@IsOptional()
-	public pLeftSocketId: string;
-
-	@IsNumber()
-	@IsOptional()
-	public pRightId: number;
-
-	@IsString()
-	@IsOptional()
-	public pRightSocketId: string;
-
-	@IsNumber()
-	@IsOptional()
-	public adminId: number;
+	ball?: BallDto;
 
 	@IsOptional()
-	public players: User[];
+	players?: User[];
+
+	@IsInstance(PlayerDto)
+	@IsOptional()
+	playerL?: PlayerDto;
+
+	@IsInstance(PlayerDto)
+	@IsOptional()
+	playerR?: PlayerDto;
 }
 
 export class UpdateGameDto extends PartialType(CreateGameDto) {}

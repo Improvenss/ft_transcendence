@@ -1,9 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterUpdate} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterUpdate } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsBoolean, IsNumber, IsPositive, IsString, Max, Min } from 'class-validator';
 import { EGameMode } from '../dto/create-game.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+
+export class Ball {
+	@IsPositive()
+	x?: number;
+ 
+	@IsPositive()
+	y?: number;
+
+	@IsPositive()
+	speedX?: number;
+
+	@IsPositive()
+	speedY?: number;
+}
+
+export class Player {
+	user?: User;
+	score?: number;
+	location?: number;
+	speed?: number;
+	ready?: boolean;
+}
 
 @Entity('game')
 export class Game {
@@ -11,11 +33,39 @@ export class Game {
 	private readonly gameRepository: Repository<Game>;
 	constructor(game: Partial<Game>) {
 		Object.assign(this, game);
+		if (!this.ball){
+			this.ball = {
+				x: 500,
+				y: 400,
+				speedX: 3,
+				speedY: 4
+			};
+		}
+		if (!this.playerL){
+			this.playerL = {
+				user: (this.players && this.players[0]) ? this.players[0] : null,
+				score: 0,
+				location: 400,
+				speed: 0,
+				ready: true
+			};
+		}
+		if (!this.playerR){
+			this.playerR = {
+				user: (this.players && this.players[1]) ? this.players[1] : null,
+				score: 0,
+				location: 400,
+				speed: 0,
+				ready: false
+			};
+		}
 	}
 
 	@IsNumber()
 	@PrimaryGeneratedColumn()
 	public id: number;
+
+	//----------------------Game Details----------------------------//
 
 	@IsString()
 	@Column({ length: 15, unique: true , nullable: false })
@@ -32,12 +82,9 @@ export class Game {
 	@Column({ type: 'enum', enum: ['public', 'private']})
 	public type: string;
 
-	// @IsEnum(GameMode, { message: 'Invalid game mode' })
-	// @Column({ type: 'enum', enum: ['classic', 'fast-mode'], nullable: false })
-	@IsEnum(EGameMode, { message: 'Invalid Game mode' })
-	@Column({ type: 'enum', enum: EGameMode, nullable: false, default: EGameMode.classic })
-	// public mode: EGameMode;
-	public mode: string;
+	// @IsEnum(EGameMode, { message: 'Invalid Game mode' })
+	@Column({ type: 'enum', enum: EGameMode, default: EGameMode.CLASSIC })
+	public mode: EGameMode;
 
 	@IsNumber()
 	@Min(1, { message: 'Win score must be at least 1' })
@@ -55,73 +102,10 @@ export class Game {
 	@Column({ nullable: true, default: false })
 	public isGameStarted: boolean;
 
-	//----------------------Game Details----------------------------//
-
-	@IsNumber()
-	@Column({ nullable: true, default: 500 })
-	public ballLocationX: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 400 })
-	public ballLocationY: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 3 })
-	public ballSpeedX: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 4 })
-	public ballSpeedY: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 340 })
-	public pLeftLocation: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 340 })
-	public pRightLocation: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 0 })
-	public pLeftSpeed: number;
-
-	@IsNumber()
-	@Column({ nullable: true, default: 0 })
-	public pRightSpeed: number;
-
-	@IsInt()
-	@IsNumber()
-	@Min(0, { message: 'Player score must be at least 0' })
-	@Column({ default: 0 })
-	public pLeftScore: number;
-
-	@IsInt()
-	@IsNumber()
-	@Min(0, { message: 'Player score must be at least 0' })
-	@Column({ default: 0 })
-	public pRightScore: number;
+	@Column('jsonb', { nullable: true })
+	public ball: Ball;
 
 	//----------------------User----------------------------//
-
-	@Column({ nullable: true, default: false })
-	public pRightIsReady: boolean;
-
-	// Buradan ----------------
-	@Column({ nullable: true, default: 0 })
-	public pLeftId: number;
-
-	@Column({ nullable: true, default: '' })
-	public pLeftSocketId: string;
-
-	@Column({ nullable: true, default: 0 })
-	public pRightId: number;
-
-	@Column({ nullable: true, default: '' })
-	public pRightSocketId: string;
-
-	@Column({ nullable: true, default: 0 })
-	public adminId: number;
-	// Buraya ---------------- silinecek User olarak userL & userR olacak sekilde set edilecek.
 
 	@OneToMany(() => User, (user) => user.currentRoom, {
 		nullable: true,
@@ -130,29 +114,29 @@ export class Game {
 	})
 	public players: User[];
 
+	@Column('jsonb', { nullable: true })
+	public	playerL: Player;
+
+	@Column('jsonb', { nullable: true })
+	public	playerR: Player;
+
 	// players dizisi değiştiğinde otomatik olarak çağrılacak metod
-	// @AfterUpdate()
-	// async	updateGamePlayersData(): Promise<void> {
-	// 	console.log("GAME ENTITY'SINDE DEGISIKLIK OLDU WAY AWK", this.players);
-	// 	if (this.players.length <= 0)
-	// 	{ // odada kimse yok o yuzden Game Room'unu siliyoruz.
-	// 		await this.gameRepository.remove(this);
-	// 	}
-	// 	if (this.players[0])
-	// 	{
-	// 		this.pLeftId = this.players[0].id;
-	// 		this.adminId = this.players[0].id;
-	// 		this.pLeftSocketId = this.players[0].socketId;
-	// 	}
-	// 	if (this.players[1])
-	// 	{
-	// 		this.pRightId = this.players[1].id;
-	// 		this.pRightSocketId = this.players[1].socketId;
-	// 	}
-	// 	else
-	// 	{
-	// 		this.pRightIsReady = false;
-	// 		this.pRightSocketId = null;
-	// 	}
-	// }
+	@AfterUpdate()
+	async	updateGamePlayersData(): Promise<void> {
+		console.log("GAME ENTITY'SINDE DEGISIKLIK OLDU WAY AWK", this.players);
+		// if (this.players.length <= 0)
+		// { // odada kimse yok o yuzden Game Room'unu siliyoruz.
+		// 	await this.gameRepository.remove(this);
+		// }
+		if (this.players[0])
+			this.playerL.user = this.players[0];
+
+		if (this.players[1])
+			this.playerR.user = this.players[1];
+		else
+			this.playerR.user = null;
+
+		
+	}
+
 }

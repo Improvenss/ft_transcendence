@@ -34,6 +34,7 @@ export class GameController {
 				throw new NotFoundException(`Game[${name}] not found!`);
 
 			if (!game.players.some((player) => player.id === user.id)) {
+			// if (!(user.id === game.userL.id || user.id === game.userR.id)) {
 				throw new NotFoundException(`User not found in game[${name}]`);
 			}
 			if (game.isGameStarted && lobby)
@@ -114,15 +115,10 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
-			const	socket = this.chatGateway.getUserSocket(user.id);
-			const	responseRoom = await this.gameService.addGameRoomUser(user, body, socket);
-			// this.chatGateway.server.emit('roomListener', responseRoom);
-			// Daha socket.join('GameRoomIsmi'); seklinde bir socket'i joinletmeyi burada yapmadigimiz icin,
-			//  server.emit olarak butun servere emit ediyoruz ama sadece oda lobbyListener:${body.room}'a denk gelen
-			//  oyun odasi uzerine aliniyor :D
+			const	responseRoom = await this.gameService.addGameRoomUser(user, body);
 			this.chatGateway.server.emit(`lobbyListener:${body.room}`, responseRoom);
-			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
-
+			const	socket = this.chatGateway.getUserSocket(user.id);
+			socket.join(body.room);
 			return (responseRoom);
 		}
 		catch (err)
@@ -179,23 +175,23 @@ export class GameController {
 		}
 	}
 
-	@Delete('/room/leave')
-	async	leaveGameLobby(
-		@Req() { user },
-		@Query('room') room: string | undefined,
-	){
-		try {
-			console.log(`${C.B_RED}DELETE: /room/leave/:room: @Query('room'): [${room}]${C.END}`);
-			const	responseLeaveGameLobby = await this.gameService.leaveGameLobby({
-				room: room,
-				user: user,
-			});
-			return (responseLeaveGameLobby);
-		} catch (err) {
-			console.log("@Delete('/room/leave'): ", err.message);
-			return ({ err: err.message });
-		}
-	}
+	// @Delete('/room/leave')
+	// async	leaveGameLobby(
+	// 	@Req() { user },
+	// 	@Query('room') room: string | undefined,
+	// ){
+	// 	try {
+	// 		console.log(`${C.B_RED}DELETE: /room/leave/:room: @Query('room'): [${room}]${C.END}`);
+	// 		const	responseLeaveGameLobby = await this.gameService.leaveGameLobby({
+	// 			room: room,
+	// 			user: user,
+	// 		});
+	// 		return (responseLeaveGameLobby);
+	// 	} catch (err) {
+	// 		console.log("@Delete('/room/leave'): ", err.message);
+	// 		return ({ err: err.message });
+	// 	}
+	// }
 
 
 	// @Put('/room')

@@ -35,6 +35,13 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: Settingsdeki contact ve about kısmını ekle/güncelle.
  * TODO: lobbydeyken farklı bir yere gidince kanaldan ayrılsın
  * TODO: loby leave'i ekle, kullanıcı kicki ekle, friend invite ekle
+ * TODO: GameLobby'deyken player'ler sayfayi yenilediginde yani
+ *  yeni socket olusturuldugunda GET islemi asamasinda bu guncel user verisiyle
+ *  GameRoom'un verisini guncelle.
+ * TODO: game entity'in kendisi guncellenecek; userL ve userR eklenecek.
+ * TODO: GameLobby sadece admin ise sag oyuncuyu kicklemeyi duzelt / frontend'i de duzelt.
+ * TODO: GameLobby'den misafir oyuncu ayrilinca FEND'i guncelle ciktigina dair.
+ * TODO: Leaderboard eklenecek ama XP'ye gore.
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();
