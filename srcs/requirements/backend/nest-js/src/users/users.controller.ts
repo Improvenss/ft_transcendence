@@ -31,10 +31,9 @@ export class UsersController {
 			console.log(`${C.B_GREEN}GET: /leaderboard: user[${user.login}]${C.END}`);
 			// this.usersService.createGameHistory(1, 2, 7, 5, '333');
 			// this.usersService.createGameHistory(1, 1, 7, 5, '333');
-			const historys = await this.usersService.gameHistorys();
+			// const historys = await this.usersService.gameHistorys();
 			const board = await this.usersService.leaderboard();
-			//--> tüm kullancıların id, login, xp değeleri, kazandığı oyunlar, kaybettiği oyunlar, total oyunlar bilgisini bir array ile döndür.
-			return ({ success: true, data: board, historys: historys });
+			return ({ success: true, data: board });
 		} catch (err) {
 			console.log(`@Get('/leaderboard'): `, err.message);
 			return ({ success: false, err: err.message});

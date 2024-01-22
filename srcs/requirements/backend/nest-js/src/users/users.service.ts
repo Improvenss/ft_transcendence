@@ -76,18 +76,20 @@ export class UsersService {
 		const result = await this.usersRepository
 			.createQueryBuilder('user')
 			.select([
-				'user.id',
-				'user.login',
-				'user._xp',
-				'COUNT(CASE WHEN gameHistory.result = :win THEN 1 END) AS totalWins',
-				'COUNT(CASE WHEN gameHistory.result = :lose THEN 1 END) AS totalLoses',
-				'COUNT(gameHistory.id) AS totalGames',
+				'user.id AS id', //user_id şeklinde dönmemesi için AS ile hangi isimde döneceğini belirtiyoruz.
+				'user.login AS login',
+				'user._xp AS xp',
+				'COUNT(CASE WHEN gameHistory.result = :win THEN 1 END) AS "totalWins"', //totalwins şeklinde dönmemesi için çift tırnak ekliyoruz.
+				'COUNT(CASE WHEN gameHistory.result = :lose THEN 1 END) AS "totalLoses"',
+				'COUNT(CASE WHEN gameHistory.result = :tie THEN 1 END) AS "totalTies"',
+				'COUNT(gameHistory.id) AS "totalGames"',
 			])
 			.leftJoin('user.gameHistory', 'gameHistory')
 			.groupBy('user.id, user.login, user._xp')
 			.orderBy('user.id')
-			.setParameter('win', GameStatus.WIN)
+			.setParameter('win', GameStatus.WIN) //select'teki yazıların neye tekabül edeceğini belirtiyoruz.
 			.setParameter('lose', GameStatus.LOSE)
+			.setParameter('tie', GameStatus.TIE)
 			.getRawMany();
 
 		return (result)

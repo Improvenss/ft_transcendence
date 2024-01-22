@@ -12,19 +12,40 @@ import fetchRequest from '../utils/fetchRequest';
 import { IUser } from '../chat/iChannel';
 import Modal from '../utils/Modal';
 
+// interface ILobby {
+// 	id: number,
+// 	name: string,
+// 	type: string,
+// 	mode: string, // belki, olabilir
+// 	winScore: number, // yes
+// 	duration: number, // yes
+// 	description: string,
+// 	adminId: number, // belki, sonra
+// 	pRightIsReady: boolean,
+// 	players: IUser, // belki
+// 	playerLeft: IUser, // yes
+// 	playerRight: IUser, // yes
+// }
+
+interface IPlayer {
+	user: IUser,
+	location: number,
+	ready: boolean,
+	score: number,
+	speed: number,
+}
+
 interface ILobby {
 	id: number,
 	name: string,
-	type: string,
-	mode: string, // belki, olabilir
-	winScore: number, // yes
-	duration: number, // yes
 	description: string,
-	adminId: number, // belki, sonra
-	pRightIsReady: boolean,
-	players: IUser, // belki
-	playerLeft: IUser, // yes
-	playerRight: IUser, // yes
+	type: string,
+	mode: string,
+	winScore: number,
+	duration: number,
+	players: IUser[],
+	playerL: IPlayer,
+	playerR: IPlayer,
 }
 
 const GameLobby = () => {
@@ -78,10 +99,11 @@ const GameLobby = () => {
 				const data = await response.json();
 				console.log("GameLobby:", data);
 				if (!data.err){
-					const playerLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
-					const playerRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
-					const pRightIsReady = data.pRightIsReady;
-					setLobby({...data, playerLeft, playerRight, pRightIsReady});
+					setLobby(data)
+					// const playerLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
+					// const playerRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
+					// const pRightIsReady = data.pRightIsReady;
+					// setLobby({...data, playerLeft, playerRight, pRightIsReady});
 				} else {
 					navigate('/404', {replace: true});
 				}
@@ -102,7 +124,7 @@ const GameLobby = () => {
 	}
 
 	const handleLobbyAction = async (action: 'ready' | 'start') => {
-		if (action === 'start' && !lobby.pRightIsReady)
+		if (action === 'start' && !lobby.playerR.ready)
 			return (console.log("You can't start right player is not ready!"));
 		const response = await fetchRequest({
 			method: 'PATCH',
@@ -112,7 +134,7 @@ const GameLobby = () => {
 				})
 			):(
 				JSON.stringify({
-					pRightIsReady: !lobby.pRightIsReady,
+					pRightIsReady: !lobby.playerR.ready,
 				})
 			)),
 			url: `/game/room?room=${lobby.name}`,
@@ -136,24 +158,24 @@ const GameLobby = () => {
 			<h2>Lobby Type: {lobby.type}</h2>
 			{lobby.description && (<h2>Description: {lobby.description}</h2>)}
 			<div className='players'>
-				{lobby.playerLeft ? (
+				{lobby.playerL.user ? (
 					<div className='leftPlayer'>
 						<img
 							className='image'
-							src={lobby.playerLeft.avatar ? lobby.playerLeft.avatar : lobby.playerLeft.imageUrl}
-							alt={lobby.playerLeft.login}
+							src={lobby.playerL.user.avatar ? lobby.playerL.user.avatar : lobby.playerL.user.imageUrl}
+							alt={lobby.playerL.user.login}
 						/>
-						<span>{lobby.playerLeft.nickname ? lobby.playerLeft.nickname : lobby.playerLeft.login}</span>
+						<span>{lobby.playerL.user.nickname ? lobby.playerL.user.nickname : lobby.playerL.user.login}</span>
 					</div>
 				) : 'null'}
-				{lobby.playerRight ? (
+				{lobby.playerR.user ? (
 					<div className='rightPlayer' title='kick' onClick={() => console.log("kick yapısını ekle")}>
 						<img
 							className='image'
-							src={lobby.playerRight.avatar ? lobby.playerRight.avatar : lobby.playerRight.imageUrl}
-							alt={lobby.playerRight.login}
+							src={lobby.playerR.user.avatar ? lobby.playerR.user.avatar : lobby.playerR.user.imageUrl}
+							alt={lobby.playerR.user.login}
 						/>
-						<span>{lobby.playerRight.nickname ? lobby.playerRight.nickname : lobby.playerRight.login}</span>
+						<span>{lobby.playerR.user.nickname ? lobby.playerR.user.nickname : lobby.playerR.user.login}</span>
 						<IconKick id='kick'/>
 					</div>
 				) : (
@@ -172,8 +194,8 @@ const GameLobby = () => {
 							>
 								<div id='friends-modal-header'>Invite Friends</div>
 								<div id='friends-content'>
-									{/* {userInfo.friends.map((user) => ( */}
-									{friends.map((user) => (
+									{/* {friends.map((user) => ( */}
+									{userInfo.friends.map((user) => (
 										<div
 											key={user.login}
 											className={`friend-card`}
@@ -196,13 +218,13 @@ const GameLobby = () => {
 			<h3>Win Score: {lobby.winScore}</h3>
 			<h3>Duration: {lobby.duration} second</h3>
 			<Map className='map'/>
-			{(lobby.adminId === userInfo.id) ? (
+			{(lobby.playerL.user.id === userInfo.id) ? (
 				<button className='start' onClick={() =>handleLobbyAction('start')} >
-					{lobby.pRightIsReady ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}
+					{lobby.playerR.ready ? `You Can Start Game ✅` : `Wait Other Player To Ready ❌`}
 				</button>
 			) : (
 				<button className='ready' onClick={() => handleLobbyAction('ready')}>
-					{lobby.pRightIsReady ? `Player Is Ready ✅` : `Player Is Unready ❌`}
+					{lobby.playerR.ready ? `Player Is Ready ✅` : `Player Is Unready ❌`}
 				</button>
 			)}
 		</div>

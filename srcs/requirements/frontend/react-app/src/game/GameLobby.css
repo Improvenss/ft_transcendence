@@ -158,6 +158,14 @@
 	background-color: rgba(255, 0, 0, 0.5);
   }
 
+  .friend-card > img {
+	height: 50px;
+	width: 50px;
+	border-radius: 50%;
+	object-fit: cover;
+	pointer-events: none;
+  }
+
   #friend-users-table {
 	width: 100%;
 	flex-direction: row;

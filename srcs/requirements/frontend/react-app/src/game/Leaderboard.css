@@ -1,0 +1,55 @@
+#leaderboard-page {
+	width: 90%;
+	height: 80vh;
+	overflow-x: auto;
+	overflow-y: auto;
+	margin: auto;
+	margin-top: 20px;
+	user-select: none;
+}
+
+#leaderboard-page table {
+	border-collapse: collapse;
+	width: 100%;
+	text-align: left;
+}
+
+#leaderboard-page th, #leaderboard-page td {
+	padding: 8px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+#leaderboard-page table thead {
+	position: sticky;
+	top: 0;
+	background-color: darkred;
+}
+
+#leaderboard-page table tbody tr:hover {
+	background-color: darkred;
+	cursor: pointer;
+}
+
+.highlight {
+	background-color: rgb(139, 0, 0, 0.5);
+}
+
+#leaderboard-page::-webkit-scrollbar {
+	width: 10px; /*dikey scroll kalınlık*/
+	height: 10px; /*yatay scroll kalınlık*/
+}
+
+#leaderboard-page::-webkit-scrollbar-thumb {
+	background: darkred;
+	border-radius: 5px;
+}
+
+#leaderboard-page::-webkit-scrollbar-button {
+	height: 0;
+	width: 0;
+}
+
+#leaderboard-page::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
