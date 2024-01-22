@@ -1,10 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterUpdate} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsString, Max, Min, min } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsNumber, IsString, Max, Min } from 'class-validator';
 import { EGameMode } from '../dto/create-game.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Entity('game')
 export class Game {
+	@InjectRepository(Game)
+	private readonly gameRepository: Repository<Game>;
 	constructor(game: Partial<Game>) {
 		Object.assign(this, game);
 	}
@@ -102,20 +106,22 @@ export class Game {
 	@Column({ nullable: true, default: false })
 	public pRightIsReady: boolean;
 
+	// Buradan ----------------
 	@Column({ nullable: true, default: 0 })
 	public pLeftId: number;
 
-	@Column({ nullable: true, default: 0 })
+	@Column({ nullable: true, default: '' })
 	public pLeftSocketId: string;
 
 	@Column({ nullable: true, default: 0 })
 	public pRightId: number;
 
-	@Column({ nullable: true, default: 0 })
+	@Column({ nullable: true, default: '' })
 	public pRightSocketId: string;
 
 	@Column({ nullable: true, default: 0 })
 	public adminId: number;
+	// Buraya ---------------- silinecek User olarak userL & userR olacak sekilde set edilecek.
 
 	@OneToMany(() => User, (user) => user.currentRoom, {
 		nullable: true,
@@ -123,4 +129,30 @@ export class Game {
 		onDelete: 'CASCADE'
 	})
 	public players: User[];
+
+	// players dizisi değiştiğinde otomatik olarak çağrılacak metod
+	// @AfterUpdate()
+	// async	updateGamePlayersData(): Promise<void> {
+	// 	console.log("GAME ENTITY'SINDE DEGISIKLIK OLDU WAY AWK", this.players);
+	// 	if (this.players.length <= 0)
+	// 	{ // odada kimse yok o yuzden Game Room'unu siliyoruz.
+	// 		await this.gameRepository.remove(this);
+	// 	}
+	// 	if (this.players[0])
+	// 	{
+	// 		this.pLeftId = this.players[0].id;
+	// 		this.adminId = this.players[0].id;
+	// 		this.pLeftSocketId = this.players[0].socketId;
+	// 	}
+	// 	if (this.players[1])
+	// 	{
+	// 		this.pRightId = this.players[1].id;
+	// 		this.pRightSocketId = this.players[1].socketId;
+	// 	}
+	// 	else
+	// 	{
+	// 		this.pRightIsReady = false;
+	// 		this.pRightSocketId = null;
+	// 	}
+	// }
 }

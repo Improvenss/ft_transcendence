@@ -6,6 +6,7 @@ import { Colors as C } from '../colors';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
+import { Server, Socket } from 'socket.io';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -113,9 +114,13 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room/register: @Body(): [${body}]${C.END}`);
-			const	responseRoom = await this.gameService.addGameRoomUser(user, body);
-			this.chatGateway.server.emit('roomListener', responseRoom);
-
+			const	socket = this.chatGateway.getUserSocket(user.id);
+			const	responseRoom = await this.gameService.addGameRoomUser(user, body, socket);
+			// this.chatGateway.server.emit('roomListener', responseRoom);
+			// Daha socket.join('GameRoomIsmi'); seklinde bir socket'i joinletmeyi burada yapmadigimiz icin,
+			//  server.emit olarak butun servere emit ediyoruz ama sadece oda lobbyListener:${body.room}'a denk gelen
+			//  oyun odasi uzerine aliniyor :D
+			this.chatGateway.server.emit(`lobbyListener:${body.room}`, responseRoom);
 			// this.chatGateway.server.to() // Buraya odaya biri baglandi diye sadece odaya ozel olarak bir dinleme de yapabiliriz.
 
 			return (responseRoom);
@@ -123,7 +128,7 @@ export class GameController {
 		catch (err)
 		{
 			console.error("@Post('/channel/register'): registerChannel:", err.message);
-			return ({err: err.message});
+			return ({err: err.message, status: err.status});
 		}
 	}
 
@@ -137,7 +142,8 @@ export class GameController {
 		try
 		{
 			console.log(`${C.B_YELLOW}POST: /room: @Body(): ${C.END}`, body);
-			const	newGameRoom = await this.gameService.createGameRoom(user.login, body);
+			const	socket = this.chatGateway.getUserSocket(user.id);
+			const	newGameRoom = await this.gameService.createGameRoom(user.login, body, socket);
 			return ({response: newGameRoom});
 		}
 		catch (err)
@@ -168,10 +174,29 @@ export class GameController {
 		}
 		catch (err)
 		{
-			console.log("@Patch('/room'): ", err);
-			return ({err: err});
+			console.log("@Patch('/room'): ", err.message);
+			return ({ err: err.message });
 		}
 	}
+
+	@Delete('/room/leave')
+	async	leaveGameLobby(
+		@Req() { user },
+		@Query('room') room: string | undefined,
+	){
+		try {
+			console.log(`${C.B_RED}DELETE: /room/leave/:room: @Query('room'): [${room}]${C.END}`);
+			const	responseLeaveGameLobby = await this.gameService.leaveGameLobby({
+				room: room,
+				user: user,
+			});
+			return (responseLeaveGameLobby);
+		} catch (err) {
+			console.log("@Delete('/room/leave'): ", err.message);
+			return ({ err: err.message });
+		}
+	}
+
 
 	// @Put('/room')
 	// async	putGameRoom()

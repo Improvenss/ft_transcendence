@@ -315,7 +315,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!returnData || !returnData.winner)
 			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
 		else
-		{
+		{ // Oyunun dongusu donerken oyunun bitme durumlari burada isleniyor.
+			// ornegin; sol/sag oyuncu kazandi ya da sure bitti 'tie'(berabere) durumu.
 			const	winnerSocket = this.connectedIds.get(returnData.winner);
 			let looserId = denemeData.pLeftId;
 			if (winnerSocket.id === denemeData.pLeftSocketId)
@@ -336,7 +337,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/**
 	 * Oyun odasina baglandiktan sonra gelen komutlari burada
 	 *  ele aliyouz.
-	 * @param param0 
 	 */
 	@SubscribeMessage('commandGameRoom')
 	async handleCommandGameRoom(
@@ -382,6 +382,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket,
 		@MessageBody() data: { gameRoom: string, isTie?: boolean },
 	){
+		if (!data || !data.gameRoom)
+			return ;
 		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
 		{
 			const	gameData = this.gameRoomData.get(data.gameRoom);
@@ -404,8 +406,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 		}
 	}
-
-
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 }

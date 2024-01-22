@@ -27,16 +27,16 @@ function App() {
 		const handleLinkClick = async (event: any) => { 
 			const newPath = event.currentTarget.getAttribute("href");
 			const currentPath = location.pathname;
-		
 			if (currentPath.startsWith('/game/lobby/') && !newPath.startsWith('/game/lobby/')) {
-				const userConfirmed = window.confirm('Are you sure you want to leave the lobby?');
+				const userConfirmed = window.confirm('Are you sure do want to leave the lobby?');
 				
 				if (!userConfirmed) {
 					event.preventDefault();
 				} else {
+					const roomName = currentPath.replace('/game/lobby/', '');
 					const response = await fetchRequest({
-						method: 'GET',
-						url: '/users/test'
+						method: 'DELETE',
+						url: `/game/room/leave?room=${roomName}`
 					});
 					console.log('Fetch Response:', response);
 				}

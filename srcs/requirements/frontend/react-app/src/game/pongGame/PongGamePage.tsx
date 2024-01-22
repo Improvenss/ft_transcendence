@@ -118,7 +118,6 @@ function PongGamePage() {
 		}
 	}, [socket])
 
-
 	// key press
 	useEffect(() => {
 		let	isUpPressed: boolean = false;

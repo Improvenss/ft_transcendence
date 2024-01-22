@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./JoinGame.css";
 import { useSocket } from "../hooks/SocketHook";
 import { IGame } from "./IGame";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import fetchRequest from "../utils/fetchRequest";
 
 export interface IGameJoinForm {
@@ -13,6 +13,7 @@ export interface IGameJoinForm {
 
 function JoinGame(){
 	console.log("---------JOIN-GAME---------");
+	const { roomName } = useParams();
 	const [searchTerm, setSearchTerm] = useState('');
 	const {socket} = useSocket();
 	const [rooms, setRooms] = useState<IGame[]>([]);
@@ -29,7 +30,7 @@ function JoinGame(){
 			});
 			if (response.ok){
 				const data = await response.json();
-				console.log("Get Channels: ", data);
+				console.log("Get Game Rooms: ", data);
 				if (!data.err){
 					setRooms(data);
 				} else {
@@ -64,13 +65,12 @@ function JoinGame(){
 		if (response.ok){
 			const data = await response.json();
 			console.log("Join-game: ", data);
-			if (!data.err){
+			if (!data.err || data.err.status === 5) {
 				navigate(`/game/lobby/${game.name}`, {replace: true});
 				if (errorMessage != null)
 					setErrorMessage('');
 			} else {
-				console.log("Join-game:", data.err);
-				console.log("Buraya ya oyun odasindan cikmissa onu isletecegiz ya da tekrardan oyun odasina girebilme olarak yapacaagiz...");
+				console.log("Join-game ama err durumu:", data.err);
 				setErrorMessage(data.err);
 			}
 		} else {
