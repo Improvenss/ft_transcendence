@@ -120,6 +120,11 @@ export class Game {
 	})
 	public players: User[];
 
+	@AfterUpdate()
+	async updateGamePlayersData(){
+		console.log("------->AfterUpdate<-------");
+	}
+
 	// // players dizisi değiştiğinde otomatik olarak çağrılacak metod
 	// @AfterUpdate()
 	// async	updateGamePlayersData(): Promise<void> {

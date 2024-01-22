@@ -72,6 +72,27 @@ export class UsersService {
 		private readonly	gameHistoryRepository: Repository<GameHistory>,
 	) {}
 
+	async leaderboard(){
+		const result = await this.usersRepository
+			.createQueryBuilder('user')
+			.select([
+				'user.id',
+				'user.login',
+				'user._xp',
+				'COUNT(CASE WHEN gameHistory.result = :win THEN 1 END) AS totalWins',
+				'COUNT(CASE WHEN gameHistory.result = :lose THEN 1 END) AS totalLoses',
+				'COUNT(gameHistory.id) AS totalGames',
+			])
+			.leftJoin('user.gameHistory', 'gameHistory')
+			.groupBy('user.id, user.login, user._xp')
+			.orderBy('user.id')
+			.setParameter('win', GameStatus.WIN)
+			.setParameter('lose', GameStatus.LOSE)
+			.getRawMany();
+
+		return (result)
+	}
+
 	async createGameHistory(
 		userLId: number,
 		userRId: number,
