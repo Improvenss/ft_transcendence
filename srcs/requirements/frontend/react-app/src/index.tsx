@@ -38,7 +38,6 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: GameLobby'deyken player'ler sayfayi yenilediginde yani
  *  yeni socket olusturuldugunda GET islemi asamasinda bu guncel user verisiyle
  *  GameRoom'un verisini guncelle.
- * TODO: game entity'in kendisi guncellenecek; userL ve userR eklenecek.
  * TODO: GameLobby sadece admin ise sag oyuncuyu kicklemeyi duzelt / frontend'i de duzelt.
  * TODO: GameLobby'den misafir oyuncu ayrilinca FEND'i guncelle ciktigina dair.
  * TODO: Leaderboard eklenecek ama XP'ye gore.

@@ -35,7 +35,14 @@ interface IPlayer {
 	speed: number,
 }
 
-interface ILobby {
+interface IBall {
+	x?: number,
+	y?: number,
+	speedX?: number,
+	speedY?: number,
+}
+
+export interface ILobby {
 	id: number,
 	name: string,
 	description: string,
@@ -46,6 +53,7 @@ interface ILobby {
 	players: IUser[],
 	playerL: IPlayer,
 	playerR: IPlayer,
+	ball: IBall,
 }
 
 const GameLobby = () => {
@@ -90,7 +98,6 @@ const GameLobby = () => {
 				navigate(`/game/${roomName}`, {replace: true});
 				return ;
 			}
-
 			const response = await fetchRequest({
 				method: 'GET',
 				url: `/game/room/${roomName}/true`
@@ -130,11 +137,14 @@ const GameLobby = () => {
 			method: 'PATCH',
 			body: (action === 'start' ? (
 				JSON.stringify({
-					isGameStarted: true,
+					running: true,
 				})
 			):(
 				JSON.stringify({
-					pRightIsReady: !lobby.playerR.ready,
+					playerR: {
+						...lobby.playerR,
+						ready: !lobby.playerR.ready
+					},
 				})
 			)),
 			url: `/game/room?room=${lobby.name}`,

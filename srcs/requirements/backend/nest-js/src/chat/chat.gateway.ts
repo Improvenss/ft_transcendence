@@ -14,7 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
-import { Game } from 'src/game/entities/game.entity';
+import { Game, Player } from 'src/game/entities/game.entity';
 import { Cron, Interval } from '@nestjs/schedule';
 
 
@@ -55,17 +55,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const	userData = await this.usersService.getUserRelation({
 			user: { id: userId },
 			relation: { currentRoom: true },
-			primary: false,
+			primary: true,
 		}, false);
 		if (userData && userData.currentRoom)
 		{
-			// const	{ playerL, playerR } = { playerL: }
-			// if (userData.currentRoom.playerL.user.id === userData.id)
-			// 	await this.gameService.patchGameRoom(userData.currentRoom.name, {
-			// 		playerL: userData
-			// 	})
-
-			// burada kaldik
+			const	room = userData.currentRoom;
+			delete userData.currentRoom;
+			if (room.playerL.user.id === userData.id)
+				await this.gameService.patchGameRoom(room.name, {
+					playerL: { user: userData },
+				})
+			else
+				await this.gameService.patchGameRoom(room.name, {
+					playerR: { user: userData },
+				})
 		}
 	}
 
@@ -294,99 +297,113 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		gameRoomData.duration--;
 	}
 
-	// @SubscribeMessage(`joinGameRoom`)
-	// async handleJoinGameRoom(
-	// 	@ConnectedSocket() socket: Socket,
-	// 	@MessageBody() data: { gameRoom: string },
-	// ){
-	// 	if (!socket.rooms.has(data.gameRoom))
-	// 	{
-	// 		console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
-	// 		socket.join(data.gameRoom);
-	// 	}
-	// 	if (!this.gameRoomData.has(data.gameRoom))
-	// 	{
-	// 		const	gameData = await this.gameService.findGameRoom(data.gameRoom);
-	// 		const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
-	// 		this.gameRoomData.set(data.gameRoom, singleGameData);
-	// 		if (this.gameRoomIntervals.get(data.gameRoom))
-	// 			return ;
-	// 		const intervalId = setInterval(() => {
-	// 			this.startDuration(this.gameRoomData.get(data.gameRoom));
-	// 		}, 1000);
-	// 		this.gameRoomIntervals.set(data.gameRoom, intervalId);
-	// 	}
-	// }
+	async	finishGame(
+		// playerL: Player,
+		// playerR: Player,
+		gameRoom: string,
+	){
+		const	gameData = this.gameRoomData.get(gameRoom);
+		if (!gameData)
+			return ;
+		console.log(`GAME IS FINISHED ${gameRoom}`);
+		this.usersService.createGameHistory(
+			gameData.playerL.user.id,
+			gameData.playerR.user.id,
+			gameData.playerL.score,
+			gameData.playerR.score,
+			gameRoom);
 
-	// @SubscribeMessage('calcGameData')
-	// async handleCalcGameData(
-	// 	@ConnectedSocket() socket: Socket,
-	// 	@MessageBody()
-	// 	{ gameRoom }:
-	// 		{ gameRoom: string }
-	// ){
-	// 	const	denemeData = this.gameRoomData.get(gameRoom);
-	// 	const	returnData = await this.gameService.calcGameLoop(denemeData);
-	// 	if (!returnData || !returnData.winner)
-	// 		this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
-	// 	else
-	// 	{ // Oyunun dongusu donerken oyunun bitme durumlari burada isleniyor.
-	// 		// ornegin; sol/sag oyuncu kazandi ya da sure bitti 'tie'(berabere) durumu.
-	// 		const	winnerSocket = this.connectedIds.get(returnData.winner);
-	// 		let looserId = denemeData.pLeftId;
-	// 		if (winnerSocket.id === denemeData.pLeftSocketId)
-	// 			looserId = denemeData.pRightId;
-	// 		const userData = await this.usersService.getUserRelation({
-	// 			user: { id: looserId },
-	// 			relation: { currentRoom: true },
-	// 			primary: false,
-	// 		});
-	// 		if (userData.currentRoom)
-	// 			await this.handleLeaveGameRoom(this.connectedIds.get(looserId), { 
-	// 				gameRoom: userData.currentRoom.name,
-	// 				isTie: returnData.isTie,
-	// 			});
-	// 	}
-	// }
+		let result = (gameData.playerL.score > gameData.playerR.score
+			? `${gameData.playerL.user.login} is Winner`
+			: (gameData.playerL.score < gameData.playerR.score)
+				? `${gameData.playerR.user.login} is Winner`
+				: `TIME IS UP! TIE`)
 
-	// /**
-	//  * Oyun odasina baglandiktan sonra gelen komutlari burada
-	//  *  ele aliyouz.
-	//  */
-	// @SubscribeMessage('commandGameRoom')
-	// async handleCommandGameRoom(
-	// 	@ConnectedSocket() socket: Socket,
-	// 	@MessageBody() 
-	// 	{ gameRoom, way, isKeyPress }:
-	// 		{ gameRoom: string, way: string, isKeyPress: boolean})
-	// {
-	// 	console.log("TUSA BASILDI ->>>>>>", gameRoom, way, isKeyPress);
-	// 	const	denemeData = this.gameRoomData.get(gameRoom);
-	// 	if (!denemeData || denemeData.pLeftSocketId || denemeData.pRightSocketId)
-	// 		return ;
-	// 	if (socket.id === denemeData.pLeftSocketId)
-	// 	{
-	// 		if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
-	// 		{
-	// 			denemeData.pLeftSpeed = -10;
-	// 			if (way === 'DOWN')
-	// 				denemeData.pLeftSpeed *= -1;
-	// 		}
-	// 		else // false -> tustan parmagini cektiginde
-	// 			denemeData.pLeftSpeed = 0;
-	// 	}
-	// 	else
-	// 	{
-	// 		if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
-	// 		{
-	// 			denemeData.pRightSpeed = -10;
-	// 			if (way === 'DOWN')
-	// 				denemeData.pRightSpeed *= -1;
-	// 		}
-	// 		else // false -> tustan parmagini cektiginde
-	// 			denemeData.pRightSpeed = 0;
-	// 	}
-	// }
+		this.server.to(gameRoom).emit('finishGameData', {
+			result: result,
+		});
+		this.server.in(gameRoom).socketsLeave(gameRoom);
+		const	deleteGameRoomDB = await this.gameService.deleteGameRoom(gameRoom);
+		const	deleteGameData = this.gameRoomData.delete(gameRoom);
+	}
+
+	@SubscribeMessage(`joinGameRoom`)
+	async handleJoinGameRoom(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() data: { gameRoom: string },
+	){
+		if (!socket.rooms.has(data.gameRoom))
+		{
+			console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
+			socket.join(data.gameRoom);
+		}
+		if (!this.gameRoomData.has(data.gameRoom))
+		{
+			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
+			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
+			this.gameRoomData.set(data.gameRoom, singleGameData);
+			if (this.gameRoomIntervals.get(data.gameRoom))
+				return ;
+			const intervalId = setInterval(() => {
+				this.startDuration(this.gameRoomData.get(data.gameRoom));
+			}, 1000);
+			this.gameRoomIntervals.set(data.gameRoom, intervalId);
+		}
+	}
+
+	@SubscribeMessage('calcGameData')
+	async handleCalcGameData(
+		// @ConnectedSocket() socket: Socket,
+		@MessageBody()
+		{ gameRoom }:
+			{ gameRoom: string }
+	){
+		const	denemeData = this.gameRoomData.get(gameRoom);
+		const	returnData = await this.gameService.calcGameLoop(denemeData);
+		if (returnData.running)
+			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+		else
+			this.finishGame(gameRoom);
+	}
+
+	/**
+	 * Oyun odasina baglandiktan sonra gelen komutlari burada
+	 *  ele aliyouz.
+	 */
+	@SubscribeMessage('commandGameRoom')
+	async handleCommandGameRoom(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() 
+		{ gameRoom, way, isKeyPress }:
+			{ gameRoom: string, way: string, isKeyPress: boolean})
+	{
+		console.log("TUSA BASILDI ->>>>>>", gameRoom, way, isKeyPress);
+		const	gd = this.gameRoomData.get(gameRoom);
+		if (!gd || !gd.playerL.user.socketId || !gd.playerR.user.socketId)
+			return ;
+		if (socket.id === gd.playerL.user.socketId)
+		{
+			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
+			{
+				gd.playerL.speed = -10;
+				if (way === 'DOWN')
+					gd.playerL.speed *= -1;
+			}
+			else // false -> tustan parmagini cektiginde
+				gd.playerL.speed = 0;
+		}
+		else
+		{
+			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
+			{
+				gd.playerR.speed = -10;
+				if (way === 'DOWN')
+					gd.playerR.speed *= -1;
+			}
+			else // false -> tustan parmagini cektiginde
+				gd.playerR.speed = 0;
+		}
+	}
 
 	/**
 	 * Oyun odasindan cikis yaparken socket baglantisini kesmek icin.
@@ -401,25 +418,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!data || !data.gameRoom)
 			return ;
 		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
-		{
-			const	gameData = this.gameRoomData.get(data.gameRoom);
-			if (!gameData)
-				return ;
-			// const	responseFinishData = await this.gameService.finishGameRoom({
-			// 	socket: socket,
-			// 	gameData: gameData,
-			// 	isTie: data.isTie,
-			// });
-			// this.server.to(data.gameRoom).emit('finishGameData', {
-			// 	action: responseFinishData.winner,
-			// 	isTie: data.isTie,
-			// });
-			socket.leave(data.gameRoom)
-			const	deleteGameRoomDB = await this.gameService.deleteGameRoom(data.gameRoom);
-			const	deleteGameData = this.gameRoomData.delete(data.gameRoom);
-		}
-		else {
+			this.finishGame(data.gameRoom);
+		else
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
-		}
 	}
 }

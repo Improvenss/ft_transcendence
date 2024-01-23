@@ -4,39 +4,42 @@ import fetchRequest from "../../utils/fetchRequest";
 import { IUser } from "../../chat/iChannel";
 import "./styles.css";
 import { useSocket } from "../../hooks/SocketHook";
+import { ILobby } from "../GameLobby";
+import LoadingPage from "../../utils/LoadingPage";
 
-interface IRoom {
-	id: number,
-	// mode: string, // belki, olabilir
-	winScore: number, // yes
-	duration: number, // yes
-	adminId: number, // belki, sonra
-	players: IUser, // belki
-	pLeft: IUser, // yes
-	pRight: IUser, // yes
-	ballLocationX: number,
-	ballLocationY: number,
-	ballSpeedX: number,
-	ballSpeedY: number,
-}
+// interface IRoom {
+// 	id: number,
+// 	// mode: string, // belki, olabilir
+// 	winScore: number, // yes
+// 	duration: number, // yes
+// 	adminId: number, // belki, sonra
+// 	players: IUser, // belki
+// 	pLeft: IUser, // yes
+// 	pRight: IUser, // yes
+// 	ballLocationX: number,
+// 	ballLocationY: number,
+// 	ballSpeedX: number,
+// 	ballSpeedY: number,
+// }
 
-interface ILiveData {
-	ballLocationX?: number;
-	ballLocationY?: number;
-	pLeftLocation?: number;
-	pRightLocation?: number;
-	// pLeftSpeed?: number;
-	// pRightSpeed?: number;
-	pLeftScore?: number;
-	pRightScore?: number;
-	duration?: number;
-	winner?: number;
-	looser?: number;
-}
+// interface IPlayer {
+// 	location?: number,
+// 	speed?: number,
+// 	score?: number,
+// }
 
-// interface IFinishData {
-// 	winner: number,
-// 	looser: number,
+// interface IBall {
+// 	x?: number,
+// 	y?: number,
+// 	speedX?: number,
+// 	speedY?: number,
+// }
+
+// interface ILiveData {
+// 	ball?: IBall,
+// 	playerL?: IPlayer,
+// 	playerR?: IPlayer,
+// 	duration?: number;
 // }
 
 /**
@@ -51,10 +54,10 @@ interface ILiveData {
 function PongGamePage() {
 	const { roomName } = useParams();
 	const navigate = useNavigate();
-	const [liveRoom, setLiveRoom] = useState<IRoom | undefined>(undefined);
-	const [liveData, setLiveData] = useState<ILiveData>();
+	const [liveRoom, setLiveRoom] = useState<ILobby>();
+	// const [liveRoom, setLiveData] = useState<ILiveData>();
 	const { socket } = useSocket();
-	const [winner, setWinner] = useState<number | string | undefined>(undefined);
+	const [result, setResult] = useState<string | undefined>(undefined);
 	const delay = 16;
 
 	useEffect(() => {
@@ -68,18 +71,16 @@ function PongGamePage() {
 				const data = await response.json();
 				console.log("PongGamePage:", data);
 				if (!data.err){
-					const pLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
-					const pRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
-					setLiveRoom({...data, pLeft, pRight});
-					setLiveData({
-						ballLocationX: data.ballLocationX,
-						ballLocationY: data.ballLocationY,
-						duration: data.duration,
-						pLeftLocation: data.pLeftLocation,
-						pRightLocation: data.pRightLocation,
-						pLeftScore: data.pLeftScore,
-						pRightScore: data.pRightScore,
-					});
+					// const pLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
+					// const pRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
+					// setLiveRoom({...data, pLeft, pRight});
+					setLiveRoom(data);
+					// setLiveData({
+					// 	ball: data.ball,
+					// 	duration: data.duration,
+					// 	playerL: data.playerL,
+					// 	playerR: data.playerR,
+					// });
 					socket.emit('joinGameRoom', {
 						gameRoom: roomName,
 					});
@@ -97,17 +98,19 @@ function PongGamePage() {
 		const	intervalId = setInterval(async() => {
 			socket.emit('calcGameData', { gameRoom: roomName });
 		}, delay);
-		const	handleLiveData = ({action}: {action: ILiveData}) => {
+		const	handleLiveData = ({action}: {action: ILobby}) => {
 			if (!action)
 				return ;
-			setLiveData(action);
+			// setLiveData(action);
+			// setLiveRoom(...action, action)
+			setLiveRoom(prevLiveRoom => ({...prevLiveRoom, ...action}));
 		}
-		const	finishGameData = ({action, isTie}: {action: number, isTie: boolean}) => {
+		const	finishGameData = ({ result }: { result: string }) => {
 			clearInterval(intervalId);
-			setWinner(isTie ? 'tie' : action);
+			setResult(result)
 			setTimeout(() => { // 5 saniye sonra /game 'ye yonlendirilecek.
 				navigate('/game', {replace: true});
-			}, 5000);
+			}, 15000);
 		}
 		socket.on('updateGameData', handleLiveData);
 		socket.on('finishGameData', finishGameData);
@@ -166,37 +169,38 @@ function PongGamePage() {
 		}
 	}, [])
 
+	useEffect(() => {
+		console.log("liveRRRooom", liveRoom);
+	}, [liveRoom])
+
 	const	leaveRoom = () => {
 		socket.emit('leaveGameRoom', {
 			gameRoom: roomName,
 		});
 	}
 
+	if (!liveRoom)
+		return (<LoadingPage/>);
+
 	return (
 		<div>
 			<button onClick={leaveRoom}>Leave Game Room BRUH</button>
 			<h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-				{winner === undefined
-					? `TIME: ${liveData?.duration}`
-					: winner === 'tie'
-						? 'TIME IS UP! TIE'
-						: `Winner Player ${
-							liveRoom?.pLeft.id === winner
-								? liveRoom.pLeft.login
-								: liveRoom?.pRight.login
-							}`
+				{result === undefined
+					? `TIME: ${liveRoom.duration}`
+					: result
 				}
 			</h1>
 			<div className="Pong">
 				<div className="container">
 					<div className="gameField">
-						<p className="PlayerName" id="leftPlayerName">{liveRoom?.pLeft.login}</p>
-						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom?.pRight.login}</p>
-						<div className="ball" style={{top: liveData?.ballLocationY, left: liveData?.ballLocationX}}/>
-						<div className="player1" id="player1" style={{top: liveData?.pLeftLocation + 'px',}} />
-						<div className="player2" id="player2" style={{top: liveData?.pRightLocation + 'px',}} />
-						<div className="left-score">{liveData?.pLeftScore}</div>
-						<div className="right-score">{liveData?.pRightScore}</div>
+						<p className="PlayerName" id="leftPlayerName">{liveRoom.playerL.user.login}</p>
+						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom.playerR.user.login}</p>
+						<div className="ball" style={{top: liveRoom.ball.y, left: liveRoom.ball.x}}/>
+						<div className="player1" id="player1" style={{top: liveRoom.playerL.location + 'px'}} />
+						<div className="player2" id="player2" style={{top: liveRoom.playerR.location + 'px'}} />
+						<div className="left-score">{liveRoom.playerL.score}</div>
+						<div className="right-score">{liveRoom.playerR.score}</div>
 					</div>
 				</div>
 			</div>

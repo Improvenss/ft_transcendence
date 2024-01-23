@@ -34,10 +34,9 @@ export class GameController {
 				throw new NotFoundException(`Game[${name}] not found!`);
 
 			if (!game.players.some((player) => player.id === user.id)) {
-			// if (!(user.id === game.userL.id || user.id === game.userR.id)) {
 				throw new NotFoundException(`User not found in game[${name}]`);
 			}
-			if (game.isGameStarted && lobby)
+			if (game.running && lobby)
 				throw (new Error(`Game started. You can't enter lobby(${name})!`));
 			delete game.password;
 			return (game);
@@ -133,11 +132,13 @@ export class GameController {
 			console.log(`${C.B_PURPLE}PATCH: /game/room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
 			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
 			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
-			if (singleRoom.isGameStarted)
+			if (singleRoom.running)
 				this.chatGateway.server.emit(`lobbyListener:${room}`, {action: 'startGame'});
 			else
+			{
 				this.chatGateway.server.emit(`lobbyListener:${room}`, singleRoom);
-			return (singleRoom);
+			}
+			return ({ success: true })
 		}
 		catch (err)
 		{
@@ -157,6 +158,7 @@ export class GameController {
 				room: room,
 				user: user,
 			});
+			this.chatGateway.server.emit(`lobbyListener:${room}`);
 			return (responseLeaveGameLobby);
 		} catch (err) {
 			console.log("@Delete('/game/room/leave'): ", err.message);

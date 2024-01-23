@@ -17,135 +17,112 @@ export class GameService {
 		private readonly	usersService: UsersService,
 	) {}
 
-	// restartBall(
-	// 	gameRoomData: Game
-	// )
-	// {
-	// 	const newPos = Math.floor(Math.random() * 2);
-	// 	const moves = [
-	// 		{ x: -4, y: -2 },
-	// 		{ x: -3, y: -4 },
-	// 		{ x: -3, y: 3 },
-	// 		{ x: -3, y: 2 },
-	// 		{ x: 4, y: -2 },
-	// 		{ x: 2, y: -4 },
-	// 	];
-	// 	const initialMove = moves[Math.floor(Math.random() * moves.length)];
-	// 	gameRoomData.ballSpeedX = initialMove.x;
-	// 	gameRoomData.ballSpeedY = initialMove.y;
-	// 	gameRoomData.ballLocationX = 479;
-	// 	if (newPos == 0)
-	// 		gameRoomData.ballLocationY = 22;
-	// 	else
-	// 		gameRoomData.ballLocationY = 757;
-	// }
+	restartBall(
+		grd: Game
+	)
+	{
+		const newPos = Math.floor(Math.random() * 2);
+		const moves = [
+			{ x: -4, y: -2 },
+			{ x: -3, y: -4 },
+			{ x: -3, y: 3 },
+			{ x: -3, y: 2 },
+			{ x: 4, y: -2 },
+			{ x: 2, y: -4 },
+		];
+		const initialMove = moves[Math.floor(Math.random() * moves.length)];
+		grd.ball = { x: 479, speedX: initialMove.x, speedY: initialMove.y };
+		if (newPos == 0)
+			grd.ball.y = 22;
+		else
+			grd.ball.y = 757;
+	}
 
-	// async	calcGameLoop(
-	// 	// { gameRoomData, }
-	// 	// : { gameRoomData: Game }
-	// 	gameRoomData: Game
-	// ){
-	// 	if (!gameRoomData)
-	// 		return ;
+	async	calcGameLoop(
+		grd: Game // grd -> gameRoomData
+	){
+		if (!grd)
+			return ;
 
-	// 	if (gameRoomData.duration <= 0)
-	// 	{
-	// 		if (gameRoomData.pLeftScore > gameRoomData.pRightScore)
-	// 			return ({ winner: gameRoomData.pLeftId });
-	// 		else if (gameRoomData.pLeftScore < gameRoomData.pRightScore)
-	// 			return ({ winner: gameRoomData.pRightId });
-	// 		else
-	// 			return ({ winner: gameRoomData.pLeftId, isTie: true });
-	// 	}
+		// zaman bittiginde calisan yer
+		if (grd.duration <= 0)
+			grd.running = false;
 
-	// 	// top hareketi
-	// 	if (gameRoomData.ballLocationY + 42 >= 800
-	// 		|| gameRoomData.ballLocationY <= 0)
-	// 		gameRoomData.ballSpeedY *= -1;
+		// top hareketi
+		// if (grd.ball.y + 42 >= 800
+		if (grd.ball.y + 42 >= 800 || grd.ball.y <= 0)
+			grd.ball.speedY *= -1;
 	
-	// 	if (gameRoomData.ballLocationY + 21 >= gameRoomData.pLeftLocation
-	// 		&& gameRoomData.ballLocationY + 21 <= gameRoomData.pLeftLocation + 120)
-	// 	{ //Left Player Collision
-	// 		if (gameRoomData.ballLocationX <= 10)
-	// 			{
-	// 				gameRoomData.ballSpeedX *= -1;
-	// 				gameRoomData.ballSpeedY += gameRoomData.pLeftSpeed / 10;
-	// 				gameRoomData.ballLocationX += 3;
-	// 			}
-	// 	}
-	// 	else if (gameRoomData.ballLocationY + 21 >= gameRoomData.pRightLocation
-	// 		&& gameRoomData.ballLocationY + 21 <= gameRoomData.pRightLocation + 120)
-	// 	{ //Right Player Collision
-	// 		if (gameRoomData.ballLocationX + 42 >= 990)
-	// 		{
-	// 			gameRoomData.ballSpeedX *= -1;
-	// 			gameRoomData.ballSpeedY += gameRoomData.pRightSpeed / 10;
-	// 			gameRoomData.ballLocationX -= 3;
-	// 		}
-	// 	}
+		if (grd.ball.y + 21 >= grd.playerL.location
+			&& grd.ball.y + 21 <= grd.playerL.location + 120)
+		{ //Left Player Collision
+			if (grd.ball.x <= 10)
+				{
+					grd.ball.speedX *= -1;
+					grd.ball.speedY += grd.playerL.speed / 10;
+					grd.ball.x += 3;
+				}
+		}
+		else if (grd.ball.y + 21 >= grd.playerR.location
+			&& grd.ball.y + 21 <= grd.playerR.location + 120)
+		{ //Right Player Collision
+			if (grd.ball.x + 42 >= 990)
+			{
+				grd.ball.speedX *= -1;
+				grd.ball.speedY += grd.playerR.speed / 10;
+				grd.ball.x -= 3;
+			}
+		}
 
-	// 	//add score to left
-	// 	if (gameRoomData.ballLocationX + 42 >= 1000)
-	// 	{
-	// 		gameRoomData.pLeftScore += 1;
-	// 		if (gameRoomData.pLeftScore >= gameRoomData.winScore)
-	// 			return ({ winner: gameRoomData.pLeftId });
-	// 		this.restartBall(gameRoomData);
-	// 	}
-	// 	//add score to right
-	// 	else if (gameRoomData.ballLocationX <= 0)
-	// 	{
-	// 		gameRoomData.pRightScore += 1;
-	// 		if (gameRoomData.pRightScore >= gameRoomData.winScore)
-	// 			return ({ winner: gameRoomData.pRightId });
-	// 		this.restartBall(gameRoomData);
-	// 	}
+		//add score to left
+		if (grd.ball.x + 42 >= 1000)
+		{
+			if (grd.playerL.score >= grd.winScore){
+				grd.running = false;
+			}
+				// return ({ winner: grd.playerL.user.id });
+			grd.playerL.score += 1;
+			this.restartBall(grd);
+		}
+		//add score to right
+		else if (grd.ball.x <= 0)
+		{
+			if (grd.playerR.score >= grd.winScore){
+				grd.running = false;
+			}
+				// return ({ winner: grd.playerR.user.id });
+			grd.playerR.score += 1;
+			this.restartBall(grd);
+		}
 
-	// 	gameRoomData.ballLocationX += gameRoomData.ballSpeedX;
-	// 	gameRoomData.ballLocationY += gameRoomData.ballSpeedY;
+		grd.ball.x += grd.ball.speedX;
+		grd.ball.y += grd.ball.speedY;
 		
-	// 	// sol oyuncu hareketi
-	// 	if (gameRoomData.pLeftLocation + gameRoomData.pLeftSpeed <= 0)
-	// 		gameRoomData.pLeftLocation = 0;
-	// 	else if (gameRoomData.pLeftLocation + gameRoomData.pLeftSpeed + 120 >= 800)
-	// 		gameRoomData.pLeftLocation = 800 - 120;
-	// 	else
-	// 		gameRoomData.pLeftLocation += gameRoomData.pLeftSpeed;
+		// sol oyuncu hareketi
+		if (grd.playerL.location + grd.playerL.speed <= 0)
+			grd.playerL.location = 0;
+		else if (grd.playerL.location + grd.playerL.speed + 120 >= 800)
+			grd.playerL.location = 800 - 120;
+		else
+			grd.playerL.location += grd.playerL.speed;
 
-	// 	// sag oyuncu hareketi
-	// 	if (gameRoomData.pRightLocation + gameRoomData.pRightSpeed <= 0)
-	// 		gameRoomData.pRightLocation = 0;
-	// 	else if (gameRoomData.pRightLocation + gameRoomData.pRightSpeed + 120>= 800)
-	// 		gameRoomData.pRightLocation = 800 - 120;
-	// 	else
-	// 		gameRoomData.pRightLocation += gameRoomData.pRightSpeed;
+		// sag oyuncu hareketi
+		if (grd.playerR.location + grd.playerR.speed <= 0)
+			grd.playerR.location = 0;
+		else if (grd.playerR.location + grd.playerR.speed + 120>= 800)
+			grd.playerR.location = 800 - 120;
+		else
+			grd.playerR.location += grd.playerR.speed;
 
-	// 	const	returnData: ILiveData = {
-	// 		ballLocationX: gameRoomData.ballLocationX,
-	// 		ballLocationY: gameRoomData.ballLocationY,
-	// 		pLeftLocation: gameRoomData.pLeftLocation,
-	// 		pRightLocation: gameRoomData.pRightLocation,
-	// 		pLeftScore: gameRoomData.pLeftScore,
-	// 		pRightScore: gameRoomData.pRightScore,
-	// 		duration: gameRoomData.duration,
-	// 	};
-	// 	return (returnData);
-	// }
-
-	// async	finishGameRoom(
-	// 	{ socket, gameData, isTie }
-	// 	: { socket: Socket, gameData: Game, isTie: boolean }
-	// ){
-	// 	if (!gameData)
-	// 		return ;
-	// 	console.log(`Oyun Bitti! Room -> (${gameData.name})`);
-	// 	if (isTie)
-	// 		return ({ winner: 0, isTie: true });
-	// 	if (socket.id === gameData.pLeftSocketId)
-	// 		return ({ winner: gameData.pRightId });
-	// 	else
-	// 		return ({ winner: gameData.pLeftId });
-	// }
+		const	returnData: ILiveData = {
+			ball: grd.ball,
+			playerL: grd.playerL,
+			playerR: grd.playerR,
+			duration: grd.duration,
+			running: grd.running,
+		};
+		return (returnData);
+	}
 
 	async	transferPlayer(
 		{user}
@@ -195,7 +172,7 @@ export class GameService {
 				createGameDto.password,
 				bcrypt.genSaltSync(+process.env.DB_PASSWORD_SALT)),
 		})
-		// await this.transferPlayer({user: tmpUser, socket: socket});
+		await this.transferPlayer({ user: tmpUser });
 	// eski oyun odasi
 //  ----------------------
 //  POST: /room: @Body():  {
@@ -345,10 +322,9 @@ export class GameService {
 		if (singleRoom.players.length >= 2)
 			throw (new Error("Game Room is full!"));
 		await this.transferPlayer({ user: user }); // old - new game room
-		if (singleRoom.players.length <= 1)
-			if (singleRoom.players[0])
-				singleRoom.playerR.user = user;
 		singleRoom.players.push(user);
+		singleRoom.playerR.user = user;
+		// singleRoom.afterUpdate = !singleRoom.afterUpdate;
 		return (await this.gameRepository.save(singleRoom));
 	}
 

@@ -15,16 +15,19 @@ export interface ILiveData {
 		speedX?: number,
 		speedY?: number,
 	},
-	userL?: {
+	playerL?: {
+		user?: User,
 		location?: number,
 		speed?: number,
 		score?: number,
 	},
-	userR?: {
+	playerR?: {
+		user?: User,
 		location?: number,
 		speed?: number,
 		score?: number,
 	},
+	running?: boolean,
 }
 
 export class BallDto {
@@ -102,7 +105,7 @@ export class CreateGameDto {
   
 	@IsBoolean()
 	@IsOptional()
-	isGameStarted?: boolean;
+	running?: boolean;
  
 	@IsInstance(BallDto)
 	@IsOptional()

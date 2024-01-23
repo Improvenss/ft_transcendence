@@ -8,24 +8,24 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 import { CreateGameHistoryDto } from './dto/create-gameHistory.dto';
 /*
 const calculateXP = (
-	userL: {level: number, score: number},
-	userR: {level: number, score: number}
+	playerL: {level: number, score: number},
+	playerR: {level: number, score: number}
 ) => {
 	let xpEarnedL: number, xpEarnedR: number;
 
 	// Skor farkını hesapla
-	let scoreDifference = Math.abs(userL.score - userR.score);
+	let scoreDifference = Math.abs(playerL.score - playerR.score);
 
 	// Kazanan ve kaybedenin XP'sini hesapla
-	if (userL.score > userR.score) {
-		xpEarnedL = userL.level > userR.level ? (10 + scoreDifference) : (20 + scoreDifference);
+	if (playerL.score > playerR.score) {
+		xpEarnedL = playerL.level > playerR.level ? (10 + scoreDifference) : (20 + scoreDifference);
 		xpEarnedR = 5 + scoreDifference;
-	} else if (userL.score < userR.score) {
+	} else if (playerL.score < playerR.score) {
 		xpEarnedL = 5 + scoreDifference;
-		xpEarnedR = userR.level > userL.level ? (10 + scoreDifference) : (20 + scoreDifference);
+		xpEarnedR = playerR.level > playerL.level ? (10 + scoreDifference) : (20 + scoreDifference);
 	} else { // Beraberlik durumu
-		xpEarnedL = userL.level > userR.level ? 10 : 15;
-		xpEarnedR = userR.level > userL.level ? 10 : 15;
+		xpEarnedL = playerL.level > playerR.level ? 10 : 15;
+		xpEarnedR = playerR.level > playerL.level ? 10 : 15;
 	}
 
 	return ({xpEarnedL, xpEarnedR});
@@ -34,25 +34,25 @@ const calculateXP = (
 
 //--> Fark artınca kaybeden kişininde kazandığı xp artıyor, azalması gerek.
 const calculateXP = (
-	userL: {level: number, score: number},
-	userR: {level: number, score: number}
+	playerL: {level: number, score: number},
+	playerR: {level: number, score: number}
 ) => {
 	let xpEarnedL: number, xpEarnedR: number;
 
 	// Skor ve seviye farklarını hesapla
-	let scoreDifference = Math.abs(userL.score - userR.score);
-	let levelDifference = Math.abs(userL.level - userR.level);
+	let scoreDifference = Math.abs(playerL.score - playerR.score);
+	let levelDifference = Math.abs(playerL.level - playerR.level);
 
 	// Kazanan ve kaybedenin XP'sini hesapla
-	if (userL.score > userR.score) {
-		xpEarnedL = Math.max(0, userL.level > userR.level ? (10 + scoreDifference - levelDifference) : (20 + scoreDifference + levelDifference));
+	if (playerL.score > playerR.score) {
+		xpEarnedL = Math.max(0, playerL.level > playerR.level ? (10 + scoreDifference - levelDifference) : (20 + scoreDifference + levelDifference));
 		xpEarnedR = Math.max(0, 5 + scoreDifference - levelDifference);
-	} else if (userL.score < userR.score) {
+	} else if (playerL.score < playerR.score) {
 		xpEarnedL = Math.max(0, 5 + scoreDifference - levelDifference);
-		xpEarnedR = Math.max(0, userR.level > userL.level ? (10 + scoreDifference - levelDifference) : (20 + scoreDifference + levelDifference));
+		xpEarnedR = Math.max(0, playerR.level > playerL.level ? (10 + scoreDifference - levelDifference) : (20 + scoreDifference + levelDifference));
 	} else { // Beraberlik durumu
-		xpEarnedL = Math.max(0, userL.level > userR.level ? (10 - levelDifference) : (15 + levelDifference));
-		xpEarnedR = Math.max(0, userR.level > userL.level ? (10 - levelDifference) : (15 + levelDifference));
+		xpEarnedL = Math.max(0, playerL.level > playerR.level ? (10 - levelDifference) : (15 + levelDifference));
+		xpEarnedR = Math.max(0, playerR.level > playerL.level ? (10 - levelDifference) : (15 + levelDifference));
 	}
 	const xpFactor = 10;
 	xpEarnedL *= xpFactor;
@@ -96,68 +96,68 @@ export class UsersService {
 	}
 
 	async createGameHistory(
-		userLId: number,
-		userRId: number,
-		userLScore: number,
-		userRScore: number,
+		playerLId: number,
+		playerRId: number,
+		playerLScore: number,
+		playerRScore: number,
 		gameName: string,
 	){
-		const userL = await this.getUserPrimary({id: userLId});
-		const userR = await this.getUserPrimary({id: userRId});
+		const playerL = await this.getUserPrimary({id: playerLId});
+		const playerR = await this.getUserPrimary({id: playerRId});
 
 		const {xpEarnedL, xpEarnedR} = calculateXP(
-			{level: userL.xp.level, score: userLScore},
-			{level: userR.xp.level, score: userRScore}
+			{level: playerL.xp.level, score: playerLScore},
+			{level: playerR.xp.level, score: playerRScore}
 		);
 
-		const userLHistoryDto: CreateGameHistoryDto = {
-			user: userL,
+		const playerLHistoryDto: CreateGameHistoryDto = {
+			user: playerL,
 			date: new Date(),
 			name: gameName,
-			rival: userR.login,
-			result: ( userLScore > userRScore ? GameStatus.WIN : userLScore < userRScore ? GameStatus.LOSE : GameStatus.TIE ),
-			score: userLScore + '-' + userRScore,
+			rival: playerR.login,
+			result: ( playerLScore > playerRScore ? GameStatus.WIN : playerLScore < playerRScore ? GameStatus.LOSE : GameStatus.TIE ),
+			score: playerLScore + '-' + playerRScore,
 			earnedXp: xpEarnedL
 		};
 
-		const userRHistoryDto: CreateGameHistoryDto = {
-			user: userR,
+		const playerRHistoryDto: CreateGameHistoryDto = {
+			user: playerR,
 			date: new Date(),
 			name: gameName,
-			rival: userL.login,
-			result: ( userRScore > userLScore ? GameStatus.WIN : userRScore < userLScore ? GameStatus.LOSE : GameStatus.TIE ),
-			score: userRScore + '-' + userLScore,
+			rival: playerL.login,
+			result: ( playerRScore > playerLScore ? GameStatus.WIN : playerRScore < playerLScore ? GameStatus.LOSE : GameStatus.TIE ),
+			score: playerRScore + '-' + playerLScore,
 			earnedXp: xpEarnedR
 		};
 
-		const userLHistory = new GameHistory(userLHistoryDto);
-		const userRHistory = new GameHistory(userRHistoryDto);
+		const playerLHistory = new GameHistory(playerLHistoryDto);
+		const playerRHistory = new GameHistory(playerRHistoryDto);
 
-		userL._xp += xpEarnedL;
-		userR._xp += xpEarnedR;
+		playerL._xp += xpEarnedL;
+		playerR._xp += xpEarnedR;
 
 		//birden fazla yapı olduğu için tek bir await altında çalıştırıyoruz.
 		await Promise.all([
 			//----------------XP save örnek--------------------------
-			this.usersRepository.update(userL.id, { _xp: userL._xp + xpEarnedL }),
-			this.usersRepository.update(userR.id, { _xp: userR._xp + xpEarnedR }),
-			// this.usersRepository.save([userL, userR]),
+			this.usersRepository.update(playerL.id, { _xp: playerL._xp + xpEarnedL }),
+			this.usersRepository.update(playerR.id, { _xp: playerR._xp + xpEarnedR }),
+			// this.usersRepository.save([playerL, playerR]),
 			// this.usersRepository
 			// 	.createQueryBuilder()
 			// 	.update(User)
 			// 	.set({ _xp: () => `_xp + ${xpEarnedL}` })
-			// 	.where("id IN (:...userIds)", { userIds: [userL.id, userR.id] })
+			// 	.where("id IN (:...userIds)", { userIds: [playerL.id, playerR.id] })
 			// 	.execute(),
 			//--------------------------------------------------------
-			this.updateAchievements(userL, userLHistoryDto.result, userR),
-			this.updateAchievements(userR, userRHistoryDto.result, userL),
-			// this.checkStreaks(userL, userLHistoryDto.result),
-			// this.checkStreaks(userR, userRHistoryDto.result),
-			// this.checkLeaderboardChampion(userL),
-			// this.checkLeaderboardChampion(userR),
+			this.updateAchievements(playerL, playerLHistoryDto.result, playerR),
+			this.updateAchievements(playerR, playerRHistoryDto.result, playerL),
+			// this.checkStreaks(playerL, playerLHistoryDto.result),
+			// this.checkStreaks(playerR, playerRHistoryDto.result),
+			// this.checkLeaderboardChampion(playerL),
+			// this.checkLeaderboardChampion(playerR),
 		]);
 
-		return (await this.gameHistoryRepository.save([userLHistory, userRHistory]));
+		return (await this.gameHistoryRepository.save([playerLHistory, playerRHistory]));
 	}
 
 	async updateAchievements(user: User, result: GameStatus, rival: User) {
