@@ -16,13 +16,21 @@ export interface ILiveData {
 		speedY?: number,
 	},
 	playerL?: {
-		user?: User,
+		user?: {
+			id?: number,
+			login?: string,
+			socketId?: string,
+		};
 		location?: number,
 		speed?: number,
 		score?: number,
 	},
 	playerR?: {
-		user?: User,
+		user?: {
+			id?: number,
+			login?: string,
+			socketId?: string,
+		};
 		location?: number,
 		speed?: number,
 		score?: number,
@@ -50,8 +58,12 @@ export class BallDto {
   
 export class PlayerDto {
 
-	@IsInstance(User)
-	user?: User;
+	@IsOptional()
+	user?: {
+		id?: number,
+		login?: string,
+		socketId?: string,
+	};
 	
 	@IsNumber()
 	@IsOptional()

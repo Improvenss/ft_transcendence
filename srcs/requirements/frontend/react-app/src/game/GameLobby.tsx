@@ -28,7 +28,11 @@ import Modal from '../utils/Modal';
 // }
 
 interface IPlayer {
-	user: IUser,
+	user: {
+		id: number,
+		login: string,
+		socketId: string,
+	},
 	location: number,
 	ready: boolean,
 	score: number,
@@ -172,20 +176,20 @@ const GameLobby = () => {
 					<div className='leftPlayer'>
 						<img
 							className='image'
-							src={lobby.playerL.user.avatar ? lobby.playerL.user.avatar : lobby.playerL.user.imageUrl}
+							src={lobby.players[0].avatar ? lobby.players[0].avatar : lobby.players[0].imageUrl}
 							alt={lobby.playerL.user.login}
 						/>
-						<span>{lobby.playerL.user.nickname ? lobby.playerL.user.nickname : lobby.playerL.user.login}</span>
+						<span>{lobby.players[0].nickname ? lobby.players[0].nickname : lobby.playerL.user.login}</span>
 					</div>
 				) : 'null'}
 				{lobby.playerR.user ? (
 					<div className='rightPlayer' title='kick' onClick={() => console.log("kick yapısını ekle")}>
 						<img
 							className='image'
-							src={lobby.playerR.user.avatar ? lobby.playerR.user.avatar : lobby.playerR.user.imageUrl}
+							src={lobby.players[1].avatar ? lobby.players[1].avatar : lobby.players[1].imageUrl}
 							alt={lobby.playerR.user.login}
 						/>
-						<span>{lobby.playerR.user.nickname ? lobby.playerR.user.nickname : lobby.playerR.user.login}</span>
+						<span>{lobby.players[1].nickname ? lobby.players[1].nickname : lobby.playerR.user.login}</span>
 						<IconKick id='kick'/>
 					</div>
 				) : (

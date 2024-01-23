@@ -20,7 +20,11 @@ export class Ball {
 }
 
 export class Player {
-	user?: User;
+	user?: {
+		id?: number,
+		login?: string,
+		socketId?: string,
+	};
 	score?: number;
 	location?: number;
 	speed?: number;
@@ -43,21 +47,35 @@ export class Game {
 		}
 		if (!this.playerL){
 			this.playerL = {
-				user: (this.players && this.players[0]) ? this.players[0] : null,
+				user: null,
 				score: 0,
 				location: 400,
 				speed: 0,
 				ready: true
 			};
+			if (this.players && this.players[0]){
+				this.playerL.user = {
+					id: this.players[0].id,
+					login: this.players[0].login,
+					socketId: this.players[0].socketId,
+				}
+			}
 		}
 		if (!this.playerR){
 			this.playerR = {
-				user: (this.players && this.players[1]) ? this.players[1] : null,
+				user: null,
 				score: 0,
 				location: 400,
 				speed: 0,
 				ready: false
 			};
+			if (this.players && this.players[1]){
+				this.playerL.user = {
+					id: this.players[1].id,
+					login: this.players[1].login,
+					socketId: this.players[1].socketId,
+				}
+			}
 		}
 	}
 

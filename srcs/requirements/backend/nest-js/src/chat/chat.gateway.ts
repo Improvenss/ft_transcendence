@@ -59,15 +59,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}, false);
 		if (userData && userData.currentRoom)
 		{
-			const	room = userData.currentRoom;
-			delete userData.currentRoom;
-			if (room.playerL.user.id === userData.id)
-				await this.gameService.patchGameRoom(room.name, {
-					playerL: { user: userData },
+			if (userData.currentRoom.playerL.user.id === userData.id)
+				await this.gameService.patchGameRoom(userData.currentRoom.name, {
+					playerL: {
+						...userData.currentRoom.playerL,
+						user: {id: userData.id, login: userData.login, socketId: userData.socketId }
+					},
 				})
 			else
-				await this.gameService.patchGameRoom(room.name, {
-					playerR: { user: userData },
+				await this.gameService.patchGameRoom(userData.currentRoom.name, {
+					playerR: {
+						...userData.currentRoom.playerR,
+						user: {id: userData.id, login: userData.login, socketId: userData.socketId }
+					},
 				})
 		}
 	}
@@ -82,6 +86,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			relation: { currentRoom: true },
 			primary: false,
 		}, false);
+		//--> oyun esnasında socket bağlantısı kopunca score göre sonuçlanıyor, çıkan kişiyi kaybettirmemiz lazım.
 		if (userData && userData.currentRoom)
 			await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
 		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
@@ -360,7 +365,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		const	denemeData = this.gameRoomData.get(gameRoom);
 		const	returnData = await this.gameService.calcGameLoop(denemeData);
-		if (returnData.running)
+		if (returnData && returnData.running)
 			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
 		else
 			this.finishGame(gameRoom);
