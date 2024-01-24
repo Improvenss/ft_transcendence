@@ -93,6 +93,44 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		client.disconnect(true);
 	}
 
+	//------------------------------------------------------------------------------------------------------
+	private gameLoopInterval: NodeJS.Timeout;
+
+	startGameLoop(roomName: string) {
+		const	denemeData = this.gameRoomData.get(roomName);
+		this.gameLoopInterval = setInterval(() => {
+			// Oyun durumu güncelleme mantığı buraya gelebilir
+			// this.updateGameState();
+			const {data} = this.gameService.calcGameLoop(denemeData);
+			this.server.to(roomName).emit(`updateGameData`, {action: data});
+			if (!data.running)
+				this.stopGameLoop(roomName);
+
+			// Oyun durumunu istemcilere gönder
+			// this.sendGameStateToClients();
+
+
+		}, 16); // Örnek olarak her 1 saniyede bir güncelleme
+	}
+
+	stopGameLoop(roomName: string) {
+		clearInterval(this.gameLoopInterval);
+		this.finishGame(roomName);
+	}
+
+	updateGameState() {
+		// Oyun durumu güncelleme mantığı buraya gelebilir
+		// Örneğin: Hareketli nesnelerin konumlarını güncelleme, çarpışma kontrolü, vb.
+	}
+
+	sendGameStateToClients() {
+		// Oyun durumunu istemcilere gönderme mantığı buraya gelebilir
+		// this.server.emit('gameState', this.gameState);
+	}
+
+	//------------------------------------------------------------------------------------------------------
+
+
 	getUserSocket(userId: number){
 		const userSocket = this.connectedIds.get(userId);
 		if (!userSocket){	
@@ -374,13 +412,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			{ gameRoom: string }
 	){
 		const	denemeData = this.gameRoomData.get(gameRoom);
-		const	returnData = await this.gameService.calcGameLoop(denemeData);
-		if (returnData && returnData.running)
-			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+		const	{data} = await this.gameService.calcGameLoop(denemeData);
+		if (data && data.running)
+			this.server.to(gameRoom).emit(`updateGameData`, {action: data});
 			// socket.emit(`updateGameData`, {action: returnData});
 		else
 		{
-			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+			this.server.to(gameRoom).emit(`updateGameData`, {action: data});
 			// socket.emit(`updateGameData`, {action: returnData});
 			this.finishGame(gameRoom);
 		}

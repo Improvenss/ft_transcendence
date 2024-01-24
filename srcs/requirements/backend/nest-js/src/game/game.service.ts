@@ -41,9 +41,9 @@ export class GameService {
 			grd.ball.y = 757;
 	}
 
-	async	calcGameLoop(
-		grd: Game // grd -> gameRoomData
-	){
+	calcGameLoop(grd: Game): {
+		data: ILiveData;
+	}{
 		if (!grd)
 			return ;
 
@@ -122,7 +122,7 @@ export class GameService {
 			duration: grd.duration,
 			running: grd.running,
 		};
-		return (returnData);
+		return ({data: returnData});
 	}
 
 	async	transferPlayer(

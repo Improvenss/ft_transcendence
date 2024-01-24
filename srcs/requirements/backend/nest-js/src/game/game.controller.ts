@@ -133,8 +133,14 @@ export class GameController {
 			console.log(`${C.B_PURPLE}PATCH: /game/room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
 			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
 			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
-			if (singleRoom.running)
+			if (singleRoom.running){
+
 				this.chatGateway.server.emit(`lobbyListener:${room}`, {action: 'startGame'});
+				//--> Burada oyun başlıyor
+				setTimeout(() => {
+					this.chatGateway.startGameLoop(room);
+				}, 3000);
+			}
 			else
 			{
 				this.chatGateway.server.emit(`lobbyListener:${room}`, singleRoom);
