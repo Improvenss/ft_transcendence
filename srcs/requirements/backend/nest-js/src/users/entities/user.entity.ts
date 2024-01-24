@@ -87,7 +87,7 @@ export class User {
 
 	//----------------------Optional----------------------------//
 
-	@Column({ nullable: true })
+	@Column({ nullable: true, unique: true })
 	public nickname: string; // Kullanıcı tarafından eklenen ekstra isim
 
 	@Column({ nullable: true })
@@ -209,6 +209,9 @@ export enum NotificationType {
 	SEND_FRIEND_REQUEST = 'sendFriendRequest',
 	ACCEPT_FRIEND_REQUEST = 'acceptFriendRequest',
 	DECLINE_FRIEND_REQUEST = 'declineFriendRequest',
+	SEND_GAME_INVITE_REQUEST = 'sendGameInviteRequest',
+	ACCEPT_GAME_INVITE_REQUEST = 'acceptGameInviteRequest',
+	DECLINE_GAME_INVITE_REQUEST = 'declineGameInviteRequest',
 	UNFRIEND = 'unFriend',
 	INVITE = 'invite',
 }

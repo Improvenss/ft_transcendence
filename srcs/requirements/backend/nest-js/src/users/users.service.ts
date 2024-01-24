@@ -368,6 +368,61 @@ export class UsersService {
 		}
 		return (await this.createNotif(sourceUser.id, destId, action, message));
 	}
+	async gameInviteRequest(
+		action: 'sendGameInviteRequest' | 'acceptGameInviteRequest' | 'declineGameInviteRequest' | 'unFriend',
+		sourceUser: User,
+		destId: number,
+		gameRoom: string,
+	){
+		if (sourceUser.id === destId)
+			throw new Error("You can't invite yourself.");
+
+		const targetUser = await this.getUserRelation({
+			user: { id: destId },
+			relation: { friends: true },
+			primary: true,
+		})
+		if (!targetUser)
+			throw new NotFoundException('User not found!');
+		let message;
+		switch (action){
+			case 'sendGameInviteRequest':
+				console.log("SENDED:" + sourceUser.login + "**");
+				message =  `${sourceUser.displayname}(${sourceUser.login}) invited a Game! ROOM NAME:${gameRoom}`;
+				break;
+			case 'acceptGameInviteRequest':
+				const requester = await this.getUserRelation({
+					user: { login: sourceUser.login},
+					relation: { friends: true },
+					primary: true,
+				})
+				if (!requester)
+					throw new NotFoundException('User not found!');
+
+				message = `${requester.displayname}(${sourceUser.login}) accepted the invite request.`;
+				break;
+			case 'declineGameInviteRequest':
+				message = `${sourceUser.displayname}(${sourceUser.login}) rejected the room invite request!`;
+				break;
+			case 'unFriend':
+				message = `${sourceUser.displayname}(${sourceUser.login}) is no longer friends with you.!`;
+				const requesterUser = await this.getUserRelation({
+					user: { login: sourceUser.login },
+					relation: { friends: true },
+					primary: true,
+				})
+				if (!requesterUser)
+					throw new NotFoundException('User not found!');
+
+				targetUser.friends = targetUser.friends.filter((user) => user.id !== sourceUser.id);
+				requesterUser.friends = requesterUser.friends.filter((user) => user.id !== targetUser.id);
+				await this.usersRepository.save([requesterUser, targetUser]);
+				break;
+			default:
+				break;
+		}
+		return (await this.createNotif(sourceUser.id, destId, action, message));
+	}
 
 	async blockAction(
 		action: 'block' | 'unblock',

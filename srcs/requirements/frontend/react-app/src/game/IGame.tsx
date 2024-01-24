@@ -5,6 +5,7 @@ export interface IGame {
 	winScore: number;
 	duration: number;
 	description: string;
+	invitedPlayer: string | null;
 	type: 'public' | 'private',
 }
 
@@ -16,5 +17,6 @@ export interface IGameRoom {
 	winScore: number,
 	duration: number,
 	description: string,
+	invitedPlayer: string | null,
 	type: 'public' | 'private',
 }

@@ -190,12 +190,13 @@ export class UsersController {
 	// 	}
 	// }
 
-	@Post('/:action/:user')
+	@Post('/:action/:user/:gameRoom')
 	async request(
 		@Req() {user}: {user: User},
 		@Param('action') action: string,
 		@Param('user') target: string,
-		@Query('notifID', ParseIntPipe) sourceNotif: number, // undefined gelmiyor bu yüzden 0 gönderiyorum
+		@Param('gameRoom') gameRoom: string,
+		@Query('notifID', ParseIntPipe) sourceNotif: number, // undefined gelmiyor bu yüzden 0 gönderiyorumi
 	){
 		try {
 			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${sourceNotif}]${C.END}`);
@@ -214,6 +215,10 @@ export class UsersController {
 					action === 'declineFriendRequest' ||
 					action === 'unFriend')
 				result = await this.usersService.friendRequest(action, user, targetUser.id);
+			else if (action === 'sendGameInviteRequest' ||
+				action === 'acceptGameInviteRequest' ||
+				action === 'declineGameInviteRequest' )
+				result =  await this.usersService.gameInviteRequest(action, user, targetUser.id, gameRoom);
 			else if (action === 'block' || action === 'unblock')
 				result = await this.usersService.blockAction(action, user.id, targetUser.id);
 			else

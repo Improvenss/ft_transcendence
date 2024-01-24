@@ -60,6 +60,7 @@ function CreateGame() {
 			winScore: winningScore,
 			duration: gameDuration,
 			description: description,
+			invitedPlayer: null,
 			type: password === '' ? 'public' : 'private'
 		}
 		console.log("createRoomObjrct", createRoomObject);

@@ -7,12 +7,14 @@ import { IMessage } from './iChannel';
 import { ReactComponent as IconMessage } from '../assets/chat/iconMessage.svg';
 import { formatDaytamp, formatTimestamp, isDifferentDay } from '../utils/dateUtils';
 import MessageInput from './MessageInput';
+import { useUser } from '../hooks/UserHook';
 
 function ActiveChannel({userId}:{userId:number}){
 	console.log("-->Active Channel<---");
 	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const {userInfo} = useUser();
 
 	const handleAdditionalMenuClick = () => { 
 		setChannelInfo(!channelInfo); // InfoChannel'ı etkinleştirmek/devre dışı bırakmak için durumu değiştirin
@@ -71,24 +73,28 @@ function ActiveChannel({userId}:{userId:number}){
 									</div>
 								) : null}
 								{(message.author.id !== userId) ? (
-									<div className='message taken'>
-										{(index === 0 || message.author.id !== messages[index - 1].author.id) ? (
-											<>
-												<img src={message.author.imageUrl} alt={message.author.imageUrl} className="user-image" />
-												<div className='first-message'>
-													<span className="icon-span"><IconMessage /></span>
-													<span className='username'>{message.author.login}</span>
-													<p>{formatMessageContent(message.content)}</p>
-													<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
-												</div>
-											</>
-										):(
-											<div className='last-message'>
-												<p>{formatMessageContent(message.content)}</p>
-												<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
+									<>
+										{!(userInfo.blockUsers.some((user) => user.id === message.author.id)) && (
+											<div className='message taken'>
+												{(index === 0 || message.author.id !== messages[index - 1].author.id) ? (
+													<>
+														<img src={message.author.imageUrl} alt={message.author.imageUrl} className="user-image" />
+														<div className='first-message'>
+															<span className="icon-span"><IconMessage /></span>
+															<span className='username'>{message.author.login}</span>
+															<p>{formatMessageContent(message.content)}</p>
+															<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
+														</div>
+													</>
+												):(
+													<div className='last-message'>
+														<p>{formatMessageContent(message.content)}</p>
+														<span className="timestamp">{formatTimestamp(message.sentAt)}</span>
+													</div>
+												)}
 											</div>
 										)}
-									</div>
+									</>
 								) : (
 									<div className='message sent'>
 										{(index === 0 || message.author.id !== messages[index - 1].author.id) && (

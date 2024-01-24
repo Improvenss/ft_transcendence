@@ -147,7 +147,7 @@
         }
       }
     },
-    "/users/{action}/{user}": {
+    "/users/{action}/{user}/{gameRoom}": {
       "post": {
         "operationId": "UsersController_request",
         "parameters": [
@@ -161,6 +161,14 @@
           },
           {
             "name": "user",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gameRoom",
             "required": true,
             "in": "path",
             "schema": {

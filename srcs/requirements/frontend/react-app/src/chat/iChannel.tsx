@@ -16,7 +16,7 @@ export interface IUser {
 
 export interface INotif {
 	id: number,
-	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'invite',
+	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'sendGameInviteRequest' | 'acceptGameInviteRequest' | 'declineGameInviteRequest' | 'invite',
 	// type: string,
 	text: string,
 	date: string,

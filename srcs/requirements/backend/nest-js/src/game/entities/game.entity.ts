@@ -119,6 +119,10 @@ export class Game {
 	@Column({ nullable: true, default: false })
 	public running: boolean;
 
+	@IsString()
+	@Column({ nullable: true })
+	public invitedPlayer: string;
+
 	@Column('jsonb', { nullable: true })
 	public ball: Ball;
 

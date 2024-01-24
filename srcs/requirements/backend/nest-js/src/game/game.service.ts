@@ -316,7 +316,7 @@ export class GameService {
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
 			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
-		if (singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
+		if (singleRoom.invitedPlayer != user.login && singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
 			throw (new Error("Password is WRONG!!!"));
 		if (singleRoom.players.length >= 2)
 			throw (new Error("Game Room is full!"));

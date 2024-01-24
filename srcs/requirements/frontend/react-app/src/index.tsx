@@ -28,19 +28,12 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: twoFA'nın css'ini düzelt.
  * TODO: twoFA'ya enter dinleme ekle.
  * TODO: consoldaki gereksiz çıktıları sil.
- * ----------------------------------------------------
- * TODO: Game'den sonra profilePage'yi güncelle
- * TODO: Game için model/mod eklenecek
- * TODO: Oyun için level ladder ekle
  * TODO: Settingsdeki contact ve about kısmını ekle/güncelle.
- * TODO: lobbydeyken farklı bir yere gidince kanaldan ayrılsın
- * TODO: loby leave'i ekle, kullanıcı kicki ekle, friend invite ekle
- * TODO: GameLobby'deyken player'ler sayfayi yenilediginde yani
- *  yeni socket olusturuldugunda GET islemi asamasinda bu guncel user verisiyle
- *  GameRoom'un verisini guncelle.
+ * ----------------------------------------------------
  * TODO: GameLobby sadece admin ise sag oyuncuyu kicklemeyi duzelt / frontend'i de duzelt.
- * TODO: GameLobby'den misafir oyuncu ayrilinca FEND'i guncelle ciktigina dair.
- * TODO: Leaderboard eklenecek ama XP'ye gore.
+ * TODO: Matchmaking; duzelt
+ * TODO: channel owner olacak sadece 1 kisi, ciktiginda null olarak yazilacak cikmayacak yani. adminler bu owner'i kickleyemez ama owner kickleyebilir
+ * TODO: chatteyken oyun istegi; attiginda gonderen kisinin ekraninda modal olarak create game basilacak. create game butonuna basilinca odayi olusturacak ve lobiye yonlendirilecek, hedef kisiye de invite istegi gidecek.
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

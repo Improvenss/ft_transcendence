@@ -309,13 +309,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!gameData)
 			return ;
 		console.log(`GAME IS FINISHED ${gameRoom}`);
-		this.usersService.createGameHistory(
-			gameData.playerL.user.id,
-			gameData.playerR.user.id,
-			gameData.playerL.score,
-			gameData.playerR.score,
-			gameRoom
-		);
 
 		let result = (gameData.playerL.score > gameData.playerR.score
 			? `🏆🎖️ WINNER '${gameData.playerL.user.login}' 🏆🎖️`
@@ -329,6 +322,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.server.in(gameRoom).socketsLeave(gameRoom);
 		const	deleteGameRoomDB = await this.gameService.deleteGameRoom(gameRoom);
 		const	deleteGameData = this.gameRoomData.delete(gameRoom);
+		this.usersService.createGameHistory(
+			gameData.playerL.user.id,
+			gameData.playerR.user.id,
+			gameData.playerL.score,
+			gameData.playerR.score,
+			gameRoom
+		);
 	}
 
 	@SubscribeMessage(`joinGameRoom`)

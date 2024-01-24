@@ -7,6 +7,7 @@ import Modal from "../utils/Modal";
 import fetchRequest from '../utils/fetchRequest';
 import { INotif } from '../chat/iChannel';
 import { ReactComponent as IconNotifs } from '../assets/iconNotification.svg';
+import { Navigate, useNavigate } from "react-router-dom";
 import './Notification.css';
 
 function Notification() {
@@ -17,6 +18,7 @@ function Notification() {
 	const [unreadNotifs, setUnreadNotifs] = useState<number>(0);
 	const [notifications, setNotifications] = useState<INotif[]>([]);
 	const [isModalOpen, setModalOpen] = useState(false);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (isAuth && userInfo && socket){
@@ -92,6 +94,32 @@ function Notification() {
 		return (id);
 	}
 
+	const navigateGame = async (notice: string) => {
+		const roomName = notice.split(':')[1];
+
+		console.log("text:" + notice +  "-------Name:" + roomName);
+
+		const response = await fetchRequest({
+			method: 'POST',
+			body: JSON.stringify({
+				room: roomName,
+				password: '',
+			}),
+			url: `/game/room/register`
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log("Join-game: ", data);
+			if (!data.err){
+				navigate(`/game/lobby/${roomName}`, {replace: true});
+			} else {
+				console.log("notice join err:", data.err);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
+	}
+
 	return (
 		<div id="notification">
 			
@@ -128,6 +156,16 @@ function Notification() {
 										Accept
 									</button>
 									<button onClick={() => handleRequest('declineFriendRequest', notification.from, removeNotif(notification.id))}>
+										Decline
+									</button>
+								</div>
+							)}
+							{ notification.type === 'sendGameInviteRequest' && (
+								<div>
+									<button onClick={() => {navigateGame(notification.text); handleRequest('acceptGameInviteRequest', notification.from, removeNotif(notification.id))}}>
+										Accept
+									</button>
+									<button onClick={() => handleRequest('declineGameInviteRequest', notification.from, removeNotif(notification.id))}>
 										Decline
 									</button>
 								</div>

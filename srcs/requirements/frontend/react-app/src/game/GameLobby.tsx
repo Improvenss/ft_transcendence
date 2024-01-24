@@ -10,7 +10,9 @@ import { ReactComponent as IconLeave } from '../assets/game/iconLeave.svg';
 import { ReactComponent as IconKick } from '../assets/game/iconKick.svg';
 import fetchRequest from '../utils/fetchRequest';
 import { IUser } from '../chat/iChannel';
+import { IGameRoom } from './IGame';
 import Modal from '../utils/Modal';
+import handleRequest from '../utils/handleRequest'
 
 // interface ILobby {
 // 	id: number,
@@ -195,6 +197,31 @@ const GameLobby = () => {
 		}
 	}
 
+	const handleInvitePlayer = async (target: string) => {
+		console.log("invite player");
+
+		const response = await fetchRequest({
+			method: 'PATCH',
+			body: JSON.stringify({
+				invitedPlayer: target ,
+			}),
+			url: `/game/room?room=${lobby.name}`,
+		});
+
+		if (response.ok)
+		{
+			const data = await response.json();
+			if (!data.err)
+			{
+				handleRequest('sendGameInviteRequest', target, undefined, lobby.name);
+			}
+			else
+				console.log("Invite data err", data.err);
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
+	}
+
 	if (!roomName)
 		return (<LoadingPage/>);
 
@@ -247,7 +274,7 @@ const GameLobby = () => {
 										<div
 											key={user.login}
 											className={`friend-card`}
-											onClick={() => console.log("invite yapısı ekle")}
+											onClick={() => handleInvitePlayer(user.login)}
 										>
 											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
 											<div id='friend-users-table'>

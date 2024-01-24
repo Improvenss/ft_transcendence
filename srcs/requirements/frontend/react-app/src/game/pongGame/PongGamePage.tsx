@@ -117,10 +117,10 @@ function PongGamePage() {
 			const countdownInterval = setInterval(() => {
 				setResult(`${result} | Redirecting in ${countdown} seconds...`);
 				countdown--;
-	  
 				if (countdown < 0) {
 					clearInterval(countdownInterval);
-					navigate('/game', { replace: true });
+					if (window.location.pathname === `/game/${roomName}`)
+						navigate('/game', { replace: true });
 				}
 			}, 1000);
 		}

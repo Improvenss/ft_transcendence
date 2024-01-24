@@ -82,6 +82,7 @@ const GamePage: React.FC = () => {
 			winScore: 5,
 			duration: 180,
 			description: '',
+			invitedPlayer: null,
 			type: 'public'
 		}
 		console.log("Searching Match . . .");
