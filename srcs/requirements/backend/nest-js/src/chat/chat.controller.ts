@@ -250,6 +250,7 @@ export class ChatController {
 			const createChannelDto: CreateChannelDto = {
 				name: name,
 				type: channelType,
+				owner: tmpUser.id,
 				description: description,
 				password: (password === undefined)
 					? null
@@ -361,6 +362,9 @@ export class ChatController {
 			const channelId = await this.chatService.removeUser(channel.name, 'members', user.id);
 			console.log(`${C.B_RED}Channel Leave: ${channel.name} - ${user.login}${C.END}`);
 
+			if (channel.owner === user.id)
+				await this.chatService.patchChannel(channel.id, {owner: 0});
+
 			if (channel.admins.some((admin) => admin.id === user.id))
 				await this.chatService.removeUser(channel.name, 'admins', user.id);
 
@@ -429,6 +433,12 @@ export class ChatController {
 		try {
 			console.log(`${C.B_YELLOW}POST: /channel/:${action}: @Req() user: [${user.login}] channel: [${channel.name}]${C.END}`);
 			const targetUser = await this.usersService.getUserPrimary({id: userId});
+
+			if (channel.owner === targetUser.id && (action === 'kick' || action === 'ban' || action === 'removeAdmin')){
+				const notif = await this.usersService.createNotif(user.id, user.id, 'text', `${targetUser.login} is channel owner!`);
+				this.chatGateway.server.emit(`user-notif:${user.id}`, notif);
+				return ({ success: true });
+			}
 
 			if (action === 'invite'){
 				const notif = await this.usersService.createNotif(user.id, userId, 'invite', `${user.login} invited you to the ${channel.name} channel.`);

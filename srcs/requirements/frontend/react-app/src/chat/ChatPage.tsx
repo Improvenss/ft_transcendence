@@ -191,18 +191,17 @@ function ChatPage () {
 					break;
 				case ActionType.Leave://OK ---------------------------------------------------------------------//
 					if (data.userId === userInfo.id){ //--> 2. durum çıkan kişiyi güncelle
-						console.log("------->", "Leave", data.userId);
-							if (data.type === 'private'){
-								setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
-							} else {
-								setChannels((prevChannels) => {
-									if (prevChannels) {
-										return prevChannels.map((channel) => {
-											if (channel.id === activeChannel?.id) {
-												return {
-													...channel,
-													members: [],
-													admins: [],
+						if (data.type === 'private'){
+							setChannels((prevChannels) => prevChannels?.filter((channel) => channel.id !== channelId));
+						} else {
+							setChannels((prevChannels) => {
+								if (prevChannels) {
+									return prevChannels.map((channel) => {
+										if (channel.id === activeChannel?.id) {
+											return {
+												...channel,
+												members: [],
+												admins: [],
 												messages: [],
 												bannedUsers: [],
 												status: 'public',
@@ -216,14 +215,15 @@ function ChatPage () {
 						}
 						if (activeChannel?.id === channelId)
 							setActiveChannel(null);
-					} else { //--> 1. durum başka biri çıkıyor, membersi güncelle
+					} else { //--> 1. durum başka biri çıkıyor, membersi/adminsi güncelle
 						setChannels((prevChannels) => {
 							if (!prevChannels) return prevChannels;
 							
 							const updatedChannels = prevChannels.map((channel) => {
 								if (channel.id === channelId) {
 									const updatedMembers = channel.members.filter((user) => user.id !== data.userId);
-									return { ...channel, members: updatedMembers };
+									const updatedAdmins = channel.admins.filter((user) => user.id !== data.userId);
+									return { ...channel, members: updatedMembers, admins: updatedAdmins };
 								} else {
 									return channel;
 								}

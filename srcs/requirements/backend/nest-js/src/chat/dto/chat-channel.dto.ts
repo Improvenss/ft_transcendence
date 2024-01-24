@@ -14,6 +14,9 @@ export class CreateChannelDto {
 	// @IsEnum(['public', 'private', 'direct_message'])
 	// type: string;
 
+	@IsOptional()
+	owner: number; 
+
 	@IsString()
 	description: string;
 

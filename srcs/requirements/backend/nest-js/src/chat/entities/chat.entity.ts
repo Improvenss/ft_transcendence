@@ -33,6 +33,9 @@ export class Channel {
 	@IsEnum(ChannelType)
 	public type: ChannelType;
 
+	@Column({ nullable: true })
+	public owner : number; // Kanalın oluşturan kişi, channeldan ayrılana kadar sahiplik devam eder.
+
 	@Column({ nullable: true }) // Şifre, private kanallar için
 	public password: string;
 

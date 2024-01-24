@@ -30,8 +30,8 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: consoldaki gereksiz çıktıları sil.
  * TODO: Settingsdeki contact ve about kısmını ekle/güncelle.
  * ----------------------------------------------------
+ * TODO-OK: channel owner olacak sadece 1 kisi, ciktiginda null olarak yazilacak cikmayacak yani. adminler bu owner'i kickleyemez ama owner kickleyebilir
  * TODO: Matchmaking; duzelt
- * TODO: channel owner olacak sadece 1 kisi, ciktiginda null olarak yazilacak cikmayacak yani. adminler bu owner'i kickleyemez ama owner kickleyebilir
  * TODO: chatteyken oyun istegi; attiginda gonderen kisinin ekraninda modal olarak create game basilacak. create game butonuna basilinca odayi olusturacak ve lobiye yonlendirilecek, hedef kisiye de invite istegi gidecek.
  * TODO: oyunun bir oyuncu alt tab attiginda yavaslamasi.
  * TODO: achievement strict'lerinde process ilerlemesi olmuor el at.

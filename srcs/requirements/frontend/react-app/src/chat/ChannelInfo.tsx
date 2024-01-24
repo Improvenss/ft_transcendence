@@ -215,7 +215,8 @@ function InfoChannel() {
 														{/*<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>*/}
 														<GameInvite login={user.login}>
 															<IconInviteGame />
-														</GameInvite>													</>
+														</GameInvite>
+													</>
 												)}
 												{isAdmin && (
 													<>
