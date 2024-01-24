@@ -38,7 +38,7 @@ function App() {
 						method: 'DELETE',
 						url: `/game/room/leave?room=${roomName}`
 					});
-					console.log('Fetch Response:', response);
+					// console.log('Fetch Response:', response);
 				}
 			}
 		};

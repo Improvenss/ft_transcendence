@@ -100,7 +100,6 @@ export class Game {
 	@Column({ type: 'enum', enum: ['public', 'private']})
 	public type: string;
 
-	// @IsEnum(EGameMode, { message: 'Invalid Game mode' })
 	@Column({ type: 'enum', enum: EGameMode, default: EGameMode.CLASSIC })
 	public mode: EGameMode;
 

@@ -73,14 +73,13 @@ function PongGamePage() {
 				if (!data.err){
 					// const pLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
 					// const pRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
-					// setLiveRoom({...data, pLeft, pRight});
-					setLiveRoom(data);
-					// setLiveData({
-					// 	ball: data.ball,
-					// 	duration: data.duration,
-					// 	playerL: data.playerL,
-					// 	playerR: data.playerR,
-					// });
+					const playerLeft: IUser | null = (data.playerL && data.playerL.user)
+						? data.players.find((player: IUser) => player.id === data.playerL.user.id)
+						: null;
+					const playerRight: IUser | null = (data.playerR && data.playerR.user)
+						? data.players.find((player: IUser) => player.id === data.playerR.user.id)
+						: null;
+					setLiveRoom({ ...data, playerLeft, playerRight });
 					socket.emit('joinGameRoom', {
 						gameRoom: roomName,
 					});
@@ -108,9 +107,22 @@ function PongGamePage() {
 		const	finishGameData = ({ result }: { result: string }) => {
 			clearInterval(intervalId);
 			setResult(result)
-			setTimeout(() => { // 5 saniye sonra /game 'ye yonlendirilecek.
-				navigate('/game', {replace: true});
-			}, 15000);
+			// setTimeout(() => { // 5 saniye sonra /game 'ye yonlendirilecek.
+			// 	setInterval(() => {
+			// 		setResult(...oldResult, result);
+			// 	}, 1000)
+			// 	navigate('/game', {replace: true});
+			// }, 5000);
+			let countdown = 8;
+			const countdownInterval = setInterval(() => {
+				setResult(`${result} | Redirecting in ${countdown} seconds...`);
+				countdown--;
+	  
+				if (countdown < 0) {
+					clearInterval(countdownInterval);
+					navigate('/game', { replace: true });
+				}
+			}, 1000);
 		}
 		socket.on('updateGameData', handleLiveData);
 		socket.on('finishGameData', finishGameData);
@@ -169,10 +181,6 @@ function PongGamePage() {
 		}
 	}, [])
 
-	useEffect(() => {
-		console.log("liveRRRooom", liveRoom);
-	}, [liveRoom])
-
 	const	leaveRoom = () => {
 		socket.emit('leaveGameRoom', {
 			gameRoom: roomName,
@@ -194,8 +202,8 @@ function PongGamePage() {
 			<div className="Pong">
 				<div className="container">
 					<div className="gameField">
-						<p className="PlayerName" id="leftPlayerName">{liveRoom.playerL.user.login}</p>
-						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom.playerR.user.login}</p>
+						<p className="PlayerName" id="leftPlayerName">{liveRoom.playerLeft.login}</p>
+						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom.playerRight.login}</p>
 						<div className="ball" style={{top: liveRoom.ball.y, left: liveRoom.ball.x}}/>
 						<div className="player1" id="player1" style={{top: liveRoom.playerL.location + 'px'}} />
 						<div className="player2" id="player2" style={{top: liveRoom.playerR.location + 'px'}} />

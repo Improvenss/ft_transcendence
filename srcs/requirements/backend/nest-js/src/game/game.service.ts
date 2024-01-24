@@ -21,6 +21,7 @@ export class GameService {
 		grd: Game
 	)
 	{
+		let	katsayi: number = 1;
 		const newPos = Math.floor(Math.random() * 2);
 		const moves = [
 			{ x: -4, y: -2 },
@@ -30,8 +31,10 @@ export class GameService {
 			{ x: 4, y: -2 },
 			{ x: 2, y: -4 },
 		];
+		if (grd.mode === 'fast-mode')
+			katsayi = 1.5;
 		const initialMove = moves[Math.floor(Math.random() * moves.length)];
-		grd.ball = { x: 479, speedX: initialMove.x, speedY: initialMove.y };
+		grd.ball = { x: 479, speedX: initialMove.x * katsayi, speedY: initialMove.y * katsayi };
 		if (newPos == 0)
 			grd.ball.y = 22;
 		else
@@ -77,21 +80,19 @@ export class GameService {
 		//add score to left
 		if (grd.ball.x + 42 >= 1000)
 		{
+			grd.playerL.score += 1;
 			if (grd.playerL.score >= grd.winScore){
 				grd.running = false;
 			}
-				// return ({ winner: grd.playerL.user.id });
-			grd.playerL.score += 1;
 			this.restartBall(grd);
 		}
 		//add score to right
 		else if (grd.ball.x <= 0)
 		{
+			grd.playerR.score += 1;
 			if (grd.playerR.score >= grd.winScore){
 				grd.running = false;
 			}
-				// return ({ winner: grd.playerR.user.id });
-			grd.playerR.score += 1;
 			this.restartBall(grd);
 		}
 
@@ -142,10 +143,8 @@ export class GameService {
 				userGameRoom.playerR.user = null; // kendi yerini bosaltacak.
 			}
 			else if (userGameRoom.playerR.user.id === user.id) // cikan kisi sagdaysa; sadece cikacak
-			{
 				userGameRoom.playerR.user = null;
-				userGameRoom.playerR.ready = false;
-			}
+			userGameRoom.playerR.ready = false;
 			userGameRoom.players = userGameRoom.players.filter(player => player.id !== user.id); // bu transfer edilen user'i de players[]'den kaldiriyoruz.
 			return (await this.gameRepository.save(userGameRoom)); // eski guncellenmis odayi kaydet.
 		}
@@ -323,7 +322,7 @@ export class GameService {
 			throw (new Error("Game Room is full!"));
 		await this.transferPlayer({ user: user }); // old - new game room
 		singleRoom.players.push(user);
-		singleRoom.playerR.user = user;
+		singleRoom.playerR.user = {id: user.id, login: user.login, socketId: user.socketId};
 		// singleRoom.afterUpdate = !singleRoom.afterUpdate;
 		return (await this.gameRepository.save(singleRoom));
 	}

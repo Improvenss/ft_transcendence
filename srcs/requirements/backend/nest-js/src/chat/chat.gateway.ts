@@ -303,8 +303,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	async	finishGame(
-		// playerL: Player,
-		// playerR: Player,
 		gameRoom: string,
 	){
 		const	gameData = this.gameRoomData.get(gameRoom);
@@ -316,13 +314,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			gameData.playerR.user.id,
 			gameData.playerL.score,
 			gameData.playerR.score,
-			gameRoom);
+			gameRoom
+		);
 
 		let result = (gameData.playerL.score > gameData.playerR.score
-			? `${gameData.playerL.user.login} is Winner`
+			? `🏆🎖️ WINNER '${gameData.playerL.user.login}' 🏆🎖️`
 			: (gameData.playerL.score < gameData.playerR.score)
-				? `${gameData.playerR.user.login} is Winner`
-				: `TIME IS UP! TIE`)
+				? `🏆🎖️ WINNER '${gameData.playerR.user.login}' 🏆🎖️`
+				: `⏰ TIME IS UP! TIE ⏲️`)
 
 		this.server.to(gameRoom).emit('finishGameData', {
 			result: result,
@@ -386,11 +385,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const	gd = this.gameRoomData.get(gameRoom);
 		if (!gd || !gd.playerL.user.socketId || !gd.playerR.user.socketId)
 			return ;
+		let katsayi: number = 1;
+		if (gd.mode === 'fast-mode')
+			katsayi = 1.5;
 		if (socket.id === gd.playerL.user.socketId)
 		{
 			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
 			{
-				gd.playerL.speed = -10;
+				gd.playerL.speed = -10 * katsayi;
 				if (way === 'DOWN')
 					gd.playerL.speed *= -1;
 			}
@@ -401,7 +403,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		{
 			if (isKeyPress) // true -> tusa basilmissa 10 -> up = +10 -> down = -10
 			{
-				gd.playerR.speed = -10;
+				gd.playerR.speed = -10 * katsayi;
 				if (way === 'DOWN')
 					gd.playerR.speed *= -1;
 			}

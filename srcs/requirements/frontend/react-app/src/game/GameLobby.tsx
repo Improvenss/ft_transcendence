@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/SocketHook';
@@ -58,6 +58,8 @@ export interface ILobby {
 	playerL: IPlayer,
 	playerR: IPlayer,
 	ball: IBall,
+	playerLeft: IUser,
+	playerRight: IUser,
 }
 
 const GameLobby = () => {
@@ -68,6 +70,7 @@ const GameLobby = () => {
 	const [lobby, setLobby] = useState<ILobby | undefined>(undefined);
 	const navigate = useNavigate();
 	const [isModalOpen, setModalOpen] = useState(false);
+	const location = useLocation();
 	
 	window.onpopstate = async () => {
 		const response = await fetchRequest({
@@ -110,12 +113,24 @@ const GameLobby = () => {
 				const data = await response.json();
 				console.log("GameLobby:", data);
 				if (!data.err){
-					setLobby(data)
-					// const playerLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
-					// const playerRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
+					// setLobby(data)
+					// const playerLeft: IUser = data.players.find((player: IUser) => player.id === data.playerL.user.id);
+					// const playerRight: IUser = data.players.find((player: IUser) => player.id === data.playerR.user.id);
+					const playerLeft: IUser | null = (data.playerL && data.playerL.user)
+						? data.players.find((player: IUser) => player.id === data.playerL.user.id)
+						: null;
+					const playerRight: IUser | null = (data.playerR && data.playerR.user)
+						? data.players.find((player: IUser) => player.id === data.playerR.user.id)
+						: null;
 					// const pRightIsReady = data.pRightIsReady;
-					// setLobby({...data, playerLeft, playerRight, pRightIsReady});
+					setLobby({ ...data, playerLeft, playerRight });
 				} else {
+					console.log("yarraaam", action, action === 'leave');
+					if (action === 'leave')
+					{
+						navigate('/game', {replace: true});
+						return ;
+					}
 					navigate('/404', {replace: true});
 				}
 			} else {
@@ -165,9 +180,28 @@ const GameLobby = () => {
 		}
 	}
 
+	const	leaveButton = async () => {
+		const currentPath = location.pathname;
+		const userConfirmed = window.confirm('Are you sure do want to leave the lobby?');
+		if (!userConfirmed) {
+		} else {
+			const roomName = currentPath.replace('/game/lobby/', '');
+			const response = await fetchRequest({
+				method: 'DELETE',
+				url: `/game/room/leave?room=${roomName}`
+			});
+			// console.log('Fetch Response:', response);
+			navigate('/game', { replace: true });
+		}
+	}
+
+	if (!roomName)
+		return (<LoadingPage/>);
+
 	return (
 		<div id='lobby'>
-			<IconLeave id='leave-lobby' title='leave' onClick={() => console.log("leave")}/>
+			<IconLeave id='leave-lobby' title='leave' onClick={() => leaveButton()} />
+			{/* <IconLeave id='leave-lobby' title='leave' onClick={() => console.log("leave")}/> */}
 			<h2>Lobby #{roomName}</h2>
 			<h2>Lobby Type: {lobby.type}</h2>
 			{lobby.description && (<h2>Description: {lobby.description}</h2>)}
@@ -176,20 +210,20 @@ const GameLobby = () => {
 					<div className='leftPlayer'>
 						<img
 							className='image'
-							src={lobby.players[0].avatar ? lobby.players[0].avatar : lobby.players[0].imageUrl}
+							src={lobby.playerLeft.avatar ? lobby.playerLeft.avatar : lobby.playerLeft.imageUrl}
 							alt={lobby.playerL.user.login}
 						/>
-						<span>{lobby.players[0].nickname ? lobby.players[0].nickname : lobby.playerL.user.login}</span>
+						<span>{lobby.playerLeft.nickname ? lobby.playerLeft.nickname : lobby.playerL.user.login}</span>
 					</div>
 				) : 'null'}
 				{lobby.playerR.user ? (
 					<div className='rightPlayer' title='kick' onClick={() => console.log("kick yapısını ekle")}>
 						<img
 							className='image'
-							src={lobby.players[1].avatar ? lobby.players[1].avatar : lobby.players[1].imageUrl}
+							src={lobby.playerRight.avatar ? lobby.playerRight.avatar : lobby.playerRight.imageUrl}
 							alt={lobby.playerR.user.login}
 						/>
-						<span>{lobby.players[1].nickname ? lobby.players[1].nickname : lobby.playerR.user.login}</span>
+						<span>{lobby.playerRight.nickname ? lobby.playerRight.nickname : lobby.playerR.user.login}</span>
 						<IconKick id='kick'/>
 					</div>
 				) : (

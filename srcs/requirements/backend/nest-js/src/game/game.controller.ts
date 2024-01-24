@@ -19,7 +19,7 @@ export class GameController {
 
 	@Get('/room/:name/:lobby')
 	async getGameRoom(
-		@Req() {user}:{user: User},
+		@Req() { user }: { user: User },
 		@Param('name') name: string,
 		@Param('lobby', ParseBoolPipe) lobby: boolean,
 	){
@@ -49,7 +49,7 @@ export class GameController {
 	// Get Game Room
 	@Get('/room')
 	async	getGameRooms(
-		@Req() {user}:{user: User},
+		@Req() { user }: { user: User },
 		@Query('room') room: string | undefined,
 		@Query('relations') relations: string[] | undefined | 'all',
 	){
@@ -79,8 +79,8 @@ export class GameController {
 
 	@Post('/room/register')
 	async registerGameRoom(
-		@Req() {user},
-		@Body() body: {room: string, password: string}
+		@Req() { user },
+		@Body() body: { room: string, password: string }
 	){
 		try
 		{
@@ -102,7 +102,7 @@ export class GameController {
 	@Post('/room')
 	// @UsePipes(new ValidationPipe())
 	async	createGameRoom(
-		@Req() {user},
+		@Req() { user },
 		@Body() body: CreateGameDto,
 	){
 		try
@@ -122,7 +122,7 @@ export class GameController {
 	// Update Game Room
 	@Patch('/room')
 	async	patchGameRoom(
-		@Req() {user},
+		@Req() { user },
 		@Query('room') room: string | undefined,
 		@Body() body: Partial<CreateGameDto>,
 	){
@@ -158,7 +158,7 @@ export class GameController {
 				room: room,
 				user: user,
 			});
-			this.chatGateway.server.emit(`lobbyListener:${room}`);
+			this.chatGateway.server.emit(`lobbyListener:${room}`, { action: 'leave' });
 			return (responseLeaveGameLobby);
 		} catch (err) {
 			console.log("@Delete('/game/room/leave'): ", err.message);
@@ -173,7 +173,7 @@ export class GameController {
 	// Delete Game Room
 	@Delete('/room')
 	async	deleteGameRoom(
-		@Req() {user},
+		@Req() { user },
 		@Query('room') room: string | undefined,
 	){
 		try
@@ -191,7 +191,7 @@ export class GameController {
 
 	// @Get('/lobby/:roomName')
 	// async getLobby(
-	// 	@Req() {user},
+	// 	@Req() { user },
 	// 	@Param('roomName') roomName: string,
 	// ){
 	// 	try
