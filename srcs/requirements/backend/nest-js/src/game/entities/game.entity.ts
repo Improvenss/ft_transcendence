@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, AfterUpdate, BeforeUpdate } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { IsBoolean, IsNumber, IsPositive, IsString, Max, Min } from 'class-validator';
 import { EGameMode } from '../dto/create-game.dto';
@@ -140,39 +140,5 @@ export class Game {
 		onDelete: 'CASCADE'
 	})
 	public players: User[];
-
-	@Column({ default: false })
-	public afterUpdate: boolean;
-
-	// @BeforeUpdate()
-	// async updateGamePlayersData(){
-	// 	console.log("------->AfterUpdate<-------");
-	// 	if (this.players.length <= 0) // odada kimse yok o yuzden Game Room'unu siliyoruz.
-	// 		await this.gameRepository.remove(this);
-	// 	console.log("count:", this.players.length);
-	// 	if (this.players[0])
-	// 		this.playerL.user = this.players[0];
-	// 	if (this.players[1])
-	// 		this.playerR.user = this.players[1];
-	// 	else
-	// 		this.playerR.user = null;
-	// }
-
-	// // players dizisi değiştiğinde otomatik olarak çağrılacak metod
-	// @AfterUpdate()
-	// async	updateGamePlayersData(): Promise<void> {
-	// 	console.log("GAME ENTITY'SINDE DEGISIKLIK OLDU WAY AWK", this.players);
-	// 	// if (this.players.length <= 0)
-	// 	// { // odada kimse yok o yuzden Game Room'unu siliyoruz.
-	// 	// 	await this.gameRepository.remove(this);
-	// 	// }
-	// 	if (this.players[0])
-	// 		this.playerL.user = this.players[0];
-
-	// 	if (this.players[1])
-	// 		this.playerR.user = this.players[1];
-	// 	else
-	// 		this.playerR.user = null;
-	// }
 
 }

@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from "./home/HomePage";
 import NoMatchPage from "./utils/NoMatchPage";
 import Cookies from 'js-cookie';
@@ -47,7 +47,6 @@ function App() {
 				if (!userConfirmed) {
 					event.preventDefault();
 				} else {
-					console.log("kekekekekkeke;");
 					socket.emit('leaveGameRoom', {
 						gameRoom: roomNameGame,
 					});
@@ -71,7 +70,8 @@ function App() {
 
 	return (
 		<div id="app">
-			<FallingChars />
+			{location.pathname.includes('/game/') ? null : <FallingChars /> }
+			{/* {(<FallingChars />)} */}
 			<header>
 				<nav id='app-header'>
 					<Link to='/' id="site-name" className='link'>TRANSCENDENCE</Link>

@@ -12,7 +12,6 @@ function PongGamePage() {
 	const [liveRoom, setLiveRoom] = useState<ILobby>();
 	const { socket } = useSocket();
 	const [result, setResult] = useState<string | undefined>(undefined);
-	const delay = 16;
 
 	useEffect(() => {
 		const	gameListener = async () => {
@@ -40,17 +39,13 @@ function PongGamePage() {
 	}, [])
 
 	useEffect(() => {
-		// const	intervalId = setInterval(async() => {
-		// 	socket.emit('calcGameData', { gameRoom: roomName });
-		// }, delay);
 		const	handleLiveData = ({action}: {action: ILobby}) => {
 			if (!action)
 				return ;
 			setLiveRoom(prevLiveRoom => ({...prevLiveRoom, ...action}));
 		}
 		const	finishGameData = ({ result }: { result: string }) => {
-			// clearInterval(intervalId);
-			setResult(result)
+			// setResult(result)
 			let countdown = 8;
 			const countdownInterval = setInterval(() => {
 				setResult(`${result} | Redirecting in ${countdown} seconds...`);
@@ -65,7 +60,6 @@ function PongGamePage() {
 		socket.on('updateGameData', handleLiveData);
 		socket.on('finishGameData', finishGameData);
 		return () => {
-			// clearInterval(intervalId);
 			socket.off('updateGameData', handleLiveData);
 			socket.off('finishGameData', finishGameData);
 		}

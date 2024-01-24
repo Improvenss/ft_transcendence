@@ -46,6 +46,7 @@ export interface ILobby {
 	ball: IBall,
 	playerLeft: IUser,
 	playerRight: IUser,
+	running: boolean,
 }
 
 const GameLobby = () => {

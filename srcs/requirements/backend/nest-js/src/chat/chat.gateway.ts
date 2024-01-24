@@ -14,8 +14,21 @@ import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
-import { Game } from 'src/game/entities/game.entity';
+import { Ball, Game, Player } from 'src/game/entities/game.entity';
+import { EGameMode, ILiveData } from 'src/game/dto/create-game.dto';
 
+interface IGame {
+	id: number,
+	name: string,
+	mode: EGameMode,
+	winScore: number,
+	duration: number,
+	running: boolean,
+	ball: Ball,
+	playerL: Player,
+	playerR: Player,
+	gameLoopInterval?: NodeJS.Timeout,
+}
 
 @WebSocketGateway({ 
 	cors: {
@@ -32,9 +45,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	public connectedIds: Map<number, Socket> = new Map();
 	public connectedSockets: Map<string, number> = new Map(); //returned user id
-	// private gameRooms: Map<string, number> = new Map();
-	private gameRoomData: Map<string, Game> = new Map();
-	private gameRoomIntervals: Map<string, NodeJS.Timeout> = new Map();
+	private gameRooms: Map<string, IGame> = new Map();
 
 	@WebSocketServer()
 	server: Server;
@@ -94,38 +105,139 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	//------------------------------------------------------------------------------------------------------
-	private gameLoopInterval: NodeJS.Timeout;
 
 	startGameLoop(roomName: string) {
-		const	denemeData = this.gameRoomData.get(roomName);
-		this.gameLoopInterval = setInterval(() => {
-			// Oyun durumu güncelleme mantığı buraya gelebilir
-			// this.updateGameState();
-			const {data} = this.gameService.calcGameLoop(denemeData);
-			this.server.to(roomName).emit(`updateGameData`, {action: data});
-			if (!data.running)
-				this.stopGameLoop(roomName);
+		const	game = this.gameRooms.get(roomName);
+		// if (!game || game.running) {
+		// 	return;
+		// }
 
-			// Oyun durumunu istemcilere gönder
-			// this.sendGameStateToClients();
-
-
-		}, 16); // Örnek olarak her 1 saniyede bir güncelleme
+		// game.running = true;
+		setInterval(() => {
+			if (game.duration <= 0)
+			{
+				clearInterval(game.gameLoopInterval);
+				return ;
+			}
+			game.duration--;
+		}, 1000);
+		game.gameLoopInterval = setInterval(() => {
+			this.updateGameState(game);
+		}, 16);
 	}
 
-	stopGameLoop(roomName: string) {
-		clearInterval(this.gameLoopInterval);
+	stopGameLoop(roomName: string, loop: NodeJS.Timeout) {
+		clearInterval(loop);
 		this.finishGame(roomName);
 	}
 
-	updateGameState() {
-		// Oyun durumu güncelleme mantığı buraya gelebilir
-		// Örneğin: Hareketli nesnelerin konumlarını güncelleme, çarpışma kontrolü, vb.
+	updateGameState(
+		grd: IGame
+	) {
+		if (!grd)
+			return ;
+
+		// zaman bittiginde calisan yer
+		if (grd.duration <= 0)
+			grd.running = false;
+
+		// top hareketi
+		// if (grd.ball.y + 42 >= 800
+		if (grd.ball.y + 42 >= 800 || grd.ball.y <= 0)
+			grd.ball.speedY *= -1;
+
+		if (grd.ball.y + 21 >= grd.playerL.location
+			&& grd.ball.y + 21 <= grd.playerL.location + 120)
+		{ //Left Player Collision
+			if (grd.ball.x <= 10)
+				{
+					grd.ball.speedX *= -1;
+					grd.ball.speedY += grd.playerL.speed / 10;
+					grd.ball.x += 3;
+				}
+		}
+		else if (grd.ball.y + 21 >= grd.playerR.location
+			&& grd.ball.y + 21 <= grd.playerR.location + 120)
+		{ //Right Player Collision
+			if (grd.ball.x + 42 >= 990)
+			{
+				grd.ball.speedX *= -1;
+				grd.ball.speedY += grd.playerR.speed / 10;
+				grd.ball.x -= 3;
+			}
+		}
+
+		//add score to left
+		if (grd.ball.x + 42 >= 1000)
+		{
+			grd.playerL.score += 1;
+			if (grd.playerL.score >= grd.winScore){
+				grd.running = false;
+			}
+			this.restartBall(grd);
+		}
+		else if (grd.ball.x <= 0) //add score to right
+		{
+			grd.playerR.score += 1;
+			if (grd.playerR.score >= grd.winScore){
+				grd.running = false;
+			}
+			this.restartBall(grd);
+		}
+
+		grd.ball.x += grd.ball.speedX;
+		grd.ball.y += grd.ball.speedY;
+		
+		// sol oyuncu hareketi
+		if (grd.playerL.location + grd.playerL.speed <= 0)
+			grd.playerL.location = 0;
+		else if (grd.playerL.location + grd.playerL.speed + 120 >= 800)
+			grd.playerL.location = 800 - 120;
+		else
+			grd.playerL.location += grd.playerL.speed;
+
+		// sag oyuncu hareketi
+		if (grd.playerR.location + grd.playerR.speed <= 0)
+			grd.playerR.location = 0;
+		else if (grd.playerR.location + grd.playerR.speed + 120>= 800)
+			grd.playerR.location = 800 - 120;
+		else
+			grd.playerR.location += grd.playerR.speed;
+
+		const	returnData: ILiveData = {
+			ball: grd.ball,
+			playerL: grd.playerL,
+			playerR: grd.playerR,
+			duration: grd.duration,
+			running: grd.running,
+		};
+		this.server.to(grd.name).emit(`updateGameData`, {action: returnData});
+		if (!grd.running)
+			this.stopGameLoop(grd.name, grd.gameLoopInterval);
 	}
 
-	sendGameStateToClients() {
-		// Oyun durumunu istemcilere gönderme mantığı buraya gelebilir
-		// this.server.emit('gameState', this.gameState);
+	restartBall(
+		grd: IGame
+	)
+	{
+		let	katsayi: number = 1;
+		const newPos = Math.floor(Math.random() * 2);
+		const moves = [
+			{ x: -4, y: -2 },
+			{ x: -3, y: -4 },
+			{ x: -3, y: 3 },
+			{ x: -3, y: 2 },
+			{ x: 4, y: -2 },
+			{ x: 2, y: -4 },
+		];
+		if (grd.mode === 'fast-mode')
+			katsayi = 1.5;
+		const initialMove = moves[Math.floor(Math.random() * moves.length)];
+		grd.ball = { x: 479, speedX: initialMove.x * katsayi, speedY: initialMove.y * katsayi };
+		if (newPos == 0)
+			grd.ball.y = 22;
+		else
+			grd.ball.y = 757;
 	}
 
 	//------------------------------------------------------------------------------------------------------
@@ -325,25 +437,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 //------------------------------------------------------------------------
 
-	// @Interval(1000)
-	async	startDuration(
-		gameRoomData: Game
-	){
-		if (!gameRoomData)
-			return ;
-		if (gameRoomData.duration <= 0)
-		{
-			clearInterval(this.gameRoomIntervals.get(gameRoomData.name));
-			return ;
-		}
-		gameRoomData.duration--;
-	}
-
 	async	finishGame(
 		gameRoom: string,
 		socketLeave?: Socket,
 	){
-		const	gameData = this.gameRoomData.get(gameRoom);
+		const	gameData = this.gameRooms.get(gameRoom);
 		if (!gameData)
 			return ;
 		console.log(`GAME IS FINISHED ${gameRoom}`);
@@ -369,8 +467,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			result: result,
 		});
 		this.server.in(gameRoom).socketsLeave(gameRoom);
-		const	deleteGameRoomDB = await this.gameService.deleteGameRoom(gameRoom);
-		const	deleteGameData = this.gameRoomData.delete(gameRoom);
+		await this.gameService.deleteGameRoom(gameRoom);
+		this.gameRooms.delete(gameRoom);
 		this.usersService.createGameHistory(
 			gameData.playerL.user.id,
 			gameData.playerR.user.id,
@@ -390,37 +488,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
 			socket.join(data.gameRoom);
 		}
-		if (!this.gameRoomData.has(data.gameRoom))
+		if (!this.gameRooms.has(data.gameRoom))
 		{
 			const	gameData = await this.gameService.findGameRoom(data.gameRoom);
 			const	singleGameData = Array.isArray(gameData) ? gameData[0] : gameData;
-			this.gameRoomData.set(data.gameRoom, singleGameData);
-			if (this.gameRoomIntervals.get(data.gameRoom))
-				return ;
-			const intervalId = setInterval(() => {
-				this.startDuration(this.gameRoomData.get(data.gameRoom));
-			}, 1000);
-			this.gameRoomIntervals.set(data.gameRoom, intervalId);
-		}
-	}
-
-	@SubscribeMessage('calcGameData')
-	async handleCalcGameData(
-		@ConnectedSocket() socket: Socket,
-		@MessageBody()
-		{ gameRoom }:
-			{ gameRoom: string }
-	){
-		const	denemeData = this.gameRoomData.get(gameRoom);
-		const	{data} = await this.gameService.calcGameLoop(denemeData);
-		if (data && data.running)
-			this.server.to(gameRoom).emit(`updateGameData`, {action: data});
-			// socket.emit(`updateGameData`, {action: returnData});
-		else
-		{
-			this.server.to(gameRoom).emit(`updateGameData`, {action: data});
-			// socket.emit(`updateGameData`, {action: returnData});
-			this.finishGame(gameRoom);
+			this.gameRooms.set(data.gameRoom, singleGameData as IGame);
 		}
 	}
 
@@ -435,8 +507,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		{ gameRoom, way, isKeyPress }:
 			{ gameRoom: string, way: string, isKeyPress: boolean})
 	{
-		console.log("TUSA BASILDI ->>>>>>", gameRoom, way, isKeyPress);
-		const	gd = this.gameRoomData.get(gameRoom);
+		const	gd = this.gameRooms.get(gameRoom);
 		if (!gd || !gd.playerL.user.socketId || !gd.playerR.user.socketId)
 			return ;
 		let katsayi: number = 1;
@@ -474,7 +545,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('leaveGameRoom')
 	async handleLeaveGameRoom(
 		@ConnectedSocket() socket: Socket,
-		@MessageBody() data: { gameRoom: string, isTie?: boolean },
+		@MessageBody() data: { gameRoom: string },
 	){
 		if (!data || !data.gameRoom)
 			return ;
