@@ -10,7 +10,6 @@ import { ReactComponent as IconLeave } from '../assets/game/iconLeave.svg';
 import { ReactComponent as IconKick } from '../assets/game/iconKick.svg';
 import fetchRequest from '../utils/fetchRequest';
 import { IUser } from '../chat/iChannel';
-import { IGameRoom } from './IGame';
 import Modal from '../utils/Modal';
 import handleRequest from '../utils/handleRequest'
 
@@ -60,9 +59,9 @@ const GameLobby = () => {
 	const location = useLocation();
 	
 	window.onpopstate = async () => {
-		const response = await fetchRequest({
-			method: 'GET',
-			url: '/users/test'
+		await fetchRequest({
+			method: 'DELETE',
+			url: `/game/room/leave?room=${roomName}`
 		});
 	}
 
@@ -149,7 +148,7 @@ const GameLobby = () => {
 		if (!userConfirmed) {
 		} else {
 			const roomName = currentPath.replace('/game/lobby/', '');
-			const response = await fetchRequest({
+			await fetchRequest({
 				method: 'DELETE',
 				url: `/game/room/leave?room=${roomName}`
 			});

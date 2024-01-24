@@ -14,8 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
-import { Game, Player } from 'src/game/entities/game.entity';
-import { Cron, Interval } from '@nestjs/schedule';
+import { Game } from 'src/game/entities/game.entity';
 
 
 @WebSocketGateway({ 
@@ -304,11 +303,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	async	finishGame(
 		gameRoom: string,
+		socketLeave?: Socket,
 	){
 		const	gameData = this.gameRoomData.get(gameRoom);
 		if (!gameData)
 			return ;
 		console.log(`GAME IS FINISHED ${gameRoom}`);
+
+		if (socketLeave && socketLeave.id === gameData.playerL.user.socketId)
+		{
+			gameData.playerL.score = 0;
+			gameData.playerR.score = 1;
+		}
+		else if (socketLeave && socketLeave.id === gameData.playerR.user.socketId)
+		{
+			gameData.playerL.score = 1;
+			gameData.playerR.score = 0;
+		}
 
 		let result = (gameData.playerL.score > gameData.playerR.score
 			? `🏆🎖️ WINNER '${gameData.playerL.user.login}' 🏆🎖️`
@@ -367,7 +378,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (returnData && returnData.running)
 			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
 		else
+		{
+			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
 			this.finishGame(gameRoom);
+		}
 	}
 
 	/**
@@ -425,7 +439,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!data || !data.gameRoom)
 			return ;
 		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
-			this.finishGame(data.gameRoom);
+			this.finishGame(data.gameRoom, socket);
 		else
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 	}

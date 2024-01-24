@@ -30,15 +30,12 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: consoldaki gereksiz çıktıları sil.
  * TODO: Settingsdeki contact ve about kısmını ekle/güncelle.
  * ----------------------------------------------------
- * OK: GameLobby sadece admin ise sag oyuncuyu kicklemeyi duzelt / frontend'i de duzelt.
  * TODO: Matchmaking; duzelt
  * TODO: channel owner olacak sadece 1 kisi, ciktiginda null olarak yazilacak cikmayacak yani. adminler bu owner'i kickleyemez ama owner kickleyebilir
  * TODO: chatteyken oyun istegi; attiginda gonderen kisinin ekraninda modal olarak create game basilacak. create game butonuna basilinca odayi olusturacak ve lobiye yonlendirilecek, hedef kisiye de invite istegi gidecek.
- * TODO: game score'si 4 ama 5 ollmsai lazim duzelt
- * TODO: game oynarken baglanti gitmesi durumunda kimin scoresi yuksekse degil de kim cikarsa kaybedecek yap.
- * TODO: arada sirada lobby.playerLeft.id undefined geliyor. invite ettikten sonra kabul ettiginde oyun baslarken.
- * TODO: oyun oynarken url dinleme ekle cikarsa cikart.
+ * TODO!!!: arada sirada lobby.playerLeft.id undefined geliyor. invite ettikten sonra kabul ettiginde oyun baslarken.
  * TODO: oyunun bir oyuncu alt tab attiginda yavaslamasi.
+ * TODO: achievement strict'lerinde process ilerlemesi olmuor el at.
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

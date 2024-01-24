@@ -1,32 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import fetchRequest from "../../utils/fetchRequest";
-import { IUser } from "../../chat/iChannel";
-import "./styles.css";
 import { useSocket } from "../../hooks/SocketHook";
 import { ILobby } from "../GameLobby";
 import LoadingPage from "../../utils/LoadingPage";
+import "./PongGamePage.css";
 
-/**
- * pLeftLocation number
- * pRightLocation number
- * ballLocation
- * pLeftScore
- * pRightScore
- * duration
- * @returns 
- */
 function PongGamePage() {
 	const { roomName } = useParams();
 	const navigate = useNavigate();
 	const [liveRoom, setLiveRoom] = useState<ILobby>();
-	// const [liveRoom, setLiveData] = useState<ILiveData>();
 	const { socket } = useSocket();
 	const [result, setResult] = useState<string | undefined>(undefined);
 	const delay = 16;
 
 	useEffect(() => {
-		// const	gameListener = async ({action}:{action: string}) => {
 		const	gameListener = async () => {
 			const response = await fetchRequest({
 				method: 'GET',
@@ -36,15 +24,7 @@ function PongGamePage() {
 				const data = await response.json();
 				console.log("PongGamePage:", data);
 				if (!data.err){
-					// const pLeft: IUser = data.players.find((player: IUser) => player.id === data.pLeftId);
-					// const pRight: IUser = data.players.find((player: IUser) => player.id === data.pRightId);
-					const playerLeft: IUser | null = (data.playerL && data.playerL.user)
-						? data.players.find((player: IUser) => player.id === data.playerL.user.id)
-						: null;
-					const playerRight: IUser | null = (data.playerR && data.playerR.user)
-						? data.players.find((player: IUser) => player.id === data.playerR.user.id)
-						: null;
-					setLiveRoom({ ...data, playerLeft, playerRight });
+					setLiveRoom(data);
 					socket.emit('joinGameRoom', {
 						gameRoom: roomName,
 					});
@@ -56,6 +36,7 @@ function PongGamePage() {
 			}
 		}
 		gameListener();
+		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [])
 
 	useEffect(() => {
@@ -65,19 +46,11 @@ function PongGamePage() {
 		const	handleLiveData = ({action}: {action: ILobby}) => {
 			if (!action)
 				return ;
-			// setLiveData(action);
-			// setLiveRoom(...action, action)
 			setLiveRoom(prevLiveRoom => ({...prevLiveRoom, ...action}));
 		}
 		const	finishGameData = ({ result }: { result: string }) => {
 			clearInterval(intervalId);
 			setResult(result)
-			// setTimeout(() => { // 5 saniye sonra /game 'ye yonlendirilecek.
-			// 	setInterval(() => {
-			// 		setResult(...oldResult, result);
-			// 	}, 1000)
-			// 	navigate('/game', {replace: true});
-			// }, 5000);
 			let countdown = 8;
 			const countdownInterval = setInterval(() => {
 				setResult(`${result} | Redirecting in ${countdown} seconds...`);
@@ -152,6 +125,12 @@ function PongGamePage() {
 		});
 	}
 
+	window.onpopstate = async () => {
+		socket.emit('leaveGameRoom', {
+			gameRoom: roomName,
+		});
+	}
+
 	if (!liveRoom)
 		return (<LoadingPage/>);
 
@@ -167,8 +146,8 @@ function PongGamePage() {
 			<div className="Pong">
 				<div className="container">
 					<div className="gameField">
-						<p className="PlayerName" id="leftPlayerName">{liveRoom.playerLeft.login}</p>
-						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom.playerRight.login}</p>
+						<p className="PlayerName" id="leftPlayerName">{liveRoom.playerL.user.login}</p>
+						<p className="PlayerName" style={{margin:'0 0 0 auto'}} id="rightPlayerName">{liveRoom.playerR.user.login}</p>
 						<div className="ball" style={{top: liveRoom.ball.y, left: liveRoom.ball.x}}/>
 						<div className="player1" id="player1" style={{top: liveRoom.playerL.location + 'px'}} />
 						<div className="player2" id="player2" style={{top: liveRoom.playerR.location + 'px'}} />
