@@ -33,9 +33,9 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: Matchmaking; duzelt
  * TODO: channel owner olacak sadece 1 kisi, ciktiginda null olarak yazilacak cikmayacak yani. adminler bu owner'i kickleyemez ama owner kickleyebilir
  * TODO: chatteyken oyun istegi; attiginda gonderen kisinin ekraninda modal olarak create game basilacak. create game butonuna basilinca odayi olusturacak ve lobiye yonlendirilecek, hedef kisiye de invite istegi gidecek.
- * TODO!!!: arada sirada lobby.playerLeft.id undefined geliyor. invite ettikten sonra kabul ettiginde oyun baslarken.
  * TODO: oyunun bir oyuncu alt tab attiginda yavaslamasi.
  * TODO: achievement strict'lerinde process ilerlemesi olmuor el at.
+ * TODO: oyun başlamışken, bildirimlerden farklı bir daveti kabul edince oyunlar üst üste biniyor,
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

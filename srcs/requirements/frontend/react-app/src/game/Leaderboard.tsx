@@ -15,7 +15,7 @@ interface IBoard {
 }
 
 function Leaderboard(){
-	console.log("---------LEADERBOARD-PAGE---------");
+	// console.log("---------LEADERBOARD-PAGE---------");
 	const [board, setBoard] = useState<IBoard[]>([]);
 	const {userInfo} = useUser();
 	const navigate = useNavigate();
@@ -31,28 +31,7 @@ function Leaderboard(){
 				// const data = await response.json();
 				console.log("Get Leaderboard: ", responseData);
 				if (!responseData.err){
-					const fakeBoardData: IBoard[] = [
-						{id: 5,login: 'user1',xp: 100,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 6,login: 'user2',xp: 150,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 7,login: 'user3',xp: 200,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 8,login: 'user4',xp: 300,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 9,login: 'user5',xp: 50,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 10,login: 'user6',xp: 10,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 11,login: 'user7',xp: 313,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 12,login: 'user8',xp: 422,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 13,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 14,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 15,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 16,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 17,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 18,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 19,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-						{id: 20,login: 'user9',xp: 355,totalWins: 20,totalLoses: 5,totalTies: 3,totalGames: 28},
-
-					]
-				
-					setBoard(prevBoard => [...prevBoard, ...fakeBoardData, ...responseData.data as IBoard[]]);
-					// setBoard(responseData.data as IBoard[]); //sadece bu açılacak şimdilik yorum satırında kalsın.
+					setBoard(responseData.data as IBoard[]);
 				} else {
 					console.log("fetchBoard error:", responseData.err);
 				}

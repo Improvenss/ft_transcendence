@@ -18,7 +18,7 @@ const configs = {
 
 
 function CreateGame({invite}: {invite?: string}) {
-	console.log("---------CREATE-GAME---------");
+	// console.log("---------CREATE-GAME---------");
 	const [roomName, setRoomName] = useState('');
 	const [gameMode, setGameMode] = useState('classic');
 	// const [gameMode, setGameMode] = useState(0); // classic

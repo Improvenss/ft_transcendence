@@ -12,7 +12,7 @@ const StatusContext = createContext<{
 });
 
 export function StatusProvider({children}: {children: React.ReactNode}) {
-	console.log("---------STATUSHOOK-PAGE---------");
+	// console.log("---------STATUSHOOK-PAGE---------");
 	const [status, setStatus] = useState<UserStatus>(undefined);
 	const {socket} = useSocket();
 	const location = useLocation();

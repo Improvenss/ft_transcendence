@@ -45,7 +45,7 @@ export const useChannelContext = () => {
 };
 
 function ChatPage () {
-	console.log("---------CHAT-PAGE---------");
+	// console.log("---------CHAT-PAGE---------");
 	const {socket} = useSocket();
 	const { userInfo } = useUser();
 	const [channels, setChannels] = useState<IChannel[] | undefined>(undefined);

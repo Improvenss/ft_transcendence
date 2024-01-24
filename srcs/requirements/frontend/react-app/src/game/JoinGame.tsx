@@ -12,8 +12,7 @@ export interface IGameJoinForm {
 }
 
 function JoinGame(){
-	console.log("---------JOIN-GAME---------");
-	const { roomName } = useParams();
+	// console.log("---------JOIN-GAME---------");
 	const [searchTerm, setSearchTerm] = useState('');
 	const {socket} = useSocket();
 	const [rooms, setRooms] = useState<IGame[]>([]);

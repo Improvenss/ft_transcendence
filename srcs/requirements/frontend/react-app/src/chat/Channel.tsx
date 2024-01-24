@@ -9,7 +9,7 @@ import ChannelJoin from './ChannelJoin';
 import fetchRequest from '../utils/fetchRequest';
 
 function Channel({userId}: {userId:number}) {
-	console.log("---------CHAT-CHANNELS---------");
+	// console.log("---------CHAT-CHANNELS---------");
 	const { dms, channels, activeDm, setActiveDm, setChannels, activeChannel, setActiveChannel } = useChannelContext();
 	const [activeTab, setActiveTab] = useState('involved');
 	const [searchTerm, setSearchTerm] = useState('');

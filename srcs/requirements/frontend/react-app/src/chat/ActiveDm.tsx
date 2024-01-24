@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import fetchRequest from "../utils/fetchRequest";
 
 function ActiveDm({userId}:{userId:number}){
-	console.log("-->Active DirectMessage<---");
+	// console.log("-->Active DirectMessage<---");
 	const { activeDm } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);

@@ -368,7 +368,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('calcGameData')
 	async handleCalcGameData(
-		// @ConnectedSocket() socket: Socket,
+		@ConnectedSocket() socket: Socket,
 		@MessageBody()
 		{ gameRoom }:
 			{ gameRoom: string }
@@ -377,9 +377,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		const	returnData = await this.gameService.calcGameLoop(denemeData);
 		if (returnData && returnData.running)
 			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+			// socket.emit(`updateGameData`, {action: returnData});
 		else
 		{
 			this.server.to(gameRoom).emit(`updateGameData`, {action: returnData});
+			// socket.emit(`updateGameData`, {action: returnData});
 			this.finishGame(gameRoom);
 		}
 	}

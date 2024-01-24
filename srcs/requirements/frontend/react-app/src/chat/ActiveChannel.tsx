@@ -10,7 +10,7 @@ import MessageInput from './MessageInput';
 import { useUser } from '../hooks/UserHook';
 
 function ActiveChannel({userId}:{userId:number}){
-	console.log("-->Active Channel<---");
+	// console.log("-->Active Channel<---");
 	const { activeChannel, channelInfo, setChannelInfo } = useChannelContext();
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const messagesEndRef = useRef<HTMLDivElement>(null);

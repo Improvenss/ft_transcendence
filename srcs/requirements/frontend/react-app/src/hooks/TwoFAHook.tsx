@@ -11,7 +11,7 @@ const TwoFAContext = createContext<{
 	});
 
 export function TwoFAProvider({ children }: { children: React.ReactNode }) {
-	console.log("---------TWOFAHOOK-PAGE---------");
+	// console.log("---------TWOFAHOOK-PAGE---------");
 	const [isTwoFA, setTwoFA] = useState<boolean>(false);
 	const [qrCode, setQrCode] = useState<string>('');
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);

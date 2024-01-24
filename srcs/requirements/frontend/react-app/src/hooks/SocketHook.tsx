@@ -12,7 +12,7 @@ const SocketContext = createContext<{
 
 // Provider component'ini oluştur
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-	console.log("---------SOCKETHOOK-PAGE---------");
+	// console.log("---------SOCKETHOOK-PAGE---------");
 	const [socket, setSocket] = useState<Socket>();
 	const {userInfo} = useUser();
 

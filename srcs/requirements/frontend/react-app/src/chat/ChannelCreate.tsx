@@ -17,7 +17,7 @@ function ChannelCreate(
 		onSuccess: (tabId: string) => void,
 		handleChannelAction:  (channelName: string, password: string | null) => Promise<void>
 }){
-	console.log("---------CHANNEL-CREATE----------");
+	// console.log("---------CHANNEL-CREATE----------");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [channelData, setChannelData] = useState<IChannelCreateForm>(defaultForm);
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

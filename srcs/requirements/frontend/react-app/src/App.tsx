@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
 import HomePage from "./home/HomePage";
 import NoMatchPage from "./utils/NoMatchPage";
 import Cookies from 'js-cookie';
@@ -16,29 +16,41 @@ import PongGamePage from './game/pongGame/PongGamePage';
 import fetchRequest from './utils/fetchRequest';
 import { useEffect } from 'react';
 import Leaderboard from './game/Leaderboard';
+import { useSocket } from './hooks/SocketHook';
 
 function App() {
-	console.log("---------APP-PAGE---------");
+	// console.log("---------APP-PAGE---------");
 	const { setAuth } = useAuth();
 	const { userInfo } = useUser();
 	const location = useLocation();
+	const { socket } = useSocket();
 
 	useEffect(() => {
 		const handleLinkClick = async (event: any) => { 
 			const newPath = event.currentTarget.getAttribute("href");
 			const currentPath = location.pathname;
+			const roomNameLobby = currentPath.replace('/game/lobby/', '');
+			const roomNameGame = currentPath.replace('/game/', '');
 			if (currentPath.startsWith('/game/lobby/') && !newPath.startsWith('/game/lobby/')) {
 				const userConfirmed = window.confirm('Are you sure do want to leave the lobby?');
-				
 				if (!userConfirmed) {
 					event.preventDefault();
 				} else {
-					const roomName = currentPath.replace('/game/lobby/', '');
 					const response = await fetchRequest({
 						method: 'DELETE',
-						url: `/game/room/leave?room=${roomName}`
+						url: `/game/room/leave?room=${roomNameLobby}`
 					});
-					// console.log('Fetch Response:', response);
+				}
+			}
+			else if (currentPath.startsWith(`/game/${roomNameGame}`) && !newPath.startsWith(`/game/${roomNameGame}`)) {
+				const userConfirmed = window.confirm('Are you sure do want to leave the Game Room?');
+				if (!userConfirmed) {
+					event.preventDefault();
+				} else {
+					console.log("kekekekekkeke;");
+					socket.emit('leaveGameRoom', {
+						gameRoom: roomNameGame,
+					});
 				}
 			}
 		};
@@ -59,7 +71,7 @@ function App() {
 
 	return (
 		<div id="app">
-			{/* <FallingChars /> */}
+			<FallingChars />
 			<header>
 				<nav id='app-header'>
 					<Link to='/' id="site-name" className='link'>TRANSCENDENCE</Link>

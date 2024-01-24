@@ -3,13 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../hooks/UserHook";
 import NoMatchPage from "../utils/NoMatchPage";
 import LoadingPage from "../utils/LoadingPage";
-import "./ProfilePage.css";
 import handleRequest from '../utils/handleRequest'
 import fetchRequest from "../utils/fetchRequest";
 import { IUserProps } from "../chat/iChannel";
+import "./ProfilePage.css";
 
 function ProfilePage() {
-	console.log("---------PROFILE-PAGE---------");
+	// console.log("---------PROFILE-PAGE---------");
 	const	{ userInfo } = useUser();
 	const	{ username } = useParams(); //profile/akaraca'daki akaraca'yı ele alıyor.
 	const	[userPanel, setUserPanel] = useState<IUserProps | undefined | null>(undefined);

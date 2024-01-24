@@ -3,8 +3,8 @@ import Modal from "../utils/Modal";
 import { ReactComponent as IconSettings } from '../assets/iconSettings.svg';
 import { isValidImage } from '../utils/fileValidation';
 import fetchRequest from '../utils/fetchRequest';
-import "./Settings.css";
 import { useUser } from '../hooks/UserHook';
+import "./Settings.css";
 
 interface IUserUpdateForm {
 	nickname: string;
@@ -24,7 +24,7 @@ enum Tab {
 }
 
 function Settings() {
-	console.log("---------SETTINGS---------");
+	// console.log("---------SETTINGS---------");
 	const {userInfo} = useUser();
 	const [isModalOpen, setModalOpen] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);

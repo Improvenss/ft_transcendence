@@ -1,7 +1,7 @@
 import './HomePage.css';
 
 function HomePage(){
-	console.log("---------HOME-PAGE---------");
+	// console.log("---------HOME-PAGE---------");
 
 	return (
 		<div id="home-page">

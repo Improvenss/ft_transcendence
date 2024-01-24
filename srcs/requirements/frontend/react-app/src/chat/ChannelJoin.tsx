@@ -4,7 +4,7 @@ import './ChannelJoin.css';
 function ChannelJoin({ handleChannelAction}: { 
 		handleChannelAction:  (channelName: string, password: string) => Promise<void>
 	}){
-		console.log("---------CHANNEL-JOIN----------");
+		// console.log("---------CHANNEL-JOIN----------");
 		const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 		const handleSubmit = async (e: FormEvent) => {

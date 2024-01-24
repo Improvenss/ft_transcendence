@@ -22,7 +22,7 @@ const GameButton: React.FC<GameButtonProps> = ({ content, onClick }) => (
 );
 
 const GamePage: React.FC = () => {
-	console.log("---------GAME-PAGE---------");
+	// console.log("---------GAME-PAGE---------");
 	const [isModalOpen, setModalOpen] = useState(false);
 	const [modalContent, setModalContent] = useState<React.ReactNode | null>(null);
 	const [isModalMatching, setModalMatching] = useState(false);

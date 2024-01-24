@@ -12,7 +12,7 @@ const UserContext = createContext<{
   });
 
 export function UserProvider({children}: {children: React.ReactNode}) {
-	console.log("---------USERHOOK-PAGE---------");
+	// console.log("---------USERHOOK-PAGE---------");
 	const {setAuth} = useAuth();
 	const [userInfo, setUserInfo] = useState<IUserProps>();
 

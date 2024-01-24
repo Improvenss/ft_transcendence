@@ -15,7 +15,7 @@ const AuthContext = createContext<{
 
 // Create the Provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-	console.log("---------AUTHHOOK-PAGE---------");
+	// console.log("---------AUTHHOOK-PAGE---------");
 	const [isAuth, setAuth] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {

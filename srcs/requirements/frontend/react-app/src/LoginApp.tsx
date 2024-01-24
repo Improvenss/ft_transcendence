@@ -15,7 +15,7 @@ interface ILoginProps{
 
 async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 	try {
-		console.log("---API Login Connection---");
+		// console.log("---API Login Connection---");
 		const response = await fetchRequest({
 			method: 'GET',
 			url: '/api/login',
@@ -49,7 +49,7 @@ async function	redirectToLogin({setClicked, navigate}: ILoginProps) {
 }
 
 function LoginApp() {
-	console.log("---------LOGINAPP-PAGE---------");
+	// console.log("---------LOGINAPP-PAGE---------");
 	const [clicked, setClicked] = useState(false);
 	const navigate = useNavigate();
 

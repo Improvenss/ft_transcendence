@@ -49,7 +49,7 @@ export interface ILobby {
 }
 
 const GameLobby = () => {
-	console.log("---------LOBBY---------");
+	// console.log("---------LOBBY---------");
 	const { roomName } = useParams();
 	const {socket} = useSocket();
 	const {userInfo} = useUser();

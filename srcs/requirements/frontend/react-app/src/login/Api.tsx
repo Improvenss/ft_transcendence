@@ -6,7 +6,7 @@ import fetchRequest from "../utils/fetchRequest";
 import LoadingPage from "../utils/LoadingPage";
 
 function Api(){
-	console.log("---------API-PAGE---------");
+	// console.log("---------API-PAGE---------");
 	const	{setAuth} = useAuth();
 	const	urlParams = new URLSearchParams(window.location.search);
 	const	uriCode = urlParams.get('code');
@@ -14,7 +14,7 @@ function Api(){
 
 	useEffect(() => {
 		async function sendCode() {
-			console.log("---API Token Connection---");
+			// console.log("---API Token Connection---");
 			const	response = await fetchRequest({
 				method: 'POST',
 				body: JSON.stringify({ code: uriCode as string}),

@@ -11,7 +11,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import './Notification.css';
 
 function Notification() {
-	console.log("---------NOTIFICATION---------");
+	// console.log("---------NOTIFICATION---------");
 	const { isAuth } = useAuth();
 	const {socket} = useSocket();
 	const { userInfo } = useUser();

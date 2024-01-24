@@ -19,7 +19,7 @@ import fetchRequest from "../utils/fetchRequest";
 import GameInvite from "./HandleGameInvite";
 
 function InfoChannel() {
-	console.log("-->Channel Info<---");
+	// console.log("-->Channel Info<---");
 	const { activeChannel, channelInfo } = useChannelContext();
 	const { userInfo } = useUser();
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
