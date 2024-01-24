@@ -14,21 +14,6 @@ import { IGameRoom } from './IGame';
 import Modal from '../utils/Modal';
 import handleRequest from '../utils/handleRequest'
 
-// interface ILobby {
-// 	id: number,
-// 	name: string,
-// 	type: string,
-// 	mode: string, // belki, olabilir
-// 	winScore: number, // yes
-// 	duration: number, // yes
-// 	description: string,
-// 	adminId: number, // belki, sonra
-// 	pRightIsReady: boolean,
-// 	players: IUser, // belki
-// 	playerLeft: IUser, // yes
-// 	playerRight: IUser, // yes
-// }
-
 interface IPlayer {
 	user: {
 		id: number,
@@ -81,25 +66,6 @@ const GameLobby = () => {
 		});
 	}
 
-	const friends = [
-		{login: 'abc', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
-		{login: 'abcde', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
-		{login: 'abcdef', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
-		{login: 'abcdeff', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
-		{login: 'abcdeffd', avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp', nickname: 'test', status: 'online', imageUrl: ''},
-	];
-
-	//   if (lobby && !lobby?.playerRight) {
-	// 	lobby.playerRight = {
-	// 		id: 5,
-	// 		status: 'offline',
-	// 	  avatar: 'https://maxst.icons8.com/vue-static/landings/page-index/hero/hero-products/icons1x.webp',
-	// 	  login: 'abc',
-	// 	  imageUrl: '',
-	// 	  nickname: '',
-	// 	};
-	//   }
-
 	useEffect(() => {
 		const lobbyListener = async ({action}: {action: string | undefined}) => {
 			if (action === 'startGame')
@@ -115,19 +81,14 @@ const GameLobby = () => {
 				const data = await response.json();
 				console.log("GameLobby:", data);
 				if (!data.err){
-					// setLobby(data)
-					// const playerLeft: IUser = data.players.find((player: IUser) => player.id === data.playerL.user.id);
-					// const playerRight: IUser = data.players.find((player: IUser) => player.id === data.playerR.user.id);
 					const playerLeft: IUser | null = (data.playerL && data.playerL.user)
 						? data.players.find((player: IUser) => player.id === data.playerL.user.id)
 						: null;
 					const playerRight: IUser | null = (data.playerR && data.playerR.user)
 						? data.players.find((player: IUser) => player.id === data.playerR.user.id)
 						: null;
-					// const pRightIsReady = data.pRightIsReady;
 					setLobby({ ...data, playerLeft, playerRight });
 				} else {
-					console.log("yarraaam", action, action === 'leave');
 					if (action === 'leave')
 					{
 						navigate('/game', {replace: true});
@@ -222,6 +183,27 @@ const GameLobby = () => {
 		}
 	}
 
+	const	handleKickPlayer = async (target: string) => {
+		console.log("kick playere geldi");
+		const response = await fetchRequest({
+			method: 'DELETE',
+			headers: {
+				'game': roomName as string,
+			},
+			url: `/game/room/kick?targetUser=${target}`,
+		});
+		if (response.ok)
+		{
+			const data = await response.json();
+			if (!data.err)
+				console.log(data);
+			else
+				console.log("Game Lobby Kick User error", data.err);
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
+	}
+
 	if (!roomName)
 		return (<LoadingPage/>);
 
@@ -244,14 +226,14 @@ const GameLobby = () => {
 					</div>
 				) : 'null'}
 				{lobby.playerR.user ? (
-					<div className='rightPlayer' title='kick' onClick={() => console.log("kick yapısını ekle")}>
+					<div className='rightPlayer' title='kick' onClick={() => userInfo.id === lobby.playerL.user.id && handleKickPlayer(lobby.playerR.user.login)}>
 						<img
 							className='image'
 							src={lobby.playerRight.avatar ? lobby.playerRight.avatar : lobby.playerRight.imageUrl}
 							alt={lobby.playerR.user.login}
 						/>
 						<span>{lobby.playerRight.nickname ? lobby.playerRight.nickname : lobby.playerR.user.login}</span>
-						<IconKick id='kick'/>
+						{userInfo.id === lobby.playerL.user.id && (<IconKick id='kick'/>)}
 					</div>
 				) : (
 					<>
@@ -269,7 +251,6 @@ const GameLobby = () => {
 							>
 								<div id='friends-modal-header'>Invite Friends</div>
 								<div id='friends-content'>
-									{/* {friends.map((user) => ( */}
 									{userInfo.friends.map((user) => (
 										<div
 											key={user.login}

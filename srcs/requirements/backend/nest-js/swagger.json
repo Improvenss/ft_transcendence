@@ -496,6 +496,26 @@
           }
         }
       }
+    },
+    "/game/room/kick": {
+      "delete": {
+        "operationId": "GameController_kickGameLobby",
+        "parameters": [
+          {
+            "name": "targetUser",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {

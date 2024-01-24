@@ -7,6 +7,7 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { Server, Socket } from 'socket.io';
+import { GameAdminGuard } from './admin.game.guard';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -166,6 +167,31 @@ export class GameController {
 		}
 	}
 
+	
+	@UseGuards(GameAdminGuard)
+	@Delete('/room/kick')
+	async	kickGameLobby(
+		@Req() { user },
+		@Req() { game },
+		@Query('targetUser') targetUser: string | undefined,
+	){
+		try
+		{
+			console.log(`${C.B_RED}DELETE: /game/room/kick: @Query('room'): [${targetUser}]${C.END}`);
+			const	targetUserData: User = await this.usersService.getUserPrimary({login: targetUser});
+			const	responseKickUser = await this.gameService.leaveGameLobby({
+				room: game.name,
+				user: targetUserData,
+			});
+			this.chatGateway.server.emit(`lobbyListener:${game.name}`, { action: 'leave' });
+			return ({ message: `ADMIN (${user.login}): Kicked ${targetUser} from Game Lobby(${game.name})!` });
+		}
+		catch (err)
+		{
+			console.log("@Delete('/game/room/kick'): ", err.message);
+			return ({err: err.message});
+		}
+	}
 
 	// @Put('/room')
 	// async	putGameRoom()
@@ -184,8 +210,8 @@ export class GameController {
 		}
 		catch (err)
 		{
-			console.log("@Delete('/game/room'): ", err);
-			return ({err: err});
+			console.log("@Delete('/game/room'): ", err.message);
+			return ({err: err.message});
 		}
 	}
 

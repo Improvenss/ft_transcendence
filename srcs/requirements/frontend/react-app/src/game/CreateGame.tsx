@@ -3,6 +3,7 @@ import "./CreateGame.css";
 import { IGameRoom } from './IGame';
 import { useNavigate } from 'react-router-dom';
 import fetchRequest from '../utils/fetchRequest';
+import handleRequest from '../utils/handleRequest';
 
 const configs = {
 	winningScore: {
@@ -15,7 +16,8 @@ const configs = {
 	},
 };
 
-function CreateGame() {
+
+function CreateGame({invite}: {invite?: string}) {
 	console.log("---------CREATE-GAME---------");
 	const [roomName, setRoomName] = useState('');
 	const [gameMode, setGameMode] = useState('classic');
@@ -27,6 +29,31 @@ function CreateGame() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [description, setDescription] = useState('');
 	const navigate = useNavigate();
+
+	// const handleInvitePlayer = async (target: string) => {
+	// 	console.log("invite player");
+
+	// 	const response = await fetchRequest({
+	// 		method: 'PATCH',
+	// 		body: JSON.stringify({
+	// 			invitedPlayer: target ,
+	// 		}),
+	// 		url: `/game/room?room=${roomName}`,
+	// 	});
+
+	// 	if (response.ok)
+	// 	{
+	// 		const data = await response.json();
+	// 		if (!data.err)
+	// 		{
+	// 			handleRequest('sendGameInviteRequest', target, undefined, roomName);
+	// 		}
+	// 		else
+	// 			console.log("Invite data err", data.err);
+	// 	} else {
+	// 		console.log("---Backend Connection '❌'---");
+	// 	}
+	// }
 
 	const handleCreateRoom = async () => {
 		// Oda adı kontrolü
@@ -74,6 +101,11 @@ function CreateGame() {
 			console.log("responses", data);
 			if (!data.err){
 				navigate(`/game/lobby/${roomName}`);
+				if (invite){
+
+					// handleRequest(invite);
+					handleRequest('inviteGame', invite);
+				}
 			} else {
 				navigate('/404');
 			}

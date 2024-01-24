@@ -46,6 +46,7 @@ async function bootstrap() {
 		cert: fs.readFileSync(process.env.CERT_FILE as string),
 	};
 	const	app = await NestFactory.create(AppModule, {httpsOptions, cors: true}); // Bu ana 'app'imiz.
+	// app.useGlobalPipes(new ValidationPipe()); // -> Burada validation pipe'yi kullanirsak sonraki islemlerin hepsinde gecerli olacaktir.
 	app.enableCors();
 	app.use(
 		cors({

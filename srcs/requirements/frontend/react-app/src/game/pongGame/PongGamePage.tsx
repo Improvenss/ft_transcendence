@@ -7,41 +7,6 @@ import { useSocket } from "../../hooks/SocketHook";
 import { ILobby } from "../GameLobby";
 import LoadingPage from "../../utils/LoadingPage";
 
-// interface IRoom {
-// 	id: number,
-// 	// mode: string, // belki, olabilir
-// 	winScore: number, // yes
-// 	duration: number, // yes
-// 	adminId: number, // belki, sonra
-// 	players: IUser, // belki
-// 	pLeft: IUser, // yes
-// 	pRight: IUser, // yes
-// 	ballLocationX: number,
-// 	ballLocationY: number,
-// 	ballSpeedX: number,
-// 	ballSpeedY: number,
-// }
-
-// interface IPlayer {
-// 	location?: number,
-// 	speed?: number,
-// 	score?: number,
-// }
-
-// interface IBall {
-// 	x?: number,
-// 	y?: number,
-// 	speedX?: number,
-// 	speedY?: number,
-// }
-
-// interface ILiveData {
-// 	ball?: IBall,
-// 	playerL?: IPlayer,
-// 	playerR?: IPlayer,
-// 	duration?: number;
-// }
-
 /**
  * pLeftLocation number
  * pRightLocation number

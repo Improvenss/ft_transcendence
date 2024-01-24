@@ -16,6 +16,7 @@ import { useUser } from "../hooks/UserHook";
 import { useNavigate } from "react-router-dom";
 import handleRequest from '../utils/handleRequest';
 import fetchRequest from "../utils/fetchRequest";
+import GameInvite from "./HandleGameInvite";
 
 function InfoChannel() {
 	console.log("-->Channel Info<---");
@@ -211,8 +212,10 @@ function InfoChannel() {
 													<>
 														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
 														<button onClick={() => handleSendMessage(user.id)}> <IconDM /> </button>
-														<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>
-													</>
+														{/*<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>*/}
+														<GameInvite login={user.login}>
+															<IconInviteGame />
+														</GameInvite>													</>
 												)}
 												{isAdmin && (
 													<>
