@@ -132,6 +132,7 @@ export class UsersService {
 
 		const playerLHistory = new GameHistory(playerLHistoryDto);
 		const playerRHistory = new GameHistory(playerRHistoryDto);
+		await this.gameHistoryRepository.save([playerLHistory, playerRHistory]);
 
 		playerL._xp += xpEarnedL;
 		playerR._xp += xpEarnedR;
@@ -151,13 +152,7 @@ export class UsersService {
 			//--------------------------------------------------------
 			this.updateAchievements(playerL, playerLHistoryDto.result, playerR),
 			this.updateAchievements(playerR, playerRHistoryDto.result, playerL),
-			// this.checkStreaks(playerL, playerLHistoryDto.result),
-			// this.checkStreaks(playerR, playerRHistoryDto.result),
-			// this.checkLeaderboardChampion(playerL),
-			// this.checkLeaderboardChampion(playerR),
 		]);
-
-		return (await this.gameHistoryRepository.save([playerLHistory, playerRHistory]));
 	}
 
 	async updateAchievements(user: User, result: GameStatus, rival: User) {
@@ -239,41 +234,19 @@ export class UsersService {
 				achievementName = 'Tie Streak';
 				break;
 		}
-		const achievement = achievements.find(a => a.name === achievementName);
-		if (achievement) {
-			if (streakCount > 0) {
-				achievement.progress += 20;
-				if (achievement.progress >= 100) {
-					achievement.progress = 100;
-					achievement.achievedDate = new Date();
+		achievements.forEach(a => {
+			if (a.progress < 100) {
+				if (a.name === achievementName && streakCount > 0) {
+					a.progress = Math.min(a.progress + 20, 100);
+					if (a.progress === 100) {
+						a.achievedDate = new Date();
+					}
+				} else if (['Win Streak', 'Lose Streak', 'Tie Streak'].includes(a.name)) {
+					a.progress = 0;
 				}
-			} else {
-				achievement.progress = 0;
 			}
-		}
-		
-		// if (streakCount >= 5) {
-		// 	let achievementName;
-		// 	switch(result) {
-		// 		case GameStatus.WIN:
-		// 			achievementName = 'Win Streak';
-		// 			break;
-		// 		case GameStatus.LOSE:
-		// 			achievementName = 'Lose Streak';
-		// 			break;
-		// 		case GameStatus.TIE:
-		// 			achievementName = 'Tie Streak';
-		// 			break;
-		// 	}
-		// 	const achievement = achievements.find(a => a.name === achievementName);
-		// 	if (achievement && achievement.achievedDate === null) {
-		// 		achievement.progress = 100;
-		// 		achievement.achievedDate = new Date();
-		// 	}
-		// }
+		});
 
-		// user.achievements = achievements;
-		// await this.usersRepository.save(user);
 		await this.usersRepository.update(user.id, { achievements: achievements });
 	}
 	
