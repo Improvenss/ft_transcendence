@@ -97,8 +97,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			primary: false,
 		}, false);
 		//--> oyun esnasında socket bağlantısı kopunca score göre sonuçlanıyor, çıkan kişiyi kaybettirmemiz lazım.
-		if (userData && userData.currentRoom)
-			await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
+		if (userData && userData.currentRoom){
+			const	gameData = this.gameRooms.get(userData.currentRoom.name);
+			if (!gameData)
+			{
+				await this.gameService.leaveGameLobby({
+					room: userData.currentRoom.name,
+					user: userData,
+				});
+				this.server.emit(`lobbyListener:${userData.currentRoom.name}`, { action: 'leave' });
+			}
+			else
+				await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
+		}
 		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
 		this.connectedSockets.delete(clientId);
 		client.disconnect(true);
@@ -223,17 +234,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		let	katsayi: number = 1;
 		const newPos = Math.floor(Math.random() * 2);
 		const moves = [
-			{ x: -4, y: -2 },
-			{ x: -3, y: -4 },
-			{ x: -3, y: 3 },
-			{ x: -3, y: 2 },
-			{ x: 4, y: -2 },
-			{ x: 2, y: -4 },
+			{ x: -5, y: -3 },
+			{ x: -4, y: -5 },
+			{ x: -4, y: 4 },
+			{ x: 4, y: 3 },
+			{ x: 5, y: -3 },
+			{ x: 3, y: -5 },
 		];
 		if (grd.mode === 'fast-mode')
-			katsayi = 1.5;
+			katsayi = 3;
 		const initialMove = moves[Math.floor(Math.random() * moves.length)];
-		grd.ball = { x: 479, speedX: initialMove.x * katsayi, speedY: initialMove.y * katsayi };
+		grd.ball = { x: (500 - 18), speedX: initialMove.x * katsayi, speedY: initialMove.y * katsayi };
 		if (newPos == 0)
 			grd.ball.y = 22;
 		else

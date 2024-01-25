@@ -39,10 +39,10 @@ export class Game {
 		Object.assign(this, game);
 		if (!this.ball){
 			this.ball = {
-				x: 500,
-				y: 400,
-				speedX: 3,
-				speedY: 4
+				x: (500 - 21), // width: 1000
+				y: (800 - 45), // height: 800
+				speedX: (this.mode === 'fast-mode' ? 3 * 4 : 4),
+				speedY: (this.mode === 'fast-mode' ? 3 * 5 : 5)
 			};
 		}
 		if (!this.playerL){

@@ -207,15 +207,20 @@ export class GameService {
 		const	tmpRoom = await this.findGameRoom(body.room, ['players']);
 		const singleRoom = Array.isArray(tmpRoom) ? tmpRoom[0] : tmpRoom;
 		if (!singleRoom)
-			throw (new NotFoundException("'Game Room' not found for register Game Room!"));
+			throw (new NotFoundException(`${body.room} not found for register Game Room!`));
 		if (singleRoom.invitedPlayer != user.login && singleRoom.password && !bcrypt.compareSync(body.password, singleRoom.password))
 			throw (new Error("Password is WRONG!!!"));
 		if (singleRoom.players.length >= 2)
 			throw (new Error("Game Room is full!"));
 		await this.transferPlayer({ user: user }); // old - new game room
+		if (singleRoom.players.some((players) => players.id === user.id))
+			throw (new Error(`Player already exist in ${body.room}`), {status: 3});
+			// throw {
+			// 	error: new Error(`Player already exists in ${body.room}`),
+			// 	status: 3
+			// };
 		singleRoom.players.push(user);
 		singleRoom.playerR.user = {id: user.id, login: user.login, socketId: user.socketId};
-		// singleRoom.afterUpdate = !singleRoom.afterUpdate;
 		return (await this.gameRepository.save(singleRoom));
 	}
 

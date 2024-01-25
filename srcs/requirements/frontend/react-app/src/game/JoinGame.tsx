@@ -65,7 +65,8 @@ function JoinGame(){
 			const data = await response.json();
 			console.log("Join-game: ", data);
 			if (!data.err || data.err.status === 5) {
-				navigate(`/game/lobby/${game.name}`, {replace: true});
+				if (data.status !== 3)
+					navigate(`/game/lobby/${game.name}`, {replace: true});
 				if (errorMessage != null)
 					setErrorMessage('');
 			} else {
