@@ -133,7 +133,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			game.duration--;
 		}, 1000);
 		game.gameLoopInterval = setInterval(() => {
-			console.log("........");
 			this.updateGameState(game);
 		}, 16);
 	}
@@ -142,45 +141,52 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		clearInterval(loop);
 		this.finishGame(roomName, lostSocket);
 	}
+ //---------------------------------------------------------------------------
+	// Topun oyunculara çarpışma kontrolü
+	checkPlayerCollision = (player: Player, ball: Ball,	direction: string ) => {
+		return (
+			ball.y + 42 >= player.location &&
+			ball.y <= player.location + 120 &&
+			((direction === 'L' && ball.x <= 0)
+				|| (direction === 'R' && ball.x + 42 >= 1000))
+		);
+	};
 
-	updateGameState(
-		grd: IGame
-	) {
+	updateGameState( grd: IGame ) {
 		if (!grd)
 			return ;
 
-		// zaman bittiginde calisan yer
+		//--> oyuncunun köşelerine çarpma durumunu ekle
+
+		// Zaman bittiğinde oyunu bitir.
 		if (grd.duration <= 0)
 			grd.running = false;
 
-		// top hareketi
-		// if (grd.ball.y + 42 >= 800
+		// Topun pozisyonunu güncelle
+		grd.ball.x += grd.ball.speedX;
+		grd.ball.y += grd.ball.speedY;
+
+		// Topun sağ ve sol duvarlara çarpışma kontrolü
 		if (grd.ball.y + 42 >= 800 || grd.ball.y <= 0)
 			grd.ball.speedY *= -1;
 
-		if (grd.ball.y + 21 >= grd.playerL.location
-			&& grd.ball.y + 21 <= grd.playerL.location + 120)
-		{ //Left Player Collision
-			if (grd.ball.x <= 10)
-				{
-					grd.ball.speedX *= -1;
-					grd.ball.speedY += grd.playerL.speed / 10;
-					grd.ball.x += 3;
-				}
-		}
-		else if (grd.ball.y + 21 >= grd.playerR.location
-			&& grd.ball.y + 21 <= grd.playerR.location + 120)
-		{ //Right Player Collision
-			if (grd.ball.x + 42 >= 990)
-			{
-				grd.ball.speedX *= -1;
-				grd.ball.speedY += grd.playerR.speed / 10;
-				grd.ball.x -= 3;
-			}
+		// Sol oyuncu ile çarpışma kontrolü
+		if (this.checkPlayerCollision(grd.playerL, grd.ball, 'L')) {
+			grd.ball.speedX *= -1;
+			grd.ball.speedY += grd.playerL.speed / 10;
+			grd.ball.x += 3;
 		}
 
-		//add score to left
-		if (grd.ball.x + 42 >= 1000)
+		// Sağ oyuncu ile çarpışma kontrolü
+		if (this.checkPlayerCollision(grd.playerR, grd.ball, 'R')) {
+			grd.ball.speedX *= -1;
+			grd.ball.speedY += grd.playerR.speed / 10;
+			grd.ball.x -= 3;
+		}
+
+		// Sayı çizgisine çarpışma kontrolü ve skor güncelleme
+		//if (grd.ball.x + 42 >= 1000)
+		if (grd.ball.x >= 1021)
 		{
 			grd.playerL.score += 1;
 			if (grd.playerL.score >= grd.winScore){
@@ -188,7 +194,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			}
 			this.restartBall(grd);
 		}
-		else if (grd.ball.x <= 0) //add score to right
+		//else if (grd.ball.x <= 0)
+		else if (grd.ball.x <= -21)
 		{
 			grd.playerR.score += 1;
 			if (grd.playerR.score >= grd.winScore){
@@ -197,10 +204,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.restartBall(grd);
 		}
 
-		grd.ball.x += grd.ball.speedX;
-		grd.ball.y += grd.ball.speedY;
-		
-		// sol oyuncu hareketi
+		// Sol oyuncu hareketi
 		if (grd.playerL.location + grd.playerL.speed <= 0)
 			grd.playerL.location = 0;
 		else if (grd.playerL.location + grd.playerL.speed + 120 >= 800)
@@ -208,7 +212,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		else
 			grd.playerL.location += grd.playerL.speed;
 
-		// sag oyuncu hareketi
+		// Sağ oyuncu hareketi
 		if (grd.playerR.location + grd.playerR.speed <= 0)
 			grd.playerR.location = 0;
 		else if (grd.playerR.location + grd.playerR.speed + 120>= 800)

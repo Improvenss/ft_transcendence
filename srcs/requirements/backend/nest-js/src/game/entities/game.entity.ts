@@ -2,8 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { IsBoolean, IsNumber, IsPositive, IsString, Max, Min } from 'class-validator';
 import { EGameMode } from '../dto/create-game.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+//import { Repository } from 'typeorm';
+//import { InjectRepository } from '@nestjs/typeorm';
 
 export class Ball {
 	@IsPositive()
@@ -33,8 +33,8 @@ export class Player {
 
 @Entity('game')
 export class Game {
-	@InjectRepository(Game)
-	private readonly gameRepository: Repository<Game>;
+	//@InjectRepository(Game)
+	//private readonly gameRepository: Repository<Game>;
 	constructor(game: Partial<Game>) {
 		Object.assign(this, game);
 		if (!this.ball){
@@ -49,7 +49,7 @@ export class Game {
 			this.playerL = {
 				user: null,
 				score: 0,
-				location: 400,
+				location: (400-60), //tam ortadan başlaması için 120 olan yüksekliğini yarısı kadar çıkarıyoruz.
 				speed: 0,
 				ready: true
 			};
@@ -65,7 +65,7 @@ export class Game {
 			this.playerR = {
 				user: null,
 				score: 0,
-				location: 400,
+				location: (400-60),
 				speed: 0,
 				ready: false
 			};
