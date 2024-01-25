@@ -16,7 +16,6 @@ const configs = {
 	},
 };
 
-
 function CreateGame({invite}: {invite?: string}) {
 	// console.log("---------CREATE-GAME---------");
 	const [roomName, setRoomName] = useState('');
