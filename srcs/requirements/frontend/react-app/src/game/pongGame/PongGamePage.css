@@ -1,90 +1,122 @@
-body {
-	margin: 0;
-	height: 100%;
-	overflow: hidden;
-	user-select: none;
-  }
-  
-  .Pong {
-	font-family: sans-serif;
-	text-align: center;
-  }
-
-.gameField {
-	position: absolute;
-	border: 8px solid #ccc;
-	transform: translate(-50%, -50%);
+#play-page {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	top: 50%;
 	left: 50%;
-	border-radius: 5px;
-	background-color: black;
+	transform: translate(-50%, -50%);
+	user-select: none;
+	position: absolute;
+}
+
+#play-page .countdown {
+	position: absolute;
+	z-index: 5;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgb(0, 0, 0, 0.7);
 	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.hidden {
+	visibility: hidden;
+}
+
+#play-page .countdown > span {
+	font-size: 100px;
+}
+
+.play-header {
+	margin-bottom: 10px;
+}
+
+.play-container {
+	border: 5px solid #ccc;
+	background-color: black;
+	border-radius: 5px;
 	height: 800px;
 	width: 1000px;
-
-	border-style: solid;
-	margin: 10px;
+	position: relative;
 }
 
-.gameField:before {
+.play-container::before {
+	content: '';
 	position: absolute;
 	left: 50%;
-	content:'';
-	width: 10px;
-	height: 100%;
-	border-left: 8px dashed #ccc;
-	transform: translate(-20%, 0);
+	top: 0;
+	bottom: 0;
+	border-left: 6px dashed #ccc;
+	margin-left: -3px;
 }
 
-  .ball {
+.playerL-name,
+.playerR-name {
+	font-size: 32px;
+	margin: 0 auto;
+}
+
+.playerL-name {
+	float: left;
+	margin-left: 10px;
+}
+
+.playerR-name {
+	float: right;
+	margin-right: 10px;
+}
+
+.playerL-score,
+.playerR-score {
+	position: absolute;
+}
+
+.playerL-score {
+	font-size: 50px;
+	left: 45%;
+	transform: translate(-50%, 0);
+	transition: width 1s ease;
+}
+
+.playerR-score {
+	font-size: 50px;
+	left: 55%;
+	transform: translate(-50%, 0);
+	transition: width 1s ease;
+}
+
+.ball {
 	position: absolute;
 	background-color: #ccc;
 	width: 42px;
 	height: 42px;
 	border-radius: 100%;
 	box-shadow: 0px 0px 50px 10px rgb(0, 0, 255);
-  }
-  
-  .player1
-  {
+}
+
+.player1,
+.player2 {
 	position: absolute;
 	border:1px solid #ccc;
 	background-color: #ccc;
 	width: 10px;
 	height: 120px;
+}
+
+.player1 {
 	box-shadow: 0px 0px 50px 10px rgb(0, 255, 0);
 }
 
-  .player2 {
-	position: absolute;
-	border:1px solid #ccc;
-	background-color: #ccc;
-	width: 10px;
-	height: 120px;
+.player2 {
 	left: 100%;
 	margin-left: -12px;
 	box-shadow: 0px 0px 50px 10px rgb(255, 0, 0);
 }
-  
-  .PlayerName {
-	font-size: 32px;
-	margin-top: 0px;
+
+.leave-game {
+	margin-top: 10px;
+	background-color: darkred;
+	border-radius: 50px;
 }
-
-  .left-score{
-	display: inline;
-	font-size: 50px;
-	left: 45%;
-	transform: translate(-50%, 0);
-	position: absolute;
-	transition: width 1s ease; /* Genişleme animasyonu */
-  }
-
-  .right-score {
-	display: inline;
-	font-size: 50px;
-	left: 55%;
-	transform: translate(-50%, 0);
-	position: absolute;
-	transition: width 1s ease;
-  }
