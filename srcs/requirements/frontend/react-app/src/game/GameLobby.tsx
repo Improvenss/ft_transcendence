@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/SocketHook';
 import { useUser } from '../hooks/UserHook';
@@ -44,8 +44,6 @@ export interface ILobby {
 	playerL: IPlayer,
 	playerR: IPlayer,
 	ball: IBall,
-	playerLeft: IUser,
-	playerRight: IUser,
 	running: boolean,
 }
 
@@ -81,13 +79,7 @@ const GameLobby = () => {
 				const data = await response.json();
 				console.log("GameLobby:", data);
 				if (!data.err){
-					const playerLeft: IUser | null = (data.playerL && data.playerL.user)
-						? data.players.find((player: IUser) => player.id === data.playerL.user.id)
-						: null;
-					const playerRight: IUser | null = (data.playerR && data.playerR.user)
-						? data.players.find((player: IUser) => player.id === data.playerR.user.id)
-						: null;
-					setLobby({ ...data, playerLeft, playerRight });
+					setLobby(data as ILobby);
 				} else {
 					if (action === 'leave')
 					{
@@ -215,60 +207,64 @@ const GameLobby = () => {
 			<h2>Lobby Type: {lobby.type}</h2>
 			{lobby.description && (<h2>Description: {lobby.description}</h2>)}
 			<div className='players'>
-				{lobby.playerL.user ? (
-					<div className='leftPlayer'>
-						<img
-							className='image'
-							src={lobby.playerLeft.avatar ? lobby.playerLeft.avatar : lobby.playerLeft.imageUrl}
-							alt={lobby.playerL.user.login}
-						/>
-						<span>{lobby.playerLeft.nickname ? lobby.playerLeft.nickname : lobby.playerL.user.login}</span>
-					</div>
-				) : 'null'}
-				{lobby.playerR.user ? (
-					<div className='rightPlayer' title='kick' onClick={() => userInfo.id === lobby.playerL.user.id && handleKickPlayer(lobby.playerR.user.login)}>
-						<img
-							className='image'
-							src={lobby.playerRight.avatar ? lobby.playerRight.avatar : lobby.playerRight.imageUrl}
-							alt={lobby.playerR.user.login}
-						/>
-						<span>{lobby.playerRight.nickname ? lobby.playerRight.nickname : lobby.playerR.user.login}</span>
-						{userInfo.id === lobby.playerL.user.id && (<IconKick id='kick'/>)}
-					</div>
-				) : (
-					<>
-						<button className={`invite-friend ${isModalOpen ? 'open' : null}`} onClick={() => setModalOpen(!isModalOpen)}>
-							Invite
-						</button>
-						{isModalOpen && (
-							<Modal
-								isOpen={isModalOpen}
-								onClose={() => setModalOpen(false)}
-								mouse={true}
-								overlayClassName='invite-overlay'
-								modalClassName='invite-modal'
-								closeButtonClassName='invite-close-button'
-							>
-								<div id='friends-modal-header'>Invite Friends</div>
-								<div id='friends-content'>
-									{userInfo.friends.map((user) => (
-										<div
-											key={user.login}
-											className={`friend-card`}
-											onClick={() => handleInvitePlayer(user.login)}
-										>
-											<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
-											<div id='friend-users-table'>
-												<span>{user.nickname ? user.nickname : user.login}</span>
-												<span>Status: {user.status}</span>
-											</div>
-										</div>
-									))}
-								</div>
-							</Modal>
+				{lobby.players.map((user) => (
+					<React.Fragment key={user.id}>
+						{(lobby.playerL.user && user.id === lobby.playerL.user.id) && (
+							<div className='leftPlayer'>
+								<img
+									className='image'
+									src={user.avatar ? user.avatar : user.imageUrl}
+									alt={user.login}
+								/>
+								<span>{user.nickname ? user.nickname : user.login}</span>
+							</div>
 						)}
-					</>
-				)}
+						{(lobby.playerR.user && user.id === lobby.playerR.user.id) ? (
+							<div className='rightPlayer' title='kick' onClick={() => userInfo.id === lobby.playerL.user.id && handleKickPlayer(user.login)}>
+								<img
+									className='image'
+									src={user.avatar ? user.avatar : user.imageUrl}
+									alt={user.login}
+								/>
+								<span>{user.nickname ? user.nickname : user.login}</span>
+								{userInfo.id === lobby.playerL.user.id && (<IconKick id='kick'/>)}
+							</div>
+						) : (!lobby.playerR.user && user.id === lobby.playerL.user.id) && (
+							<>
+								<button className={`invite-friend ${isModalOpen ? 'open' : null}`} onClick={() => setModalOpen(!isModalOpen)}>
+									Invite
+								</button>
+								{isModalOpen && (
+									<Modal
+										isOpen={isModalOpen}
+										onClose={() => setModalOpen(false)}
+										mouse={true}
+										overlayClassName='invite-overlay'
+										modalClassName='invite-modal'
+										closeButtonClassName='invite-close-button'
+									>
+										<div id='friends-modal-header'>Invite Friends</div>
+										<div id='friends-content'>
+											{userInfo.friends.map((user) => (
+												<div
+													key={user.login}
+													className={`friend-card`}
+													onClick={() => handleInvitePlayer(user.login)}
+												>
+													<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
+													<div id='friend-users-table'>
+														<span>{user.nickname ? user.nickname : user.login}</span>
+														<span>Status: {user.status}</span>
+													</div>
+												</div>
+											))}
+										</div>
+									</Modal>
+								)}
+							</>
+						)}	
+					</React.Fragment>
+				))}
 			</div>
 			<h3>Game Mode: {lobby.mode}</h3>
 			<h3>Win Score: {lobby.winScore}</h3>

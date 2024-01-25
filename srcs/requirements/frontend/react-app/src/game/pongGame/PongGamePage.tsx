@@ -7,36 +7,82 @@ import LoadingPage from "../../utils/LoadingPage";
 import "./PongGamePage.css";
 
 function PongGamePage() {
+	//------------Example-----------------
+	const exampleLiveRoom: ILobby = {
+		id: 1,
+		name: 'Sample Room',
+		description: 'This is a sample lobby.',
+		type: 'public',
+		mode: 'classic',
+		winScore: 5,
+		duration: 180,
+		players: [
+		// ... uygun IUser nesneleri ekleyin
+		],
+		playerL: {
+		user: {
+			id: 1,
+			login: 'sampleUser',
+			socketId: 'sampleSocketId',
+		},
+		location: 400,
+		ready: true,
+		score: 0,
+		speed: 0,
+		},
+		playerR: {
+		user: {
+			id: 2,
+			login: 'anotherUser',
+			socketId: 'anotherSocketId',
+		},
+		location: 400,
+		ready: false,
+		score: 0,
+		speed: 0,
+		},
+		ball: {
+		x: 500,
+		y: 400,
+		speedX: 3,
+		speedY: 4,
+		},
+		running: false,
+	};
+
+	const [liveRoom, setLiveRoom] = useState<ILobby>(exampleLiveRoom);
+	//----------------------------------------------------------------------
+
 	const { roomName } = useParams();
 	const navigate = useNavigate();
-	const [liveRoom, setLiveRoom] = useState<ILobby>();
+	//const [liveRoom, setLiveRoom] = useState<ILobby>();
 	const { socket } = useSocket();
 	const [result, setResult] = useState<string | undefined>(undefined);
 
-	useEffect(() => {
-		const	gameListener = async () => {
-			const response = await fetchRequest({
-				method: 'GET',
-				url: `/game/room/${roomName}/false` // lobby'e attik cunku orada aliyoruz zaten bu verileri.
-			})
-			if (response.ok){
-				const data = await response.json();
-				console.log("PongGamePage:", data);
-				if (!data.err){
-					setLiveRoom(data);
-					socket.emit('joinGameRoom', {
-						gameRoom: roomName,
-					});
-				} else {
-					navigate('/404', {replace: true});
-				}
-			} else {
-				console.log("---Backend Connection '❌'---");
-			}
-		}
-		gameListener();
-		/* eslint-disable react-hooks/exhaustive-deps */
-	}, [])
+	//useEffect(() => {
+	//	const	gameListener = async () => {
+	//		const response = await fetchRequest({
+	//			method: 'GET',
+	//			url: `/game/room/${roomName}/false` // lobby'e attik cunku orada aliyoruz zaten bu verileri.
+	//		})
+	//		if (response.ok){
+	//			const data = await response.json();
+	//			console.log("PongGamePage:", data);
+	//			if (!data.err){
+	//				setLiveRoom(data);
+	//				socket.emit('joinGameRoom', {
+	//					gameRoom: roomName,
+	//				});
+	//			} else {
+	//				navigate('/404', {replace: true});
+	//			}
+	//		} else {
+	//			console.log("---Backend Connection '❌'---");
+	//		}
+	//	}
+	//	gameListener();
+	//	/* eslint-disable react-hooks/exhaustive-deps */
+	//}, [])
 
 	useEffect(() => {
 		const	handleLiveData = ({action}: {action: ILobby}) => {
@@ -45,7 +91,6 @@ function PongGamePage() {
 			setLiveRoom(prevLiveRoom => ({...prevLiveRoom, ...action}));
 		}
 		const	finishGameData = ({ result }: { result: string }) => {
-			// setResult(result)
 			let countdown = 8;
 			const countdownInterval = setInterval(() => {
 				setResult(`${result} | Redirecting in ${countdown} seconds...`);
@@ -130,7 +175,6 @@ function PongGamePage() {
 
 	return (
 		<div>
-			<button onClick={leaveRoom}>Leave Game Room BRUH</button>
 			<h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 				{result === undefined
 					? `TIME: ${liveRoom.duration}`
@@ -150,6 +194,7 @@ function PongGamePage() {
 					</div>
 				</div>
 			</div>
+			<button onClick={leaveRoom}>Leave Game Room</button>
 		</div>
 	);
 }
