@@ -104,7 +104,8 @@ function CreateGame({invite}: {invite?: string}) {
 				if (invite){
 
 					// handleRequest(invite);
-					handleRequest('inviteGame', invite);
+					// handleRequest('inviteGame', invite);
+					handleInvitePlayer(invite);
 				}
 			} else {
 				navigate('/404');
@@ -117,6 +118,31 @@ function CreateGame({invite}: {invite?: string}) {
 		if (errorMessage != null)
 			setErrorMessage('');
 	};
+
+	const handleInvitePlayer = async (target: string) => {
+		console.log("invite player");
+
+		const response = await fetchRequest({
+			method: 'PATCH',
+			body: JSON.stringify({
+				invitedPlayer: target ,
+			}),
+			url: `/game/room?room=${roomName}`,
+		});
+
+		if (response.ok)
+		{
+			const data = await response.json();
+			if (!data.err)
+			{
+				handleRequest('sendGameInviteRequest', target, undefined, roomName);
+			}
+			else
+				console.log("Invite data err", data.err);
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
+	}
 
   return (
 	<div id="create-game">
