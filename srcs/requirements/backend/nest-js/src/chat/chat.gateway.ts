@@ -14,7 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
-import { Ball, Game, Player } from 'src/game/entities/game.entity';
+import { Ball, Player } from 'src/game/entities/game.entity';
 import { EGameMode, ILiveData } from 'src/game/dto/create-game.dto';
 
 interface IGame {
@@ -133,13 +133,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			game.duration--;
 		}, 1000);
 		game.gameLoopInterval = setInterval(() => {
+			console.log("........");
 			this.updateGameState(game);
 		}, 16);
 	}
 
-	stopGameLoop(roomName: string, loop: NodeJS.Timeout) {
+	stopGameLoop(roomName: string, loop: NodeJS.Timeout, lostSocket?: Socket) {
 		clearInterval(loop);
-		this.finishGame(roomName);
+		this.finishGame(roomName, lostSocket);
 	}
 
 	updateGameState(
@@ -561,7 +562,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!data || !data.gameRoom)
 			return ;
 		if (socket.rooms.has(data.gameRoom) || this.connectedSockets.has(socket.id))
-			this.finishGame(data.gameRoom, socket);
+		{
+			const game = this.gameRooms.get(data.gameRoom);
+			if (!game)
+				return ; 
+			this.stopGameLoop(game.name, game.gameLoopInterval, socket);
+		}
 		else
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 	}
