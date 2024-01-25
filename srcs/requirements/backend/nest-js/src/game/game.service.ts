@@ -158,11 +158,11 @@ export class GameService {
 	){
 		console.log(`Wait List ama remove olan [${this.waitingPlayers.length}]`);
 		console.log("Siradan cikarilacak user: ", user.login);
-		// if (!(this.waitingPlayers.length > 0)) // buraya bak ustam
-		// 	return ;
+		if (!(this.waitingPlayers.length > 0)) // buraya bak ustam
+			return ;
 		const index = this.waitingPlayers.findIndex((item) => item.user.id === user.id);
 		if (index === -1)
-			throw (new NotFoundException(`User not found for matchmaking data`));
+			throw (new NotFoundException(`User not found for matchmaking data :DD`));
 		const	removedUser = this.waitingPlayers.splice(index, 1);
 		if (!removedUser)
 			throw (new NotFoundException(`User can't remove matchmaking data`));

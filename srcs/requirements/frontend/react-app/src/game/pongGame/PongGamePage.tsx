@@ -25,7 +25,7 @@ function PongGamePage() {
 	//		login: 'sampleUser',
 	//		socketId: 'sampleSocketId',
 	//	},
-	//	location: 400,
+	//	location: 400-60, //yüksekliği 120, yarısını çıkartıyoruz.
 	//	ready: true,
 	//	score: 0,
 	//	speed: 0,
@@ -36,14 +36,15 @@ function PongGamePage() {
 	//		login: 'anotherUser',
 	//		socketId: 'anotherSocketId',
 	//	},
-	//	location: 400,
+	//	location: 400-60,
 	//	ready: false,
 	//	score: 0,
 	//	speed: 0,
 	//	},
 	//	ball: {
-	//	x: 500,
-	//	y: 400,
+	//	x: 500 - 21,
+	//	//x: -21,
+	//	y: (800-45),
 	//	speedX: 3,
 	//	speedY: 4,
 	//	},
@@ -203,8 +204,8 @@ function PongGamePage() {
 				</div>
 
 				<div className="ball" style={{top: liveRoom.ball.y, left: liveRoom.ball.x}}/>
-				<div className="player1" id="player1" style={{top: liveRoom.playerL.location + 'px'}} />
-				<div className="player2" id="player2" style={{top: liveRoom.playerR.location + 'px'}} />
+				<div className="playerL" style={{top: liveRoom.playerL.location + 'px'}} />
+				<div className="playerR" style={{top: liveRoom.playerR.location + 'px'}} />
 			</div>
 			<button className="leave-game" onClick={leaveRoom}>Leave Game Room</button>
 		</div>

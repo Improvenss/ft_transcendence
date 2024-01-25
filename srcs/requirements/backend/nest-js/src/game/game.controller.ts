@@ -121,43 +121,43 @@ export class GameController {
 		}
 	}
 
-	@Put('/matchmaking')
-	async	matchmaking(
-		@Req() { user },
-		@Body() body: { status: true }
-	){
-		try
-		{
-			console.log(`${C.B_BLUE}PUT: /game/matchmaking: { user } -> ${user.login}`);
-			let	response: Game | null;
-			if (body.status)
-				response = await this.gameService.matchPlayer({ user: user })
-			else
-				response = await this.gameService.removeMatchPlayer({ user: user })
-			if (!response)
-				return ({ err: `Game not started yet!` });
-			const	socketLeft = this.chatGateway.connectedIds.get(response.playerL.user.id);
-			const	socketRight = this.chatGateway.connectedIds.get(response.playerR.user.id);
-			const	responseGameRoom = await this.gameService.patchGameRoom(response.name, { running: true });
-			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
-			if (singleRoom.running)
-			{
-				this.chatGateway.handleJoinGameRoom(socketLeft, { gameRoom: response.name });
-				this.chatGateway.handleJoinGameRoom(socketRight, { gameRoom: response.name });
-				this.chatGateway.server.to(response.name).emit('matchmakingStartGame', response.name);
-				//--> Burada oyun başlıyor
-				setTimeout(() => {
-					this.chatGateway.startGameLoop(singleRoom.name);
-				}, 3000);
-			}
-			return ({ success: true, roomName: response.name });
-		}
-		catch (err)
-		{
-			console.log("@Put('/game/matchmaking'): ", err.message);
-			return ({ err: err.message });
-		}
-	}
+	// @Put('/matchmaking')
+	// async	matchmaking(
+	// 	@Req() { user },
+	// 	@Body() body: { status: true }
+	// ){
+	// 	try
+	// 	{
+	// 		console.log(`${C.B_BLUE}PUT: /game/matchmaking: { user } -> ${user.login}`);
+	// 		let	response: Game | null;
+	// 		if (body.status)
+	// 			response = await this.gameService.matchPlayer({ user: user })
+	// 		else
+	// 			response = await this.gameService.removeMatchPlayer({ user: user })
+	// 		if (!response)
+	// 			return ({ err: `Game not started yet!` });
+	// 		const	socketLeft = this.chatGateway.connectedIds.get(response.playerL.user.id);
+	// 		const	socketRight = this.chatGateway.connectedIds.get(response.playerR.user.id);
+	// 		const	responseGameRoom = await this.gameService.patchGameRoom(response.name, { running: true });
+	// 		const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
+	// 		if (singleRoom.running)
+	// 		{
+	// 			this.chatGateway.handleJoinGameRoom(socketLeft, { gameRoom: response.name });
+	// 			this.chatGateway.handleJoinGameRoom(socketRight, { gameRoom: response.name });
+	// 			this.chatGateway.server.to(response.name).emit('matchmakingStartGame', response.name);
+	// 			//--> Burada oyun başlıyor
+	// 			setTimeout(() => {
+	// 				this.chatGateway.startGameLoop(singleRoom.name);
+	// 			}, 3000);
+	// 		}
+	// 		return ({ success: true, roomName: response.name });
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.log("@Put('/game/matchmaking'): ", err.message);
+	// 		return ({ err: err.message });
+	// 	}
+	// }
 
 	// Update Game Room
 	@Patch('/room')

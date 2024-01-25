@@ -14,7 +14,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from './dto/chat-message.dto';
 import { CreateDmMessageDto } from './dto/chat-dmMessage.dto';
 import { GameService } from 'src/game/game.service';
-import { Ball, Player } from 'src/game/entities/game.entity';
+import { Ball, Game, Player } from 'src/game/entities/game.entity';
 import { EGameMode, ILiveData } from 'src/game/dto/create-game.dto';
 
 interface IGame {
@@ -588,14 +588,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 	}
 
-	// @SubscribeMessage('fastMatch')
-	// async	handleFastMatch(
-	// 	@ConnectedSocket() socket: Socket,
-	// 	// @MessageBody() data: { }
-	// ){
-	// 	this.gameService.addPlayerMatch(socket, );
-	// }
+	@SubscribeMessage('matchmaking')
+	async	handleMatchmaking(
+		@ConnectedSocket() socket: Socket,
+		@MessageBody() data: { status: boolean }
+	){
+		console.log("matchmaking'e geldik", data, data.status);
+		const	user = await this.usersService.getUserPrimary({ socketId: socket.id });
 
-
-
+		let	response: Game | null;
+		if (data.status)
+			response = await this.gameService.matchPlayer({ user: user })
+		else
+		{
+			console.log("kakaaaaaaaaa");
+			response = await this.gameService.removeMatchPlayer({ user: user })
+		}
+		if (!response)
+			return ({ err: `Game not started yet!` });
+		const	socketLeft = this.connectedIds.get(response.playerL.user.id);
+		const	socketRight = this.connectedIds.get(response.playerR.user.id);
+		const	responseGameRoom = await this.gameService.patchGameRoom(response.name, { running: true });
+		const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
+		if (singleRoom.running)
+		{
+			this.handleJoinGameRoom(socketLeft, { gameRoom: response.name });
+			this.handleJoinGameRoom(socketRight, { gameRoom: response.name });
+			this.server.to(response.name).emit('matchmakingStartGame', response.name);
+			//--> Burada oyun başlıyor
+			setTimeout(() => {
+				this.startGameLoop(singleRoom.name);
+			}, 3000);
+		}
+	}
 }

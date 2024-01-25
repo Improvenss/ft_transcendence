@@ -49,7 +49,7 @@ export class Game {
 			this.playerL = {
 				user: null,
 				score: 0,
-				location: 400,
+				location: (400-60), //tam ortadan başlaması için 120 olan yüksekliğini yarısı kadar çıkarıyoruz.
 				speed: 0,
 				ready: true
 			};
@@ -65,7 +65,7 @@ export class Game {
 			this.playerR = {
 				user: null,
 				score: 0,
-				location: 400,
+				location: (400-60),
 				speed: 0,
 				ready: false
 			};
