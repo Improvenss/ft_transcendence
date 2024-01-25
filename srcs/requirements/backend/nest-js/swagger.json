@@ -477,6 +477,17 @@
         }
       }
     },
+    "/game/matchmaking": {
+      "put": {
+        "operationId": "GameController_matchmaking",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/game/room/leave": {
       "delete": {
         "operationId": "GameController_leaveGameLobby",

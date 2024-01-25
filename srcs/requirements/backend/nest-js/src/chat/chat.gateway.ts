@@ -87,32 +87,41 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	async handleDisconnect(client: Socket) {
-		const clientId = client.id;
-		await this.handleUserStatus({status: 'offline'}, client);
-		console.log(`Client disconnected 💔: socket.id[${clientId}]`);
-		const userId = this.connectedSockets.get(clientId);
-		const userData = await this.usersService.getUserRelation({
-			user: { socketId: client.id },
-			relation: { currentRoom: true },
-			primary: false,
-		}, false);
-		//--> oyun esnasında socket bağlantısı kopunca score göre sonuçlanıyor, çıkan kişiyi kaybettirmemiz lazım.
-		if (userData && userData.currentRoom){
-			const	gameData = this.gameRooms.get(userData.currentRoom.name);
-			if (!gameData)
-			{
-				await this.gameService.leaveGameLobby({
-					room: userData.currentRoom.name,
-					user: userData,
-				});
-				this.server.emit(`lobbyListener:${userData.currentRoom.name}`, { action: 'leave' });
+		try
+		{
+			const clientId = client.id;
+			await this.handleUserStatus({status: 'offline'}, client);
+			console.log(`Client disconnected 💔: socket.id[${clientId}]`);
+			const userId = this.connectedSockets.get(clientId);
+			const userData = await this.usersService.getUserRelation({
+				user: { socketId: client.id },
+				relation: { currentRoom: true },
+				primary: true,
+			}, false);
+			await this.gameService.removeMatchPlayer({ user: userData });
+			//--> oyun esnasında socket bağlantısı kopunca score göre sonuçlanıyor, çıkan kişiyi kaybettirmemiz lazım.
+			if (userData && userData.currentRoom){
+				const	gameData = this.gameRooms.get(userData.currentRoom.name);
+				if (!gameData)
+				{
+					await this.gameService.leaveGameLobby({
+						room: userData.currentRoom.name,
+						user: userData,
+					});
+					this.server.emit(`lobbyListener:${userData.currentRoom.name}`, { action: 'leave' });
+				}
+				else
+					await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
 			}
-			else
-				await this.handleLeaveGameRoom(client, { gameRoom: userData.currentRoom.name });
+			this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
+			this.connectedSockets.delete(clientId);
+			client.disconnect(true);
 		}
-		this.connectedIds.delete(userId); // Bağlantı kesildiğinde soketi listeden kaldır
-		this.connectedSockets.delete(clientId);
-		client.disconnect(true);
+		catch (err)
+		{
+			console.log("SOCKET: handleDisconnect():", err.message);
+			return ({ err: err.message });
+		}
 	}
 
 	//------------------------------------------------------------------------------------------------------
@@ -133,7 +142,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			game.duration--;
 		}, 1000);
 		game.gameLoopInterval = setInterval(() => {
-			console.log("........");
 			this.updateGameState(game);
 		}, 16);
 	}
@@ -571,4 +579,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		else
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
 	}
+
+	// @SubscribeMessage('fastMatch')
+	// async	handleFastMatch(
+	// 	@ConnectedSocket() socket: Socket,
+	// 	// @MessageBody() data: { }
+	// ){
+	// 	this.gameService.addPlayerMatch(socket, );
+	// }
+
+
+
 }

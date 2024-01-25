@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Delete, Query, Req, UseGuards, NotFoundException, Param, ParseBoolPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Put, Delete, Query, Req, UseGuards, NotFoundException, Param, ParseBoolPipe } from '@nestjs/common';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -8,6 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { Server, Socket } from 'socket.io';
 import { GameAdminGuard } from './admin.game.guard';
+import { Game } from './entities/game.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -117,6 +118,37 @@ export class GameController {
 		{
 			console.log("@Post('/game/room'): ", err);
 			return ({err: err});
+		}
+	}
+
+	@Put('/matchmaking')
+	async	matchmaking(
+		@Req() { user },
+		@Body() body: { status: true }
+	){
+		try
+		{
+			console.log(`${C.B_BLUE}PUT: /game/matchmaking: { user } -> ${user.login}`);
+			let	response: Game | null;
+			if (body.status)
+				response = await this.gameService.matchPlayer({ user: user })
+			else
+				response = await this.gameService.removeMatchPlayer({ user: user })
+			if (!response)
+				return ({ err: `Game not started yet!` });
+			console.log("oyun odasi olusturuldu simdi sira  oyunu baslatmakta ", response);
+			const	socketLeft = this.chatGateway.connectedIds.get(response.playerL.user.id);
+			const	socketRight = this.chatGateway.connectedIds.get(response.playerR.user.id);
+			socketLeft.join(`${response.name}`);
+			socketRight.join(`${response.name}`);
+			this.chatGateway.startGameLoop(response.name);
+			this.chatGateway.server.to(response.name).emit('matchmakingStartGame', response.name);
+			return ({ success: true, roomName: response.name });
+		}
+		catch (err)
+		{
+			console.log("@Put('/game/matchmaking'): ", err.message);
+			return ({ err: err.message });
 		}
 	}
 

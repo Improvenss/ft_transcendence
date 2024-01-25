@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from "..//utils/Modal";
 import './GamePage.css';
 import CreateGame from './CreateGame';
@@ -31,83 +31,63 @@ const GamePage: React.FC = () => {
 	const {socket} = useSocket();
 	const navigate = useNavigate();
 
+	function	generateUniqueRoomName(length: number) {
+		const randomNumber = Math.random().toString(36).substring(2, length + 2);
+		return (randomNumber);
+	}
+
 	const openModal = (content: React.ReactNode) => {
 		setModalContent(content);
 		setModalOpen(true);
 	};
 
-	function generateUniqueRoomName(length: number) {
-		const randomNumber = Math.random().toString(36).substring(2, length + 2);
-		return (randomNumber);
+	useEffect(() => {
+
+		socket.on('matchmakingStartGame', (roomName: string) => {
+			navigate(`/game/${roomName}`, {replace: true});
+		});
+		return () => {
+			socket.off('matchmakingStartGame');
+		};
+	})
+
+	const	matchmaking = async (status: boolean) => {
+		// socket.emit('fastMatch');
+		const	response = await fetchRequest({
+			method: 'PUT',
+			body: JSON.stringify({
+				status: status,
+			}),
+			url: '/game/matchmaking',
+		});
+		if (response.ok){
+			const data = await response.json();
+			console.log("GamePage Matchmaking:", data);
+			if (!data.err && data.roomName){
+				navigate(`/game/${data.roomName}`, {replace: true});
+			} else {
+				console.log("GamePage Matchmaking:", data);
+			}
+		} else {
+			console.log("---Backend Connection '❌'---");
+		}
 	}
+
 
 	const closeModal = async () => {
 		setModalOpen(false);
 		if (isModalMatching)
 		{
-			const roomName = generateUniqueRoomName(5) + user.userInfo.login;
-			const response = await fetchRequest({
-				method: 'DELETE',
-				url: `/game/room/${roomName}`,
-			});
-			if (response.ok) {
-				const data = await response.json();
-				if (!data.err) {
-					console.log("Room deleted successfully");
-				} else {
-					console.log("Error deleting room:", data.err);
-				}
-			}
-			else
-			{
-				console.log("Respose failed");
-			}
-			console.log("stopped searching");
-			socket?.emit('stopSearchGame', user.userInfo.login);
+			console.log("kapandi ustammmmmmm");
+			matchmaking(false);
 			setModalMatching(false);
 		}
 	};
 
-	// /game/lobby/test
-	socket?.on('matching', (data) => {
-		navigate(`/game/lobby/${data.name}`);
-	})
-
-	const findMatch = async () => {
-		const	createRoomObject: IGameRoom = {
-			name: generateUniqueRoomName(5) + user.userInfo.login,
-			password: null,
-			mode: 'classic',
-			// mode: 0,
-			winScore: 5,
-			duration: 180,
-			description: '',
-			invitedPlayer: null,
-			type: 'public'
-		}
-		console.log("Searching Match . . .");
-		const response = await fetchRequest({
-			method: 'POST',
-			body: JSON.stringify(createRoomObject),
-			url: '/game/room'
-		});
-		if (response.ok){
-			const data = await response.json();
-			console.log("responses", data);
-			if (!data.err){
-				socket?.emit('searchGame', {login: user.userInfo.login, data: data.name});
-			} else {
-				navigate('/404');
-			}
-		} else {
-			console.log("Response failed on searching game");
-		}
-	}
-
 	return (
 		<div id="game-page">
 			{/* <GameButton content="Matchmaking" onClick={() => openModal(<Matchmaking />)} /> */}
-			<GameButton content="Matchmaking" onClick={() => {setModalMatching(true); findMatch(); openModal(<Matchmaking />); }} />
+			<GameButton content="Matchmaking" onClick={() => {setModalMatching(true); matchmaking(true); openModal(<Matchmaking />); }} />
 			<GameButton content="Join Game" onClick={() => openModal(<JoinGame />)} />
 			<GameButton content="Create Game" onClick={() => openModal(<CreateGame />)} />
 

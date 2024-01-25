@@ -9,6 +9,67 @@ import * as bcrypt from 'bcrypt';
 import { FindOptionsRelations } from 'typeorm';
 import { Socket } from 'socket.io';
 
+class Queue<T> {
+	private items: T[];
+
+	constructor() {
+		this.items = [];
+	}
+
+	enqueue(element: T) {
+		this.items.push(element);
+	}
+
+	dequeue(): T | undefined {
+		return this.items.shift();
+	}
+
+	isEmpty(): boolean {
+		return this.items.length === 0;
+	}
+
+	size(): number {
+		return this.items.length;
+	}
+
+	display() {
+		console.log(this.items);
+	}
+}
+
+class Vector<T> {
+	private items: T[];
+
+	constructor() {
+		this.items = [];
+	}
+
+	// Vektöre öğe ekleme
+	push(element: T) {
+		this.items.push(element);
+	}
+
+	// Belirtilen indeksteki öğeyi döndürme
+	get(index: number): T | undefined {
+		return this.items[index];
+	}
+
+	// Vektörün uzunluğunu döndürme
+	size(): number {
+		return this.items.length;
+	}
+
+	// Vektördeki öğeleri dizi olarak döndürme
+	toArray(): T[] {
+		return this.items.slice(); // Klon oluşturarak asıl diziyi koruyoruz
+	}
+
+	// Vektördeki öğeleri gösterme
+	display() {
+		console.log(this.items);
+	}
+}
+
 @Injectable()
 export class GameService {
 	constructor(
@@ -16,6 +77,98 @@ export class GameService {
 		private readonly	gameRepository: Repository<Game>,
 		private readonly	usersService: UsersService,
 	) {}
+
+	private waitingPlayers: { user: User, roomName: string }[] = [];
+	// private	waitingPlayers: Queue<number>;
+	// private	waitingPlayers: Vector<number>;
+	// private	waitingPlayers: number[] = [];
+
+	async	generateUniqueRoomName(length: number, login: string): Promise<string> {
+		if (length > 5)
+			length = 5;
+		if (login.length > 8)
+			login = login.substring(0, 9);
+		const	randomNumber = Math.random().toString(36).substring(2, length + 2);
+		const	roomName = login + '-' + randomNumber;
+		return (roomName);
+	}
+
+	async	addQueueMatchPlayer(
+		{ user }:
+			{ user: User }
+	){
+		const	roomName = await this.generateUniqueRoomName(5, user.login);
+		console.log("roomName:", roomName);
+		this.waitingPlayers.push({ user: user, roomName: roomName });
+		console.log(`Added to wait list [${this.waitingPlayers.length}]`);
+		return (null);
+	}
+
+	async	matchPlayer(
+		{ user }:
+			{ user: User }
+	){
+		console.log(`Wait List [${this.waitingPlayers.length}]`);
+		console.log("Siraya girecek user: ", user.login);
+		if (this.waitingPlayers.length > 0
+			&& this.waitingPlayers[0])
+		{
+			const index = this.waitingPlayers.findIndex((item) => item.user.id === user.id);
+			if (index !== -1)
+			{
+				const	removedUser = this.waitingPlayers.splice(index, 1);
+				if (!removedUser)
+					throw (new NotFoundException(`User can't remove matchmaking data`));
+				this.addQueueMatchPlayer({ user: user });
+				return (null);
+			}
+			const	createGameDto: CreateGameDto = {
+				name: this.waitingPlayers[0].roomName,
+				password: null,
+				mode: EGameMode.CLASSIC,
+				winScore: 11,
+				duration: 180,
+				description: 'Fast Matching Game',
+				// invitedPlayer: null,
+				type: 'public',
+			}
+			const	responseCreateRoom = await this.createGameRoom(
+				this.waitingPlayers[0].user.login,
+				createGameDto
+			);
+			console.log("olusturulan oyun hizli oyun" ,responseCreateRoom);
+			const	responseAddPlayer = await this.addGameRoomUser(user, {
+				room: this.waitingPlayers[0].roomName,
+				password: null,
+			});
+			// this.waitingPlayers.pop();
+			this.waitingPlayers.splice(0, 1); // this.waitingPlayers[0]'incisini siliyoruz.
+			return (responseAddPlayer);
+		}
+		else
+		{
+			this.addQueueMatchPlayer({ user: user });
+			return (null);
+		}
+	}
+
+	async	removeMatchPlayer(
+		{ user }:
+			{ user: User }
+	){
+		console.log(`Wait List ama remove olan [${this.waitingPlayers.length}]`);
+		console.log("Siradan cikarilacak user: ", user.login);
+		if (!(this.waitingPlayers.length > 0))
+			return ;
+		const index = this.waitingPlayers.findIndex((item) => item.user.id === user.id);
+		if (index === -1)
+			throw (new NotFoundException(`User not found for matchmaking data`));
+		const	removedUser = this.waitingPlayers.splice(index, 1);
+		if (!removedUser)
+			throw (new NotFoundException(`User can't remove matchmaking data`));
+		console.log(`Deleted to wait list [${this.waitingPlayers.length}]`);
+		return (null);
+	}
 
 	async	transferPlayer(
 		{user}
