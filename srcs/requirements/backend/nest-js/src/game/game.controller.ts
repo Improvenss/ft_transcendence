@@ -136,13 +136,20 @@ export class GameController {
 				response = await this.gameService.removeMatchPlayer({ user: user })
 			if (!response)
 				return ({ err: `Game not started yet!` });
-			console.log("oyun odasi olusturuldu simdi sira  oyunu baslatmakta ", response);
 			const	socketLeft = this.chatGateway.connectedIds.get(response.playerL.user.id);
 			const	socketRight = this.chatGateway.connectedIds.get(response.playerR.user.id);
-			socketLeft.join(`${response.name}`);
-			socketRight.join(`${response.name}`);
-			this.chatGateway.startGameLoop(response.name);
-			this.chatGateway.server.to(response.name).emit('matchmakingStartGame', response.name);
+			const	responseGameRoom = await this.gameService.patchGameRoom(response.name, { running: true });
+			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;
+			if (singleRoom.running)
+			{
+				this.chatGateway.handleJoinGameRoom(socketLeft, { gameRoom: response.name });
+				this.chatGateway.handleJoinGameRoom(socketRight, { gameRoom: response.name });
+				this.chatGateway.server.to(response.name).emit('matchmakingStartGame', response.name);
+				//--> Burada oyun başlıyor
+				setTimeout(() => {
+					this.chatGateway.startGameLoop(singleRoom.name);
+				}, 3000);
+			}
 			return ({ success: true, roomName: response.name });
 		}
 		catch (err)
@@ -161,7 +168,6 @@ export class GameController {
 	){
 		try
 		{
-			// Admin harici bir seyleri degistirmeyi engelleme yapilabilinir. Yani admin kontrolu. (user)
 			console.log(`${C.B_PURPLE}PATCH: /game/room: @Query('room'): [${room}] @Body(): [${C.END}`, body, ']');
 			const	responseGameRoom = await this.gameService.patchGameRoom(room, body);
 			const	singleRoom = Array.isArray(responseGameRoom) ? responseGameRoom[0] : responseGameRoom;

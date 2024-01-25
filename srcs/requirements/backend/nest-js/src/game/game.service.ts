@@ -158,8 +158,8 @@ export class GameService {
 	){
 		console.log(`Wait List ama remove olan [${this.waitingPlayers.length}]`);
 		console.log("Siradan cikarilacak user: ", user.login);
-		if (!(this.waitingPlayers.length > 0))
-			return ;
+		// if (!(this.waitingPlayers.length > 0)) // buraya bak ustam
+		// 	return ;
 		const index = this.waitingPlayers.findIndex((item) => item.user.id === user.id);
 		if (index === -1)
 			throw (new NotFoundException(`User not found for matchmaking data`));
@@ -368,10 +368,6 @@ export class GameService {
 		await this.transferPlayer({ user: user }); // old - new game room
 		if (singleRoom.players.some((players) => players.id === user.id))
 			throw (new Error(`Player already exist in ${body.room}`), {status: 3});
-			// throw {
-			// 	error: new Error(`Player already exists in ${body.room}`),
-			// 	status: 3
-			// };
 		singleRoom.players.push(user);
 		singleRoom.playerR.user = {id: user.id, login: user.login, socketId: user.socketId};
 		return (await this.gameRepository.save(singleRoom));

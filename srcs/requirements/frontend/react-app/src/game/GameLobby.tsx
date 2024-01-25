@@ -109,18 +109,14 @@ const GameLobby = () => {
 			return (console.log("You can't start right player is not ready!"));
 		const response = await fetchRequest({
 			method: 'PATCH',
-			body: (action === 'start' ? (
-				JSON.stringify({
-					running: true,
-				})
-			):(
-				JSON.stringify({
+			body: (action === 'start'
+				? (JSON.stringify({ running: true }))
+				: (JSON.stringify({
 					playerR: {
 						...lobby.playerR,
 						ready: !lobby.playerR.ready
 					},
-				})
-			)),
+				}))),
 			url: `/game/room?room=${lobby.name}`,
 		});
 		if (response.ok){

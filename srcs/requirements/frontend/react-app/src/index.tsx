@@ -34,6 +34,7 @@ import { TwoFAProvider } from './hooks/TwoFAHook';
  * TODO: Matchmaking; duzelt
  * TODO: chatteyken oyun istegi; attiginda gonderen kisinin ekraninda modal olarak create game basilacak. create game butonuna basilinca odayi olusturacak ve lobiye yonlendirilecek, hedef kisiye de invite istegi gidecek.
  * TODO: oyun başlamışken, bildirimlerden farklı bir daveti kabul edince oyunlar üst üste biniyor,
+ * TODO: matchmaking ariyorken sayfayi yenilediginde baska biri matchmaking aramaya baslarsa eslesiyor???
  * ---->
  * 		const startTime = new Date();
 		const endTime = new Date();

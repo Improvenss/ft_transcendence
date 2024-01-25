@@ -84,10 +84,10 @@ function PongGamePage() {
 		gameListener();
 
 		setInterval(() => {
-            setCountdown((prevCountdown) => prevCountdown - 1);
+			setCountdown((prevCountdown) => prevCountdown - 1);
 			if (countdown <= 0)
 				return ;
-        }, 1000);
+		}, 1000);
 		/* eslint-disable react-hooks/exhaustive-deps */
 	}, [])
 
@@ -172,9 +172,10 @@ function PongGamePage() {
 	}
 
 	window.onpopstate = async () => {
-		socket.emit('leaveGameRoom', {
-			gameRoom: roomName,
-		});
+		// socket.emit('leaveGameRoom', {
+		// 	gameRoom: roomName,
+		// });
+		leaveRoom();
 	}
 
 	if (!liveRoom)

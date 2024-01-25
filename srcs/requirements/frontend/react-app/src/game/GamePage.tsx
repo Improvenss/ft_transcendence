@@ -27,7 +27,6 @@ const GamePage: React.FC = () => {
 	const [modalContent, setModalContent] = useState<React.ReactNode | null>(null);
 	const [isModalMatching, setModalMatching] = useState(false);
 
-	const user = useUser();
 	const {socket} = useSocket();
 	const navigate = useNavigate();
 
@@ -42,7 +41,6 @@ const GamePage: React.FC = () => {
 	};
 
 	useEffect(() => {
-
 		socket.on('matchmakingStartGame', (roomName: string) => {
 			navigate(`/game/${roomName}`, {replace: true});
 		});
@@ -52,7 +50,6 @@ const GamePage: React.FC = () => {
 	})
 
 	const	matchmaking = async (status: boolean) => {
-		// socket.emit('fastMatch');
 		const	response = await fetchRequest({
 			method: 'PUT',
 			body: JSON.stringify({
@@ -64,7 +61,8 @@ const GamePage: React.FC = () => {
 			const data = await response.json();
 			console.log("GamePage Matchmaking:", data);
 			if (!data.err && data.roomName){
-				navigate(`/game/${data.roomName}`, {replace: true});
+				console.log("match started bruh");
+				// navigate(`/game/${data.roomName}`, {replace: true});
 			} else {
 				console.log("GamePage Matchmaking:", data);
 			}

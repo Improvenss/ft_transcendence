@@ -28,6 +28,7 @@ interface IGame {
 	playerL: Player,
 	playerR: Player,
 	gameLoopInterval?: NodeJS.Timeout,
+	gameLoopIntervalDuration?: NodeJS.Timeout,
 }
 
 @WebSocketGateway({ 
@@ -90,7 +91,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		try
 		{
 			const clientId = client.id;
-			await this.handleUserStatus({status: 'offline'}, client);
+			await this.handleUserStatus({ status: 'offline' }, client);
 			console.log(`Client disconnected 💔: socket.id[${clientId}]`);
 			const userId = this.connectedSockets.get(clientId);
 			const userData = await this.usersService.getUserRelation({
@@ -132,8 +133,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// 	return;
 		// }
 
-		// game.running = true;
-		setInterval(() => {
+		// game.running = true; // ustam bunu silme burasi matchmaking'in start'i icin 
+		game.gameLoopIntervalDuration = setInterval(() => {
+			console.log('==================================');
 			if (game.duration <= 0)
 			{
 				clearInterval(game.gameLoopInterval);
@@ -146,8 +148,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}, 16);
 	}
 
-	stopGameLoop(roomName: string, loop: NodeJS.Timeout, lostSocket?: Socket) {
+	stopGameLoop(
+		roomName: string,
+		loop: NodeJS.Timeout,
+		duration: NodeJS.Timeout,
+		lostSocket?: Socket
+	){
 		clearInterval(loop);
+		clearInterval(duration);
 		this.finishGame(roomName, lostSocket);
 	}
 
@@ -191,18 +199,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (grd.ball.x + 42 >= 1000)
 		{
 			grd.playerL.score += 1;
-			if (grd.playerL.score >= grd.winScore){
-				grd.running = false;
-			}
 			this.restartBall(grd);
 		}
 		else if (grd.ball.x <= 0) //add score to right
 		{
 			grd.playerR.score += 1;
-			if (grd.playerR.score >= grd.winScore){
-				grd.running = false;
-			}
 			this.restartBall(grd);
+		}
+		if (grd.playerL.score >= grd.winScore
+			|| grd.playerR.score >= grd.winScore){
+			grd.running = false;
 		}
 
 		grd.ball.x += grd.ball.speedX;
@@ -231,9 +237,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			duration: grd.duration,
 			running: grd.running,
 		};
-		this.server.to(grd.name).emit(`updateGameData`, {action: returnData});
+		this.server.to(grd.name).emit(`updateGameData`, { action: returnData });
 		if (!grd.running)
-			this.stopGameLoop(grd.name, grd.gameLoopInterval);
+			this.stopGameLoop(grd.name, grd.gameLoopInterval,
+				grd.gameLoopIntervalDuration);
 	}
 
 	restartBall(
@@ -574,7 +581,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const game = this.gameRooms.get(data.gameRoom);
 			if (!game)
 				return ; 
-			this.stopGameLoop(game.name, game.gameLoopInterval, socket);
+			this.stopGameLoop(game.name, game.gameLoopInterval,
+				game.gameLoopIntervalDuration, socket);
 		}
 		else
 			console.log(`${socket.id} zaten ${data.gameRoom} oyun odasinda degil! :D?`);
