@@ -7,7 +7,7 @@ import Modal from "../utils/Modal";
 import fetchRequest from '../utils/fetchRequest';
 import { INotif } from '../chat/iChannel';
 import { ReactComponent as IconNotifs } from '../assets/iconNotification.svg';
-import { Navigate, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import './Notification.css';
 
 function Notification() {
@@ -19,6 +19,7 @@ function Notification() {
 	const [notifications, setNotifications] = useState<INotif[]>([]);
 	const [isModalOpen, setModalOpen] = useState(false);
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	useEffect(() => {
 		if (isAuth && userInfo && socket){
@@ -94,29 +95,24 @@ function Notification() {
 		return (id);
 	}
 
-	const navigateGame = async (notice: string) => {
+	const navigateLobby = async (notice: string) => {
 		const roomName = notice.split(':')[1];
-
-		console.log("text:" + notice +  "-------Name:" + roomName);
-
-		const response = await fetchRequest({
-			method: 'POST',
-			body: JSON.stringify({
-				room: roomName,
-				password: '',
-			}),
-			url: `/game/room/register`
-		});
-		if (response.ok){
-			const data = await response.json();
-			console.log("Join-game: ", data);
-			if (!data.err){
-				navigate(`/game/lobby/${roomName}`, {replace: true});
-			} else {
-				console.log("notice join err:", data.err);
+		const currentPath = location.pathname;
+		
+		if (!(currentPath === `/game/lobby/${roomName}` || currentPath === `/game/${roomName}`)){ //aynı lobydeyse/oyundaysa boşa navigate atmaya gerek yok.
+			if (currentPath.startsWith('/game/lobby/')){
+				fetchRequest({
+					method: 'DELETE',
+					url: `/game/room/leave?room=${roomName}`
+				});
+			} else if (currentPath.startsWith(`/game/${roomName}`)){
+				socket.emit('leaveGameRoom', {
+					gameRoom: roomName,
+				});
 			}
-		} else {
-			console.log("---Backend Connection '❌'---");
+			setTimeout(() => {
+				navigate(`/game/lobby/${roomName}`, {replace: true});
+			}, 500);
 		}
 	}
 
@@ -152,34 +148,58 @@ function Notification() {
 							<p>{notification.text}</p>
 							{notification.type === "sendFriendRequest" && (
 								<div>
-									<button onClick={() => handleRequest('acceptFriendRequest', notification.from, removeNotif(notification.id))}>
+									<button onClick={() => handleRequest({
+											action:'acceptFriendRequest',
+											target: notification.from,
+											sourceNotifId: removeNotif(notification.id)
+										})}>
 										Accept
 									</button>
-									<button onClick={() => handleRequest('declineFriendRequest', notification.from, removeNotif(notification.id))}>
+									<button onClick={() => handleRequest({
+											action: 'declineFriendRequest',
+											target: notification.from,
+											sourceNotifId: removeNotif(notification.id)
+										})}>
 										Decline
 									</button>
 								</div>
 							)}
 							{ notification.type === 'sendGameInviteRequest' && (
 								<div>
-									<button onClick={() => {navigateGame(notification.text); handleRequest('acceptGameInviteRequest', notification.from, removeNotif(notification.id))}}>
+									<button onClick={() => {handleRequest({
+											action: 'acceptGameInviteRequest',
+											target: notification.from,
+											sourceNotifId: removeNotif(notification.id)
+										}); navigateLobby(notification.text); }}>
 										Accept
 									</button>
-									<button onClick={() => handleRequest('declineGameInviteRequest', notification.from, removeNotif(notification.id))}>
+									<button onClick={() => handleRequest({
+											action:'declineGameInviteRequest',
+											target: notification.from,
+											sourceNotifId: removeNotif(notification.id)
+										})}>
 										Decline
 									</button>
 								</div>
 							)}
-							{ notification.type === 'invite' && (
+							{/* { notification.type === 'invite' && (
 								<div>
-									<button onClick={() => handleRequest('acceptInvite', notification.from, removeNotif(notification.id))}>
+									<button onClick={() => handleRequest({
+											action: 'acceptInvite',
+											target: notification.from,
+											sourceNotifId: removeNotif(notification.id)
+										})}>
 										Accept
 									</button>
-									<button onClick={() => handleRequest('declineInvite', notification.from, removeNotif(notification.id))}>
+									<button onClick={() => handleRequest({
+											action:'declineInvite',
+											target: notification.from,
+											sourceNotifId: removeNotif(notification.id)
+										})}>
 										Decline
 									</button>
 								</div>
-							)}
+							)} */}
 							<p className="notification-date">
 								{formatTimeAgo(notification.date)}
 							</p>

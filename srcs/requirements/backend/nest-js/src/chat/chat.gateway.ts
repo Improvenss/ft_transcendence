@@ -131,6 +131,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// if (!game || game.running) {
 		// 	return;
 		// }
+		if (!game)
+			return ;
 
 		// game.running = true;
 		setInterval(() => {

@@ -24,7 +24,7 @@ function InfoChannel() {
 	const { userInfo } = useUser();
  	const [activeTabInfo, setActiveTabInfo] = useState('infoUsers');
  	const [userSearchTerm, setUserSearchTerm] = useState('');
- 	const [friendSearchTerm, setFriendSearchTerm] = useState('');
+ 	// const [friendSearchTerm, setFriendSearchTerm] = useState('');
  	const [banSearchTerm, setBanSearchTerm] = useState('');
 	const inputRefName = useRef<HTMLInputElement>(null);
 	const inputRefDescription = useRef<HTMLInputElement>(null);
@@ -177,7 +177,7 @@ function InfoChannel() {
  						<div className="info-content-header">
  							{activeTabInfo === 'infoUsers' && <h1>Channel Users</h1>}
  							{activeTabInfo === 'infoChannel' && <h1>Channel Settings</h1>}
- 							{activeTabInfo === 'infoFriends' && <h1>Invite Friends</h1>}
+ 							{/* {activeTabInfo === 'infoFriends' && <h1>Invite Friends</h1>} */}
  							{activeTabInfo === 'banList' && <h1>Banned Users</h1>}
  						</div>
 
@@ -210,7 +210,7 @@ function InfoChannel() {
 												<button onClick={() => navigate('/profile/' + user.login)}> <IconProfile /> </button>
 												{user.login !== userInfo.login && (
 													<>
-														<button onClick={() => handleRequest('sendFriendRequest', user.login)}> <IconAddFriend /> </button>
+														<button onClick={() => handleRequest({action: 'sendFriendRequest', target: user.login})}> <IconAddFriend /> </button>
 														<button onClick={() => handleSendMessage(user.id)}> <IconDM /> </button>
 														{/*<button onClick={() => handleRequest('inviteGame', user.login)}> <IconInviteGame /> </button>*/}
 														<GameInvite login={user.login}>
@@ -237,9 +237,9 @@ function InfoChannel() {
 										)}
  									</div>
  								))}
-								{isAdmin && (
+								{/* {isAdmin && (
  									<button id="userAdd" onClick={() => setActiveTabInfo('infoFriends')}> <IconAddUser /> </button>
-								)}
+								)} */}
  								<button id="userBanList" onClick={() => setActiveTabInfo('banList')}> <IconBanList /> </button>
  							</div>
  						)}
@@ -313,7 +313,7 @@ function InfoChannel() {
  							</div>
  						)}
 
- 						{isAdmin && activeTabInfo === 'infoFriends' && (
+ 						{/* {isAdmin && activeTabInfo === 'infoFriends' && (
  							<div>
  								<input
  									id="friendSearch"
@@ -338,7 +338,7 @@ function InfoChannel() {
  										</div>
  								))}
  							</div>
- 						)}
+ 						)} */}
 
 						{activeTabInfo === 'banList' && (
  							<div>

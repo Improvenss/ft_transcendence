@@ -20,7 +20,7 @@ export class UsersController {
 		private readonly usersService: UsersService,
 		private readonly chatGateway: ChatGateway,
 		private readonly twoFactorAuthService: TwoFactorAuthService,
-		private readonly jwtService: JwtService
+		private readonly jwtService: JwtService,
 	) {}
 
 	@Get('/leaderboard')
@@ -29,9 +29,6 @@ export class UsersController {
 	){
 		try {
 			console.log(`${C.B_GREEN}GET: /leaderboard: user[${user.login}]${C.END}`);
-			// this.usersService.createGameHistory(1, 2, 7, 5, '333');
-			// this.usersService.createGameHistory(1, 1, 7, 5, '333');
-			// const historys = await this.usersService.gameHistorys();
 			const board = await this.usersService.leaderboard();
 			return ({ success: true, data: board });
 		} catch (err) {
@@ -190,21 +187,24 @@ export class UsersController {
 	// 	}
 	// }
 
-	@Post('/:action/:user/:gameRoom')
+	@Post('/request')
 	async request(
 		@Req() {user}: {user: User},
-		@Param('action') action: string,
-		@Param('user') target: string,
-		@Param('gameRoom') gameRoom: string,
-		@Query('notifID', ParseIntPipe) sourceNotif: number, // undefined gelmiyor bu yüzden 0 gönderiyorumi
+		@Body() body: {
+			action: string,
+			target: string,
+			gameRoom?: string,
+			sourceNotif?: number
+		}
 	){
 		try {
-			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] notifId: [${sourceNotif}]${C.END}`);
+			const {action, target, gameRoom, sourceNotif} = body;
+			console.log(`${C.B_YELLOW}POST: /user: @Req() action: [${action}] target: [${target}] room: [${gameRoom}] notifId: [${sourceNotif}]${C.END}`);
 			if (action === undefined || target === undefined)
 				throw Error(`Query is empty!`);
 			if (sourceNotif)
 				await this.usersService.deleteNotif(user.id, sourceNotif);
-			const targetUser = await this.usersService.getUserPrimary({login: target});
+			const targetUser = await this.usersService.getUserPrimary({ login: target });
 
 			let result : Notif;
 
@@ -218,13 +218,14 @@ export class UsersController {
 			else if (action === 'sendGameInviteRequest' ||
 				action === 'acceptGameInviteRequest' ||
 				action === 'declineGameInviteRequest' )
-				result =  await this.usersService.gameInviteRequest(action, user, targetUser.id, gameRoom);
+					result =  await this.usersService.gameInviteRequest(action, user, targetUser.id, gameRoom);
 			else if (action === 'block' || action === 'unblock')
 				result = await this.usersService.blockAction(action, user.id, targetUser.id);
 			else
 				throw new Error('Invalid action values!');
 
-			this.chatGateway.server.emit(`user-notif:${targetUser.id}`, result);
+			if (result)
+				this.chatGateway.server.emit(`user-notif:${targetUser.id}`, result);
 			return { success: true };
 		} catch (err) {
 			const notif = await this.usersService.createNotif(user.id, user.id, 'text', err.message);

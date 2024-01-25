@@ -147,43 +147,10 @@
         }
       }
     },
-    "/users/{action}/{user}/{gameRoom}": {
+    "/users/request": {
       "post": {
         "operationId": "UsersController_request",
-        "parameters": [
-          {
-            "name": "action",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "user",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "gameRoom",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "notifID",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "201": {
             "description": ""

@@ -16,11 +16,9 @@ export interface IUser {
 
 export interface INotif {
 	id: number,
-	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'sendGameInviteRequest' | 'acceptGameInviteRequest' | 'declineGameInviteRequest' | 'invite',
-	// type: string,
+	type: 'text' | 'sendFriendRequest' | 'acceptFriendRequest' | 'declineFriendRequest' | 'sendGameInviteRequest' | 'acceptGameInviteRequest' | 'declineGameInviteRequest',
 	text: string,
 	date: string,
-	// date: Date,
 	read: boolean,
 	from: string,
 }

@@ -1,11 +1,18 @@
 import fetchRequest from "./fetchRequest";
 
-const handleRequest = async (action: string, targetUser: string, notifId?: number, gameRoom?: string) => {
-	console.log(action,targetUser);
+const handleRequest = async ({action, target, sourceNotifId, gameRoom}:
+{action: string, target: string, sourceNotifId?: number, gameRoom?: string}) => {
+	console.log(action, target);
 
 	const response = await fetchRequest({
 		method: 'POST',
-		url: `/users/${action}/${targetUser}/${gameRoom}?notifID=${notifId ? notifId : 0}`,
+		body: JSON.stringify({
+			action: action,
+			target: target,
+			sourceNotif: (sourceNotifId ? sourceNotifId : undefined),
+			gameRoom: (gameRoom ? gameRoom : undefined),
+		}),
+		url: '/users/request'
 	});
 	if (response.ok){
 		const data = await response.json();

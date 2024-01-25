@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNotifDto } from './dto/create-notifs.dto';
 import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 import { CreateGameHistoryDto } from './dto/create-gameHistory.dto';
+import { Game } from 'src/game/entities/game.entity';
 /*
 const calculateXP = (
 	playerL: {level: number, score: number},
@@ -70,6 +71,8 @@ export class UsersService {
 		private readonly	usersRepository: Repository<User>, // Burada olusturdugun 'Repository<>'de DB'ye erisim saglamak icin.
 		@InjectRepository(GameHistory)
 		private readonly	gameHistoryRepository: Repository<GameHistory>,
+		@InjectRepository(Game)
+		private readonly	gameRepository: Repository<Game>,
 	) {}
 
 	async leaderboard(){
@@ -341,8 +344,9 @@ export class UsersService {
 		}
 		return (await this.createNotif(sourceUser.id, destId, action, message));
 	}
+
 	async gameInviteRequest(
-		action: 'sendGameInviteRequest' | 'acceptGameInviteRequest' | 'declineGameInviteRequest' | 'unFriend',
+		action: 'sendGameInviteRequest' | 'acceptGameInviteRequest' | 'declineGameInviteRequest',
 		sourceUser: User,
 		destId: number,
 		gameRoom: string,
@@ -350,46 +354,29 @@ export class UsersService {
 		if (sourceUser.id === destId)
 			throw new Error("You can't invite yourself.");
 
-		const targetUser = await this.getUserRelation({
-			user: { id: destId },
-			relation: { friends: true },
-			primary: true,
-		})
+		const targetUser = await this.getUserPrimary({id: destId});
 		if (!targetUser)
 			throw new NotFoundException('User not found!');
+
 		let message;
 		switch (action){
 			case 'sendGameInviteRequest':
-				console.log("SENDED:" + sourceUser.login + "**");
+				await this.gameRepository.update({ name: gameRoom }, { invitedPlayer: targetUser.login })
+					// .then(result => {
+					// 	console.log("Update result:", result);
+					// })
+					// .catch(error => {
+					// 	console.error("Update error:", error);
+					// });
 				message =  `${sourceUser.displayname}(${sourceUser.login}) invited a Game! ROOM NAME:${gameRoom}`;
 				break;
 			case 'acceptGameInviteRequest':
-				const requester = await this.getUserRelation({
-					user: { login: sourceUser.login},
-					relation: { friends: true },
-					primary: true,
-				})
-				if (!requester)
-					throw new NotFoundException('User not found!');
-
-				message = `${requester.displayname}(${sourceUser.login}) accepted the invite request.`;
+				//--> Lobbiye kayıt edecektik ama nestJS sağoulsun. Lobiye FEND'den yönlendirip, get atarken invitePlayer ise kayıt edip veri döndürüyoruz.
+				message = `${sourceUser.displayname}(${sourceUser.login}) accepted the game invite.`;
+				// return ;
 				break;
 			case 'declineGameInviteRequest':
 				message = `${sourceUser.displayname}(${sourceUser.login}) rejected the room invite request!`;
-				break;
-			case 'unFriend':
-				message = `${sourceUser.displayname}(${sourceUser.login}) is no longer friends with you.!`;
-				const requesterUser = await this.getUserRelation({
-					user: { login: sourceUser.login },
-					relation: { friends: true },
-					primary: true,
-				})
-				if (!requesterUser)
-					throw new NotFoundException('User not found!');
-
-				targetUser.friends = targetUser.friends.filter((user) => user.id !== sourceUser.id);
-				requesterUser.friends = requesterUser.friends.filter((user) => user.id !== targetUser.id);
-				await this.usersRepository.save([requesterUser, targetUser]);
 				break;
 			default:
 				break;
@@ -446,18 +433,18 @@ export class UsersService {
 	async createNotif(
 		sourceId: number,
 		destId: number,
-		action: string,
+		type: string,
 		text: string,
 	){
-		if (!Object.values(NotificationType).includes(action as NotificationType)) {
-			throw new BadRequestException(`Invalid notification type: ${action}`);
+		if (!Object.values(NotificationType).includes(type as NotificationType)) {
+			throw new BadRequestException(`Invalid notification type: ${type}`);
 		}
 
 		const source = await this.getUserPrimary({id: sourceId});
 		const destination = await this.getUserPrimary({id: destId});
 
 		const createNotfiDto: CreateNotifDto = {
-			type: action as NotificationType,
+			type: type as NotificationType,
 			text: text,
 			date: new Date(),
 			user: destination,
