@@ -12,63 +12,63 @@
 	align-items: center;
 	display: flex;
 	flex-direction: column;
-  }
+}
 
-  #leave-lobby {
+#leave-lobby {
 	position: absolute;
 	width: 50px;
 	height: 50px;
 	right: 5px;
 	top: 5px;
 	cursor: pointer;
-  }
+}
 
-  #leave-lobby:hover * {
+#leave-lobby:hover * {
 	color: red;
-  }
+}
 
-  h2 {
+h2 {
 	font-size: 20px;
 	margin: 0;
 	user-select: none;
-  }
+}
 
-  h2:first-of-type {
+h2:first-of-type {
 	margin-top: 10px;
 	font-size: 30px;
-  }
+}
 
-  h2:last-of-type {
+h2:last-of-type {
 	margin-bottom: 10px;
-  }
+}
 
-  h3 {
+h3 {
 	margin: 0;
 	user-select: none;
-  }
+}
 
-  h3:first-of-type{
+h3:first-of-type{
 	margin-top: 30px;
-  }
+}
 
-  .players {
+.players {
 	width: 100%;
 	height: 50px;
 	justify-content: space-between;
-  }
+}
 
-  .players .image {
+.players .image {
 	border-radius: 50%;
 	width: 30px;
 	height: 30px;
 	object-fit: cover;
 	user-select: none;
 	pointer-events: none;
-  }
+}
 
-  .players .leftPlayer,
-  .players .rightPlayer,
-  .invite-friend {
+.players .leftPlayer,
+.players .rightPlayer,
+.invite-friend {
 	width: calc(50% - 15px);
 	height: 100%;
 	background-color: gray;
@@ -76,51 +76,51 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-  }
+}
 
-  .players .leftPlayer > span,
-  .players .rightPlayer > span {
+.players .leftPlayer > span,
+.players .rightPlayer > span {
 	margin-left: 10px;
-  }
+}
 
-  .players .leftPlayer {
+.players .leftPlayer {
 	float: left;
 	margin-left: 10px;
-  }
-  
-  .players .rightPlayer,
-  .invite-friend {
+}
+
+.players .rightPlayer,
+.invite-friend {
 	float: right;
 	margin-right: 10px;
-  }
+}
 
-  .invite-friend {
+.invite-friend {
 	background-color: darkred;
 	cursor: pointer;
 	user-select: none;
-  }
+}
 
-  .invite-friend:hover {
+.invite-friend:hover {
 	background-color: #45a049;
-  }
+}
 
-  .players .rightPlayer:hover {
+.players .rightPlayer:hover {
 	background-color: darkred;
 	cursor: pointer;
-  }
+}
 
-   #kick {
+ #kick {
 	position: absolute;
 	opacity: 0; /* Başlangıçta görünmez */
 	transition: opacity 0.3s ease; /* Geçiş efekti */
 	right: 20px;
 	height: 30px;
 	width: 30px;
-  }
+}
 
-  .rightPlayer:hover #kick {
+.rightPlayer:hover #kick {
 	opacity: 1; /* Üzerine gelindiğinde görünür hale getir */
-  }
+}
 
 /* -- Friends Content -- */
 
@@ -139,9 +139,9 @@
 	font-size: 15px;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 1);
 	border-radius: 5px;
-  }
+}
 
-  .friend-card {
+.friend-card {
 	border-radius: 5px;
 	text-align: center;
 	padding: 5px;
@@ -152,30 +152,30 @@
 	background-color: rgb(0, 0, 0, 0.5);
 	display: flex;
 	cursor: pointer;
-  }
+}
 
-  .friend-card:hover {
+.friend-card:hover {
 	background-color: rgba(255, 0, 0, 0.5);
-  }
+}
 
-  .friend-card > img {
+.friend-card > img {
 	height: 50px;
 	width: 50px;
 	border-radius: 50%;
 	object-fit: cover;
 	pointer-events: none;
-  }
+}
 
-  #friend-users-table {
+#friend-users-table {
 	width: 100%;
 	flex-direction: row;
 	justify-content: space-evenly;
 	align-items: center;
-  }
+}
 
-  /* -- Notif Modal -- */
+/* -- Notif Modal -- */
 
-  .invite-modal {
+.invite-modal {
 	z-index: 100;
 	background: rgb(44, 44, 44, 0.8);
 	padding: 10px;
@@ -185,27 +185,27 @@
 	max-height: 60%;
 	display: flex;
 	flex-direction: column;
-  }
+}
 
-  .invite-close-button {
+.invite-close-button {
 	line-height: 0;
 	align-self: flex-end;
 	font-size: 25px;
 	user-select: none;
 	cursor: pointer;
 	z-index: 100;
-  }
+}
 
-  /* --  -- */
+/* ---- */
 
 
-  .map {
+.map {
 	width: 200px;
 	height: max-content;
 	user-select: none;
-  }
+}
 
-  .start {
+.start {
 	user-select: none;
 	margin-top: 20px;
 	padding: 10px;
@@ -215,4 +215,4 @@
 	border-radius: 4px;
 	cursor: pointer;
 	text-align: center;
-  }
+}

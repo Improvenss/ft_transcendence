@@ -1,10 +1,11 @@
 #activeDm {
 	display: flex;
-	border: 1px solid #ccc;
+	border: 1px solid none;
 	border-radius: 10px;
 	flex: 4;
 	/* overflow: hidden; */
 	flex-direction: column;
+	/* background-color: #24334a87; */
 }
 
 /* ------Header------ */
@@ -13,12 +14,16 @@
 	display: flex;
 	align-items: center;
 	padding: 7px;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #FF4C29;
 	user-select: none;
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	/* background-color: #082032; */
 	border-radius: 10px;
 	margin: 5px;
+}
+
+#dm-header h2 {
+	font-size: 30px;
 }
 
 #dm-header img {
@@ -41,7 +46,8 @@
 #dm-header > button {
 	border-radius: 5px;
 	margin-right: 5px;
-	background-color: darkred;
+	background-color: #334756;
+	border: 1px solid #FF4C29;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -51,7 +57,7 @@
 
 #dm-header > button:hover {
 	transform: scale(1.1);
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 /* -------Message Container------- */

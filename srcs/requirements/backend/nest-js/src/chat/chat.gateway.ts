@@ -129,10 +129,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	startGameLoop(roomName: string) {
 		const	game = this.gameRooms.get(roomName);
-		// if (!game || game.running) {
-		// 	return;
-		// }
-
+		if (!game)
+			return;
 		// game.running = true; // ustam bunu silme burasi matchmaking'in start'i icin 
 		game.gameLoopIntervalDuration = setInterval(() => {
 			console.log('==================================');
@@ -512,7 +510,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	){
 		if (!socket.rooms.has(data.gameRoom))
 		{
-			console.log(`Socket[${socket.id}] oyun odasin bagli degil bagliyoruz. gameRoom -> ${data.gameRoom}`);
+			console.log(`Socket[${socket.id}] is not connecting GameRoom(${data.gameRoom}). Connecting...`);
 			socket.join(data.gameRoom);
 		}
 		if (!this.gameRooms.has(data.gameRoom))
@@ -593,17 +591,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		@ConnectedSocket() socket: Socket,
 		@MessageBody() data: { status: boolean }
 	){
-		console.log("matchmaking'e geldik", data, data.status);
 		const	user = await this.usersService.getUserPrimary({ socketId: socket.id });
-
 		let	response: Game | null;
 		if (data.status)
 			response = await this.gameService.matchPlayer({ user: user })
 		else
-		{
-			console.log("kakaaaaaaaaa");
 			response = await this.gameService.removeMatchPlayer({ user: user })
-		}
 		if (!response)
 			return ({ err: `Game not started yet!` });
 		const	socketLeft = this.connectedIds.get(response.playerL.user.id);
@@ -615,7 +608,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.handleJoinGameRoom(socketLeft, { gameRoom: response.name });
 			this.handleJoinGameRoom(socketRight, { gameRoom: response.name });
 			this.server.to(response.name).emit('matchmakingStartGame', response.name);
-			//--> Burada oyun başlıyor
+			//--> Burada oyun basliyor
 			setTimeout(() => {
 				this.startGameLoop(singleRoom.name);
 			}, 3000);

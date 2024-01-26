@@ -1,6 +1,7 @@
 #activeChannel {
 	display: flex;
-	border: 1px solid #ccc;
+	border: 1px solid none;
+	/* border: 1px solid ##7a0e0e; */
 	border-radius: 10px;
 	flex: 4;
 	/* overflow: hidden; */
@@ -13,11 +14,11 @@
 	display: flex;
 	align-items: center;
 	padding: 7px;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #FF4C29;
 	/*position: relative;*/
 	user-select: none;
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #082032;
 	border-radius: 10px;
 	margin: 5px;
 }
@@ -68,7 +69,7 @@
 	overflow: auto;
 	padding: 10px;
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #24334a87;
 	border-radius: 10px;
 	margin: 5px;
 }
@@ -81,7 +82,7 @@
 	border-radius: 5px;
 	width: 100%;
 	margin-bottom: 5px;
-	background-color: darkred;
+	background-color: rgba(255, 77, 41, 0.816);
 }
 
 .message {
@@ -116,7 +117,7 @@
 	border-radius: 0px 5px 5px 5px;
 	display: flex;
 	flex-direction: column; /* Öğeleri dikey (kolon) sırayla düzenle */
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	margin-left: 63px;
 	margin-bottom: 10px;
 }
@@ -147,7 +148,7 @@
 	border-radius: 5px 0px 5px 5px;
 	padding-left: 10px;
 	padding-right: 10px;
-	border: 2px solid #cccccc;
+	border: 2px solid #ff4d2967;
 	float: right;
 	margin-bottom: 10px; /* Optional spacing between messages */
 }
@@ -176,9 +177,9 @@
 	justify-content: space-between;
 	padding-left: 5px;
 	user-select: none;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #FF4C29;
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #082032;
 	border-radius: 10px;
 	margin: 5px;
 	padding-right: 5px;
@@ -188,7 +189,8 @@
 	flex: 1;
 	padding: 5px;
 	border-radius: 8px;
-	border: 1px solid;
+	border: 1px solid #FF4C29;
+	/* background-color: #334756; */
 	resize: none;
 	height: 50%;
 }
@@ -199,14 +201,15 @@
 
 #message-input button {
 	padding: 5px 10px;
-	background-color: darkred;
+	background-color: #334756;
 	color: white;
 	cursor: pointer;
 	border-radius: 5px;
+	border: 1px solid #FF4C29;
 }
 
 #message-input button:hover {
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 /* ------ */

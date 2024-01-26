@@ -1,5 +1,6 @@
 #infoChannel {
-	border: 1px solid #ccc;
+	/* border: 1px solid #7a0e0e; */
+	border-bottom: 1px solid #FF4C29;
 	display: flex;
 	flex-direction: column;
 	flex: 1;
@@ -14,16 +15,17 @@
 }
 
 .settings > button {
-	background-color: green;
+	background-color: #334756;
 	color: white;
 	cursor: pointer;
 	border-radius: 5px;
+	border: 1px solid #FF4C29;
 	width: 100%;
 	margin-bottom: 10px;
 }
 
 .settings > button:hover {
-	background-color: darkred;
+	background-color: #FF4C29;
 }
 
 .settings > img {
@@ -42,7 +44,7 @@
 }
 
 #channelInfoContainer .channel.active {
-	background-color: #7a0e0e;
+	background-color: #FF4C29;
 }
 
 /* -------- */
@@ -53,7 +55,7 @@
 	flex: 1;
 	cursor: pointer;
 	padding: 10px;
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	text-align: center;
   }
 
@@ -65,12 +67,12 @@
 /* ---------- */
 
 .tab-info-channel:hover {
-	background-color: #45a049;
+	background-color: #ff4d29b7;
 }
 
 .tab-info-channel {
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #334756;
 	border-radius: 10px;
 	margin: 5px;
 }
@@ -78,7 +80,7 @@
 #info-content-container {
 	flex: 1;
 	padding: 10px;
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	position: relative;
 	overflow-y: auto; /* Add this line to enable vertical scrolling */
 	max-height: calc(100% - 20px); /* Set a maximum height for the container */
@@ -86,7 +88,7 @@
 
 #info-content-container {
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #08203284;
 	border-radius: 10px;
 	margin: 5px;
 }
@@ -96,7 +98,7 @@
 .info-content-header {
 	font-size: 8px;
 	text-align: center;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #7a0e0e;
 	margin-bottom: 5px;
 }
 
@@ -105,7 +107,7 @@
 #userSearch {
 	margin-bottom: 10px; /* İstenilen boşluk değeri */
 	padding: 6px; /* İstenilen iç boşluk değeri */
-	border: 1px solid #ccc; /* Sınır rengi */
+	border: 1px solid #7a0e0e; /* Sınır rengi */
 	border-radius: 4px; /* Köşe yuvarlatma */
 	width: 100%; /* Tam genişlik */
 	box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
@@ -123,7 +125,7 @@
 /* -------- */
 
 #channel-user {
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	border-radius: 10px;
 	margin-bottom: 10px;
 	padding: 15px;
@@ -132,7 +134,7 @@
 }
 
 #channel-user:hover {
-	background-color: darkred;
+	background-color: #FF4C29;
 }
 
 #channel-user img {
@@ -148,7 +150,8 @@
 }
 
 #channel-user-info {
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
+	background-color: #334756;
 	border-radius: 10px;
 	margin-bottom: 10px;
 	margin-top: -5px;
@@ -157,7 +160,8 @@
 }
 
 #channel-user-info > button {
-	background-color: darkred;
+	background-color: #334756;
+	border: 1px solid #FF4C29;
 	cursor: pointer;
 	border-radius: 5px;
 	width: 100%;
@@ -170,7 +174,7 @@
 }
 
 #channel-user-info > button:hover {
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 /* -------- */
@@ -179,10 +183,11 @@
 	position: sticky;
 	bottom: 0;
 	left: 100%;
-	background-color: darkred;
+	background-color: #334756;
 	color: white;
 	cursor: pointer;
 	border-radius: 5px;
+	border: 1px solid #FF4C29;
 }
 
 #userAdd svg {
@@ -191,7 +196,7 @@
 }
 
 #userAdd:hover {
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 /* ------------ */
@@ -200,10 +205,11 @@
 	position: sticky;
 	bottom: 0;
 	right: 100%;
-	background-color: darkred;
+	background-color: #334756;
 	color: white;
 	cursor: pointer;
 	border-radius: 5px;
+	border: 1px solid #FF4C29;
 }
 
 #userBanList svg {
@@ -212,7 +218,7 @@
 }
 
 #userBanList:hover {
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 /* ------------ */
@@ -220,7 +226,8 @@
 
 #leaveButton,
 #deleteButton {
-	background-color: darkred;
+	background-color: #FF4C29;
+	border-bottom: 1px solid #FF4C29;
 	color: white;
 	cursor: pointer;
 	border-radius: 5px;
@@ -230,7 +237,7 @@
 
 #leaveButton:hover,
 #deleteButton:hover {
-	background-color: #45a049;
+	background-color: #334756;
 }
 
 /* --------- */
@@ -239,7 +246,7 @@
 #banSearch {
 	margin-bottom: 10px; /* İstenilen boşluk değeri */
 	padding: 6px; /* İstenilen iç boşluk değeri */
-	border: 1px solid #ccc; /* Sınır rengi */
+	border: 1px solid #7a0e0e; /* Sınır rengi */
 	border-radius: 4px; /* Köşe yuvarlatma */
 	width: 100%; /* Tam genişlik */
 	box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
@@ -249,7 +256,7 @@
 
 #friend-users,
 #banned-users {
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	display: flex;
 	flex: 1;
 	overflow: hidden;
@@ -262,7 +269,7 @@
 
 #friend-users:hover,
 #banned-users:hover {
-	background-color: darkred;
+	background-color: #FF4C29;
 }
 
 #friend-users img,

@@ -1,5 +1,6 @@
 #channel {
-	border: 1px solid #ccc;
+	/* border: 1px solid #7a0e0e; */
+	border-bottom: 1px solid #FF4C29;
 	display: flex;
 	flex-direction: column;
 	flex: 1;
@@ -9,13 +10,14 @@
 }
 
 #channel button {
-	background-color: darkred;
+	background-color: #334756;
 	cursor: pointer;
 	border-radius: 5px;
+	border: 1px solid #FF4C29;
 }
 
 #channel button:hover{
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 /* ---------- */
@@ -26,7 +28,7 @@
 }
 
 #container .tab.active {
-	background-color: #7a0e0e;
+	background-color: #FF4C29;
 }
 
 .tab {
@@ -35,26 +37,26 @@
 	flex: 1;
 	cursor: pointer;
 	padding: 10px;
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	text-align: center;
-  }
+}
 
 .tab svg {
 	width: 20px;
 	height: 20px;
-  }
+}
 
 /* ------ */
 
 .tab {
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #334756;
 	border-radius: 10px;
 	margin: 5px;
 }
 
 .tab:hover {
-	background-color: #45a049;
+	background-color: #ff4d29b7;
 }
 
 /* ----------- */
@@ -62,15 +64,13 @@
 #container-content {
 	flex: 1;
 	padding: 10px;
-	border: 1px solid #ccc;
+	/* border: 1px solid #7a0e0e; */
 	position: relative;
 	overflow-y: auto; /* Add this line to enable vertical scrolling */
 	max-height: calc(100% - 20px); /* Set a maximum height for the container */
-}
-
-#container-content {
 	content: '';
-	background-color: rgba(30, 97, 45, 0.758);
+	background-color: #08203284;
+	border: 1px solid #7a0e0e;
 	border-radius: 10px;
 	margin: 5px;
 }
@@ -80,23 +80,23 @@
 .content-header {
 	font-size: 8px;
 	text-align: center;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid #7a0e0e;
 	margin-bottom: 5px;
 }
 
 /* ----------- */
 
 #channel-search {
-   margin-bottom: 10px; /* İstenilen boşluk değeri */
-   padding: 6px; /* İstenilen iç boşluk değeri */
-   border: 1px solid #ccc; /* Sınır rengi */
-   border-radius: 4px; /* Köşe yuvarlatma */
-   width: 100%; /* Tam genişlik */
-   box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
+	margin-bottom: 10px; /* İstenilen boşluk değeri */
+	padding: 6px; /* İstenilen iç boşluk değeri */
+	border: 1px solid #7a0e0e; /* Sınır rengi */
+	border-radius: 4px; /* Köşe yuvarlatma */
+	width: 100%; /* Tam genişlik */
+	box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
 }
 
 #public-channel, #involved-channel {
-	border: 1px solid #ccc;
+	border: 1px solid #7a0e0e;
 	display: flex;
 	flex: 1;
 	overflow: hidden;
@@ -109,21 +109,20 @@
 
 #public-channel:hover,
 #involved-channel:hover {
-	/*background-color: darkred;*/
-	background-color: #45a049;
+	background-color: #FF4C29;
 }
 
 #public-channel img,
 #involved-channel img {
-   height: 30px;
-   width: 30px;
-   border-radius: 50%;
-   margin-right: 5px;
-   object-fit: cover; /* Resmin orantılı olarak kaplanması */
+	height: 30px;
+	width: 30px;
+	border-radius: 50%;
+	margin-right: 5px;
+	object-fit: cover; /* Resmin orantılı olarak kaplanması */
 }
 
 #container-content .active {
-	background-color: darkred;
+	background-color: #FF4C29;
 }
 
 /*------------ */
@@ -137,5 +136,5 @@
 }
 
 #joinChannel:hover {
-	background-color: #45a049;
+	background-color: rgba(226, 124, 0, 0.979);
 }
