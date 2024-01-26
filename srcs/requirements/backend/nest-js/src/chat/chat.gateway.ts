@@ -132,6 +132,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!game)
 			return;
 		// game.running = true; // ustam bunu silme burasi matchmaking'in start'i icin 
+		const	gameSpeed = (game.mode === 'fast-mode' ? 6 : 12);
 		game.gameLoopIntervalDuration = setInterval(() => {
 			if (game.duration <= 0)
 			{
@@ -142,7 +143,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}, 1000);
 		game.gameLoopInterval = setInterval(() => {
 			this.updateGameState(game);
-		}, 16);
+		}, gameSpeed);
 	}
 
 	stopGameLoop(
@@ -177,7 +178,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (grd.ball.x <= 10)
 				{
 					grd.ball.speedX *= -1;
-					grd.ball.speedY += grd.playerL.speed / 10;
+					grd.ball.speedY += grd.playerL.speed / 5;
 					grd.ball.x += 3;
 				}
 		}
@@ -187,7 +188,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			if (grd.ball.x + 42 >= 990)
 			{
 				grd.ball.speedX *= -1;
-				grd.ball.speedY += grd.playerR.speed / 10;
+				grd.ball.speedY += grd.playerR.speed / 5;
 				grd.ball.x -= 3;
 			}
 		}
@@ -244,20 +245,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		grd: IGame
 	)
 	{
-		let	katsayi: number = 1;
+		// let	katsayi: number = 1;
 		const newPos = Math.floor(Math.random() * 2);
 		const moves = [
-			{ x: -5, y: -3 },
-			{ x: -4, y: -5 },
-			{ x: -4, y: 4 },
-			{ x: 4, y: 3 },
-			{ x: 5, y: -3 },
-			{ x: 3, y: -5 },
+			{ x: -4, y: -2 },
+			{ x: -3, y: -4 },
+			{ x: -3, y: 3 },
+			{ x: 3, y: 2 },
+			{ x: 4, y: -2 },
+			{ x: 2, y: -4 },
 		];
-		if (grd.mode === 'fast-mode')
-			katsayi = 3;
+		// if (grd.mode === 'fast-mode')
+		// 	katsayi = 3;
 		const initialMove = moves[Math.floor(Math.random() * moves.length)];
-		grd.ball = { x: (500 - 18), speedX: initialMove.x * katsayi, speedY: initialMove.y * katsayi };
+		// grd.ball = { x: (500 - 18), speedX: initialMove.x * katsayi, speedY: initialMove.y * katsayi };
+		grd.ball = { x: (500 - 18), speedX: initialMove.x, speedY: initialMove.y };
 		if (newPos == 0)
 			grd.ball.y = 22;
 		else

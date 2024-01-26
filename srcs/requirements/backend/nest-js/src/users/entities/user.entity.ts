@@ -87,7 +87,7 @@ export class User {
 
 	//----------------------Optional----------------------------//
 
-	@Column({ nullable: true, unique: true })
+	@Column({ nullable: true, length: 15, unique: true })
 	public nickname: string; // Kullanıcı tarafından eklenen ekstra isim
 
 	@Column({ nullable: true })

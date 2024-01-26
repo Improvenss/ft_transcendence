@@ -46,6 +46,10 @@
 	height: 20px;
 }
 
+#additional-menu-trigger:hover * {
+	color: #FF4C29;
+}
+
 /* ------------ */
 
 #additional-menu-trigger {

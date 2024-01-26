@@ -26,7 +26,7 @@ export class Channel {
 	@IsNotEmpty()
 	public name: string;
 
-	@Column({ nullable: false})
+	@Column({ nullable: false, length: 30})
 	public description: string; // Kanal tanımı
 
 	@Column({ type: 'enum', enum: ChannelType })

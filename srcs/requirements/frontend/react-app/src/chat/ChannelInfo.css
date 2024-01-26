@@ -232,7 +232,7 @@
 	cursor: pointer;
 	border-radius: 5px;
 	width: 100%;
-	margin-bottom: 0px;
+	margin-bottom: 5px;
 }
 
 #leaveButton:hover,

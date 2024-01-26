@@ -87,29 +87,29 @@ services:
       - "5432:5432" # Local port / Exported port. postgres's default port(5432).
   # ________________ #
   # ____pgadmin4____ #
-  # pgadmin4:
-  #   container_name: pgadmin4
-  #   # image: dpage/pgadmin4:7.8
-  #   image: dpage/pgadmin4:latest
-  #   env_file:
-  #     # - ./srcs/requirements/pgadmin4/.env
-  #     - ./srcs/.env
-  #   # environment:
-  #   #   TZ: "Europe/Istanbul"
-  #   volumes:
-  #     - ./srcs/requirements/ssl:/etc/ssl/certs
-  #     - ./srcs/requirements/pgadmin4/servers.json:/pgadmin4/servers.json
-  #     - ./srcs/requirements/pgadmin4/entrypoint.sh:/entrypoint.sh
-  #     # - pgadmin4_data:/pgadmin4
-  #   networks:
-  #     - transcendence_network
-  #   restart: unless-stopped
-  #   expose:
-  #     - 5050
-  #   ports:
-  #     - "5050:5050" # Local port / Exported port.
-  #   depends_on:
-  #     - postgres
+  pgadmin4:
+    container_name: pgadmin4
+    # image: dpage/pgadmin4:7.8
+    image: dpage/pgadmin4:latest
+    env_file:
+      # - ./srcs/requirements/pgadmin4/.env
+      - ./srcs/.env
+    # environment:
+    #   TZ: "Europe/Istanbul"
+    volumes:
+      - ./srcs/requirements/ssl:/etc/ssl/certs
+      - ./srcs/requirements/pgadmin4/servers.json:/pgadmin4/servers.json
+      - ./srcs/requirements/pgadmin4/entrypoint.sh:/entrypoint.sh
+      # - pgadmin4_data:/pgadmin4
+    networks:
+      - transcendence_network
+    restart: unless-stopped
+    expose:
+      - 5050
+    ports:
+      - "5050:5050" # Local port / Exported port.
+    depends_on:
+      - postgres
   # ________________ #
   # _____backend____ #
   backend: # Backend's container.

@@ -41,8 +41,10 @@ export class Game {
 			this.ball = {
 				x: (500 - 21), // width: 1000
 				y: (800 - 45), // height: 800
-				speedX: (this.mode === 'fast-mode' ? 3 * 4 : 4),
-				speedY: (this.mode === 'fast-mode' ? 3 * 5 : 5)
+				// speedX: (this.mode === 'fast-mode' ? 3 * 4 : 4),
+				// speedY: (this.mode === 'fast-mode' ? 3 * 5 : 5)
+				speedX: 3,
+				speedY: 3,
 			};
 		}
 		if (!this.playerL){

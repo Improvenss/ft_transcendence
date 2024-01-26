@@ -98,16 +98,19 @@ function Notification() {
 	const navigateLobby = async (notice: string) => {
 		const roomName = notice.split(':')[1];
 		const currentPath = location.pathname;
+
+		const roomNameLobby = currentPath.replace('/game/lobby/', '');
+		const roomNameGame = currentPath.replace('/game/', '');
 		
 		if (!(currentPath === `/game/lobby/${roomName}` || currentPath === `/game/${roomName}`)){ //aynı lobydeyse/oyundaysa boşa navigate atmaya gerek yok.
 			if (currentPath.startsWith('/game/lobby/')){
 				fetchRequest({
 					method: 'DELETE',
-					url: `/game/room/leave?room=${roomName}`
+					url: `/game/room/leave?room=${roomNameLobby}`
 				});
-			} else if (currentPath.startsWith(`/game/${roomName}`)){
+			} else if (currentPath.startsWith(`/game/${roomNameGame}`)){
 				socket.emit('leaveGameRoom', {
-					gameRoom: roomName,
+					gameRoom: roomNameGame,
 				});
 			}
 			setTimeout(() => {
