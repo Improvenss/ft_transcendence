@@ -6,9 +6,7 @@ import { Colors as C } from '../colors';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
-import { Server, Socket } from 'socket.io';
 import { GameAdminGuard } from './admin.game.guard';
-import { Game } from './entities/game.entity';
 
 @UseGuards(AuthGuard)
 @Controller('/game')
@@ -34,8 +32,9 @@ export class GameController {
 			});
 			if (!game)
 				throw new NotFoundException(`Game[${name}] not found!`);
-
-			if (!game.players.some((player) => player.id === user.id)) {
+			if (game.invitedPlayer === user.login){
+				this.registerGameRoom({user: user}, {room: name, password: ''});
+			} else if (!game.players.some((player) => player.id === user.id)) {
 				throw new NotFoundException(`User not found in game[${name}]`);
 			}
 			if (game.running && lobby)

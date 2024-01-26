@@ -102,17 +102,17 @@ function ProfilePage() {
 					</div>
 				) : (
 					<>
-						<button id="poke" onClick={() => handleRequest('poke', userPanel.login)}>Poke</button>
+						<button id="poke" onClick={() => handleRequest({action:'poke', target:userPanel.login})}>Poke</button>
 						<button id="sendMessage" onClick={() => handleSendMessage(userPanel.id)} >Send Message</button>
 						{!(userInfo.friends.some((user) => user.id === userPanel.id)) ? (
-							<button id="addFriend" onClick={() => handleRequest('sendFriendRequest', userPanel.login)}>Add Friend</button>
+							<button id="addFriend" onClick={() => handleRequest({action:'sendFriendRequest', target: userPanel.login})}>Add Friend</button>
 						):(
-							<button id="unFriend" onClick={() => handleRequest('unFriend', userPanel.login)}>Remove Friend</button>
+							<button id="unFriend" onClick={() => handleRequest({action: 'unFriend', target: userPanel.login})}>Remove Friend</button>
 						)}
 						{!(userInfo.blockUsers.some((user) => user.id === userPanel.id)) ? (
-							<button id="block" onClick={() => handleRequest('block', userPanel.login)} >Block</button>
+							<button id="block" onClick={() => handleRequest({action: 'block', target: userPanel.login})} >Block</button>
 						):(
-							<button id="unblock" onClick={() => handleRequest('unblock', userPanel.login)} >Unblock</button>
+							<button id="unblock" onClick={() => handleRequest({action: 'unblock', target: userPanel.login})} >Unblock</button>
 						)}
 					</>
 				)}

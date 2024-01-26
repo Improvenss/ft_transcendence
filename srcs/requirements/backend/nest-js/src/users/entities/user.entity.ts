@@ -213,7 +213,7 @@ export enum NotificationType {
 	ACCEPT_GAME_INVITE_REQUEST = 'acceptGameInviteRequest',
 	DECLINE_GAME_INVITE_REQUEST = 'declineGameInviteRequest',
 	UNFRIEND = 'unFriend',
-	INVITE = 'invite',
+	// INVITE = 'invite',
 }
 
 @Entity('notification')

@@ -191,6 +191,8 @@ export class GameService {
 				userGameRoom.playerR.user = null;
 			userGameRoom.playerR.ready = false;
 			userGameRoom.players = userGameRoom.players.filter(player => player.id !== user.id); // bu transfer edilen user'i de players[]'den kaldiriyoruz.
+			if (userGameRoom.invitedPlayer === user.login)
+				userGameRoom.invitedPlayer = null;
 			return (await this.gameRepository.save(userGameRoom)); // eski guncellenmis odayi kaydet.
 		}
 		else if (userGameRoom.players.length <= 1)

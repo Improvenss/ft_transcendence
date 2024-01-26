@@ -102,7 +102,6 @@ function JoinGame(){
 						return (
 							game.name.toLowerCase().includes(searchTermLower) ||
 							game.mode.toLowerCase().includes(searchTermLower) ||
-							// game.mode.toString().includes(searchTermLower) || // bunu degistirdik
 							game.winScore.toString().includes(searchTermLower) ||
 							game.duration.toString().includes(searchTermLower) ||
 							game.type.toLowerCase().includes(searchTermLower) 

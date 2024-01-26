@@ -48,14 +48,13 @@ export interface ILobby {
 }
 
 const GameLobby = () => {
-	// console.log("---------LOBBY---------");
+	console.log("---------LOBBY---------");
 	const { roomName } = useParams();
 	const {socket} = useSocket();
 	const {userInfo} = useUser();
 	const [lobby, setLobby] = useState<ILobby | undefined>(undefined);
 	const navigate = useNavigate();
 	const [isModalOpen, setModalOpen] = useState(false);
-	const location = useLocation();
 	
 	window.onpopstate = async () => {
 		await fetchRequest({
@@ -71,6 +70,7 @@ const GameLobby = () => {
 				navigate(`/game/${roomName}`, {replace: true});
 				return ;
 			}
+
 			const response = await fetchRequest({
 				method: 'GET',
 				url: `/game/room/${roomName}/true`
@@ -109,14 +109,18 @@ const GameLobby = () => {
 			return (console.log("You can't start right player is not ready!"));
 		const response = await fetchRequest({
 			method: 'PATCH',
-			body: (action === 'start'
-				? (JSON.stringify({ running: true }))
-				: (JSON.stringify({
+			body: (action === 'start' ? (
+				JSON.stringify({
+					running: true,
+				})
+			):(
+				JSON.stringify({
 					playerR: {
 						...lobby.playerR,
 						ready: !lobby.playerR.ready
 					},
-				}))),
+				})
+			)),
 			url: `/game/room?room=${lobby.name}`,
 		});
 		if (response.ok){
@@ -132,47 +136,18 @@ const GameLobby = () => {
 	}
 
 	const	leaveButton = async () => {
-		const currentPath = location.pathname;
 		const userConfirmed = window.confirm('Are you sure do want to leave the lobby?');
 		if (!userConfirmed) {
 		} else {
-			const roomName = currentPath.replace('/game/lobby/', '');
-			await fetchRequest({
+			fetchRequest({
 				method: 'DELETE',
 				url: `/game/room/leave?room=${roomName}`
 			});
-			// console.log('Fetch Response:', response);
 			navigate('/game', { replace: true });
 		}
 	}
 
-	const handleInvitePlayer = async (target: string) => {
-		console.log("invite player");
-
-		const response = await fetchRequest({
-			method: 'PATCH',
-			body: JSON.stringify({
-				invitedPlayer: target ,
-			}),
-			url: `/game/room?room=${lobby.name}`,
-		});
-
-		if (response.ok)
-		{
-			const data = await response.json();
-			if (!data.err)
-			{
-				handleRequest('sendGameInviteRequest', target, undefined, lobby.name);
-			}
-			else
-				console.log("Invite data err", data.err);
-		} else {
-			console.log("---Backend Connection '❌'---");
-		}
-	}
-
 	const	handleKickPlayer = async (target: string) => {
-		console.log("kick playere geldi");
 		const response = await fetchRequest({
 			method: 'DELETE',
 			headers: {
@@ -192,13 +167,9 @@ const GameLobby = () => {
 		}
 	}
 
-	if (!roomName)
-		return (<LoadingPage/>);
-
 	return (
 		<div id='lobby'>
 			<IconLeave id='leave-lobby' title='leave' onClick={() => leaveButton()} />
-			{/* <IconLeave id='leave-lobby' title='leave' onClick={() => console.log("leave")}/> */}
 			<h2>Lobby #{roomName}</h2>
 			<h2>Lobby Type: {lobby.type}</h2>
 			{lobby.description && (<h2>Description: {lobby.description}</h2>)}
@@ -245,7 +216,11 @@ const GameLobby = () => {
 												<div
 													key={user.login}
 													className={`friend-card`}
-													onClick={() => handleInvitePlayer(user.login)}
+													onClick={() => handleRequest({
+														action:"sendGameInviteRequest",
+														target: user.login,
+														gameRoom: roomName
+													})}
 												>
 													<img src={user.avatar ? user.avatar : user.imageUrl} alt={user.login}/>
 													<div id='friend-users-table'>

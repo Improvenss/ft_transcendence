@@ -133,7 +133,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return;
 		// game.running = true; // ustam bunu silme burasi matchmaking'in start'i icin 
 		game.gameLoopIntervalDuration = setInterval(() => {
-			console.log('==================================');
 			if (game.duration <= 0)
 			{
 				clearInterval(game.gameLoopInterval);

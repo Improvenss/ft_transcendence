@@ -29,31 +29,6 @@ function CreateGame({invite}: {invite?: string}) {
 	const [description, setDescription] = useState('');
 	const navigate = useNavigate();
 
-	// const handleInvitePlayer = async (target: string) => {
-	// 	console.log("invite player");
-
-	// 	const response = await fetchRequest({
-	// 		method: 'PATCH',
-	// 		body: JSON.stringify({
-	// 			invitedPlayer: target ,
-	// 		}),
-	// 		url: `/game/room?room=${roomName}`,
-	// 	});
-
-	// 	if (response.ok)
-	// 	{
-	// 		const data = await response.json();
-	// 		if (!data.err)
-	// 		{
-	// 			handleRequest('sendGameInviteRequest', target, undefined, roomName);
-	// 		}
-	// 		else
-	// 			console.log("Invite data err", data.err);
-	// 	} else {
-	// 		console.log("---Backend Connection '❌'---");
-	// 	}
-	// }
-
 	const handleCreateRoom = async () => {
 		// Oda adı kontrolü
 		if (!roomName.trim()) {
@@ -101,9 +76,11 @@ function CreateGame({invite}: {invite?: string}) {
 			if (!data.err){
 				navigate(`/game/lobby/${roomName}`);
 				if (invite){
-
-					// handleRequest(invite);
-					handleRequest('inviteGame', invite);
+					handleRequest({
+						action: 'sendGameInviteRequest',
+						target: invite,
+						gameRoom: roomName
+					});
 				}
 			} else {
 				navigate('/404');
