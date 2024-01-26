@@ -86,7 +86,6 @@ function PongGamePage() {
 
 		const	intervalId = setInterval(() => {
 			setCountdown((prevCountdown) => prevCountdown - 1);
-			console.log("kaka----------------------------------");
 			if (countdown <= 0)
 				return ;
 		}, 1000);
