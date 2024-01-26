@@ -89,7 +89,7 @@ export class GameService {
 		if (login.length > 8)
 			login = login.substring(0, 9);
 		const	randomNumber = Math.random().toString(36).substring(2, length + 2);
-		const	roomName = login + '-' + randomNumber;
+		const	roomName = login + randomNumber;
 		return (roomName);
 	}
 

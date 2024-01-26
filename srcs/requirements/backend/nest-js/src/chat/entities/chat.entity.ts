@@ -16,7 +16,7 @@ export enum ChannelType {
 @Entity('channel')
 export class Channel {
 	constructor(channel: Partial<Channel>) {
-		if (channel&& !/^[a-zA-Z]+$/.test(channel.name)) {
+		if (channel&& !/^[a-zA-Z0-9]+$/.test(channel.name)) {
 			throw (new Error('The channel name must consist of only alphabetical characters.'));
 		}
 		Object.assign(this, channel);
