@@ -36,6 +36,9 @@ export class Game {
 	@InjectRepository(Game)
 	private readonly gameRepository: Repository<Game>;
 	constructor(game: Partial<Game>) {
+		if (game && !/^[a-zA-Z]+$/.test(game.name)) {
+			throw (new Error('The room name must consist of only alphabetical characters.'));
+		}
 		Object.assign(this, game);
 		if (!this.ball){
 			this.ball = {

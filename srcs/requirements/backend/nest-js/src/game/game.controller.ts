@@ -115,8 +115,8 @@ export class GameController {
 		}
 		catch (err)
 		{
-			console.log("@Post('/game/room'): ", err);
-			return ({err: err});
+			console.log("@Post('/game/room'): ", err.message);
+			return ({ err: err.message });
 		}
 	}
 

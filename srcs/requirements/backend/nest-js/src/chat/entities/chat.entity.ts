@@ -16,6 +16,9 @@ export enum ChannelType {
 @Entity('channel')
 export class Channel {
 	constructor(channel: Partial<Channel>) {
+		if (channel&& !/^[a-zA-Z]+$/.test(channel.name)) {
+			throw (new Error('The channel name must consist of only alphabetical characters.'));
+		}
 		Object.assign(this, channel);
 	}
 
@@ -26,7 +29,7 @@ export class Channel {
 	@IsNotEmpty()
 	public name: string;
 
-	@Column({ nullable: false, length: 30})
+	@Column({ nullable: false})
 	public description: string; // Kanal tanımı
 
 	@Column({ type: 'enum', enum: ChannelType })
